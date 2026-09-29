@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Data Privacy Practice Quiz</title>
+<style>
+  :root{
+    --bg: #EEF2F6;
+    --surface: #FFFFFF;
+    --ink: #16213B;
+    --muted: #5B6478;
+    --line: #DCE3EA;
+    --accent: #146C6A;
+    --accent-dark: #0E4F4D;
+    --accent-tint: #E4F1F0;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #0D1420;
+      --surface: #16202F;
+      --ink: #E7ECF3;
+      --muted: #93A2B7;
+      --line: #2A374A;
+      --accent: #3BB6AF;
+      --accent-dark: #7FE0DA;
+      --accent-tint: rgba(59,182,175,0.14);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #0D1420;
+    --surface: #16202F;
+    --ink: #E7ECF3;
+    --muted: #93A2B7;
+    --line: #2A374A;
+    --accent: #3BB6AF;
+    --accent-dark: #7FE0DA;
+    --accent-tint: rgba(59,182,175,0.14);
+  }
+
+  *{ box-sizing: border-box; }
+
+  html{ scroll-padding-top: env(safe-area-inset-top, 0px); }
+
+  html, body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(28px + env(safe-area-inset-top, 0px)) 16px calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .wrap{
+    width: 100%;
+    max-width: 520px;
+  }
+
+  header.top{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 0 4px;
+  }
+
+  header.top .mark{
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+  }
+
+  header.top h1{
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  header.top p{
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 34px 32px;
+  }
+
+  @media (max-width: 480px){
+    .card{ padding: 26px 22px; }
+  }
+
+  h2{
+    font-size: 23px;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    color: var(--muted);
+    font-size: 14.5px;
+    line-height: 1.6;
+    margin: 0 0 22px;
+  }
+
+  ul.points{
+    list-style: none;
+    margin: 0 0 28px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  ul.points li{
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  ul.points li svg{
+    flex: 0 0 auto;
+    margin-top: 2px;
+    color: var(--accent);
+  }
+
+  .cta{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 14px 20px;
+    border-radius: 8px;
+  }
+
+  .cta:hover{ background: var(--accent-dark); }
+
+  .cta:focus-visible{
+    outline: 2px solid var(--accent-dark);
+    outline-offset: 2px;
+  }
+
+  .note{
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 14px 0 0;
+  }
+
+  footer.foot{
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="mark" aria-hidden="true">
+      <svg width="32" height="32" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17 3 L28 7 V16 C28 23.5 23.3 28.8 17 31 C10.7 28.8 6 23.5 6 16 V7 L17 3 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="17" cy="15.5" r="3.4" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M13 22 C13 19 21 19 21 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Practice Questions</h1>
+      <p>Data Privacy · Sprint 1.4</p>
+    </div>
+  </header>
+
+  <section class="card">
+    <h2>Ready to practice?</h2>
+    <p class="lede">Enter your name and choose your class (<strong>10AM1–10AM6</strong>) to start the Data Privacy practice quiz — Unit 1: Technology, IP and Security.</p>
+
+    <ul class="points">
+      <li>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Instant feedback and an explanation after every answer</span>
+      </li>
+      <li>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Teacher's feedback on strengths and weaknesses at the end</span>
+      </li>
+      <li>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Download your results as a PDF when you're done</span>
+      </li>
+    </ul>
+
+    <a class="cta" href="quiz.html">Start the practice quiz</a>
+    <p class="note">No sign-in needed. Works on phone, tablet, or computer.</p>
+  </section>
+
+  <footer class="foot">Shared by your teacher</footer>
+
+</div>
+</body>
+</html>
