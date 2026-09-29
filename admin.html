@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Admin Report — Data Privacy Practice Quiz</title>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  .wrap.wrap-wide{ max-width: 980px; }
+
+  .admin-tabs{
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .admin-tab{
+    appearance: none;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 10px 4px;
+    margin-right: 18px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .admin-tab.active{ color: var(--accent); border-bottom-color: var(--accent); }
+
+  .admin-panel{ display: none; }
+  .admin-panel.active{ display: block; }
+
+  .admin-toolbar{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .admin-toolbar select, .admin-toolbar input[type="text"]{
+    padding: 9px 11px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: var(--input-bg);
+    color: var(--ink);
+    font-size: 13px;
+    font-family: inherit;
+  }
+
+  .admin-status{
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+
+  .admin-status.warn{ color: var(--incorrect); }
+
+  .table-scroll{ overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  table.admin-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  table.admin-table th, table.admin-table td{
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+
+  table.admin-table td.wrap-cell{ white-space: normal; }
+
+  table.admin-table th{
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  table.admin-table tbody tr{ cursor: pointer; }
+  table.admin-table tbody tr:hover{ background: var(--accent-tint); }
+  table.admin-table tbody tr:last-child td{ border-bottom: none; }
+
+  .admin-summary-row{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .admin-card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 14px 16px;
+  }
+
+  .admin-card .label{ font-size: 11.5px; color: var(--muted); margin-bottom: 4px; }
+  .admin-card .value{ font-size: 19px; font-weight: 700; }
+
+  .admin-question-row{
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .admin-question-row .qtop{
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+
+  .admin-question-row .qtext{ font-size: 13.5px; font-weight: 600; }
+  .admin-question-row .qpct{ font-size: 13.5px; font-weight: 700; flex: 0 0 auto; }
+  .admin-question-row .qpct.low{ color: var(--incorrect); }
+  .admin-question-row .qpct.high{ color: var(--correct); }
+  .admin-question-row .qmiss{ font-size: 12.5px; color: var(--muted); }
+
+  .admin-detail-back{ margin-bottom: 16px; }
+
+  .admin-note{
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+  }
+
+  .empty-note{
+    font-size: 13.5px;
+    color: var(--muted);
+    padding: 18px 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+
+  <header class="top">
+    <div class="mark" aria-hidden="true">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17 3 L28 7 V16 C28 23.5 23.3 28.8 17 31 C10.7 28.8 6 23.5 6 16 V7 L17 3 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="17" cy="15.5" r="3.4" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M13 22 C13 19 21 19 21 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <h1 id="header-title">Admin report</h1>
+      <p id="header-sub">Data Privacy Practice Quiz</p>
+    </div>
+  </header>
+
+  <!-- ============ LOGIN SCREEN ============ -->
+  <section id="screen-login" class="card">
+    <h2 class="step-title">Teacher / admin login</h2>
+    <p class="step-sub">View a complete report for each student, a class-by-class overview, and question-by-question results across the whole cohort.</p>
+
+    <div class="field" id="field-user">
+      <label for="input-user">Username</label>
+      <input type="text" id="input-user" autocomplete="username" />
+      <div class="err">Please enter the username.</div>
+    </div>
+
+    <div class="field" id="field-pass">
+      <label for="input-pass">Password</label>
+      <input type="password" id="input-pass" autocomplete="current-password" />
+      <div class="err">Please enter the password.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-login">Log in</button>
+      <a class="btn btn-secondary" href="index.html" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">Back to quiz</a>
+    </div>
+    <p class="cohort-note" id="login-error"></p>
+    <p class="admin-note">This login screen keeps casual visitors out, but this page is a static file — anyone who inspected its code could find what unlocks the data endpoint below. It is classroom-appropriate privacy, not bank-grade security.</p>
+  </section>
+
+  <!-- ============ DASHBOARD SCREEN ============ -->
+  <section id="screen-dashboard" class="card hidden">
+    <div class="admin-toolbar no-print">
+      <button class="btn btn-secondary" id="btn-refresh">Refresh data</button>
+      <button class="btn btn-secondary" id="btn-logout">Log out</button>
+    </div>
+    <p class="admin-status" id="admin-status">Loading…</p>
+
+    <div class="admin-tabs no-print" id="admin-tabs">
+      <button class="admin-tab active" data-tab="students">Students</button>
+      <button class="admin-tab" data-tab="classes">Class overview</button>
+      <button class="admin-tab" data-tab="questions">Question analysis</button>
+    </div>
+
+    <div id="admin-panels">
+      <div class="admin-panel active" id="panel-students">
+        <div class="admin-toolbar no-print">
+          <select id="filter-class">
+            <option value="">All classes</option>
+          </select>
+          <input type="text" id="filter-search" placeholder="Search by name" />
+        </div>
+        <div class="table-scroll">
+          <table class="admin-table" id="student-table">
+            <thead><tr><th>Name</th><th>Class</th><th>Score</th><th>%</th><th>Date</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="panel-classes">
+        <div id="class-summary"></div>
+      </div>
+
+      <div class="admin-panel" id="panel-questions">
+        <div id="question-summary"></div>
+      </div>
+
+      <div class="admin-panel" id="panel-detail">
+        <div class="admin-toolbar no-print">
+          <button class="btn btn-secondary admin-detail-back" id="btn-back">← Back to student list</button>
+          <button class="btn btn-primary" id="btn-detail-print">Download PDF</button>
+        </div>
+        <p class="admin-status no-print" id="detail-print-status"></p>
+        <div id="student-detail"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="jspdf.min.js"></script>
+<script src="quiz-data.js"></script>
+<script src="backend-lib.js"></script>
+<script src="report-lib.js"></script>
+<script>
+(function(){
+
+  // Must match ADMIN_KEY in Practice_Quiz_Backend_AppsScript.gs.
+  var ADMIN_KEY = "dpquiz-ashraf2k-7f31c9";
+  // Login shown on this page. Plain client-side check — see the note
+  // on the login screen for what that does and doesn't protect against.
+  var ADMIN_USER = "ashraf2k";
+  var ADMIN_PASS = "clocktwo";
+
+  var EXAM_KEY = "dp";
+
+  function backendList(){
+    if(!BACKEND_URL) return Promise.resolve({ ok:false, error:"no_backend" });
+    var url = BACKEND_URL + (BACKEND_URL.indexOf("?") > -1 ? "&" : "?") + "action=list&key=" + encodeURIComponent(ADMIN_KEY);
+    return fetchWithTimeout(url, { method: "GET" }).then(function(res){
+      if(!res.ok) return { ok:false };
+      return res.json().then(function(data){ return data; });
+    }).catch(function(){ return { ok:false }; });
+  }
+
+  // ============================================================
+  // Login
+  // ============================================================
+  var inputUser = document.getElementById("input-user");
+  var inputPass = document.getElementById("input-pass");
+  var fieldUser = document.getElementById("field-user");
+  var fieldPass = document.getElementById("field-pass");
+  var loginError = document.getElementById("login-error");
+
+  document.getElementById("btn-login").addEventListener("click", function(){
+    var u = inputUser.value.trim();
+    var p = inputPass.value;
+    var ok = true;
+    if(!u){ fieldUser.classList.add("invalid"); ok = false; } else { fieldUser.classList.remove("invalid"); }
+    if(!p){ fieldPass.classList.add("invalid"); ok = false; } else { fieldPass.classList.remove("invalid"); }
+    if(!ok) return;
+
+    if(u !== ADMIN_USER || p !== ADMIN_PASS){
+      loginError.textContent = "Incorrect username or password.";
+      return;
+    }
+    loginError.textContent = "";
+    document.getElementById("screen-login").classList.add("hidden");
+    document.getElementById("screen-dashboard").classList.remove("hidden");
+    document.getElementById("wrap").classList.add("wrap-wide");
+    showTab("students");
+    loadData();
+  });
+
+  document.getElementById("btn-logout").addEventListener("click", function(){
+    attempts = [];
+    document.getElementById("screen-dashboard").classList.add("hidden");
+    document.getElementById("wrap").classList.remove("wrap-wide");
+    document.getElementById("screen-login").classList.remove("hidden");
+    inputUser.value = "";
+    inputPass.value = "";
+  });
+
+  // ============================================================
+  // Tabs
+  // ============================================================
+  function showTab(name){
+    document.querySelectorAll(".admin-tab").forEach(function(btn){
+      btn.classList.toggle("active", btn.dataset.tab === name);
+    });
+    ["students","classes","questions","detail"].forEach(function(id){
+      document.getElementById("panel-" + id).classList.toggle("active", id === name);
+    });
+  }
+
+  document.getElementById("admin-tabs").addEventListener("click", function(e){
+    var btn = e.target.closest(".admin-tab");
+    if(!btn) return;
+    showTab(btn.dataset.tab);
+  });
+
+  // ============================================================
+  // Data loading
+  // ============================================================
+  var attempts = [];
+  var loaded = false;
+  var adminStatus = document.getElementById("admin-status");
+
+  function loadData(){
+    if(!BACKEND_URL){
+      adminStatus.textContent = "No shared results sheet is connected yet. Add your Google Apps Script Web App URL to BACKEND_URL in backend-lib.js to see real student data here. See the setup instructions sent alongside this file.";
+      adminStatus.classList.add("warn");
+      renderAll();
+      return;
+    }
+    adminStatus.classList.remove("warn");
+    adminStatus.textContent = "Loading…";
+    backendList().then(function(res){
+      if(res && res.ok && Array.isArray(res.attempts)){
+        attempts = res.attempts.filter(function(a){ return (a.exam || "dp") === EXAM_KEY; });
+        loaded = true;
+        adminStatus.textContent = "Loaded " + attempts.length + " submitted attempt" + (attempts.length === 1 ? "" : "s") + " · refreshed " + new Date().toLocaleTimeString();
+      } else if(res && res.error === "forbidden"){
+        adminStatus.classList.add("warn");
+        adminStatus.textContent = "The admin key in this page doesn't match the one in the Apps Script backend. Check ADMIN_KEY in admin.html against Practice_Quiz_Backend_AppsScript.gs.";
+      } else {
+        adminStatus.classList.add("warn");
+        adminStatus.textContent = "Couldn't reach the results sheet. Check BACKEND_URL and that the Apps Script deployment is set to \"Anyone\" access.";
+      }
+      renderAll();
+    });
+  }
+
+  document.getElementById("btn-refresh").addEventListener("click", loadData);
+
+  function renderAll(){
+    populateClassFilter();
+    renderStudents();
+    renderClasses();
+    renderQuestions();
+  }
+
+  function populateClassFilter(){
+    var sel = document.getElementById("filter-class");
+    var current = sel.value;
+    sel.innerHTML = '<option value="">All classes</option>';
+    EXAMS[EXAM_KEY].classes.forEach(function(cls){
+      var opt = document.createElement("option");
+      opt.value = cls;
+      opt.textContent = cls;
+      sel.appendChild(opt);
+    });
+    sel.value = current;
+  }
+
+  function attemptPct(a){
+    var total = a.total || EXAMS[EXAM_KEY].questions.length;
+    return total ? Math.round((Number(a.score) / total) * 100) : 0;
+  }
+
+  function fmtDateShort(iso){
+    try{
+      var d = new Date(iso);
+      if(isNaN(d.getTime())) return String(iso || "");
+      return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
+    } catch(e){ return String(iso || ""); }
+  }
+
+  // ============================================================
+  // Students tab
+  // ============================================================
+  var filterClass = document.getElementById("filter-class");
+  var filterSearch = document.getElementById("filter-search");
+  filterClass.addEventListener("change", renderStudents);
+  filterSearch.addEventListener("input", renderStudents);
+
+  function filteredAttempts(){
+    var cls = filterClass.value;
+    var q = filterSearch.value.trim().toLowerCase();
+    return attempts.filter(function(a){
+      if(cls && a.className !== cls) return false;
+      if(q && (a.name || "").toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+  }
+
+  function renderStudents(){
+    var tbody = document.querySelector("#student-table tbody");
+    tbody.innerHTML = "";
+    var rows = filteredAttempts().slice().sort(function(a, b){
+      return new Date(b.timestamp) - new Date(a.timestamp);
+    });
+
+    if(rows.length === 0){
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      td.colSpan = 5;
+      td.className = "wrap-cell";
+      td.textContent = !BACKEND_URL ? "Connect the shared results sheet to see students here." : (loaded ? "No attempts match these filters." : "");
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    rows.forEach(function(a){
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + escapeHtml(a.name || "") + "</td>" +
+        "<td>" + escapeHtml(a.className || "") + "</td>" +
+        "<td>" + a.score + "/" + (a.total || EXAMS[EXAM_KEY].questions.length) + "</td>" +
+        "<td>" + attemptPct(a) + "%</td>" +
+        "<td>" + fmtDateShort(a.timestamp) + "</td>";
+      tr.addEventListener("click", function(){ openDetail(a); });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ============================================================
+  // Class overview tab
+  // ============================================================
+  function renderClasses(){
+    var container = document.getElementById("class-summary");
+    container.innerHTML = "";
+
+    var classes = EXAMS[EXAM_KEY].classes;
+    if(!loaded && !BACKEND_URL){
+      container.innerHTML = '<p class="empty-note">Connect the shared results sheet to see class summaries here.</p>';
+      return;
+    }
+
+    var grid = document.createElement("div");
+    grid.className = "admin-summary-row";
+
+    classes.forEach(function(cls){
+      var inClass = attempts.filter(function(a){ return a.className === cls; });
+      var card = document.createElement("div");
+      card.className = "admin-card";
+      var avg = inClass.length ? Math.round(inClass.reduce(function(s, a){ return s + attemptPct(a); }, 0) / inClass.length) : null;
+      card.innerHTML =
+        '<div class="label">' + escapeHtml(cls) + '</div>' +
+        '<div class="value">' + (avg === null ? "—" : avg + "%") + '</div>' +
+        '<div class="label" style="margin-top:6px;">' + inClass.length + ' attempt' + (inClass.length === 1 ? "" : "s") + '</div>';
+      grid.appendChild(card);
+    });
+
+    container.appendChild(grid);
+
+    if(attempts.length === 0 && loaded){
+      var note = document.createElement("p");
+      note.className = "empty-note";
+      note.textContent = "No submitted attempts yet.";
+      container.appendChild(note);
+    }
+  }
+
+  // ============================================================
+  // Question analysis tab
+  // ============================================================
+  function renderQuestions(){
+    var container = document.getElementById("question-summary");
+    container.innerHTML = "";
+
+    if(!loaded && !BACKEND_URL){
+      container.innerHTML = '<p class="empty-note">Connect the shared results sheet to see question analysis here.</p>';
+      return;
+    }
+    if(attempts.length === 0){
+      container.innerHTML = '<p class="empty-note">No submitted attempts yet.</p>';
+      return;
+    }
+
+    var qs = EXAMS[EXAM_KEY].questions;
+    qs.forEach(function(q, qi){
+      var correctCount = 0;
+      var total = 0;
+      var wrongCounts = {};
+
+      attempts.forEach(function(a){
+        var sel = Array.isArray(a.answers) ? a.answers[qi] : undefined;
+        if(sel === undefined || sel === null || sel === -1) return;
+        total++;
+        if(sel === q.correct){
+          correctCount++;
+        } else {
+          wrongCounts[sel] = (wrongCounts[sel] || 0) + 1;
+        }
+      });
+
+      var pct = total ? Math.round((correctCount / total) * 100) : null;
+      var mostCommonWrong = null, mostCommonWrongCount = 0;
+      Object.keys(wrongCounts).forEach(function(idx){
+        if(wrongCounts[idx] > mostCommonWrongCount){
+          mostCommonWrongCount = wrongCounts[idx];
+          mostCommonWrong = Number(idx);
+        }
+      });
+
+      var row = document.createElement("div");
+      row.className = "admin-question-row";
+      var pctClass = pct === null ? "" : (pct < 50 ? "low" : (pct >= 85 ? "high" : ""));
+      row.innerHTML =
+        '<div class="qtop"><div class="qtext">Q' + (qi + 1) + '. ' + escapeHtml(q.q) + '</div>' +
+        '<div class="qpct ' + pctClass + '">' + (pct === null ? "—" : pct + "%") + '</div></div>' +
+        '<div class="qmiss">' + (mostCommonWrong === null
+          ? "No incorrect answers recorded."
+          : "Most common wrong answer: " + escapeHtml(q.options[mostCommonWrong]) + " (" + mostCommonWrongCount + "×)") + '</div>';
+      container.appendChild(row);
+    });
+  }
+
+  // ============================================================
+  // Student detail (reuses buildReportFragment + PDF from report-lib.js)
+  // ============================================================
+  var detailCtx = null;
+
+  function openDetail(attempt){
+    var qs = EXAMS[EXAM_KEY].questions;
+    var answers = qs.map(function(q, i){
+      var sel = Array.isArray(attempt.answers) ? attempt.answers[i] : -1;
+      if(sel === undefined || sel === null || sel === -1) return null;
+      return { selected: sel, correct: sel === q.correct };
+    });
+    detailCtx = {
+      examKey: EXAM_KEY,
+      name: attempt.name,
+      cls: attempt.className,
+      answers: answers,
+      completedAt: attempt.timestamp
+    };
+    var container = document.getElementById("student-detail");
+    container.innerHTML = "";
+    container.appendChild(buildReportFragment(detailCtx));
+    document.getElementById("detail-print-status").textContent = "";
+    showTab("detail");
+  }
+
+  document.getElementById("btn-back").addEventListener("click", function(){
+    showTab("students");
+  });
+
+  wirePdfButton(
+    document.getElementById("btn-detail-print"),
+    document.getElementById("detail-print-status"),
+    function(){ return detailCtx; }
+  );
+
+})();
+</script>
+</body>
+</html>

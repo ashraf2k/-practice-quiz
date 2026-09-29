@@ -1,0 +1,585 @@
+  function buildAnswerObjects(examKey, selectedIndices){
+    var qs = examQuestions(examKey);
+    return qs.map(function(q, i){
+      var sel = selectedIndices[i];
+      if(sel === undefined || sel === null || sel < 0) return null;
+      return { selected: sel, correct: sel === q.correct };
+    });
+  }
+
+  function computeReport(ctx){
+    var exam = EXAMS[ctx.examKey];
+    var qs = exam.questions;
+    var total = qs.length;
+    var correctCount = 0, aCorrect = 0, bCorrect = 0;
+    var statsMap = {}, order = [];
+
+    qs.forEach(function(q, idx){
+      var t = q.topic || "General";
+      if(!statsMap[t]){ statsMap[t] = { topic: t, correct: 0, total: 0 }; order.push(t); }
+      statsMap[t].total++;
+
+      var a = ctx.answers[idx];
+      if(a && a.correct){
+        correctCount++;
+        statsMap[t].correct++;
+        if(idx < exam.sectionA.count) aCorrect++; else bCorrect++;
+      }
+    });
+
+    var pct = total ? Math.round((correctCount / total) * 100) : 0;
+    var topicStats = order.map(function(t){ return statsMap[t]; });
+
+    return { exam: exam, total: total, correctCount: correctCount, aCorrect: aCorrect, bCorrect: bCorrect, pct: pct, topicStats: topicStats };
+  }
+
+  function joinList(arr){
+    if(arr.length === 1) return arr[0];
+    if(arr.length === 2) return arr[0] + " and " + arr[1];
+    return arr.slice(0, -1).join(", ") + ", and " + arr[arr.length - 1];
+  }
+
+  // Indicative letter grade, only used when an exam opts in via hasGrade.
+  function getGrade(pct){
+    if(pct >= 80) return "A";
+    if(pct >= 70) return "B";
+    if(pct >= 60) return "C";
+    if(pct >= 50) return "D";
+    if(pct >= 40) return "E";
+    return "U";
+  }
+
+  function buildTeacherFeedback(ctx, report){
+    var rows = report.topicStats.map(function(r){
+      return { topic: r.topic, correct: r.correct, total: r.total, pct: r.total ? (r.correct / r.total) : 0 };
+    });
+    var byStrength = rows.slice().sort(function(a, b){ return b.pct - a.pct || b.total - a.total; });
+
+    var strengths = byStrength.filter(function(r){ return r.pct >= 0.75; });
+    var weaknesses = byStrength.filter(function(r){ return r.pct < 0.6; }).sort(function(a, b){ return a.pct - b.pct; });
+
+    if(strengths.length === 0 && byStrength.length){
+      strengths = byStrength.slice(0, Math.min(2, byStrength.length)).filter(function(r){ return r.pct > 0; });
+    }
+
+    var name = ctx.name || "This student";
+    var firstName = name.trim().split(/\s+/)[0];
+    var exam = report.exam;
+
+    var paragraphs = [];
+
+    var band = report.pct >= 90 ? "excellent" : report.pct >= 75 ? "strong" : report.pct >= 60 ? "solid, developing" : report.pct >= 40 ? "emerging" : "early-stage";
+    paragraphs.push(name + " scored " + report.correctCount + " out of " + report.total + " (" + report.pct + "%), showing " + band + " understanding of this content overall.");
+
+    if(strengths.length){
+      var strengthList = strengths.map(function(r){ return r.topic + " (" + r.correct + "/" + r.total + ")"; });
+      paragraphs.push("Strengths: " + firstName + " performed well on " + joinList(strengthList) + ". This suggests a good grasp of " + (strengths.length > 1 ? "these areas" : "this area") + " and the ability to apply the concepts correctly.");
+    }
+
+    if(weaknesses.length){
+      var weakList = weaknesses.map(function(r){ return r.topic + " (" + r.correct + "/" + r.total + ")"; });
+      paragraphs.push("Areas to revisit: performance was weaker on " + joinList(weakList) + ". Going back over these sections — and re-attempting similar questions — should help close these gaps before the next assessment.");
+    } else {
+      paragraphs.push("No topic stood out as a clear weak point — performance was fairly consistent across the topics covered.");
+    }
+
+    var aPct = exam.sectionA.count ? Math.round((report.aCorrect / exam.sectionA.count) * 100) : 0;
+    var bPct = exam.sectionB.count ? Math.round((report.bCorrect / exam.sectionB.count) * 100) : 0;
+    if(Math.abs(aPct - bPct) >= 25){
+      if(aPct > bPct){
+        paragraphs.push("By section, " + firstName + " handled " + exam.sectionA.label + " (" + aPct + "%) noticeably better than " + exam.sectionB.label + " (" + bPct + "%) — it's worth spending extra revision time on " + exam.sectionB.label + ".");
+      } else {
+        paragraphs.push("By section, " + firstName + " handled " + exam.sectionB.label + " (" + bPct + "%) noticeably better than " + exam.sectionA.label + " (" + aPct + "%) — it's worth spending extra revision time on " + exam.sectionA.label + ".");
+      }
+    }
+
+    if(weaknesses.length){
+      paragraphs.push("Suggested next step: review the material covering " + weaknesses[0].topic.toLowerCase() + ", then retake this practice to check progress.");
+    } else if(report.pct < 100){
+      paragraphs.push("Suggested next step: revisit the one or two missed questions above, then retake the practice for a perfect score.");
+    } else {
+      paragraphs.push("Suggested next step: none — full marks. Ready to move on.");
+    }
+
+    return { paragraphs: paragraphs, strengths: strengths, weaknesses: weaknesses };
+  }
+
+  function escapeHtml(str){
+    var div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function fmtDate(iso){
+    try{
+      var d = new Date(iso);
+      if(isNaN(d.getTime())) return String(iso || "");
+      return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+    } catch(e){ return String(iso || ""); }
+  }
+
+  // ---------- Build the on-screen report (score, stats, teacher feedback, review) ----------
+  function buildReportFragment(ctx){
+    var report = computeReport(ctx);
+    var exam = report.exam;
+    var frag = document.createDocumentFragment();
+
+    // Score block
+    var scoreBlock = document.createElement("div");
+    scoreBlock.className = "score-block";
+    var scoreNum = document.createElement("div");
+    scoreNum.className = "score-number";
+    scoreNum.textContent = report.correctCount + "/" + report.total;
+    var side = document.createElement("div");
+    side.className = "score-side";
+    var who = document.createElement("p");
+    who.className = "who";
+    who.textContent = ctx.name + " · " + ctx.cls;
+    var dateP = document.createElement("p");
+    dateP.textContent = fmtDate(ctx.completedAt);
+    side.appendChild(who); side.appendChild(dateP);
+    scoreBlock.appendChild(scoreNum); scoreBlock.appendChild(side);
+    frag.appendChild(scoreBlock);
+
+    // Stat row
+    var statRow = document.createElement("div");
+    statRow.className = "stat-row";
+    function statBox(label, value){
+      var box = document.createElement("div"); box.className = "stat-box";
+      var l = document.createElement("div"); l.className = "label"; l.textContent = label;
+      var v = document.createElement("div"); v.className = "value"; v.textContent = value;
+      box.appendChild(l); box.appendChild(v);
+      return box;
+    }
+    statRow.appendChild(statBox(exam.sectionA.label + " (" + exam.sectionA.count + ")", report.aCorrect + "/" + exam.sectionA.count));
+    statRow.appendChild(statBox(exam.sectionB.label + " (" + exam.sectionB.count + ")", report.bCorrect + "/" + exam.sectionB.count));
+    statRow.appendChild(statBox("Overall", report.pct + "%"));
+    frag.appendChild(statRow);
+
+    if(exam.hasGrade){
+      var gradeP = document.createElement("p");
+      gradeP.className = "grade-note";
+      var grade = getGrade(report.pct);
+      gradeP.innerHTML = "Indicative Cambridge grade: <strong>" + grade + "</strong> — for this practice only; Cambridge sets official grade boundaries per exam series, not as fixed percentages.";
+      frag.appendChild(gradeP);
+    }
+
+    // Teacher's feedback
+    var feedback = buildTeacherFeedback(ctx, report);
+    var fbBlock = document.createElement("div");
+    fbBlock.className = "feedback-block";
+    var fbTitle = document.createElement("p"); fbTitle.className = "fb-title"; fbTitle.textContent = "Teacher's feedback";
+    fbBlock.appendChild(fbTitle);
+
+    var fbGroups = document.createElement("div"); fbGroups.className = "fb-groups";
+    function fbGroup(label, items, chipClass, noneText){
+      var group = document.createElement("div"); group.className = "fb-group";
+      var lbl = document.createElement("div"); lbl.className = "fb-label"; lbl.textContent = label;
+      group.appendChild(lbl);
+      var chips = document.createElement("div"); chips.className = "fb-chips";
+      if(items.length){
+        items.forEach(function(r){
+          var chip = document.createElement("span");
+          chip.className = "chip " + chipClass;
+          chip.textContent = r.topic + " " + r.correct + "/" + r.total;
+          chips.appendChild(chip);
+        });
+      } else {
+        var none = document.createElement("span"); none.className = "fb-none"; none.textContent = noneText;
+        chips.appendChild(none);
+      }
+      group.appendChild(chips);
+      return group;
+    }
+    fbGroups.appendChild(fbGroup("Strengths", feedback.strengths, "chip-good", "None yet identified"));
+    fbGroups.appendChild(fbGroup("Areas to revisit", feedback.weaknesses, "chip-weak", "No notable weak areas"));
+    fbBlock.appendChild(fbGroups);
+
+    var fbParas = document.createElement("div"); fbParas.className = "fb-paragraphs";
+    feedback.paragraphs.forEach(function(text){
+      var p = document.createElement("p"); p.textContent = text; fbParas.appendChild(p);
+    });
+    fbBlock.appendChild(fbParas);
+    frag.appendChild(fbBlock);
+
+    // Review heading + list
+    var heading = document.createElement("p"); heading.className = "review-heading"; heading.textContent = "Question-by-question review";
+    frag.appendChild(heading);
+
+    exam.questions.forEach(function(q, idx){
+      var a = ctx.answers[idx];
+      var item = document.createElement("div"); item.className = "review-item";
+
+      var rq = document.createElement("p"); rq.className = "rq";
+      var num = document.createElement("span"); num.className = "num"; num.textContent = (idx + 1) + ".";
+      rq.appendChild(num);
+      rq.appendChild(document.createTextNode(q.q));
+      var badge = document.createElement("span");
+      badge.className = "badge " + (a && a.correct ? "correct" : "wrong");
+      badge.textContent = a && a.correct ? "Correct" : "Incorrect";
+      rq.appendChild(badge);
+      item.appendChild(rq);
+
+      if(q.code){
+        var pre = document.createElement("pre"); pre.className = "code-block"; pre.textContent = q.code;
+        item.appendChild(pre);
+      }
+
+      var yourAnswer = document.createElement("p");
+      yourAnswer.className = "review-line " + (a && a.correct ? "answer-correct" : "answer-wrong");
+      var yourText = a ? q.options[a.selected] : "(no answer)";
+      yourAnswer.innerHTML = "<span class=\"lbl\">Your answer: </span><span class=\"val\">" + escapeHtml(yourText) + "</span>";
+      item.appendChild(yourAnswer);
+
+      if(!a || !a.correct){
+        var correctAnswer = document.createElement("p");
+        correctAnswer.className = "review-line";
+        correctAnswer.innerHTML = "<span class=\"lbl\">Correct answer: </span><span class=\"val\" style=\"color:var(--correct);font-weight:600\">" + escapeHtml(q.options[q.correct]) + "</span>";
+        item.appendChild(correctAnswer);
+      }
+
+      var explain = document.createElement("p"); explain.className = "review-explain"; explain.textContent = q.explain;
+      item.appendChild(explain);
+
+      frag.appendChild(item);
+    });
+
+    return frag;
+  }
+
+
+  var PDF_INK = [0, 0, 0];
+  var PDF_MUTED = [95, 95, 95];
+  var PDF_LINE = [180, 180, 180];
+  var PDF_CARD_LINE = [190, 190, 190];
+
+  function pdfColor(doc, rgb){ doc.setTextColor(rgb[0], rgb[1], rgb[2]); }
+  function pdfDrawColor(doc, rgb){ doc.setDrawColor(rgb[0], rgb[1], rgb[2]); }
+  function pdfFillColor(doc, rgb){ doc.setFillColor(rgb[0], rgb[1], rgb[2]); }
+
+  // jsPDF's built-in fonts (helvetica/courier) only support the WinAnsi
+  // (roughly Latin-1 + common typographic) character set. A handful of
+  // characters used in the question content — the pseudocode assignment
+  // arrow in particular — fall outside that set and render as garbled
+  // glyphs if sent through unchanged, so swap them for safe equivalents
+  // whenever text is placed into the PDF (the on-screen HTML view is
+  // unaffected and keeps the nicer original characters).
+  function pdfSafe(str){
+    if(!str) return str;
+    return String(str)
+      .replace(/←/g, "<-")
+      .replace(/→/g, "->")
+      .replace(/[✓✗]/g, "");
+  }
+
+  function buildResultsPDF(ctx){
+    if(!window.jspdf || !window.jspdf.jsPDF) return null;
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ unit: "pt", format: "a4" });
+
+    var report = computeReport(ctx);
+    var exam = report.exam;
+    var feedback = buildTeacherFeedback(ctx, report);
+
+    var PAGE_W = doc.internal.pageSize.getWidth();
+    var PAGE_H = doc.internal.pageSize.getHeight();
+    var MARGIN = 40;
+    var BOTTOM = PAGE_H - MARGIN;
+    var CONTENT_W = PAGE_W - MARGIN * 2;
+    var y = MARGIN;
+    var pageNum = 1;
+
+    function runningHeader(){
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      pdfColor(doc, PDF_MUTED);
+      doc.text(exam.title + " — " + ctx.name + " · " + ctx.cls, MARGIN, MARGIN - 12);
+    }
+
+    function newPage(){
+      doc.addPage();
+      pageNum++;
+      y = MARGIN;
+      runningHeader();
+      y += 10;
+    }
+
+    function measure(str, opts){
+      opts = opts || {};
+      var size = opts.size || 9;
+      doc.setFont(opts.font || "helvetica", opts.bold ? "bold" : "normal");
+      doc.setFontSize(size);
+      var lines = str ? doc.splitTextToSize(pdfSafe(str), opts.width || CONTENT_W) : [];
+      var lh = size * (opts.lineHeightFactor || 1.28);
+      return { lines: lines, lh: lh, height: lines.length * lh };
+    }
+
+    function drawLines(lines, x, topY, lh, opts){
+      opts = opts || {};
+      doc.setFont(opts.font || "helvetica", opts.bold ? "bold" : "normal");
+      doc.setFontSize(opts.size || 9);
+      pdfColor(doc, opts.color || PDF_INK);
+      var baseline = topY + lh * 0.8;
+      lines.forEach(function(line){
+        doc.text(line, x, baseline);
+        baseline += lh;
+      });
+      return topY + lines.length * lh;
+    }
+
+    function writeText(str, opts){
+      opts = opts || {};
+      var m = measure(str, opts);
+      if(y + m.height > BOTTOM){ newPage(); }
+      y = drawLines(m.lines, MARGIN, y, m.lh, opts);
+      if(opts.marginAfter) y += opts.marginAfter;
+    }
+
+    function box(x, boxY, w, h, opts){
+      opts = opts || {};
+      var radius = opts.radius != null ? opts.radius : 6;
+      doc.setLineWidth(opts.lineWidth || 0.75);
+      pdfDrawColor(doc, opts.stroke || PDF_LINE);
+      if(opts.fill){
+        pdfFillColor(doc, opts.fill);
+        doc.roundedRect(x, boxY, w, h, radius, radius, "FD");
+      } else {
+        doc.roundedRect(x, boxY, w, h, radius, radius, "S");
+      }
+      if(opts.accentBar){
+        pdfFillColor(doc, opts.accentBar);
+        doc.roundedRect(x, boxY + 3, 4, h - 6, 2, 2, "F");
+      }
+    }
+
+    // ---------- Masthead ----------
+    writeText(exam.title, { size: 16, bold: true, marginAfter: 2 });
+    writeText(exam.subtitle, { size: 8.5, color: PDF_MUTED, marginAfter: 14 });
+
+    // ---------- Student details + score panel ----------
+    var completedDateText = fmtDate(ctx.completedAt);
+    var panelH = exam.hasGrade ? 92 : 78;
+    if(y + panelH > BOTTOM) newPage();
+    var panelY = y;
+    box(MARGIN, panelY, CONTENT_W, panelH, { stroke: PDF_LINE, radius: 8 });
+
+    var padX = 18;
+    var leftX = MARGIN + padX;
+    var rightEdge = PAGE_W - MARGIN - padX;
+    var rowY = panelY + 26;
+
+    function field(label, value, valueOpts){
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      pdfColor(doc, PDF_MUTED);
+      doc.text(label, leftX, rowY);
+      doc.setFont("helvetica", (valueOpts && valueOpts.bold === false) ? "normal" : "bold");
+      doc.setFontSize((valueOpts && valueOpts.size) || 11.5);
+      pdfColor(doc, PDF_INK);
+      doc.text(value, leftX + 52, rowY);
+      rowY += 17;
+    }
+
+    field("STUDENT", ctx.name);
+    field("CLASS", ctx.cls);
+    field("DATE", completedDateText, { bold: false, size: 10 });
+    if(exam.hasGrade){
+      field("GRADE", getGrade(report.pct) + "  (indicative, practice only)", { bold: true, size: 10.5 });
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(28);
+    pdfColor(doc, PDF_INK);
+    doc.text(report.correctCount + " / " + report.total, rightEdge, panelY + 34, { align: "right" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    pdfColor(doc, PDF_MUTED);
+    doc.text(report.pct + "% overall", rightEdge, panelY + 50, { align: "right" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    pdfColor(doc, PDF_MUTED);
+    doc.text(exam.sectionA.label + " " + report.aCorrect + "/" + exam.sectionA.count + "   ·   " + exam.sectionB.label + " " + report.bCorrect + "/" + exam.sectionB.count, rightEdge, panelY + 64, { align: "right" });
+
+    y = panelY + panelH + 18;
+
+    // ---------- Teacher's Feedback (boxed) ----------
+    var fbPad = 14;
+    var fbInnerW = CONTENT_W - fbPad * 2 - 6;
+    var fbHeadingH = 15;
+    var fbParaGap = 6;
+    var fbMeasures = feedback.paragraphs.map(function(p){
+      return measure(p, { size: 8.5, width: fbInnerW, lineHeightFactor: 1.34 });
+    });
+    var fbContentH = fbHeadingH + fbMeasures.reduce(function(sum, m){ return sum + m.height + fbParaGap; }, 0);
+    var fbBoxH = fbContentH + fbPad * 2;
+
+    if(y + fbBoxH > BOTTOM) newPage();
+    var fbBoxY = y;
+    box(MARGIN, fbBoxY, CONTENT_W, fbBoxH, { stroke: PDF_LINE, radius: 8, accentBar: PDF_INK });
+
+    var fbX = MARGIN + fbPad + 6;
+    var fbY = fbBoxY + fbPad;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11.5);
+    pdfColor(doc, PDF_INK);
+    doc.text("Teacher's Feedback", fbX, fbY + 11);
+    fbY += fbHeadingH;
+
+    fbMeasures.forEach(function(m){
+      fbY = drawLines(m.lines, fbX, fbY, m.lh, { size: 8.5, color: PDF_INK });
+      fbY += fbParaGap;
+    });
+
+    y = fbBoxY + fbBoxH + 18;
+
+    // ---------- Question-by-question review (two-column boxed cards) ----------
+    writeText("Question-by-question review", { size: 11.5, bold: true, marginAfter: 8 });
+
+    var colGap = 14;
+    var colW = (CONTENT_W - colGap) / 2;
+    var colX = [MARGIN, MARGIN + colW + colGap];
+    var colY = [y, y];
+    var cardPad = 6;
+    var innerW = colW - cardPad * 2;
+
+    function cardLayout(q, a, isCorrect){
+      var blocks = [];
+      blocks.push({ text: measure(q.q, { size: 8.5, bold: true, width: innerW, lineHeightFactor: 1.22 }), size: 8.5, bold: true, color: PDF_INK, gapAfter: 2 });
+      if(q.code){
+        blocks.push({ text: measure(q.code, { size: 7, width: innerW, lineHeightFactor: 1.28, font: "courier" }), size: 7, font: "courier", color: PDF_INK, gapAfter: 3 });
+      }
+      var yourAnswerText = (isCorrect ? "Correct — " : "Incorrect — ") + "Your answer: " + (a ? q.options[a.selected] : "(no answer)");
+      blocks.push({ text: measure(yourAnswerText, { size: 8, bold: true, width: innerW, lineHeightFactor: 1.22 }), size: 8, bold: true, color: PDF_INK, gapAfter: isCorrect ? 3 : 1.5 });
+      if(!isCorrect){
+        blocks.push({ text: measure("Correct answer: " + q.options[q.correct], { size: 8, bold: true, width: innerW, lineHeightFactor: 1.22 }), size: 8, bold: true, color: PDF_INK, gapAfter: 3 });
+      }
+      blocks.push({ text: measure(q.explain, { size: 8, width: innerW, lineHeightFactor: 1.26 }), size: 8, color: PDF_MUTED, gapAfter: 0 });
+
+      var h = cardPad * 2;
+      blocks.forEach(function(b){ h += b.text.height + b.gapAfter; });
+      return { blocks: blocks, height: h };
+    }
+
+    exam.questions.forEach(function(q, idx){
+      var a = ctx.answers[idx];
+      var isCorrect = !!(a && a.correct);
+      var card = cardLayout(q, a, isCorrect);
+
+      var target = colY[0] <= colY[1] ? 0 : 1;
+      if(colY[target] + card.height > BOTTOM){
+        var other = target === 0 ? 1 : 0;
+        if(colY[other] + card.height <= BOTTOM){
+          target = other;
+        } else {
+          newPage();
+          colY = [y, y];
+          target = 0;
+        }
+      }
+
+      var cx = colX[target];
+      var cy = colY[target];
+      box(cx, cy, colW, card.height, { stroke: PDF_CARD_LINE, radius: 5, lineWidth: 0.6 });
+
+      var innerY = cy + cardPad;
+      var innerX = cx + cardPad;
+      card.blocks.forEach(function(b){
+        innerY = drawLines(b.text.lines, innerX, innerY, b.text.lh, { size: b.size, bold: b.bold, color: b.color, font: b.font });
+        innerY += b.gapAfter;
+      });
+
+      colY[target] = cy + card.height + 7;
+    });
+
+    // ---------- Footer: page numbers ----------
+    var totalPages = doc.internal.getNumberOfPages();
+    for(var p = 1; p <= totalPages; p++){
+      doc.setPage(p);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      pdfColor(doc, PDF_MUTED);
+      doc.text("Page " + p + " of " + totalPages, PAGE_W - MARGIN, PAGE_H - 20, { align: "right" });
+    }
+
+    return doc.output("blob");
+  }
+
+  function pdfFilename(ctx){
+    var exam = EXAMS[ctx.examKey];
+    var safeName = (ctx.name || "student").trim().replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "");
+    var safeCls = (ctx.cls || "").replace(/[^a-z0-9]+/gi, "-");
+    var safeExam = (exam && exam.key) || "results";
+    return safeExam + "-results-" + (safeName || "student") + (safeCls ? "-" + safeCls : "") + ".pdf";
+  }
+
+  // A plain, dependency-free browser download: works in any ordinary tab
+  // with zero Claude involvement.
+  function fallbackBrowserDownload(filename, blob){
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    return url;
+  }
+
+  // Tries Claude's "downloads" capability first (the sandbox-safe path
+  // when this page is running inside a Claude artifact viewer), then
+  // falls back to a plain browser download anywhere else.
+  async function offerPdfDownload(filename, blob){
+    if(window.claude && typeof window.claude.use === "function"){
+      try{
+        var downloads = await window.claude.use("downloads");
+        if(downloads){
+          await downloads.save({ filename: filename, data: blob });
+          return "saved";
+        }
+      } catch(err){
+        if(err && err.code === "declined") return "declined";
+        // any other error: fall through to the plain download below
+      }
+    }
+
+    fallbackBrowserDownload(filename, blob);
+    return "fallback";
+  }
+
+  function wirePdfButton(btn, statusEl, getCtx){
+    btn.addEventListener("click", function(){
+      if(btn.disabled) return;
+      btn.disabled = true;
+      var originalLabel = btn.textContent;
+      btn.textContent = "Preparing PDF…";
+      if(statusEl) statusEl.textContent = "";
+
+      setTimeout(async function(){
+        try{
+          var ctx = getCtx();
+          if(!ctx){
+            if(statusEl) statusEl.textContent = "Nothing to export yet.";
+            return;
+          }
+          var blob = buildResultsPDF(ctx);
+          if(!blob){
+            if(statusEl) statusEl.textContent = "Couldn't generate the PDF in this browser. Try again.";
+            return;
+          }
+          var result = await offerPdfDownload(pdfFilename(ctx), blob);
+          if(statusEl){
+            if(result === "declined") statusEl.textContent = "";
+            else statusEl.textContent = "PDF ready — check your downloads.";
+          }
+        } catch(err){
+          if(statusEl) statusEl.textContent = "Something went wrong generating the PDF. Please try again.";
+        } finally {
+          btn.disabled = false;
+          btn.textContent = originalLabel;
+        }
+      }, 30);
+    });
+  }
