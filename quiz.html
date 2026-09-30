@@ -220,8 +220,50 @@
     reviewMode: false,
     completedAt: null,
     startedAt: null,
-    minutesTaken: null
+    minutesTaken: null,
+    // Per-attempt display order: questionOrder[displayIndex] = canonical
+    // question index; optionOrder[canonicalQuestionIndex][displayPos] =
+    // canonical option index. Freshly randomised in startAttempt() so
+    // every attempt gets its own unique shuffle. Everything actually
+    // recorded (state.answers, the backend payload, the report/PDF) stays
+    // keyed by the CANONICAL indices from quiz-data.js, so scoring,
+    // review, and the admin dashboard's cross-student analysis are
+    // completely unaffected by the shuffle — only what's shown on screen
+    // during the live quiz is reordered.
+    questionOrder: null,
+    optionOrder: null
   };
+
+  // Fisher-Yates shuffle — returns a new array, leaves the input untouched.
+  function shuffled(arr){
+    var a = arr.slice();
+    for(var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  // Builds a fresh, unique-per-attempt display order: questions are
+  // shuffled WITHIN each section (so Section A questions still only ever
+  // appear in the first sectionA.count slots, keeping the section label,
+  // progress bar, and stat breakdown all correct), and each question's
+  // own answer options are independently shuffled too.
+  function buildAttemptShuffle(examKey){
+    var exam = EXAMS[examKey];
+    var qs = examQuestions(examKey);
+    var aCount = exam.sectionA.count;
+
+    var indicesA = [], indicesB = [];
+    qs.forEach(function(q, i){ (i < aCount ? indicesA : indicesB).push(i); });
+
+    var questionOrder = shuffled(indicesA).concat(shuffled(indicesB));
+    var optionOrder = qs.map(function(q){
+      return shuffled(q.options.map(function(_, i){ return i; }));
+    });
+
+    return { questionOrder: questionOrder, optionOrder: optionOrder };
+  }
 
   var inputName = document.getElementById("input-name");
   var inputClass = document.getElementById("input-class");
@@ -276,6 +318,10 @@
     state.completedAt = null;
     state.startedAt = Date.now();
     state.minutesTaken = null;
+
+    var shuffle = buildAttemptShuffle(examKey);
+    state.questionOrder = shuffle.questionOrder;
+    state.optionOrder = shuffle.optionOrder;
 
     var exam = EXAMS[examKey];
     setHeader(exam.title, exam.subtitle);
@@ -357,10 +403,14 @@
   function renderQuestion(){
     var qs = examQuestions(state.examKey);
     var exam = EXAMS[state.examKey];
-    var q = qs[state.index];
+    var canonicalIdx = state.questionOrder[state.index];
+    var q = qs[canonicalIdx];
     var total = qs.length;
+    // Display position -> canonical option index, for this question.
+    var order = state.optionOrder[canonicalIdx];
 
-    sectionLabel.textContent = state.index < exam.sectionA.count ? exam.sectionA.label : exam.sectionB.label;
+    var section = canonicalIdx < exam.sectionA.count ? exam.sectionA : exam.sectionB;
+    sectionLabel.textContent = section.label;
     questionCount.textContent = "Question " + (state.index + 1) + " of " + total;
     progressFill.style.width = ((state.index) / total * 100) + "%";
 
@@ -379,7 +429,8 @@
 
     var letters = ["A","B","C","D"];
 
-    q.options.forEach(function(optText, i){
+    order.forEach(function(canonicalOptIdx, displayIdx){
+      var optText = q.options[canonicalOptIdx];
       var btn = document.createElement("button");
       btn.className = "opt";
       btn.type = "button";
@@ -390,7 +441,7 @@
       if(q.type === "mcq"){
         var tag = document.createElement("span");
         tag.className = "tag";
-        tag.textContent = letters[i];
+        tag.textContent = letters[displayIdx];
         btn.appendChild(tag);
       }
 
@@ -399,7 +450,7 @@
       label.textContent = optText;
       btn.appendChild(label);
 
-      btn.addEventListener("click", function(){ selectAnswer(i); });
+      btn.addEventListener("click", function(){ selectAnswer(canonicalOptIdx); });
       optionsWrap.appendChild(btn);
     });
 
@@ -407,34 +458,42 @@
     feedbackEl.classList.remove("show");
     btnNext.classList.add("hidden");
 
-    var already = state.answers[state.index];
+    var already = state.answers[canonicalIdx];
     if(already){
-      lockOptions(already.selected, q.correct);
+      lockOptions(already.selected, q.correct, order);
       showFeedback(already.correct, q.explain);
       btnNext.classList.remove("hidden");
     }
   }
 
-  function selectAnswer(i){
+  // selectedCanonicalIdx is the canonical (quiz-data.js) index of the
+  // chosen option, already resolved from the shuffled button that was
+  // clicked — see the click handler wired up in renderQuestion().
+  function selectAnswer(selectedCanonicalIdx){
     var qs = examQuestions(state.examKey);
-    var q = qs[state.index];
-    if(state.answers[state.index]) return;
+    var canonicalIdx = state.questionOrder[state.index];
+    var q = qs[canonicalIdx];
+    if(state.answers[canonicalIdx]) return;
 
-    var isCorrect = i === q.correct;
-    state.answers[state.index] = { selected: i, correct: isCorrect };
+    var isCorrect = selectedCanonicalIdx === q.correct;
+    state.answers[canonicalIdx] = { selected: selectedCanonicalIdx, correct: isCorrect };
 
-    lockOptions(i, q.correct);
+    var order = state.optionOrder[canonicalIdx];
+    lockOptions(selectedCanonicalIdx, q.correct, order);
     showFeedback(isCorrect, q.explain);
     btnNext.classList.remove("hidden");
     btnNext.focus();
   }
 
-  function lockOptions(selectedIndex, correctIndex){
+  // selectedIndex/correctIndex are canonical option indices; order maps
+  // each rendered button's position back to its canonical option index.
+  function lockOptions(selectedIndex, correctIndex, order){
     var opts = optionsWrap.querySelectorAll(".opt");
     opts.forEach(function(btn, i){
+      var canonicalOptIdx = order[i];
       btn.disabled = true;
-      if(i === correctIndex) btn.classList.add("is-correct");
-      else if(i === selectedIndex) btn.classList.add("is-wrong");
+      if(canonicalOptIdx === correctIndex) btn.classList.add("is-correct");
+      else if(canonicalOptIdx === selectedIndex) btn.classList.add("is-wrong");
       else btn.classList.add("is-muted");
     });
   }

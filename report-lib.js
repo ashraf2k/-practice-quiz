@@ -358,6 +358,23 @@
       return topY + lines.length * lh;
     }
 
+    // Draws a single short line of text as a filled black pill with white
+    // text — used for the per-question "Teacher's feedback" label in the
+    // review cards, so it reads as a clear label rather than plain text.
+    function drawHighlightBadge(text, x, topY, lh, opts){
+      opts = opts || {};
+      var size = opts.size || 8;
+      doc.setFont("helvetica", opts.bold === false ? "normal" : "bold");
+      doc.setFontSize(size);
+      var baseline = topY + lh * 0.8;
+      var tw = doc.getTextWidth(text);
+      pdfFillColor(doc, opts.bg || PDF_INK);
+      doc.roundedRect(x - 3, baseline - size * 0.82, tw + 6, size * 1.05, 2, 2, "F");
+      pdfColor(doc, opts.textColor || [255, 255, 255]);
+      doc.text(text, x, baseline);
+      return topY + lh;
+    }
+
     function writeText(str, opts){
       opts = opts || {};
       var m = measure(str, opts);
@@ -513,7 +530,7 @@
       if(!isCorrect){
         blocks.push({ text: measure("Correct answer: " + q.options[q.correct], { size: 8, bold: true, width: innerW, lineHeightFactor: 1.22 }), size: 8, bold: true, color: PDF_INK, gapAfter: 3 });
       }
-      blocks.push({ text: measure("Teacher's feedback", { size: 7, bold: true, width: innerW, lineHeightFactor: 1.2 }), size: 7, bold: true, color: PDF_MUTED, gapAfter: 1.5 });
+      blocks.push({ text: measure("Teacher's feedback", { size: 7, bold: true, width: innerW, lineHeightFactor: 1.35 }), size: 7, bold: true, color: [255, 255, 255], gapAfter: 2.5, highlightBg: true });
       blocks.push({ text: measure(q.explain, { size: 8, width: innerW, lineHeightFactor: 1.26 }), size: 8, color: PDF_MUTED, gapAfter: 0 });
 
       var h = cardPad * 2;
@@ -545,7 +562,11 @@
       var innerY = cy + cardPad;
       var innerX = cx + cardPad;
       card.blocks.forEach(function(b){
-        innerY = drawLines(b.text.lines, innerX, innerY, b.text.lh, { size: b.size, bold: b.bold, color: b.color, font: b.font });
+        if(b.highlightBg){
+          innerY = drawHighlightBadge(b.text.lines[0] || "", innerX, innerY, b.text.lh, { size: b.size, bold: b.bold, textColor: b.color });
+        } else {
+          innerY = drawLines(b.text.lines, innerX, innerY, b.text.lh, { size: b.size, bold: b.bold, color: b.color, font: b.font });
+        }
         innerY += b.gapAfter;
       });
 
