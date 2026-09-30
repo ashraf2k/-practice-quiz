@@ -55,6 +55,14 @@
       <div class="err">Please choose your class.</div>
     </div>
 
+    <div class="field hidden" id="field-topic">
+      <label for="input-topic">Topic</label>
+      <select id="input-topic">
+        <option value="" disabled selected>Choose a topic</option>
+      </select>
+      <div class="err">Please choose a topic.</div>
+    </div>
+
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-start">Start practice</button>
     </div>
@@ -217,10 +225,35 @@
 
   var inputName = document.getElementById("input-name");
   var inputClass = document.getElementById("input-class");
+  var inputTopic = document.getElementById("input-topic");
   var fieldName = document.getElementById("field-name");
   var fieldClass = document.getElementById("field-class");
+  var fieldTopic = document.getElementById("field-topic");
   var startStatus = document.getElementById("start-status");
   var btnStart = document.getElementById("btn-start");
+
+  // Some classes (currently the IGCSE 10BR classes) have more than one
+  // practice topic to pick from — show a second dropdown for those, built
+  // from quiz-data.js's examChoicesForClass(), and hide/reset it otherwise.
+  function refreshTopicField(){
+    var choices = examChoicesForClass(inputClass.value);
+    fieldTopic.classList.remove("invalid");
+    if(choices.length > 1){
+      inputTopic.innerHTML = '<option value="" disabled selected>Choose a topic</option>';
+      choices.forEach(function(choice){
+        var opt = document.createElement("option");
+        opt.value = choice.key;
+        opt.textContent = choice.label || EXAMS[choice.key].title;
+        inputTopic.appendChild(opt);
+      });
+      fieldTopic.classList.remove("hidden");
+    } else {
+      fieldTopic.classList.add("hidden");
+      inputTopic.innerHTML = '<option value="" disabled selected>Choose a topic</option>';
+    }
+  }
+
+  inputClass.addEventListener("change", refreshTopicField);
 
   var sectionLabel = document.getElementById("section-label");
   var questionCount = document.getElementById("question-count");
@@ -272,10 +305,19 @@
     if(!cls){ fieldClass.classList.add("invalid"); ok = false; } else { fieldClass.classList.remove("invalid"); }
     if(!ok) return;
 
-    var examKey = examKeyForClass(cls);
-    if(!examKey){
+    var choices = examChoicesForClass(cls);
+    if(choices.length === 0){
       startStatus.textContent = "That class isn't recognised. Please choose one from the list.";
       return;
+    }
+
+    var examKey;
+    if(choices.length > 1){
+      examKey = inputTopic.value;
+      if(!examKey){ fieldTopic.classList.add("invalid"); return; }
+      fieldTopic.classList.remove("invalid");
+    } else {
+      examKey = choices[0].key;
     }
 
     // Fast local check first (works offline, no network wait).
@@ -465,8 +507,10 @@
     showScreen("start");
     inputName.value = "";
     inputClass.value = "";
+    refreshTopicField();
     fieldName.classList.remove("invalid");
     fieldClass.classList.remove("invalid");
+    fieldTopic.classList.remove("invalid");
     startStatus.textContent = "";
     setHeader("Practice Questions", "Enter your details to begin.");
     inputName.focus();

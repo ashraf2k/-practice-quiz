@@ -76,13 +76,56 @@
         { type:"mcq", q:"Which of these would most likely be carried out during the EVALUATION stage of the program development life cycle?", options:["Comparing the finished solution against the original requirements to judge how successful it is","Writing pseudocode for the algorithm","Choosing appropriate variable names and data types","Collecting requirements from the client using a questionnaire"], correct:0, explain:"Evaluation takes place once the solution is complete. It involves reviewing the finished program against the original requirements/specification and identifying strengths, weaknesses and possible improvements.", topic:"Evaluation Stage" },
         { type:"mcq", q:"Which of these is NOT a typical fact-finding method used during the analysis stage?", options:["Interviewing existing system users","Observing how the current system is used","Distributing a questionnaire to stakeholders","Writing the final program code"], correct:3, explain:"Interviews, observation and questionnaires are all fact-finding methods used during analysis. Writing the final code is part of the coding stage, much later in the life cycle.", topic:"Analysis Stage" }
       ]
+    },
+    algo: {
+      key: "algo",
+      title: "IGCSE Computer Science 0478 — Topic 7: Algorithm Design & Problem-Solving",
+      subtitle: "Paper 2 · Abstraction & decomposition, loops, standard algorithms, test data & trace tables",
+      classes: ["10BR1","10BR2","10BR3"],
+      sectionA: { label: "Design Concepts", count: 2 },
+      sectionB: { label: "Standard Algorithms & Testing", count: 5 },
+      hasGrade: true,
+      questions: [
+        // ---------------- SECTION A: Design Concepts (2) ----------------
+        { type:"mcq", q:"A software developer removes unnecessary details from a problem statement to focus only on the essential features required. What is this technique called?", options:["System decomposition","Abstraction","Double entry verification","Boundary testing"], correct:1, explain:"Abstraction means filtering out non-essential details so a solution focuses only on what's actually needed to solve the problem — for example, ignoring an ATM's physical colour when modelling how it processes transactions.", topic:"Abstraction & Decomposition" },
+        { type:"mcq", q:"Which loop structure in pseudocode is specifically designed to execute a sequence of statements a fixed, predetermined number of times?", options:["WHILE...DO...ENDWHILE","REPEAT...UNTIL","FOR...TO...NEXT","IF...THEN...ELSE...ENDIF"], correct:2, explain:"FOR...TO...NEXT is a count-controlled loop: the number of repetitions is fixed and known in advance from its start and end values. WHILE and REPEAT loops are condition-controlled and can run a different number of times depending on the data.", topic:"Loop Structures" },
+
+        // ---------------- SECTION B: Standard Algorithms & Testing (5) ----------------
+        { type:"mcq", q:"Which line of pseudocode represents the standard algorithm for totalling values inside a loop?", options:["Count <- Count + 1","Total <- Total + Value","Average <- Total / Count","Total <- Value"], correct:1, explain:"Totalling accumulates values by repeatedly adding each new value to a running total: Total <- Total + Value. Counting instead adds 1 each time (Count <- Count + 1), and an average is only calculated once, after the loop ends, by dividing the total by the count.", topic:"Totalling & Counting Algorithms" },
+        { type:"mcq", q:"An algorithm validates exam marks from 0 to 100 inclusive. Which pair of values represents boundary test data for the upper limit (100)?", options:["0 and 100","99 and 100","100 and 101","100 and 1000"], correct:2, explain:"Boundary data tests the exact point where acceptance turns to rejection, so it needs one value just inside the limit and one value just outside it. For an upper limit of 100, that's 100 (the last accepted value) and 101 (the first rejected value).", topic:"Boundary & Extreme Test Data" },
+        { type:"mcq", q:"What is the primary purpose of constructing a trace table during a dry run of an algorithm?", options:["To translate pseudocode into Python or VB.NET automatically","To track step-by-step changes in variable values and outputs to catch logic errors","To check if user passwords meet security length rules","To compress data files before saving to secondary storage"], correct:1, explain:"A trace table lets you dry-run an algorithm by hand, recording how each variable's value (and any output) changes at every step, so logic errors can be caught without running the program on a computer.", topic:"Trace Tables & Dry Runs" },
+        { type:"mcq", q:"A linear search is executed on the array [4, 8, 2, 15, 9, 30] to locate the target value 15. How many element comparisons will be performed?", options:["1 comparison","4 comparisons","6 comparisons","15 comparisons"], correct:1, explain:"A linear search checks each element in order from the start of the array until it finds the target. 15 is the 4th element in [4, 8, 2, 15, 9, 30], so it takes 4 comparisons (4, 8, 2, then 15) to find it.", topic:"Standard Algorithms: Linear Search" },
+        { type:"mcq", q:"During the first complete pass of a Bubble Sort on an unsorted list of N numbers, what is guaranteed regarding the largest unsorted element?", options:["It moves to the very first position of the array","It bubbles up to its correct final position at the end of the array","It is deleted from the array","It is swapped with the array mean"], correct:1, explain:"On each full pass, a Bubble Sort compares adjacent elements and swaps them if they're out of order. This pushes the largest unsorted element step by step across the array until it 'bubbles up' to its correct final position at the end by the time the pass is complete.", topic:"Standard Algorithms: Bubble Sort" }
+      ]
     }
   };
 
+  // Which exam(s) a class can practise. Most classes map straight to one
+  // exam; 10BR classes have two IGCSE topics to choose between, so the
+  // quiz page shows a second "Topic" dropdown built from this list.
+  var EXAM_CHOICES_BY_CLASS = [
+    { test: /^10am/i, choices: [
+      { key: "dp" }
+    ] },
+    { test: /^10br/i, choices: [
+      { key: "algo", label: "Topic 7: Algorithm Design & Problem-Solving" },
+      { key: "igcse", label: "Conditional Statements practice questions" }
+    ] }
+  ];
+
+  function examChoicesForClass(cls){
+    for(var i = 0; i < EXAM_CHOICES_BY_CLASS.length; i++){
+      if(EXAM_CHOICES_BY_CLASS[i].test.test(cls)) return EXAM_CHOICES_BY_CLASS[i].choices;
+    }
+    return [];
+  }
+
+  // Back-compat single-answer helper: the class's default/only exam.
+  // When a class has more than one choice, prefer examChoicesForClass()
+  // plus an explicit topic selection instead of this.
   function examKeyForClass(cls){
-    if(/^10am/i.test(cls)) return "dp";
-    if(/^10br/i.test(cls)) return "igcse";
-    return null;
+    var choices = examChoicesForClass(cls);
+    return choices.length ? choices[0].key : null;
   }
 
   function examQuestions(examKey){ return EXAMS[examKey].questions; }
