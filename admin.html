@@ -636,7 +636,8 @@
       name: attempt.name,
       cls: attempt.className,
       answers: answers,
-      completedAt: attempt.timestamp
+      completedAt: attempt.timestamp,
+      minutesTaken: (attempt.minutesTaken != null && attempt.minutesTaken !== "") ? Number(attempt.minutesTaken) : null
     };
     var container = document.getElementById("student-detail");
     container.innerHTML = "";

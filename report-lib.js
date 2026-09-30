@@ -254,10 +254,18 @@
   var PDF_MUTED = [95, 95, 95];
   var PDF_LINE = [180, 180, 180];
   var PDF_CARD_LINE = [190, 190, 190];
+  var PDF_HIGHLIGHT = [255, 231, 128]; // highlighter-marker yellow behind the student's name
 
   function pdfColor(doc, rgb){ doc.setTextColor(rgb[0], rgb[1], rgb[2]); }
   function pdfDrawColor(doc, rgb){ doc.setDrawColor(rgb[0], rgb[1], rgb[2]); }
   function pdfFillColor(doc, rgb){ doc.setFillColor(rgb[0], rgb[1], rgb[2]); }
+
+  // "AK" from "Ahmed Khan" — used for the initials badge on the first page.
+  function getInitials(name){
+    var parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+    var initials = parts.map(function(p){ return p.charAt(0).toUpperCase(); }).join("");
+    return initials || "ST";
+  }
 
   // jsPDF's built-in fonts (helvetica/courier) only support the WinAnsi
   // (roughly Latin-1 + common typographic) character set. A handful of
@@ -291,11 +299,32 @@
     var y = MARGIN;
     var pageNum = 1;
 
-    function runningHeader(){
+    // Draws "<prefix><name highlighted><suffix>" on one line, so the
+    // student's name stands out when flipping through a stack of printouts.
+    function highlightedLine(prefix, name, suffix, x, baseline, opts){
+      opts = opts || {};
+      var size = opts.size || 8;
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      pdfColor(doc, PDF_MUTED);
-      doc.text(exam.title + " — " + ctx.name + " · " + ctx.cls, MARGIN, MARGIN - 12);
+      doc.setFontSize(size);
+      pdfColor(doc, opts.color || PDF_MUTED);
+      doc.text(prefix, x, baseline);
+      x += doc.getTextWidth(prefix);
+
+      doc.setFont("helvetica", "bold");
+      var nameW = doc.getTextWidth(name);
+      pdfFillColor(doc, PDF_HIGHLIGHT);
+      doc.roundedRect(x - 2, baseline - size * 0.82, nameW + 4, size * 1.05, 1.5, 1.5, "F");
+      pdfColor(doc, PDF_INK);
+      doc.text(name, x, baseline);
+      x += nameW;
+
+      doc.setFont("helvetica", "normal");
+      pdfColor(doc, opts.color || PDF_MUTED);
+      doc.text(suffix, x, baseline);
+    }
+
+    function runningHeader(){
+      highlightedLine(exam.title + " — ", ctx.name, " · " + ctx.cls, MARGIN, MARGIN - 12, { size: 8 });
     }
 
     function newPage(){
@@ -354,6 +383,22 @@
       }
     }
 
+    // ---------- First-page badge: initials + time taken ----------
+    var badgeText = getInitials(ctx.name);
+    if(typeof ctx.minutesTaken === "number" && isFinite(ctx.minutesTaken) && ctx.minutesTaken > 0){
+      badgeText += "  ·  " + ctx.minutesTaken + " min";
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    var badgePadX = 10;
+    var badgeH = 18;
+    var badgeW = doc.getTextWidth(badgeText) + badgePadX * 2;
+    var badgeX = PAGE_W - MARGIN - badgeW;
+    var badgeY = MARGIN - 26;
+    box(badgeX, badgeY, badgeW, badgeH, { stroke: PDF_LINE, radius: 9, fill: [242, 242, 242] });
+    pdfColor(doc, PDF_INK);
+    doc.text(badgeText, badgeX + badgeW / 2, badgeY + badgeH / 2 + 3.2, { align: "center" });
+
     // ---------- Masthead ----------
     writeText(exam.title, { size: 16, bold: true, marginAfter: 2 });
     writeText(exam.subtitle, { size: 8.5, color: PDF_MUTED, marginAfter: 14 });
@@ -371,18 +416,29 @@
     var rowY = panelY + 26;
 
     function field(label, value, valueOpts){
+      valueOpts = valueOpts || {};
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       pdfColor(doc, PDF_MUTED);
       doc.text(label, leftX, rowY);
-      doc.setFont("helvetica", (valueOpts && valueOpts.bold === false) ? "normal" : "bold");
-      doc.setFontSize((valueOpts && valueOpts.size) || 11.5);
+
+      var size = valueOpts.size || 11.5;
+      var valueX = leftX + 52;
+      doc.setFont("helvetica", valueOpts.bold === false ? "normal" : "bold");
+      doc.setFontSize(size);
+
+      if(valueOpts.highlight){
+        var textW = doc.getTextWidth(value);
+        pdfFillColor(doc, PDF_HIGHLIGHT);
+        doc.roundedRect(valueX - 3, rowY - size * 0.8, textW + 6, size * 1.05, 2, 2, "F");
+      }
+
       pdfColor(doc, PDF_INK);
-      doc.text(value, leftX + 52, rowY);
+      doc.text(value, valueX, rowY);
       rowY += 17;
     }
 
-    field("STUDENT", ctx.name);
+    field("STUDENT", ctx.name, { highlight: true });
     field("CLASS", ctx.cls);
     field("DATE", completedDateText, { bold: false, size: 10 });
     if(exam.hasGrade){

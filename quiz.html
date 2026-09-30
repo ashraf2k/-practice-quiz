@@ -211,7 +211,8 @@
     answers: [],
     reviewMode: false,
     completedAt: null,
-    startedAt: null
+    startedAt: null,
+    minutesTaken: null
   };
 
   var inputName = document.getElementById("input-name");
@@ -241,6 +242,7 @@
     state.reviewMode = false;
     state.completedAt = null;
     state.startedAt = Date.now();
+    state.minutesTaken = null;
 
     var exam = EXAMS[examKey];
     setHeader(exam.title, exam.subtitle);
@@ -255,6 +257,7 @@
     state.answers = record.answers;
     state.reviewMode = true;
     state.completedAt = record.completedAt || null;
+    state.minutesTaken = (typeof record.minutesTaken === "number") ? record.minutesTaken : null;
     var exam = EXAMS[examKey];
     setHeader(exam.title, exam.subtitle);
     showResults();
@@ -298,7 +301,8 @@
           name: res.attempt.name || name,
           cls: res.attempt.className || cls,
           answers: buildAnswerObjects(examKey, res.attempt.answers || []),
-          completedAt: res.attempt.timestamp || null
+          completedAt: res.attempt.timestamp || null,
+          minutesTaken: (res.attempt.minutesTaken != null && res.attempt.minutesTaken !== "") ? Number(res.attempt.minutesTaken) : null
         };
         saveCompletion(examKey, record.name, record.cls, record);
         showExistingCompletion(examKey, record);
@@ -424,7 +428,11 @@
       state.completedAt = completedDate.toISOString();
     }
 
-    var ctx = { examKey: state.examKey, name: state.name, cls: state.cls, answers: state.answers, completedAt: state.completedAt };
+    if(!state.reviewMode){
+      state.minutesTaken = state.startedAt ? Math.max(1, Math.round((Date.now() - state.startedAt) / 60000)) : null;
+    }
+
+    var ctx = { examKey: state.examKey, name: state.name, cls: state.cls, answers: state.answers, completedAt: state.completedAt, minutesTaken: state.minutesTaken };
     var report = computeReport(ctx);
 
     var band = report.pct >= 90 ? "Excellent work." : report.pct >= 70 ? "Good grasp of the material." : "Worth another look at the topics you missed.";
@@ -435,12 +443,11 @@
       reviewBanner.innerHTML = "This practice has already been submitted as <strong>" + escapeHtml(state.name) + " · " + escapeHtml(state.cls) + "</strong> (recorded " + completedDateText + "). Showing that submitted response below — only one attempt is recorded per student. If this isn't you, go back and enter your own name.";
       reviewBanner.classList.remove("hidden");
     } else {
-      saveCompletion(state.examKey, state.name, state.cls, { name: state.name, cls: state.cls, answers: state.answers, completedAt: state.completedAt });
+      saveCompletion(state.examKey, state.name, state.cls, { name: state.name, cls: state.cls, answers: state.answers, completedAt: state.completedAt, minutesTaken: state.minutesTaken });
       reviewBanner.classList.add("hidden");
       reviewBanner.innerHTML = "";
 
-      var minutesTaken = state.startedAt ? Math.max(1, Math.round((Date.now() - state.startedAt) / 60000)) : "";
-      backendRecord(ctx, minutesTaken).catch(function(){ /* best-effort */ });
+      backendRecord(ctx, state.minutesTaken).catch(function(){ /* best-effort */ });
     }
 
     resultsBody.innerHTML = "";
