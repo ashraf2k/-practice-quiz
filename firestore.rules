@@ -31,8 +31,16 @@ service cloud.firestore {
     }
 
     match /attempts/{attemptId} {
+      // Ownership is checked from the DOCUMENT ID's own uid_examKey shape,
+      // not from resource.data -- a student's very first attempt at an
+      // exam doesn't exist as a document yet, so `resource` is null and
+      // `resource.data.uid` would fail to evaluate, which Firestore
+      // treats as a denial even for the rightful owner. The ID shape is
+      // always available, existing document or not, so checking that
+      // instead means a student can find out "no attempt yet" instead of
+      // getting a permission error.
       allow get: if request.auth != null
-                  && (resource.data.uid == request.auth.uid || isAdmin());
+                  && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
       allow list: if isAdmin();
       allow create: if request.auth != null
                     && request.resource.data.uid == request.auth.uid
