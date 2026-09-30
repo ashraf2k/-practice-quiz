@@ -194,6 +194,11 @@
 
 </div>
 
+<!-- Big "liquid crystal" star celebration for every 5-correct-in-a-row
+     streak. Lives outside .wrap (fixed to the viewport edge, not the
+     card) and is pointer-events:none so it never blocks the quiz. -->
+<div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
+
 <script src="jspdf.min.js"></script>
 <script src="quiz-data.js"></script>
 <script src="report-lib.js"></script>
@@ -558,6 +563,7 @@
   var feedbackVerdict = document.getElementById("feedback-verdict");
   var feedbackExplain = document.getElementById("feedback-explain");
   var btnNext = document.getElementById("btn-next");
+  var streakStarLayer = document.getElementById("streak-star-layer");
 
   // ---------- Difficulty badge ----------
   function renderQuestionMeta(q){
@@ -660,6 +666,73 @@
       '</svg><span>Streak! ' + count + ' correct in a row</span>';
   }
 
+  // ---------- Big "liquid crystal" star (side-of-page celebration, every
+  // 5th consecutive correct answer) ----------
+  // A faceted 10-point star outline filled with a slowly-rotating
+  // rainbow gradient (the "liquid" part -- an SVG <animateTransform> spun
+  // on the gradient itself, not just a static rainbow fill) plus a
+  // pulsing colour-shifting glow and a few twinkling sparkles around it.
+  // streakStarSeq keeps each gradient's id unique across calls so a
+  // fast-retriggered animation (streak 5, then 10, then 15...) never
+  // references a gradient definition that a previous innerHTML swap
+  // already removed from the DOM.
+  var streakStarSeq = 0;
+  var streakStarTimer = null;
+  var STAR_OUTLINE = "M 50 4 L 61.17 34.63 L 93.75 35.79 L 68.07 55.87 L 77.04 87.21 L 50 69 L 22.96 87.21 L 31.93 55.87 L 6.25 35.79 L 38.83 34.63 Z";
+  var STAR_POINTS = [[50,4],[61.17,34.63],[93.75,35.79],[68.07,55.87],[77.04,87.21],[50,69],[22.96,87.21],[31.93,55.87],[6.25,35.79],[38.83,34.63]];
+
+  function crystalStarHtml(count){
+    streakStarSeq++;
+    var gid = "streakStarGrad" + streakStarSeq;
+    var facetLines = STAR_POINTS.map(function(pt){
+      return '<line x1="50" y1="50" x2="' + pt[0] + '" y2="' + pt[1] + '"/>';
+    }).join("");
+    return (
+      '<div class="streak-star-inner">' +
+        '<svg class="streak-star-svg" viewBox="0 0 100 100" aria-hidden="true">' +
+          '<defs>' +
+            '<linearGradient id="' + gid + '" x1="0" y1="0" x2="1" y2="1">' +
+              '<stop offset="0%" stop-color="#8B7CF6"/>' +
+              '<stop offset="22%" stop-color="#3B9BF4"/>' +
+              '<stop offset="46%" stop-color="#2FD9B8"/>' +
+              '<stop offset="70%" stop-color="#FBBF3F"/>' +
+              '<stop offset="100%" stop-color="#F4568F"/>' +
+              '<animateTransform attributeName="gradientTransform" type="rotate" from="0 0.5 0.5" to="360 0.5 0.5" dur="3.2s" repeatCount="indefinite"/>' +
+            '</linearGradient>' +
+          '</defs>' +
+          '<path class="streak-star-glow" d="' + STAR_OUTLINE + '"/>' +
+          '<path class="streak-star-body" d="' + STAR_OUTLINE + '" fill="url(#' + gid + ')"/>' +
+          '<g class="streak-star-facets">' + facetLines + '</g>' +
+          '<circle class="streak-star-sparkle sp1" cx="12" cy="24" r="2.4"/>' +
+          '<circle class="streak-star-sparkle sp2" cx="90" cy="16" r="1.7"/>' +
+          '<circle class="streak-star-sparkle sp3" cx="92" cy="68" r="2.1"/>' +
+          '<circle class="streak-star-sparkle sp4" cx="9" cy="74" r="1.5"/>' +
+        '</svg>' +
+        '<div class="streak-star-caption">' +
+          '<span class="streak-star-count">' + count + '</span>' +
+          '<span class="streak-star-label">in a row!</span>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  // Re-triggerable even when a streak star is already showing (e.g. the
+  // student rattles off 5, then 5 more straight after): each call rebuilds
+  // fresh markup, forces a reflow so removing+re-adding "show" restarts
+  // the CSS transition/animations from the start, and resets the auto-hide
+  // timer.
+  function showStreakStar(count){
+    if(streakStarTimer){ clearTimeout(streakStarTimer); streakStarTimer = null; }
+    streakStarLayer.innerHTML = crystalStarHtml(count);
+    streakStarLayer.classList.remove("show");
+    void streakStarLayer.offsetWidth; // force reflow so the animation restarts
+    streakStarLayer.classList.add("show");
+    streakStarTimer = setTimeout(function(){
+      streakStarLayer.classList.remove("show");
+      streakStarTimer = null;
+    }, 2600);
+  }
+
   function startAttempt(examKey){
     state.examKey = examKey;
     state.index = 0;
@@ -673,6 +746,9 @@
     state.finishing = false;
     state.streak = 0;
     btnNext.disabled = false;
+    if(streakStarTimer){ clearTimeout(streakStarTimer); streakStarTimer = null; }
+    streakStarLayer.classList.remove("show");
+    streakStarLayer.innerHTML = "";
 
     var shuffle = buildAttemptShuffle(examKey);
     state.questionOrder = shuffle.questionOrder;
@@ -913,6 +989,7 @@
       streak.className = "streak-badge";
       streak.innerHTML = streakBadgeHtml(streakHit);
       feedbackEl.appendChild(streak);
+      showStreakStar(streakHit);
     }
   }
 
