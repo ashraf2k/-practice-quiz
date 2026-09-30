@@ -1,9 +1,9 @@
-  function buildAnswerObjects(examKey, selectedIndices){
+  function buildAnswerObjects(examKey, selectedIndices, hintFlags){
     var qs = examQuestions(examKey);
     return qs.map(function(q, i){
       var sel = selectedIndices[i];
       if(sel === undefined || sel === null || sel < 0) return null;
-      return { selected: sel, correct: sel === q.correct };
+      return { selected: sel, correct: sel === q.correct, hintUsed: !!(hintFlags && hintFlags[i]) };
     });
   }
 

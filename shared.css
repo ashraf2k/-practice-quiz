@@ -184,6 +184,7 @@
   }
 
   .field input[type="text"],
+  .field input[type="email"],
   .field input[type="password"],
   .field select{
     width: 100%;
@@ -197,11 +198,18 @@
   }
 
   .field input[type="text"]:focus,
+  .field input[type="email"]:focus,
   .field input[type="password"]:focus,
   .field select:focus{
     outline: 2px solid var(--accent);
     outline-offset: 1px;
     border-color: var(--accent);
+  }
+
+  .field .hint{
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 6px;
   }
 
   .field .err{
@@ -218,6 +226,55 @@
 
   .field.invalid .err{
     display: block;
+  }
+
+  /* ---------- Auth (sign up / log in) ---------- */
+
+  .auth-tabs{
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+
+  .auth-tab{
+    appearance: none;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 10px 4px;
+    margin-right: 22px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .auth-tab.active{ color: var(--accent); border-bottom-color: var(--accent); }
+
+  .link-btn{
+    appearance: none;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--accent);
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .link-btn:hover{ color: var(--accent-dark); }
+
+  .account-banner{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
   }
 
   .btn{

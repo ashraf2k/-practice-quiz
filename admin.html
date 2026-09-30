@@ -171,27 +171,33 @@
 
   <!-- ============ LOGIN SCREEN ============ -->
   <section id="screen-login" class="card">
-    <h2 class="step-title">Teacher / admin login</h2>
-    <p class="step-sub">View a complete report for each student, a class-by-class overview, and question-by-question results across the whole cohort.</p>
+    <h2 class="step-title" id="login-title">Teacher / admin login</h2>
+    <p class="step-sub" id="login-sub">View a complete report for each student, a class-by-class overview, and question-by-question results across the whole cohort.</p>
 
-    <div class="field" id="field-user">
-      <label for="input-user">Username</label>
-      <input type="text" id="input-user" autocomplete="username" />
-      <div class="err">Please enter the username.</div>
+    <div class="auth-tabs" id="login-tabs">
+      <button class="auth-tab active" data-mode="login" type="button">Log in</button>
+      <button class="auth-tab" data-mode="signup" type="button">First time? Create login</button>
     </div>
 
-    <div class="field" id="field-pass">
-      <label for="input-pass">Password</label>
-      <input type="password" id="input-pass" autocomplete="current-password" />
+    <div class="field" id="field-admin-email">
+      <label for="input-admin-email">Email</label>
+      <input type="email" id="input-admin-email" autocomplete="username" />
+      <div class="err">Please enter a valid email address.</div>
+    </div>
+
+    <div class="field" id="field-admin-password">
+      <label for="input-admin-password">Password</label>
+      <input type="password" id="input-admin-password" autocomplete="current-password" />
+      <div class="hint hidden" id="admin-password-hint">At least 6 characters.</div>
       <div class="err">Please enter the password.</div>
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-primary" id="btn-login">Log in</button>
+      <button class="btn btn-primary" id="btn-admin-submit">Log in</button>
       <a class="btn btn-secondary" href="index.html" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">Back to quiz</a>
     </div>
-    <p class="cohort-note" id="login-error"></p>
-    <p class="admin-note">This login screen keeps casual visitors out, but this page is a static file — anyone who inspected its code could find what unlocks the data endpoint below. It is classroom-appropriate privacy, not bank-grade security.</p>
+    <p class="cohort-note" id="login-status" aria-live="polite">Checking your account…</p>
+    <p class="admin-note">Access is enforced by this project's Firestore security rules, not by this page — only the teacher email(s) listed there can ever see student data, however this page is logged into.</p>
   </section>
 
   <!-- ============ DASHBOARD SCREEN ============ -->
@@ -250,17 +256,11 @@
 
 <script src="jspdf.min.js"></script>
 <script src="quiz-data.js"></script>
-<script src="backend-lib.js"></script>
 <script src="report-lib.js"></script>
-<script>
+<script src="firebase-config.js"></script>
+<script type="module" src="firebase-init.js"></script>
+<script type="module">
 (function(){
-
-  // Must match ADMIN_KEY in Practice_Quiz_Backend_AppsScript.gs.
-  var ADMIN_KEY = "dpquiz-ashraf2k-7f31c9";
-  // Login shown on this page. Plain client-side check — see the note
-  // on the login screen for what that does and doesn't protect against.
-  var ADMIN_USER = "ashraf2k";
-  var ADMIN_PASS = "clocktwo";
 
   // Populated from EXAMS (quiz-data.js) once the page loads — this admin
   // page reports on every exam defined there, not just one.
@@ -284,51 +284,133 @@
     return (EXAMS[examKey] && EXAMS[examKey].title) || examKey;
   }
 
-  function backendList(){
-    if(!BACKEND_URL) return Promise.resolve({ ok:false, error:"no_backend" });
-    var url = BACKEND_URL + (BACKEND_URL.indexOf("?") > -1 ? "&" : "?") + "action=list&key=" + encodeURIComponent(ADMIN_KEY);
-    return fetchWithTimeout(url, { method: "GET" }).then(function(res){
-      if(!res.ok) return { ok:false };
-      return res.json().then(function(data){ return data; });
-    }).catch(function(){ return { ok:false }; });
+  // ============================================================
+  // Login (Firebase email/password — real enforcement is in
+  // firestore.rules' isAdmin(), this page is just the door)
+  // ============================================================
+  var screenLogin = document.getElementById("screen-login");
+  var screenDashboard = document.getElementById("screen-dashboard");
+  var loginTabs = document.getElementById("login-tabs");
+  var loginTitle = document.getElementById("login-title");
+  var loginStatus = document.getElementById("login-status");
+  var btnAdminSubmit = document.getElementById("btn-admin-submit");
+  var fieldAdminEmail = document.getElementById("field-admin-email");
+  var fieldAdminPassword = document.getElementById("field-admin-password");
+  var inputAdminEmail = document.getElementById("input-admin-email");
+  var inputAdminPassword = document.getElementById("input-admin-password");
+  var adminPasswordHint = document.getElementById("admin-password-hint");
+
+  var loginMode = "login";
+  // Set right before a forced logOut() (wrong-email case below) so the
+  // message survives the auth-state change that logOut() triggers, since
+  // showLoginScreen() (called from that change) would otherwise clear it.
+  var pendingLoginStatus = null;
+
+  function setLoginMode(mode){
+    loginMode = mode;
+    fieldAdminEmail.classList.remove("invalid");
+    fieldAdminPassword.classList.remove("invalid");
+    loginStatus.classList.remove("warn");
+    loginStatus.textContent = "";
+    loginTabs.querySelectorAll(".auth-tab").forEach(function(btn){
+      btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
+    if(mode === "signup"){
+      loginTitle.textContent = "Create your admin login";
+      adminPasswordHint.classList.remove("hidden");
+      btnAdminSubmit.textContent = "Create login";
+      inputAdminPassword.autocomplete = "new-password";
+    } else {
+      loginTitle.textContent = "Teacher / admin login";
+      adminPasswordHint.classList.add("hidden");
+      btnAdminSubmit.textContent = "Log in";
+      inputAdminPassword.autocomplete = "current-password";
+    }
   }
 
-  // ============================================================
-  // Login
-  // ============================================================
-  var inputUser = document.getElementById("input-user");
-  var inputPass = document.getElementById("input-pass");
-  var fieldUser = document.getElementById("field-user");
-  var fieldPass = document.getElementById("field-pass");
-  var loginError = document.getElementById("login-error");
+  loginTabs.addEventListener("click", function(e){
+    var btn = e.target.closest(".auth-tab");
+    if(!btn) return;
+    setLoginMode(btn.dataset.mode);
+  });
 
-  document.getElementById("btn-login").addEventListener("click", function(){
-    var u = inputUser.value.trim();
-    var p = inputPass.value;
+  btnAdminSubmit.addEventListener("click", function(){
+    var email = inputAdminEmail.value.trim();
+    var password = inputAdminPassword.value;
     var ok = true;
-    if(!u){ fieldUser.classList.add("invalid"); ok = false; } else { fieldUser.classList.remove("invalid"); }
-    if(!p){ fieldPass.classList.add("invalid"); ok = false; } else { fieldPass.classList.remove("invalid"); }
+    if(!email || email.indexOf("@") === -1){ fieldAdminEmail.classList.add("invalid"); ok = false; } else { fieldAdminEmail.classList.remove("invalid"); }
+    if(!password){ fieldAdminPassword.classList.add("invalid"); ok = false; } else { fieldAdminPassword.classList.remove("invalid"); }
     if(!ok) return;
 
-    if(u !== ADMIN_USER || p !== ADMIN_PASS){
-      loginError.textContent = "Incorrect username or password.";
-      return;
-    }
-    loginError.textContent = "";
-    document.getElementById("screen-login").classList.add("hidden");
-    document.getElementById("screen-dashboard").classList.remove("hidden");
-    document.getElementById("wrap").classList.add("wrap-wide");
-    showTab("students");
-    loadData();
+    btnAdminSubmit.disabled = true;
+    loginStatus.classList.remove("warn");
+    loginStatus.textContent = loginMode === "signup" ? "Creating your login…" : "Logging in…";
+
+    var action = loginMode === "signup"
+      ? PQFirebase.signUp(email, password, "Admin", "Admin")
+      : PQFirebase.logIn(email, password);
+
+    action.then(function(){
+      // Deliberately leave loginStatus untouched here: onAuthChange
+      // (below) is the sole authority on what it says next, since a
+      // successful sign-in for a NON-admin email ends in onAuthChange
+      // setting a denial message and signing the user back out — this
+      // callback would otherwise race that and clobber it back to "".
+    }).catch(function(err){
+      loginStatus.classList.add("warn");
+      loginStatus.textContent = err.message || "Something went wrong. Please try again.";
+    }).finally(function(){
+      btnAdminSubmit.disabled = false;
+    });
   });
 
   document.getElementById("btn-logout").addEventListener("click", function(){
+    PQFirebase.logOut();
+    // onAuthChange (below) clears attempts/state and shows the login screen.
+  });
+
+  function showLoginScreen(){
     attempts = [];
-    document.getElementById("screen-dashboard").classList.add("hidden");
+    loaded = false;
+    screenDashboard.classList.add("hidden");
     document.getElementById("wrap").classList.remove("wrap-wide");
-    document.getElementById("screen-login").classList.remove("hidden");
-    inputUser.value = "";
-    inputPass.value = "";
+    screenLogin.classList.remove("hidden");
+    inputAdminPassword.value = "";
+    setLoginMode("login");
+    if(pendingLoginStatus){
+      loginStatus.classList.add("warn");
+      loginStatus.textContent = pendingLoginStatus;
+      pendingLoginStatus = null;
+    }
+  }
+
+  function showDashboard(){
+    screenLogin.classList.add("hidden");
+    screenDashboard.classList.remove("hidden");
+    document.getElementById("wrap").classList.add("wrap-wide");
+    showTab("students");
+    loadData();
+  }
+
+  // Runs once per sign-in: a signed-in Firebase user isn't necessarily an
+  // allowed admin — the real check is Firestore's isAdmin(), which
+  // listAllAttempts() below will hit. This client-side check against
+  // ADMIN_EMAILS (from firebase-config.js) is only here to give a clear,
+  // friendly message instead of a raw "permission denied" the moment
+  // someone signs in with the wrong email — it grants nothing by itself.
+  PQFirebase.onAuthChange(function(user){
+    if(!user){
+      showLoginScreen();
+      return;
+    }
+    var email = (user.email || "").toLowerCase();
+    var allowed = (window.ADMIN_EMAILS || []).some(function(a){ return a.toLowerCase() === email; });
+    if(!allowed){
+      pendingLoginStatus = "Signed in as " + user.email + ", but that email isn't in the admin list. Please log in with your teacher account instead.";
+      PQFirebase.logOut();
+      return;
+    }
+    showDashboard();
   });
 
   // ============================================================
@@ -356,29 +438,39 @@
   var loaded = false;
   var adminStatus = document.getElementById("admin-status");
 
+  // Firestore attempt docs are keyed by uid/examKey and use `examKey` /
+  // `class` / `completedAt`; the rendering code below was written against
+  // the old Apps-Script shape (`exam` / `className` / `timestamp`). Rather
+  // than rename every reference, normalize once here.
+  function normalizeAttempt(raw){
+    return {
+      exam: raw.examKey,
+      name: raw.name,
+      className: raw.class,
+      score: raw.score,
+      total: raw.total,
+      answers: raw.answers || [],
+      hints: raw.hints || [],
+      timestamp: raw.completedAt,
+      minutesTaken: raw.minutesTaken
+    };
+  }
+
   function loadData(){
-    if(!BACKEND_URL){
-      adminStatus.textContent = "No shared results sheet is connected yet. Add your Google Apps Script Web App URL to BACKEND_URL in backend-lib.js to see real student data here. See the setup instructions sent alongside this file.";
-      adminStatus.classList.add("warn");
-      renderAll();
-      return;
-    }
     adminStatus.classList.remove("warn");
     adminStatus.textContent = "Loading…";
-    backendList().then(function(res){
-      if(res && res.ok && Array.isArray(res.attempts)){
-        // Keep every attempt across all exams here; the exam/class/search
-        // filters below decide what's actually shown in each tab.
-        attempts = res.attempts;
-        loaded = true;
-        adminStatus.textContent = "Loaded " + attempts.length + " submitted attempt" + (attempts.length === 1 ? "" : "s") + " · refreshed " + new Date().toLocaleTimeString();
-      } else if(res && res.error === "forbidden"){
-        adminStatus.classList.add("warn");
-        adminStatus.textContent = "The admin key in this page doesn't match the one in the Apps Script backend. Check ADMIN_KEY in admin.html against Practice_Quiz_Backend_AppsScript.gs.";
-      } else {
-        adminStatus.classList.add("warn");
-        adminStatus.textContent = "Couldn't reach the results sheet. Check BACKEND_URL and that the Apps Script deployment is set to \"Anyone\" access.";
-      }
+    PQFirebase.listAllAttempts().then(function(list){
+      // Keep every attempt across all exams here; the exam/class/search
+      // filters below decide what's actually shown in each tab.
+      attempts = list.map(normalizeAttempt);
+      loaded = true;
+      adminStatus.textContent = "Loaded " + attempts.length + " submitted attempt" + (attempts.length === 1 ? "" : "s") + " · refreshed " + new Date().toLocaleTimeString();
+      renderAll();
+    }).catch(function(err){
+      adminStatus.classList.add("warn");
+      adminStatus.textContent = (err && err.code === "permission-denied")
+        ? "Firestore denied this request — this account isn't recognised as admin by firestore.rules (check isAdmin() there)."
+        : "Couldn't reach Firestore. Check your internet connection and try again.";
       renderAll();
     });
   }
@@ -463,7 +555,7 @@
       var td = document.createElement("td");
       td.colSpan = 6;
       td.className = "wrap-cell";
-      td.textContent = !BACKEND_URL ? "Connect the shared results sheet to see students here." : (loaded ? "No attempts match these filters." : "");
+      td.textContent = loaded ? "No attempts match these filters." : "";
       tr.appendChild(td);
       tbody.appendChild(tr);
       return;
@@ -492,8 +584,8 @@
     var container = document.getElementById("class-summary");
     container.innerHTML = "";
 
-    if(!loaded && !BACKEND_URL){
-      container.innerHTML = '<p class="empty-note">Connect the shared results sheet to see class summaries here.</p>';
+    if(!loaded){
+      container.innerHTML = '<p class="empty-note">Loading class summaries…</p>';
       return;
     }
 
@@ -546,8 +638,8 @@
     var container = document.getElementById("question-summary");
     container.innerHTML = "";
 
-    if(!loaded && !BACKEND_URL){
-      container.innerHTML = '<p class="empty-note">Connect the shared results sheet to see question analysis here.</p>';
+    if(!loaded){
+      container.innerHTML = '<p class="empty-note">Loading question analysis…</p>';
       return;
     }
 
@@ -628,12 +720,12 @@
 
   function openDetail(attempt){
     var examKey = attempt.exam || "dp";
-    var qs = EXAMS[examKey].questions;
-    var answers = qs.map(function(q, i){
-      var sel = Array.isArray(attempt.answers) ? attempt.answers[i] : -1;
-      if(sel === undefined || sel === null || sel === -1) return null;
-      return { selected: sel, correct: sel === q.correct };
-    });
+    // Firestore stores which questions used a hint (attempt.hints), unlike
+    // the old Apps-Script/Sheets backend which only had room for the
+    // selected-option indices — so, unlike before, the detail view here
+    // can apply the hint mark-deduction correctly instead of recomputing
+    // full marks.
+    var answers = buildAnswerObjects(examKey, attempt.answers || [], attempt.hints || []);
     detailCtx = {
       examKey: examKey,
       name: attempt.name,

@@ -19,24 +19,29 @@
     </div>
     <div>
       <h1 id="header-title">Practice Questions</h1>
-      <p id="header-sub">Enter your details to begin.</p>
+      <p id="header-sub">Log in to begin.</p>
     </div>
   </header>
 
-  <!-- ============ START SCREEN ============ -->
-  <section id="screen-start" class="card">
-    <h2 class="step-title">Before you begin</h2>
-    <p class="step-sub">Enter your details, then choose your class. Classes <strong>10AM1–10AM6</strong> get the Data Privacy practice quiz, and classes <strong>10BR1–10BR3</strong> get the IGCSE Computer Science 0478 practice quiz. You'll see feedback and an explanation right after each answer.</p>
+  <!-- ============ AUTH SCREEN (signed out) ============ -->
+  <section id="screen-auth" class="card">
+    <h2 class="step-title" id="auth-title">Log in</h2>
+    <p class="step-sub" id="auth-sub">Log in to continue your practice, or sign up if this is your first time.</p>
 
-    <div class="field" id="field-name">
-      <label for="input-name">Full name</label>
-      <input type="text" id="input-name" placeholder="e.g. Ahmed Ali" autocomplete="name" />
+    <div class="auth-tabs" id="auth-tabs">
+      <button class="auth-tab active" data-mode="login" type="button">Log in</button>
+      <button class="auth-tab" data-mode="signup" type="button">Sign up</button>
+    </div>
+
+    <div class="field hidden" id="field-signup-name">
+      <label for="input-signup-name">Full name</label>
+      <input type="text" id="input-signup-name" placeholder="e.g. Ahmed Ali" autocomplete="name" />
       <div class="err">Please enter your full name.</div>
     </div>
 
-    <div class="field" id="field-class">
-      <label for="input-class">Class</label>
-      <select id="input-class">
+    <div class="field hidden" id="field-signup-class">
+      <label for="input-signup-class">Class</label>
+      <select id="input-signup-class">
         <option value="" disabled selected>Choose your class</option>
         <optgroup label="Data Privacy — 10AM">
           <option>10AM1</option>
@@ -55,6 +60,35 @@
       <div class="err">Please choose your class.</div>
     </div>
 
+    <div class="field" id="field-email">
+      <label for="input-email">Email</label>
+      <input type="email" id="input-email" autocomplete="email" />
+      <div class="err">Please enter a valid email address.</div>
+    </div>
+
+    <div class="field" id="field-password">
+      <label for="input-password">Password</label>
+      <input type="password" id="input-password" autocomplete="current-password" />
+      <div class="hint hidden" id="password-hint">At least 6 characters.</div>
+      <div class="err">Please enter your password.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-auth-submit">Log in</button>
+    </div>
+
+    <p class="cohort-note"><button class="link-btn" id="link-forgot-password" type="button">Forgot your password?</button></p>
+    <p class="cohort-note" id="auth-status" aria-live="polite">Checking your account…</p>
+  </section>
+
+  <!-- ============ START SCREEN (signed in) ============ -->
+  <section id="screen-start" class="card hidden">
+    <div class="account-banner">
+      <h2 class="step-title" style="margin-bottom:0;">Before you begin</h2>
+      <button class="link-btn" id="btn-logout-start" type="button">Not you? Log out</button>
+    </div>
+    <p class="step-sub" id="start-greeting"></p>
+
     <div class="field hidden" id="field-topic">
       <label for="input-topic">Topic</label>
       <select id="input-topic">
@@ -67,7 +101,7 @@
       <button class="btn btn-primary" id="btn-start">Start practice</button>
     </div>
 
-    <p class="cohort-note" id="start-note">At the end you'll get teacher's feedback on your strengths and weaknesses, and you can download your results as a PDF. Only one attempt is recorded per student.</p>
+    <p class="cohort-note" id="start-note">At the end you'll get teacher's feedback on your strengths and weaknesses, and you can download your results as a PDF. Only one attempt is recorded per account.</p>
     <p class="cohort-note" id="start-status" aria-live="polite"></p>
   </section>
 
@@ -111,7 +145,8 @@
 
     <div class="results-actions no-print">
       <button class="btn btn-primary" id="btn-print">Download PDF</button>
-      <button class="btn btn-secondary" id="btn-retake">Retake practice</button>
+      <button class="btn btn-secondary" id="btn-back-to-start">Back to start</button>
+      <button class="btn btn-secondary" id="btn-logout-results">Log out</button>
     </div>
     <p class="cohort-note no-print" id="print-status" aria-live="polite"></p>
   </section>
@@ -120,86 +155,26 @@
 
 <script src="jspdf.min.js"></script>
 <script src="quiz-data.js"></script>
-<script src="backend-lib.js"></script>
 <script src="report-lib.js"></script>
-<script>
+<script src="firebase-config.js"></script>
+<script type="module" src="firebase-init.js"></script>
+<script type="module">
 (function(){
 
-  // Quiz-specific backend calls. BACKEND_URL/fetchWithTimeout come from
-  // backend-lib.js, EXAMS/examQuestions from quiz-data.js, and
+  // Quiz-specific logic. EXAMS/examQuestions come from quiz-data.js;
   // computeReport/buildAnswerObjects/buildReportFragment/wirePdfButton
-  // from report-lib.js — all loaded before this script tag.
-
-  function backendCheck(examKey, name, cls){
-    if(!BACKEND_URL) return Promise.resolve({ ok:false });
-    return fetchWithTimeout(BACKEND_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: "action=check&exam=" + encodeURIComponent(examKey) + "&name=" + encodeURIComponent(name) + "&class=" + encodeURIComponent(cls)
-    }).then(function(res){
-      if(!res.ok) return { ok:false };
-      return res.json().then(function(data){ return data; });
-    }).catch(function(){ return { ok:false }; });
-  }
-
-  function backendRecord(ctx, minutesTaken){
-    if(!BACKEND_URL) return Promise.resolve({ ok:false });
-    var selected = ctx.answers.map(function(a){ return a ? a.selected : -1; });
-    // score/total are both in MARKS (a hard question is worth 2, minus 1 if
-    // a hint was used on it) rather than a raw question count, so they stay
-    // consistent with what the student's own results screen and PDF show.
-    var report = computeReport(ctx);
-    return fetchWithTimeout(BACKEND_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: "action=record" +
-            "&exam=" + encodeURIComponent(ctx.examKey) +
-            "&name=" + encodeURIComponent(ctx.name) +
-            "&class=" + encodeURIComponent(ctx.cls) +
-            "&score=" + encodeURIComponent(report.correctCount) +
-            "&total=" + encodeURIComponent(report.total) +
-            "&answersJson=" + encodeURIComponent(JSON.stringify(selected)) +
-            "&timestamp=" + encodeURIComponent(ctx.completedAt) +
-            "&minutesTaken=" + encodeURIComponent(minutesTaken || "")
-    }).then(function(res){
-      if(!res.ok) return { ok:false };
-      return res.json().then(function(data){ return data; });
-    }).catch(function(){ return { ok:false }; });
-  }
-
-  // ============================================================
-  // Local storage (per-device cache + soft lock fallback)
-  // ============================================================
-  var COMPLETIONS_KEY = "pq_completions_v2";
-
-  function normalizeKey(examKey, name, cls){
-    return examKey + "|" + (name || "").trim().toLowerCase().replace(/\s+/g, " ") + "|" + (cls || "").trim().toLowerCase();
-  }
-
-  function loadCompletions(){
-    try{ return JSON.parse(window.localStorage.getItem(COMPLETIONS_KEY) || "{}"); }
-    catch(e){ return {}; }
-  }
-
-  function getCompletion(examKey, name, cls){
-    try{
-      var all = loadCompletions();
-      return all[normalizeKey(examKey, name, cls)] || null;
-    } catch(e){ return null; }
-  }
-
-  function saveCompletion(examKey, name, cls, record){
-    try{
-      var all = loadCompletions();
-      all[normalizeKey(examKey, name, cls)] = record;
-      window.localStorage.setItem(COMPLETIONS_KEY, JSON.stringify(all));
-    } catch(e){ /* private mode / storage disabled — degrade silently */ }
-  }
+  // from report-lib.js; window.PQFirebase from firebase-init.js — all
+  // loaded before this script tag. This script is itself a module (see
+  // the script tag above) purely so it's guaranteed to run AFTER
+  // firebase-init.js (module scripts execute in document order, after
+  // the page has parsed) — it still reads those other files' globals
+  // the normal way, since classic <script> globals are on `window`,
+  // which modules can see too.
 
   // ============================================================
   // Screen management
   // ============================================================
-  var SCREEN_IDS = ["screen-start","screen-quiz","screen-results"];
+  var SCREEN_IDS = ["screen-auth","screen-start","screen-quiz","screen-results"];
   function showScreen(name){
     SCREEN_IDS.forEach(function(id){
       var el = document.getElementById(id);
@@ -216,12 +191,121 @@
   }
 
   // ============================================================
+  // Auth screen (sign up / log in)
+  // ============================================================
+  var authTitle = document.getElementById("auth-title");
+  var authSub = document.getElementById("auth-sub");
+  var authTabs = document.getElementById("auth-tabs");
+  var authStatus = document.getElementById("auth-status");
+  var btnAuthSubmit = document.getElementById("btn-auth-submit");
+  var fieldSignupName = document.getElementById("field-signup-name");
+  var fieldSignupClass = document.getElementById("field-signup-class");
+  var fieldEmail = document.getElementById("field-email");
+  var fieldPassword = document.getElementById("field-password");
+  var inputSignupName = document.getElementById("input-signup-name");
+  var inputSignupClass = document.getElementById("input-signup-class");
+  var inputEmail = document.getElementById("input-email");
+  var inputPassword = document.getElementById("input-password");
+  var passwordHint = document.getElementById("password-hint");
+
+  var authMode = "login";
+
+  function clearAuthErrors(){
+    [fieldSignupName, fieldSignupClass, fieldEmail, fieldPassword].forEach(function(f){
+      f.classList.remove("invalid");
+    });
+  }
+
+  function setAuthMode(mode){
+    authMode = mode;
+    clearAuthErrors();
+    authStatus.textContent = "";
+    authTabs.querySelectorAll(".auth-tab").forEach(function(btn){
+      btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
+    if(mode === "signup"){
+      authTitle.textContent = "Sign up";
+      authSub.textContent = "Create your account once — after that you'll just log in.";
+      fieldSignupName.classList.remove("hidden");
+      fieldSignupClass.classList.remove("hidden");
+      passwordHint.classList.remove("hidden");
+      btnAuthSubmit.textContent = "Sign up";
+      inputPassword.autocomplete = "new-password";
+    } else {
+      authTitle.textContent = "Log in";
+      authSub.textContent = "Log in to continue your practice, or sign up if this is your first time.";
+      fieldSignupName.classList.add("hidden");
+      fieldSignupClass.classList.add("hidden");
+      passwordHint.classList.add("hidden");
+      btnAuthSubmit.textContent = "Log in";
+      inputPassword.autocomplete = "current-password";
+    }
+  }
+
+  authTabs.addEventListener("click", function(e){
+    var btn = e.target.closest(".auth-tab");
+    if(!btn) return;
+    setAuthMode(btn.dataset.mode);
+  });
+
+  btnAuthSubmit.addEventListener("click", function(){
+    clearAuthErrors();
+    var email = inputEmail.value.trim();
+    var password = inputPassword.value;
+    var ok = true;
+
+    if(!email || email.indexOf("@") === -1){ fieldEmail.classList.add("invalid"); ok = false; }
+    if(!password){ fieldPassword.classList.add("invalid"); ok = false; }
+
+    var name, cls;
+    if(authMode === "signup"){
+      name = inputSignupName.value.trim();
+      cls = inputSignupClass.value;
+      if(!name){ fieldSignupName.classList.add("invalid"); ok = false; }
+      if(!cls){ fieldSignupClass.classList.add("invalid"); ok = false; }
+    }
+
+    if(!ok) return;
+
+    btnAuthSubmit.disabled = true;
+    authStatus.textContent = authMode === "signup" ? "Creating your account…" : "Logging in…";
+
+    var action = authMode === "signup"
+      ? PQFirebase.signUp(email, password, name, cls)
+      : PQFirebase.logIn(email, password);
+
+    action.then(function(){
+      // onAuthChange (below) picks up the new signed-in state and
+      // switches screens — nothing further to do here on success.
+      authStatus.textContent = "";
+    }).catch(function(err){
+      authStatus.textContent = err.message || "Something went wrong. Please try again.";
+    }).finally(function(){
+      btnAuthSubmit.disabled = false;
+    });
+  });
+
+  document.getElementById("link-forgot-password").addEventListener("click", function(){
+    var email = inputEmail.value.trim();
+    if(!email || email.indexOf("@") === -1){
+      fieldEmail.classList.add("invalid");
+      authStatus.textContent = "Enter your email above first, then click “Forgot your password?” again.";
+      return;
+    }
+    authStatus.textContent = "Sending a password reset email…";
+    PQFirebase.resetPassword(email).then(function(){
+      authStatus.textContent = "Check " + email + " for a password reset link.";
+    }).catch(function(err){
+      authStatus.textContent = err.message || "Couldn't send the reset email. Please try again.";
+    });
+  });
+
+  // ============================================================
   // Student quiz flow
   // ============================================================
   var state = {
+    currentUser: null, // { uid, name, email, class }
     examKey: null,
-    name: "",
-    cls: "",
     index: 0,
     answers: [],
     reviewMode: false,
@@ -232,8 +316,8 @@
     // question index; optionOrder[canonicalQuestionIndex][displayPos] =
     // canonical option index. Freshly randomised in startAttempt() so
     // every attempt gets its own unique shuffle. Everything actually
-    // recorded (state.answers, the backend payload, the report/PDF) stays
-    // keyed by the CANONICAL indices from quiz-data.js, so scoring,
+    // recorded (state.answers, the Firestore record, the report/PDF)
+    // stays keyed by the CANONICAL indices from quiz-data.js, so scoring,
     // review, and the admin dashboard's cross-student analysis are
     // completely unaffected by the shuffle — only what's shown on screen
     // during the live quiz is reordered.
@@ -275,20 +359,17 @@
     return { questionOrder: questionOrder, optionOrder: optionOrder };
   }
 
-  var inputName = document.getElementById("input-name");
-  var inputClass = document.getElementById("input-class");
-  var inputTopic = document.getElementById("input-topic");
-  var fieldName = document.getElementById("field-name");
-  var fieldClass = document.getElementById("field-class");
   var fieldTopic = document.getElementById("field-topic");
+  var inputTopic = document.getElementById("input-topic");
+  var startGreeting = document.getElementById("start-greeting");
   var startStatus = document.getElementById("start-status");
   var btnStart = document.getElementById("btn-start");
 
   // Some classes (currently the IGCSE 10BR classes) have more than one
   // practice topic to pick from — show a second dropdown for those, built
   // from quiz-data.js's examChoicesForClass(), and hide/reset it otherwise.
-  function refreshTopicField(){
-    var choices = examChoicesForClass(inputClass.value);
+  function refreshTopicField(cls){
+    var choices = examChoicesForClass(cls);
     fieldTopic.classList.remove("invalid");
     if(choices.length > 1){
       inputTopic.innerHTML = '<option value="" disabled selected>Choose a topic</option>';
@@ -303,9 +384,8 @@
       fieldTopic.classList.add("hidden");
       inputTopic.innerHTML = '<option value="" disabled selected>Choose a topic</option>';
     }
+    return choices;
   }
-
-  inputClass.addEventListener("change", refreshTopicField);
 
   var sectionLabel = document.getElementById("section-label");
   var questionCount = document.getElementById("question-count");
@@ -413,10 +493,8 @@
       '</svg><span>Hard question mastered' + (hintUsed ? "" : " — full marks!") + '</span>';
   }
 
-  function startAttempt(examKey, name, cls){
+  function startAttempt(examKey){
     state.examKey = examKey;
-    state.name = name;
-    state.cls = cls;
     state.index = 0;
     state.answers = new Array(examQuestions(examKey).length).fill(null);
     state.reviewMode = false;
@@ -435,11 +513,11 @@
     renderQuestion();
   }
 
+  // `record` is the raw Firestore attempt document: { answers, hints,
+  // completedAt, minutesTaken, ... }.
   function showExistingCompletion(examKey, record){
     state.examKey = examKey;
-    state.name = record.name;
-    state.cls = record.cls;
-    state.answers = record.answers;
+    state.answers = buildAnswerObjects(examKey, record.answers || [], record.hints || []);
     state.reviewMode = true;
     state.completedAt = record.completedAt || null;
     state.minutesTaken = (typeof record.minutesTaken === "number") ? record.minutesTaken : null;
@@ -448,18 +526,22 @@
     showResults();
   }
 
+  function currentReportCtx(){
+    return {
+      examKey: state.examKey,
+      name: state.currentUser.name,
+      cls: state.currentUser.class,
+      answers: state.answers,
+      completedAt: state.completedAt,
+      minutesTaken: state.minutesTaken
+    };
+  }
+
   btnStart.addEventListener("click", function(){
-    var name = inputName.value.trim();
-    var cls = inputClass.value;
-    var ok = true;
-
-    if(!name){ fieldName.classList.add("invalid"); ok = false; } else { fieldName.classList.remove("invalid"); }
-    if(!cls){ fieldClass.classList.add("invalid"); ok = false; } else { fieldClass.classList.remove("invalid"); }
-    if(!ok) return;
-
+    var cls = state.currentUser.class;
     var choices = examChoicesForClass(cls);
     if(choices.length === 0){
-      startStatus.textContent = "That class isn't recognised. Please choose one from the list.";
+      startStatus.textContent = "Your class isn't recognised. Please contact your teacher.";
       return;
     }
 
@@ -472,37 +554,20 @@
       examKey = choices[0].key;
     }
 
-    // Fast local check first (works offline, no network wait).
-    var localExisting = getCompletion(examKey, name, cls);
-    if(localExisting && Array.isArray(localExisting.answers) && localExisting.answers.length === examQuestions(examKey).length){
-      showExistingCompletion(examKey, localExisting);
-      return;
-    }
-
-    if(!BACKEND_URL){
-      startAttempt(examKey, name, cls);
-      return;
-    }
-
     btnStart.disabled = true;
     startStatus.textContent = "Checking for a previous attempt…";
 
-    backendCheck(examKey, name, cls).then(function(res){
+    PQFirebase.getMyAttempt(state.currentUser.uid, examKey).then(function(existing){
       btnStart.disabled = false;
       startStatus.textContent = "";
-      if(res && res.ok && res.exists && res.attempt){
-        var record = {
-          name: res.attempt.name || name,
-          cls: res.attempt.className || cls,
-          answers: buildAnswerObjects(examKey, res.attempt.answers || []),
-          completedAt: res.attempt.timestamp || null,
-          minutesTaken: (res.attempt.minutesTaken != null && res.attempt.minutesTaken !== "") ? Number(res.attempt.minutesTaken) : null
-        };
-        saveCompletion(examKey, record.name, record.cls, record);
-        showExistingCompletion(examKey, record);
+      if(existing){
+        showExistingCompletion(examKey, existing);
         return;
       }
-      startAttempt(examKey, name, cls);
+      startAttempt(examKey);
+    }).catch(function(){
+      btnStart.disabled = false;
+      startStatus.textContent = "Couldn't reach the server. Check your internet connection and try again.";
     });
   });
 
@@ -645,32 +710,46 @@
       state.index += 1;
       renderQuestion();
     } else {
-      showResults();
+      finishAttempt();
     }
   });
 
-  var scoreNumberEl, resultWhoEl; // unused placeholders retained for clarity
   var resultSub = document.getElementById("result-sub");
   var reviewBanner = document.getElementById("review-banner");
   var resultsBody = document.getElementById("results-body");
   var printStatus = document.getElementById("print-status");
 
-  function showResults(){
+  // Called once, right when the student finishes their LIVE attempt —
+  // records it to Firestore, then shows the results screen. Re-viewing an
+  // already-completed attempt goes straight to showResults() instead (see
+  // showExistingCompletion above), skipping the record step entirely.
+  function finishAttempt(){
+    var completedDate = new Date();
+    state.completedAt = completedDate.toISOString();
+    state.minutesTaken = state.startedAt ? Math.max(1, Math.round((Date.now() - state.startedAt) / 60000)) : null;
+
+    var ctx = currentReportCtx();
+    var report = computeReport(ctx);
+    var hints = state.answers.map(function(a){ return !!(a && a.hintUsed); });
+
+    startStatus.textContent = "";
+    resultSub.textContent = "Saving your results…";
+
+    PQFirebase.recordAttempt(state.currentUser.uid, state.examKey, {
+      name: state.currentUser.name,
+      cls: state.currentUser.class,
+      score: report.correctCount,
+      total: report.total,
+      answers: state.answers.map(function(a){ return a ? a.selected : -1; }),
+      hints: hints,
+      completedAt: state.completedAt,
+      minutesTaken: state.minutesTaken
+    }).catch(function(){ /* best-effort: the student still sees their results below */ })
+      .then(function(){ renderResults(ctx); });
+  }
+
+  function renderResults(ctx){
     progressFill.style.width = "100%";
-
-    var completedDate;
-    if(state.reviewMode && state.completedAt){
-      completedDate = new Date(state.completedAt);
-    } else {
-      completedDate = new Date();
-      state.completedAt = completedDate.toISOString();
-    }
-
-    if(!state.reviewMode){
-      state.minutesTaken = state.startedAt ? Math.max(1, Math.round((Date.now() - state.startedAt) / 60000)) : null;
-    }
-
-    var ctx = { examKey: state.examKey, name: state.name, cls: state.cls, answers: state.answers, completedAt: state.completedAt, minutesTaken: state.minutesTaken };
     var report = computeReport(ctx);
 
     var band = report.pct >= 90 ? "Excellent work." : report.pct >= 70 ? "Good grasp of the material." : "Worth another look at the topics you missed.";
@@ -678,14 +757,11 @@
 
     if(state.reviewMode){
       var completedDateText = fmtDate(state.completedAt);
-      reviewBanner.innerHTML = "This practice has already been submitted as <strong>" + escapeHtml(state.name) + " · " + escapeHtml(state.cls) + "</strong> (recorded " + completedDateText + "). Showing that submitted response below — only one attempt is recorded per student. If this isn't you, go back and enter your own name.";
+      reviewBanner.innerHTML = "You already submitted this practice (recorded " + completedDateText + "). Showing your submitted response below — only one attempt is recorded per account.";
       reviewBanner.classList.remove("hidden");
     } else {
-      saveCompletion(state.examKey, state.name, state.cls, { name: state.name, cls: state.cls, answers: state.answers, completedAt: state.completedAt, minutesTaken: state.minutesTaken });
       reviewBanner.classList.add("hidden");
       reviewBanner.innerHTML = "";
-
-      backendRecord(ctx, state.minutesTaken).catch(function(){ /* best-effort */ });
     }
 
     resultsBody.innerHTML = "";
@@ -696,20 +772,55 @@
     showScreen("results");
   }
 
+  // showExistingCompletion() -> showResults() path (re-viewing a
+  // completed attempt): no save needed, just render.
+  function showResults(){
+    renderResults(currentReportCtx());
+  }
 
   wirePdfButton(document.getElementById("btn-print"), printStatus, function(){ return window.__studentReportCtx; });
 
-  document.getElementById("btn-retake").addEventListener("click", function(){
-    showScreen("start");
-    inputName.value = "";
-    inputClass.value = "";
-    refreshTopicField();
-    fieldName.classList.remove("invalid");
-    fieldClass.classList.remove("invalid");
-    fieldTopic.classList.remove("invalid");
+  document.getElementById("btn-back-to-start").addEventListener("click", function(){
+    goToStartScreen();
+  });
+
+  function doLogout(){
+    PQFirebase.logOut();
+    // onAuthChange (below) handles clearing state and switching to the
+    // auth screen once Firebase confirms the sign-out.
+  }
+  document.getElementById("btn-logout-start").addEventListener("click", doLogout);
+  document.getElementById("btn-logout-results").addEventListener("click", doLogout);
+
+  // ============================================================
+  // Wiring it together: react to Firebase's sign-in state
+  // ============================================================
+  function goToStartScreen(){
+    var user = state.currentUser;
+    setHeader("Practice Questions", "Choose a topic to begin.");
+    startGreeting.textContent = "Hi " + user.name + " — " + user.class + ".";
     startStatus.textContent = "";
-    setHeader("Practice Questions", "Enter your details to begin.");
-    inputName.focus();
+    var choices = refreshTopicField(user.class);
+    if(choices.length <= 1){
+      startGreeting.textContent += " Ready when you are.";
+    }
+    showScreen("start");
+  }
+
+  PQFirebase.onAuthChange(function(user){
+    if(!user){
+      state.currentUser = null;
+      setHeader("Practice Questions", "Log in to begin.");
+      inputEmail.value = "";
+      inputPassword.value = "";
+      inputSignupName.value = "";
+      inputSignupClass.value = "";
+      setAuthMode("login");
+      showScreen("auth");
+      return;
+    }
+    state.currentUser = user;
+    goToStartScreen();
   });
 
 })();

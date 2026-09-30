@@ -1,0 +1,44 @@
+// Firestore security rules for the Practice Quiz app.
+//
+// This is the REAL enforcement layer for student accounts — the app's
+// JavaScript only makes for a nicer experience, but these rules are what
+// actually decide who can read or write what. Paste this exact text into
+// the Firebase console: Build -> Firestore Database -> Rules -> Publish.
+//
+// What this enforces:
+//   - A student can only read/write their OWN profile (users/{uid}).
+//   - A student can only read their OWN attempt records, never anyone
+//     else's, and can never list all attempts.
+//   - A student can submit an attempt only once per exam — a second
+//     write to the same (uid, examKey) attempt is rejected outright.
+//   - No one can ever edit or delete a submitted attempt (immutable).
+//   - Only the teacher's own account (matched by email below) can list
+//     every attempt across every student, which is what powers the
+//     admin dashboard.
+//
+// To add more teacher/admin accounts later, add another
+// "|| request.auth.token.email == '...'" clause inside isAdmin().
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'ashraf2k@gmail.com';
+    }
+
+    match /users/{uid} {
+      allow get, write: if request.auth != null && request.auth.uid == uid;
+      allow get: if isAdmin();
+    }
+
+    match /attempts/{attemptId} {
+      allow get: if request.auth != null
+                  && (resource.data.uid == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && attemptId == request.resource.data.uid + '_' + request.resource.data.examKey
+                    && !exists(/databases/$(database)/documents/attempts/$(attemptId));
+      allow update, delete: if false;
+    }
+  }
+}
