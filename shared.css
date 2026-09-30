@@ -741,6 +741,14 @@
     color: var(--ink);
   }
 
+  .review-banner.warn{
+    border-color: var(--incorrect-line);
+    border-left-color: var(--incorrect);
+    background: var(--incorrect-bg);
+    color: var(--ink);
+  }
+  .review-banner.warn strong{ color: var(--incorrect); }
+
   /* ---------- Start-screen attempt status (retake warning / used up) ---------- */
 
   .attempt-status{

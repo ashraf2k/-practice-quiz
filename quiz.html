@@ -337,7 +337,16 @@
     // attempt's score, carried into the retake's Firestore record so the
     // teacher's admin view can still see it even though this write
     // replaces the first attempt's answers as the one that counts.
-    firstAttemptSnapshot: null
+    firstAttemptSnapshot: null,
+    // Set by finishAttempt() when PQFirebase.recordAttempt() did NOT
+    // actually save (rejected by Firestore's rules, or a network/other
+    // error) -- e.g. if the live Firestore rules are still an older
+    // version that doesn't yet allow this retake. Without this, a failed
+    // save was previously silent: the student saw normal-looking results,
+    // the database never advanced past attemptNumber 1, and they could
+    // click "Retake" again and again forever, each time re-failing to
+    // save, with nothing on screen ever saying so.
+    saveFailed: false
   };
 
   // Fisher-Yates shuffle — returns a new array, leaves the input untouched.
@@ -606,6 +615,7 @@
     state.startedAt = Date.now();
     state.minutesTaken = null;
     state.hintUsedFor = {};
+    state.saveFailed = false;
 
     var shuffle = buildAttemptShuffle(examKey);
     state.questionOrder = shuffle.questionOrder;
@@ -623,6 +633,7 @@
     state.examKey = examKey;
     state.answers = buildAnswerObjects(examKey, record.answers || [], record.hints || []);
     state.reviewMode = true;
+    state.saveFailed = false;
     state.attemptNumber = record.attemptNumber || 1;
     state.firstAttemptSnapshot = record.firstAttempt || null;
     state.completedAt = record.completedAt || null;
@@ -873,8 +884,19 @@
     };
     if(state.firstAttemptSnapshot) record.firstAttempt = state.firstAttemptSnapshot;
 
+    // Track whether the save actually succeeded -- a rejected write (the
+    // live Firestore rules not yet matching this version of the app, a
+    // genuine bug, or a dropped connection) must never look like a normal
+    // finish: previously this was silent, so a rules mismatch let a
+    // student "retake" the same exam over and over, every time failing to
+    // save, with the score frozen at the first attempt and nothing on
+    // screen ever saying why.
+    state.saveFailed = false;
     PQFirebase.recordAttempt(state.currentUser.uid, state.examKey, record)
-      .catch(function(){ /* best-effort: the student still sees their results below */ })
+      .then(function(result){
+        if(!result || !result.ok) state.saveFailed = true;
+      })
+      .catch(function(){ state.saveFailed = true; })
       .then(function(){ renderResults(ctx); });
   }
 
@@ -897,13 +919,23 @@
       firstAttemptText = " Your first attempt scored " + state.firstAttemptSnapshot.score + "/" + state.firstAttemptSnapshot.total + ".";
     }
 
-    if(state.reviewMode){
+    if(state.saveFailed){
+      // Loudest possible signal that this attempt did NOT actually save —
+      // deliberately shown instead of the normal banner text below, not
+      // alongside it, so it can't be missed or mistaken for success.
+      reviewBanner.classList.add("warn");
+      reviewBanner.innerHTML = "<strong>Your result could not be saved.</strong> This attempt has NOT been recorded for your teacher. " +
+        "Please check your internet connection and try again — if this keeps happening, tell your teacher so they can check the account setup.";
+    } else if(state.reviewMode){
+      reviewBanner.classList.remove("warn");
       reviewBanner.innerHTML = attemptNumber >= 2
         ? "This is your final submitted attempt at this topic (recorded " + completedDateText + ")." + firstAttemptText + " Showing your submitted response below."
         : "You already submitted this practice (recorded " + completedDateText + "). You still have one retake left if you'd like to try again — go back to the start screen to use it.";
     } else if(attemptNumber >= 2){
+      reviewBanner.classList.remove("warn");
       reviewBanner.innerHTML = "That was your final attempt at this topic — nice work getting through it!" + firstAttemptText;
     } else {
+      reviewBanner.classList.remove("warn");
       reviewBanner.innerHTML = "Nice work! If you'd like to improve this score, you can retake this topic <strong>one more time</strong> — just go back to the start screen.";
     }
 
