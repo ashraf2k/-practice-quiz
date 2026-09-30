@@ -346,7 +346,11 @@
     // the database never advanced past attemptNumber 1, and they could
     // click "Retake" again and again forever, each time re-failing to
     // save, with nothing on screen ever saying so.
-    saveFailed: false
+    saveFailed: false,
+    // Guards against a fast double-click/tap on "Finish" calling
+    // finishAttempt() twice for the same attempt -- see finishAttempt()'s
+    // comment for what that race used to cause.
+    finishing: false
   };
 
   // Fisher-Yates shuffle — returns a new array, leaves the input untouched.
@@ -616,6 +620,8 @@
     state.minutesTaken = null;
     state.hintUsedFor = {};
     state.saveFailed = false;
+    state.finishing = false;
+    btnNext.disabled = false;
 
     var shuffle = buildAttemptShuffle(examKey);
     state.questionOrder = shuffle.questionOrder;
@@ -846,6 +852,17 @@
       state.index += 1;
       renderQuestion();
     } else {
+      // Guard against a fast double-click/tap on "Finish": the results
+      // screen only appears once the save round-trip finishes, so without
+      // this, a second click in that gap called finishAttempt() again --
+      // sending a second, now-redundant write that the rules correctly
+      // reject (a duplicate "create" or "update" for the same attempt).
+      // That rejection used to be mistaken for a real failure and shown
+      // to the student as a scary warning, even though the FIRST click
+      // had already saved everything fine.
+      if(state.finishing) return;
+      state.finishing = true;
+      btnNext.disabled = true;
       finishAttempt();
     }
   });
@@ -884,19 +901,32 @@
     };
     if(state.firstAttemptSnapshot) record.firstAttempt = state.firstAttemptSnapshot;
 
-    // Track whether the save actually succeeded -- a rejected write (the
-    // live Firestore rules not yet matching this version of the app, a
-    // genuine bug, or a dropped connection) must never look like a normal
-    // finish: previously this was silent, so a rules mismatch let a
-    // student "retake" the same exam over and over, every time failing to
-    // save, with the score frozen at the first attempt and nothing on
-    // screen ever saying why.
+    // A write that comes back anything other than a clean success is NOT
+    // automatically a real failure worth alarming the student over -- a
+    // duplicate/redundant write (see the btnNext guard above; also
+    // possible if the SDK internally retries a slow request) is
+    // correctly rejected by the rules even when an earlier, successful
+    // write already saved this exact attempt. So before ever flagging
+    // saveFailed, re-read this attempt from the server and only treat it
+    // as a real failure if it genuinely isn't there with the score we
+    // just tried to save.
+    var expectedAttemptNumber = record.attemptNumber;
+    function verifyOrFlagFailure(){
+      return PQFirebase.getMyAttempt(state.currentUser.uid, state.examKey).then(function(existing){
+        var matches = existing
+          && existing.attemptNumber === expectedAttemptNumber
+          && existing.score === record.score
+          && existing.total === record.total;
+        state.saveFailed = !matches;
+      }).catch(function(){ state.saveFailed = true; });
+    }
+
     state.saveFailed = false;
     PQFirebase.recordAttempt(state.currentUser.uid, state.examKey, record)
       .then(function(result){
-        if(!result || !result.ok) state.saveFailed = true;
+        if(!result || !result.ok) return verifyOrFlagFailure();
       })
-      .catch(function(){ state.saveFailed = true; })
+      .catch(function(){ return verifyOrFlagFailure(); })
       .then(function(){ renderResults(ctx); });
   }
 
