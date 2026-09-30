@@ -515,13 +515,12 @@
     var colGap = 14;
     var colW = (CONTENT_W - colGap) / 2;
     var colX = [MARGIN, MARGIN + colW + colGap];
-    var colY = [y, y];
     var cardPad = 6;
     var innerW = colW - cardPad * 2;
 
-    function cardLayout(q, a, isCorrect){
+    function cardLayout(q, num, a, isCorrect){
       var blocks = [];
-      blocks.push({ text: measure(q.q, { size: 8.5, bold: true, width: innerW, lineHeightFactor: 1.22 }), size: 8.5, bold: true, color: PDF_INK, gapAfter: 2 });
+      blocks.push({ text: measure(num + ". " + q.q, { size: 8.5, bold: true, width: innerW, lineHeightFactor: 1.22 }), size: 8.5, bold: true, color: PDF_INK, gapAfter: 2 });
       if(q.code){
         blocks.push({ text: measure(q.code, { size: 7, width: innerW, lineHeightFactor: 1.28, font: "courier" }), size: 7, font: "courier", color: PDF_INK, gapAfter: 3 });
       }
@@ -538,27 +537,9 @@
       return { blocks: blocks, height: h };
     }
 
-    exam.questions.forEach(function(q, idx){
-      var a = ctx.answers[idx];
-      var isCorrect = !!(a && a.correct);
-      var card = cardLayout(q, a, isCorrect);
-
-      var target = colY[0] <= colY[1] ? 0 : 1;
-      if(colY[target] + card.height > BOTTOM){
-        var other = target === 0 ? 1 : 0;
-        if(colY[other] + card.height <= BOTTOM){
-          target = other;
-        } else {
-          newPage();
-          colY = [y, y];
-          target = 0;
-        }
-      }
-
-      var cx = colX[target];
-      var cy = colY[target];
+    // Draws one review card's box and its content blocks at a given position.
+    function drawCard(card, cx, cy){
       box(cx, cy, colW, card.height, { stroke: PDF_CARD_LINE, radius: 5, lineWidth: 0.6 });
-
       var innerY = cy + cardPad;
       var innerX = cx + cardPad;
       card.blocks.forEach(function(b){
@@ -569,9 +550,33 @@
         }
         innerY += b.gapAfter;
       });
+    }
 
-      colY[target] = cy + card.height + 7;
-    });
+    // Cards are laid out row by row (left card = question N, right card =
+    // question N+1), rather than each column filling independently, so the
+    // printed numbers always read in order — 1, 2 then 3, 4 — instead of
+    // drifting out of sequence when neighbouring cards have different
+    // heights. A row that doesn't fit on the current page moves to the
+    // next page as a whole.
+    for(var qi = 0; qi < exam.questions.length; qi += 2){
+      var leftA = ctx.answers[qi];
+      var leftCard = cardLayout(exam.questions[qi], qi + 1, leftA, !!(leftA && leftA.correct));
+
+      var rightQ = exam.questions[qi + 1];
+      var rightCard = null;
+      if(rightQ){
+        var rightA = ctx.answers[qi + 1];
+        rightCard = cardLayout(rightQ, qi + 2, rightA, !!(rightA && rightA.correct));
+      }
+
+      var rowH = rightCard ? Math.max(leftCard.height, rightCard.height) : leftCard.height;
+      if(y + rowH > BOTTOM){ newPage(); }
+
+      drawCard(leftCard, colX[0], y);
+      if(rightCard) drawCard(rightCard, colX[1], y);
+
+      y += rowH + 7;
+    }
 
     // ---------- Footer: page numbers ----------
     var totalPages = doc.internal.getNumberOfPages();
