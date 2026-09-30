@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Data Privacy Practice Quiz</title>
+<title>Practice Quiz</title>
 <link rel="stylesheet" href="shared.css" />
 </head>
 <body>
@@ -26,7 +26,7 @@
   <!-- ============ START SCREEN ============ -->
   <section id="screen-start" class="card">
     <h2 class="step-title">Before you begin</h2>
-    <p class="step-sub">Enter your details, then choose your class. You'll see feedback and an explanation right after each answer.</p>
+    <p class="step-sub">Enter your details, then choose your class. Classes <strong>10AM1–10AM6</strong> get the Data Privacy practice quiz, and classes <strong>10BR1–10BR3</strong> get the IGCSE Computer Science 0478 practice quiz. You'll see feedback and an explanation right after each answer.</p>
 
     <div class="field" id="field-name">
       <label for="input-name">Full name</label>
@@ -38,12 +38,19 @@
       <label for="input-class">Class</label>
       <select id="input-class">
         <option value="" disabled selected>Choose your class</option>
-        <option>10AM1</option>
-        <option>10AM2</option>
-        <option>10AM3</option>
-        <option>10AM4</option>
-        <option>10AM5</option>
-        <option>10AM6</option>
+        <optgroup label="Data Privacy — 10AM">
+          <option>10AM1</option>
+          <option>10AM2</option>
+          <option>10AM3</option>
+          <option>10AM4</option>
+          <option>10AM5</option>
+          <option>10AM6</option>
+        </optgroup>
+        <optgroup label="IGCSE Computer Science 0478 — 10BR">
+          <option>10BR1</option>
+          <option>10BR2</option>
+          <option>10BR3</option>
+        </optgroup>
       </select>
       <div class="err">Please choose your class.</div>
     </div>
