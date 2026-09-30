@@ -238,6 +238,8 @@
         item.appendChild(correctAnswer);
       }
 
+      var explainLabel = document.createElement("p"); explainLabel.className = "review-explain-label"; explainLabel.textContent = "Teacher's feedback";
+      item.appendChild(explainLabel);
       var explain = document.createElement("p"); explain.className = "review-explain"; explain.textContent = q.explain;
       item.appendChild(explain);
 
@@ -455,6 +457,7 @@
       if(!isCorrect){
         blocks.push({ text: measure("Correct answer: " + q.options[q.correct], { size: 8, bold: true, width: innerW, lineHeightFactor: 1.22 }), size: 8, bold: true, color: PDF_INK, gapAfter: 3 });
       }
+      blocks.push({ text: measure("Teacher's feedback", { size: 7, bold: true, width: innerW, lineHeightFactor: 1.2 }), size: 7, bold: true, color: PDF_MUTED, gapAfter: 1.5 });
       blocks.push({ text: measure(q.explain, { size: 8, width: innerW, lineHeightFactor: 1.26 }), size: 8, color: PDF_MUTED, gapAfter: 0 });
 
       var h = cardPad * 2;
