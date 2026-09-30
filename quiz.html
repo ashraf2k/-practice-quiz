@@ -384,6 +384,9 @@
       btn.className = "opt";
       btn.type = "button";
 
+      var isMultiline = optText.indexOf("\n") !== -1;
+      if(isMultiline) btn.classList.add("has-code");
+
       if(q.type === "mcq"){
         var tag = document.createElement("span");
         tag.className = "tag";
@@ -392,6 +395,7 @@
       }
 
       var label = document.createElement("span");
+      if(isMultiline) label.className = "opt-code";
       label.textContent = optText;
       btn.appendChild(label);
 

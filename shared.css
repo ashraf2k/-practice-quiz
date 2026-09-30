@@ -380,6 +380,25 @@
     opacity: 0.55;
   }
 
+  /* A handful of Topic 7 questions offer full pseudocode snippets as their
+     answer options (rather than a single line of text) — render those in a
+     monospace block that preserves line breaks, instead of squashing them
+     onto one line. */
+  .opt.has-code{
+    align-items: flex-start;
+  }
+
+  .opt.has-code .tag{
+    margin-top: 2px;
+  }
+
+  .opt .opt-code{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 12.5px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+
   .feedback{
     margin-top: 20px;
     padding: 16px 18px;
@@ -629,6 +648,10 @@
 
   .review-line .lbl{
     color: var(--muted);
+  }
+
+  .review-line .val{
+    white-space: pre-wrap;
   }
 
   .review-line.answer-correct .val{ color: var(--correct); font-weight: 600; }
