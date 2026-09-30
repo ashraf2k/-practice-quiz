@@ -97,11 +97,14 @@
       <div class="err">Please choose a topic.</div>
     </div>
 
+    <div class="attempt-status hidden" id="attempt-status"></div>
+
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-start">Start practice</button>
+      <button class="btn btn-secondary hidden" id="btn-view-report">View my report</button>
     </div>
 
-    <p class="cohort-note" id="start-note">At the end you'll get teacher's feedback on your strengths and weaknesses, and you can download your results as a PDF. Only one attempt is recorded per account.</p>
+    <p class="cohort-note" id="start-note">At the end you'll get teacher's feedback on your strengths and weaknesses, and you can download your results as a PDF.</p>
     <p class="cohort-note" id="start-status" aria-live="polite"></p>
   </section>
 
@@ -325,7 +328,16 @@
     optionOrder: null,
     // canonicalQuestionIndex -> true once the student has requested (and
     // confirmed) the hint for that question during this attempt.
-    hintUsedFor: {}
+    hintUsedFor: {},
+    // Which attempt this is for the current exam: 1 (fresh) or 2 (the one
+    // allowed retake). Set right before startAttempt() and read again in
+    // finishAttempt() / showExistingCompletion() / renderResults().
+    attemptNumber: 1,
+    // Only set when attemptNumber is 2: a small snapshot of the first
+    // attempt's score, carried into the retake's Firestore record so the
+    // teacher's admin view can still see it even though this write
+    // replaces the first attempt's answers as the one that counts.
+    firstAttemptSnapshot: null
   };
 
   // Fisher-Yates shuffle — returns a new array, leaves the input untouched.
@@ -386,6 +398,98 @@
     }
     return choices;
   }
+
+  var attemptStatusEl = document.getElementById("attempt-status");
+  var btnViewReport = document.getElementById("btn-view-report");
+
+  // What the LAST getMyAttempt() check found, so btnStart/btnViewReport
+  // know what to do without re-checking on every click, and so a check
+  // for an old topic selection can be told apart from the current one.
+  var pendingCheck = { examKey: null, existing: null };
+
+  // The exam the student would start right now: the class's one exam for
+  // a single-choice class, or whatever's picked in the topic dropdown for
+  // a multi-choice class (null if nothing's picked yet).
+  function currentExamKeyChoice(){
+    var choices = examChoicesForClass(state.currentUser.class);
+    if(choices.length === 0) return null;
+    if(choices.length > 1) return inputTopic.value || null;
+    return choices[0].key;
+  }
+
+  // Shows/hides the inline "you've done this before" message and the
+  // View my report / Start practice buttons to match. `existing` is the
+  // raw Firestore attempt record for the current topic, or null/undefined
+  // if there isn't one yet.
+  function renderAttemptStatus(existing){
+    attemptStatusEl.className = "attempt-status hidden";
+    attemptStatusEl.innerHTML = "";
+    btnViewReport.classList.add("hidden");
+    btnStart.textContent = "Start practice";
+    btnStart.classList.remove("hidden");
+
+    if(!existing) return;
+
+    var attemptNumber = existing.attemptNumber || 1;
+    var scoreText = (typeof existing.score === "number" && typeof existing.total === "number")
+      ? (existing.score + "/" + existing.total) : null;
+    var dateText = fmtDate(existing.completedAt);
+
+    btnViewReport.classList.remove("hidden");
+
+    if(attemptNumber >= 2){
+      attemptStatusEl.className = "attempt-status done";
+      attemptStatusEl.innerHTML = "You've used both of your attempts at this topic" +
+        (scoreText ? " — final score <strong>" + scoreText + "</strong>." : ".") +
+        " You can still view your full report below.";
+      btnStart.classList.add("hidden");
+    } else {
+      attemptStatusEl.className = "attempt-status retake";
+      attemptStatusEl.innerHTML = "You've already attempted this topic" +
+        (scoreText ? " (scored <strong>" + scoreText + "</strong> on " + dateText + ")" : "") +
+        ". You can take it <span class=\"last-chance\">one more time — this is your last chance</span>, so make it count!";
+      btnStart.textContent = "Retake practice (last chance)";
+    }
+  }
+
+  // Looks up whether the current topic already has an attempt on file and
+  // updates the inline message. Safe to call repeatedly (topic changes,
+  // arriving at the start screen) — a stale in-flight check for a topic
+  // the student has since changed away from is ignored when it resolves.
+  function checkAttemptStatus(){
+    var examKey = currentExamKeyChoice();
+    pendingCheck = { examKey: examKey, existing: null };
+    renderAttemptStatus(null);
+    if(!examKey) return;
+
+    PQFirebase.getMyAttempt(state.currentUser.uid, examKey).then(function(existing){
+      if(pendingCheck.examKey !== examKey) return;
+      pendingCheck.existing = existing;
+      renderAttemptStatus(existing);
+    }).catch(function(){
+      if(pendingCheck.examKey !== examKey) return;
+      attemptStatusEl.className = "attempt-status";
+      attemptStatusEl.textContent = "Couldn't check for a previous attempt — Start practice still works.";
+    });
+  }
+
+  document.getElementById("input-topic").addEventListener("change", checkAttemptStatus);
+
+  btnViewReport.addEventListener("click", function(){
+    var examKey = currentExamKeyChoice();
+    if(!examKey) return;
+    if(pendingCheck.examKey === examKey && pendingCheck.existing){
+      showExistingCompletion(examKey, pendingCheck.existing);
+      return;
+    }
+    startStatus.textContent = "Loading your report…";
+    PQFirebase.getMyAttempt(state.currentUser.uid, examKey).then(function(existing){
+      startStatus.textContent = "";
+      if(existing) showExistingCompletion(examKey, existing);
+    }).catch(function(){
+      startStatus.textContent = "Couldn't reach the server. Check your internet connection and try again.";
+    });
+  });
 
   var sectionLabel = document.getElementById("section-label");
   var questionCount = document.getElementById("question-count");
@@ -514,11 +618,13 @@
   }
 
   // `record` is the raw Firestore attempt document: { answers, hints,
-  // completedAt, minutesTaken, ... }.
+  // attemptNumber, completedAt, minutesTaken, ... }.
   function showExistingCompletion(examKey, record){
     state.examKey = examKey;
     state.answers = buildAnswerObjects(examKey, record.answers || [], record.hints || []);
     state.reviewMode = true;
+    state.attemptNumber = record.attemptNumber || 1;
+    state.firstAttemptSnapshot = record.firstAttempt || null;
     state.completedAt = record.completedAt || null;
     state.minutesTaken = (typeof record.minutesTaken === "number") ? record.minutesTaken : null;
     var exam = EXAMS[examKey];
@@ -557,13 +663,32 @@
     btnStart.disabled = true;
     startStatus.textContent = "Checking for a previous attempt…";
 
+    // Always re-checked here (not just trusted from the inline message),
+    // the same way the original one-attempt version did — the student's
+    // attempt count is what decides whether this is a fresh attempt or
+    // the one allowed retake, and Firestore's rules enforce that same
+    // limit server-side regardless, so a stale read here can't let
+    // anyone past two attempts.
     PQFirebase.getMyAttempt(state.currentUser.uid, examKey).then(function(existing){
       btnStart.disabled = false;
       startStatus.textContent = "";
-      if(existing){
-        showExistingCompletion(examKey, existing);
+
+      var attemptNumber = existing ? (existing.attemptNumber || 1) + 1 : 1;
+      if(attemptNumber > 2){
+        // Both attempts already used — nothing to start; refresh the
+        // inline status so Start practice hides and View my report shows.
+        renderAttemptStatus(existing);
         return;
       }
+
+      state.attemptNumber = attemptNumber;
+      state.firstAttemptSnapshot = (attemptNumber === 2 && existing) ? {
+        score: existing.score,
+        total: existing.total,
+        completedAt: existing.completedAt,
+        minutesTaken: existing.minutesTaken
+      } : null;
+
       startAttempt(examKey);
     }).catch(function(){
       btnStart.disabled = false;
@@ -735,16 +860,21 @@
     startStatus.textContent = "";
     resultSub.textContent = "Saving your results…";
 
-    PQFirebase.recordAttempt(state.currentUser.uid, state.examKey, {
+    var record = {
       name: state.currentUser.name,
       cls: state.currentUser.class,
+      attemptNumber: state.attemptNumber || 1,
       score: report.correctCount,
       total: report.total,
       answers: state.answers.map(function(a){ return a ? a.selected : -1; }),
       hints: hints,
       completedAt: state.completedAt,
       minutesTaken: state.minutesTaken
-    }).catch(function(){ /* best-effort: the student still sees their results below */ })
+    };
+    if(state.firstAttemptSnapshot) record.firstAttempt = state.firstAttemptSnapshot;
+
+    PQFirebase.recordAttempt(state.currentUser.uid, state.examKey, record)
+      .catch(function(){ /* best-effort: the student still sees their results below */ })
       .then(function(){ renderResults(ctx); });
   }
 
@@ -755,13 +885,26 @@
     var band = report.pct >= 90 ? "Excellent work." : report.pct >= 70 ? "Good grasp of the material." : "Worth another look at the topics you missed.";
     resultSub.textContent = band;
 
+    var attemptNumber = state.attemptNumber || 1;
+    var completedDateText = fmtDate(state.completedAt);
+    reviewBanner.classList.remove("hidden");
+
+    // When this is the 2nd (final) attempt, mention the first attempt's
+    // score too, if it was captured — so the "full report" a student can
+    // come back to also shows their improvement, not just the final score.
+    var firstAttemptText = "";
+    if(attemptNumber >= 2 && state.firstAttemptSnapshot && typeof state.firstAttemptSnapshot.score === "number" && typeof state.firstAttemptSnapshot.total === "number"){
+      firstAttemptText = " Your first attempt scored " + state.firstAttemptSnapshot.score + "/" + state.firstAttemptSnapshot.total + ".";
+    }
+
     if(state.reviewMode){
-      var completedDateText = fmtDate(state.completedAt);
-      reviewBanner.innerHTML = "You already submitted this practice (recorded " + completedDateText + "). Showing your submitted response below — only one attempt is recorded per account.";
-      reviewBanner.classList.remove("hidden");
+      reviewBanner.innerHTML = attemptNumber >= 2
+        ? "This is your final submitted attempt at this topic (recorded " + completedDateText + ")." + firstAttemptText + " Showing your submitted response below."
+        : "You already submitted this practice (recorded " + completedDateText + "). You still have one retake left if you'd like to try again — go back to the start screen to use it.";
+    } else if(attemptNumber >= 2){
+      reviewBanner.innerHTML = "That was your final attempt at this topic — nice work getting through it!" + firstAttemptText;
     } else {
-      reviewBanner.classList.add("hidden");
-      reviewBanner.innerHTML = "";
+      reviewBanner.innerHTML = "Nice work! If you'd like to improve this score, you can retake this topic <strong>one more time</strong> — just go back to the start screen.";
     }
 
     resultsBody.innerHTML = "";
@@ -804,6 +947,7 @@
     if(choices.length <= 1){
       startGreeting.textContent += " Ready when you are.";
     }
+    checkAttemptStatus();
     showScreen("start");
   }
 

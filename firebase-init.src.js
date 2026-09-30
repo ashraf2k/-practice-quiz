@@ -130,20 +130,28 @@ function getMyAttempt(uid, examKey){
   });
 }
 
-// Creates the attempt document. Firestore security rules reject a second
-// write to the same (uid, examKey) pair, so "one attempt per student" is
-// enforced by the database itself, not just by the page's own JS.
+// Creates (attemptNumber 1) or retakes (attemptNumber 2) the attempt
+// document. Firestore security rules enforce exactly this shape — a
+// fresh create must be attemptNumber 1, and the one allowed retake must
+// move an existing attemptNumber-1 doc to attemptNumber 2 — so "at most
+// two attempts per student per exam" is enforced by the database itself,
+// not just by the page's own JS. The caller (quiz.html) is what decides
+// which attemptNumber this write is, since it already checked
+// getMyAttempt() before offering a fresh attempt vs. a retake.
 // `answers` is the canonical-indexed selections (same shape as before);
 // `hints` is a parallel array of booleans (true where a hint was used on
-// that question) — stored for real this time, unlike the old Sheets
-// backend, which could only carry a selected-option index.
+// that question). `record.firstAttempt`, when this is the retake
+// (attemptNumber 2), is a small snapshot of the first attempt's score so
+// the teacher's admin view can still see it even though this write
+// replaces the first attempt's answers/score as the one that counts.
 function recordAttempt(uid, examKey, record){
   var ref = doc(db, "attempts", attemptId(uid, examKey));
-  return setDoc(ref, {
+  var payload = {
     uid: uid,
     examKey: examKey,
     name: record.name,
     class: record.cls,
+    attemptNumber: record.attemptNumber || 1,
     score: record.score,
     total: record.total,
     answers: record.answers,
@@ -151,13 +159,16 @@ function recordAttempt(uid, examKey, record){
     completedAt: record.completedAt,
     minutesTaken: record.minutesTaken != null ? record.minutesTaken : null,
     recordedAt: serverTimestamp()
-  }, { merge: false })
+  };
+  if(record.firstAttempt) payload.firstAttempt = record.firstAttempt;
+  return setDoc(ref, payload, { merge: false })
   .then(function(){ return { ok: true }; })
   .catch(function(err){
-    // Someone else already wrote this exact (uid, examKey) doc — most
-    // likely a duplicate submit (double click, retry after a flaky
-    // connection). Treat it the same as "already recorded" rather than
-    // surfacing a scary permission error.
+    // Blocked by the rules above — a duplicate submit (double click,
+    // retry after a flaky connection), or the student has already used
+    // both attempts. Treat it the same as "already recorded" rather than
+    // surfacing a scary permission error; the student still sees their
+    // just-finished results either way (see finishAttempt() in quiz.html).
     if(err && err.code === "permission-denied") return { ok: false, alreadyRecorded: true };
     throw err;
   });

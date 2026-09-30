@@ -741,6 +741,36 @@
     color: var(--ink);
   }
 
+  /* ---------- Start-screen attempt status (retake warning / used up) ---------- */
+
+  .attempt-status{
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--muted);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 0 4px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--bg);
+  }
+
+  .attempt-status strong{ font-weight: 700; }
+
+  .attempt-status.retake{
+    border-left-color: var(--diff-moderate);
+    background: var(--diff-moderate-bg);
+  }
+
+  .attempt-status.retake .last-chance{
+    color: var(--diff-moderate);
+    font-weight: 700;
+  }
+
+  .attempt-status.done{
+    border-left-color: var(--muted);
+  }
+
   .feedback-block{
     border: 1px solid var(--line);
     border-left: 3px solid var(--accent);
