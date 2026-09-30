@@ -195,8 +195,8 @@
 </div>
 
 <!-- Big "liquid crystal" star celebration for every 5-correct-in-a-row
-     streak. Lives outside .wrap (fixed to the viewport edge, not the
-     card) and is pointer-events:none so it never blocks the quiz. -->
+     streak. Lives outside .wrap (fixed dead-center in the viewport, not
+     the card) and is pointer-events:none so it never blocks the quiz. -->
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
@@ -666,12 +666,13 @@
       '</svg><span>Streak! ' + count + ' correct in a row</span>';
   }
 
-  // ---------- Big "liquid crystal" star (side-of-page celebration, every
+  // ---------- Big "liquid crystal" star (centered celebration, every
   // 5th consecutive correct answer) ----------
   // A faceted 10-point star outline filled with a slowly-rotating
   // rainbow gradient (the "liquid" part -- an SVG <animateTransform> spun
   // on the gradient itself, not just a static rainbow fill) plus a
-  // pulsing colour-shifting glow and a few twinkling sparkles around it.
+  // pulsing colour-shifting glow and a few twinkling sparkles around it,
+  // shown dead-center in the viewport for 5 seconds.
   // streakStarSeq keeps each gradient's id unique across calls so a
   // fast-retriggered animation (streak 5, then 10, then 15...) never
   // references a gradient definition that a previous innerHTML swap
@@ -688,6 +689,7 @@
       return '<line x1="50" y1="50" x2="' + pt[0] + '" y2="' + pt[1] + '"/>';
     }).join("");
     return (
+      '<div class="streak-star-backdrop"></div>' +
       '<div class="streak-star-inner">' +
         '<svg class="streak-star-svg" viewBox="0 0 100 100" aria-hidden="true">' +
           '<defs>' +
@@ -730,7 +732,7 @@
     streakStarTimer = setTimeout(function(){
       streakStarLayer.classList.remove("show");
       streakStarTimer = null;
-    }, 2600);
+    }, 5000);
   }
 
   function startAttempt(examKey){

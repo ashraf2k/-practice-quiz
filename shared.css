@@ -687,24 +687,37 @@
     color: var(--streak);
   }
 
-  /* ---------- Big "liquid crystal" star (side-of-page streak celebration) ----------
-     Fixed to the viewport's right edge (not the card), so it reads as a
-     celebration happening "beside" the page rather than another line of
-     text inside the feedback box. pointer-events:none throughout so it
-     never intercepts a click/tap on the quiz underneath it. */
+  /* ---------- Big "liquid crystal" star (centered streak celebration) ----------
+     Fixed dead-center in the viewport (not inside the card), so it reads
+     as a big celebration moment rather than another line of text inside
+     the feedback box. pointer-events:none throughout so it never
+     intercepts a click/tap on the quiz underneath it. */
   .streak-star-layer{
     position: fixed;
     top: 50%;
-    right: 14px;
+    left: 50%;
     z-index: 500;
     pointer-events: none;
     opacity: 0;
-    transform: translateY(-50%) translateX(65%) scale(0.85);
+    transform: translate(-50%,-50%) scale(0.55);
     transition: transform 0.55s cubic-bezier(0.19,1.3,0.36,1), opacity 0.4s ease;
   }
   .streak-star-layer.show{
     opacity: 1;
-    transform: translateY(-50%) translateX(0) scale(1);
+    transform: translate(-50%,-50%) scale(1);
+  }
+
+  .streak-star-backdrop{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 340px;
+    height: 340px;
+    transform: translate(-50%,-50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--streak-bg) 0%, transparent 70%);
+    filter: blur(6px);
+    z-index: -1;
   }
 
   .streak-star-inner{
@@ -715,15 +728,15 @@
 
   .streak-star-svg{
     display: block;
-    width: 108px;
-    height: 108px;
+    width: 220px;
+    height: 220px;
     overflow: visible;
   }
 
   .streak-star-glow{
     fill: var(--streak);
     opacity: 0.55;
-    filter: blur(14px);
+    filter: blur(22px);
     transform-origin: 50% 50%;
     transform: scale(1.08);
   }
@@ -745,14 +758,14 @@
   }
 
   .streak-star-caption{
-    margin-top: 6px;
+    margin-top: 10px;
     text-align: center;
     line-height: 1.15;
   }
 
   .streak-star-count{
     display: block;
-    font-size: 26px;
+    font-size: 46px;
     font-weight: 800;
     color: var(--ink);
     text-shadow: 0 1px 0 var(--surface), 0 2px 10px rgba(0,0,0,0.12);
@@ -760,7 +773,7 @@
 
   .streak-star-label{
     display: block;
-    font-size: 11px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -799,14 +812,12 @@
   }
 
   @media (max-width: 480px){
-    /* Narrow viewports have no real "side" gap beside the card, so the
-       star is anchored higher (near the question-meta/progress area)
-       rather than dead-center, to avoid sitting directly over the
-       feedback text it would otherwise cover for its ~2.6s. */
-    .streak-star-layer{ top: 190px; right: 6px; }
-    .streak-star-svg{ width: 72px; height: 72px; }
-    .streak-star-count{ font-size: 19px; }
-    .streak-star-label{ font-size: 9px; }
+    /* Still dead-center on narrow screens, just scaled down enough to
+       leave some margin on either side of a phone-width viewport. */
+    .streak-star-svg{ width: 150px; height: 150px; }
+    .streak-star-backdrop{ width: 230px; height: 230px; }
+    .streak-star-count{ font-size: 34px; }
+    .streak-star-label{ font-size: 12px; }
   }
 
   .quiz-footer{
