@@ -386,7 +386,7 @@
     // ---------- First-page badge: initials + time taken ----------
     var badgeText = getInitials(ctx.name);
     if(typeof ctx.minutesTaken === "number" && isFinite(ctx.minutesTaken) && ctx.minutesTaken > 0){
-      badgeText += "  ·  " + ctx.minutesTaken + " min";
+      badgeText += "  ·  " + ctx.minutesTaken;
     }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
