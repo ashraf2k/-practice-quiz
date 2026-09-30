@@ -909,7 +909,7 @@
         row.className = "admin-question-row";
         var pctClass = pct === null ? "" : (pct < 50 ? "low" : (pct >= 85 ? "high" : ""));
         var diffBadgeHtml = q.difficulty
-          ? ' <span class="diff-badge diff-' + q.difficulty + '" style="margin-left:6px;">' + q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) + '</span>'
+          ? ' <span class="diff-badge diff-' + q.difficulty + '" style="margin-left:6px;">' + difficultyLabel(q.difficulty) + '</span>'
           : "";
         row.innerHTML =
           '<div class="qtop"><div class="qtext">Q' + (qi + 1) + '. ' + escapeHtml(q.q) + diffBadgeHtml + '</div>' +

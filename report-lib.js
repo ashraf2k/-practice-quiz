@@ -8,10 +8,10 @@
   }
 
   // Most questions are worth 1 mark; a question flagged "hard" (currently
-  // only some IGCSE questions) is worth 2, per the teacher's weighting.
-  // Exams with no difficulty field at all (dp, algo) get 1 for every
-  // question, so their totals/scores are numerically identical to a plain
-  // question count — this keeps those exams fully backward-compatible.
+  // some igcse and algo questions) is worth 2, per the teacher's weighting.
+  // Exams with no difficulty field at all (dp) get 1 for every question,
+  // so their totals/scores are numerically identical to a plain question
+  // count — this keeps those exams fully backward-compatible.
   function questionMarks(q){
     return (q && q.difficulty === "hard") ? 2 : 1;
   }
@@ -232,7 +232,7 @@
       if(q.difficulty){
         var diffBadge = document.createElement("span");
         diffBadge.className = "diff-badge diff-" + q.difficulty;
-        diffBadge.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+        diffBadge.textContent = difficultyLabel(q.difficulty);
         rq.appendChild(diffBadge);
       }
       var badge = document.createElement("span");
@@ -563,7 +563,7 @@
       }
       if(q.difficulty){
         var diffColors = PDF_DIFF_COLORS[q.difficulty] || PDF_DIFF_COLORS.easy;
-        var diffLabel = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) + (q.difficulty === "hard" ? "  ·  2 marks" : "");
+        var diffLabel = difficultyLabel(q.difficulty) + (q.difficulty === "hard" ? "  ·  2 marks" : "");
         blocks.push({ text: measure(diffLabel, { size: 7, bold: true, width: innerW, lineHeightFactor: 1.35 }), size: 7, bold: true, color: diffColors.text, bg: diffColors.bg, gapAfter: 3, highlightBg: true });
       }
       var yourAnswerText = (isCorrect ? "Correct — " : "Incorrect — ") + "Your answer: " + (a ? q.options[a.selected] : "(no answer)");

@@ -566,7 +566,7 @@
     questionMeta.classList.remove("hidden");
     var diffBadge = document.createElement("span");
     diffBadge.className = "diff-badge diff-" + q.difficulty;
-    diffBadge.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+    diffBadge.textContent = difficultyLabel(q.difficulty);
     questionMeta.appendChild(diffBadge);
     if(q.difficulty === "hard"){
       var marksNote = document.createElement("span");
