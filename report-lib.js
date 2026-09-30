@@ -7,30 +7,45 @@
     });
   }
 
+  // Most questions are worth 1 mark; a question flagged "hard" (currently
+  // only some IGCSE questions) is worth 2, per the teacher's weighting.
+  // Exams with no difficulty field at all (dp, algo) get 1 for every
+  // question, so their totals/scores are numerically identical to a plain
+  // question count — this keeps those exams fully backward-compatible.
+  function questionMarks(q){
+    return (q && q.difficulty === "hard") ? 2 : 1;
+  }
+
   function computeReport(ctx){
     var exam = EXAMS[ctx.examKey];
     var qs = exam.questions;
-    var total = qs.length;
+    var total = 0, aTotal = 0, bTotal = 0;
     var correctCount = 0, aCorrect = 0, bCorrect = 0;
     var statsMap = {}, order = [];
 
     qs.forEach(function(q, idx){
+      var marks = questionMarks(q);
       var t = q.topic || "General";
       if(!statsMap[t]){ statsMap[t] = { topic: t, correct: 0, total: 0 }; order.push(t); }
-      statsMap[t].total++;
+      statsMap[t].total += marks;
+      total += marks;
+      if(idx < exam.sectionA.count) aTotal += marks; else bTotal += marks;
 
       var a = ctx.answers[idx];
       if(a && a.correct){
-        correctCount++;
-        statsMap[t].correct++;
-        if(idx < exam.sectionA.count) aCorrect++; else bCorrect++;
+        // Using a hint on a hard question costs 1 of its marks. Wrong
+        // answers always earn 0, whether or not a hint was used.
+        var earned = Math.max(0, marks - (a.hintUsed ? 1 : 0));
+        correctCount += earned;
+        statsMap[t].correct += earned;
+        if(idx < exam.sectionA.count) aCorrect += earned; else bCorrect += earned;
       }
     });
 
     var pct = total ? Math.round((correctCount / total) * 100) : 0;
     var topicStats = order.map(function(t){ return statsMap[t]; });
 
-    return { exam: exam, total: total, correctCount: correctCount, aCorrect: aCorrect, bCorrect: bCorrect, pct: pct, topicStats: topicStats };
+    return { exam: exam, total: total, aTotal: aTotal, bTotal: bTotal, correctCount: correctCount, aCorrect: aCorrect, bCorrect: bCorrect, pct: pct, topicStats: topicStats };
   }
 
   function joinList(arr){
@@ -83,8 +98,8 @@
       paragraphs.push("No topic stood out as a clear weak point — performance was fairly consistent across the topics covered.");
     }
 
-    var aPct = exam.sectionA.count ? Math.round((report.aCorrect / exam.sectionA.count) * 100) : 0;
-    var bPct = exam.sectionB.count ? Math.round((report.bCorrect / exam.sectionB.count) * 100) : 0;
+    var aPct = report.aTotal ? Math.round((report.aCorrect / report.aTotal) * 100) : 0;
+    var bPct = report.bTotal ? Math.round((report.bCorrect / report.bTotal) * 100) : 0;
     if(Math.abs(aPct - bPct) >= 25){
       if(aPct > bPct){
         paragraphs.push("By section, " + firstName + " handled " + exam.sectionA.label + " (" + aPct + "%) noticeably better than " + exam.sectionB.label + " (" + bPct + "%) — it's worth spending extra revision time on " + exam.sectionB.label + ".");
@@ -151,8 +166,8 @@
       box.appendChild(l); box.appendChild(v);
       return box;
     }
-    statRow.appendChild(statBox(exam.sectionA.label + " (" + exam.sectionA.count + ")", report.aCorrect + "/" + exam.sectionA.count));
-    statRow.appendChild(statBox(exam.sectionB.label + " (" + exam.sectionB.count + ")", report.bCorrect + "/" + exam.sectionB.count));
+    statRow.appendChild(statBox(exam.sectionA.label + " (" + exam.sectionA.count + ")", report.aCorrect + "/" + report.aTotal));
+    statRow.appendChild(statBox(exam.sectionB.label + " (" + exam.sectionB.count + ")", report.bCorrect + "/" + report.bTotal));
     statRow.appendChild(statBox("Overall", report.pct + "%"));
     frag.appendChild(statRow);
 
@@ -214,6 +229,12 @@
       var num = document.createElement("span"); num.className = "num"; num.textContent = (idx + 1) + ".";
       rq.appendChild(num);
       rq.appendChild(document.createTextNode(q.q));
+      if(q.difficulty){
+        var diffBadge = document.createElement("span");
+        diffBadge.className = "diff-badge diff-" + q.difficulty;
+        diffBadge.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+        rq.appendChild(diffBadge);
+      }
       var badge = document.createElement("span");
       badge.className = "badge " + (a && a.correct ? "correct" : "wrong");
       badge.textContent = a && a.correct ? "Correct" : "Incorrect";
@@ -238,6 +259,13 @@
         item.appendChild(correctAnswer);
       }
 
+      if(a && a.hintUsed){
+        var hintNote = document.createElement("p");
+        hintNote.className = "review-line hint-used-note";
+        hintNote.innerHTML = "<span class=\"lbl\">Hint used: </span><span class=\"val\">Yes — 1 mark deducted</span>";
+        item.appendChild(hintNote);
+      }
+
       var explainLabel = document.createElement("p"); explainLabel.className = "review-explain-label"; explainLabel.textContent = "Teacher's feedback";
       item.appendChild(explainLabel);
       var explain = document.createElement("p"); explain.className = "review-explain"; explain.textContent = q.explain;
@@ -255,6 +283,15 @@
   var PDF_LINE = [180, 180, 180];
   var PDF_CARD_LINE = [190, 190, 190];
   var PDF_HIGHLIGHT = [255, 231, 128]; // highlighter-marker yellow behind the student's name
+
+  // Elegant, muted pastel pill colors for the per-question difficulty
+  // badge in the PDF review cards — same palette family as the on-screen
+  // --diff-easy/--diff-moderate/--diff-hard CSS variables (light theme).
+  var PDF_DIFF_COLORS = {
+    easy:     { text: [15, 138, 107],  bg: [225, 245, 238] },
+    moderate: { text: [161, 98, 7],    bg: [253, 241, 214] },
+    hard:     { text: [124, 58, 237],  bg: [238, 231, 252] }
+  };
 
   function pdfColor(doc, rgb){ doc.setTextColor(rgb[0], rgb[1], rgb[2]); }
   function pdfDrawColor(doc, rgb){ doc.setDrawColor(rgb[0], rgb[1], rgb[2]); }
@@ -475,7 +512,7 @@
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
     pdfColor(doc, PDF_MUTED);
-    doc.text(exam.sectionA.label + " " + report.aCorrect + "/" + exam.sectionA.count + "   ·   " + exam.sectionB.label + " " + report.bCorrect + "/" + exam.sectionB.count, rightEdge, panelY + 64, { align: "right" });
+    doc.text(exam.sectionA.label + " " + report.aCorrect + "/" + report.aTotal + "   ·   " + exam.sectionB.label + " " + report.bCorrect + "/" + report.bTotal, rightEdge, panelY + 64, { align: "right" });
 
     y = panelY + panelH + 18;
 
@@ -524,10 +561,19 @@
       if(q.code){
         blocks.push({ text: measure(q.code, { size: 7, width: innerW, lineHeightFactor: 1.28, font: "courier" }), size: 7, font: "courier", color: PDF_INK, gapAfter: 3 });
       }
+      if(q.difficulty){
+        var diffColors = PDF_DIFF_COLORS[q.difficulty] || PDF_DIFF_COLORS.easy;
+        var diffLabel = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) + (q.difficulty === "hard" ? "  ·  2 marks" : "");
+        blocks.push({ text: measure(diffLabel, { size: 7, bold: true, width: innerW, lineHeightFactor: 1.35 }), size: 7, bold: true, color: diffColors.text, bg: diffColors.bg, gapAfter: 3, highlightBg: true });
+      }
       var yourAnswerText = (isCorrect ? "Correct — " : "Incorrect — ") + "Your answer: " + (a ? q.options[a.selected] : "(no answer)");
       blocks.push({ text: measure(yourAnswerText, { size: 8, bold: true, width: innerW, lineHeightFactor: 1.22 }), size: 8, bold: true, color: PDF_INK, gapAfter: isCorrect ? 3 : 1.5 });
       if(!isCorrect){
         blocks.push({ text: measure("Correct answer: " + q.options[q.correct], { size: 8, bold: true, width: innerW, lineHeightFactor: 1.22 }), size: 8, bold: true, color: PDF_INK, gapAfter: 3 });
+      }
+      if(a && a.hintUsed){
+        var hintColors = PDF_DIFF_COLORS.hard;
+        blocks.push({ text: measure("Hint used — 1 mark deducted", { size: 7.5, bold: true, width: innerW, lineHeightFactor: 1.24 }), size: 7.5, bold: true, color: hintColors.text, gapAfter: 3 });
       }
       blocks.push({ text: measure("Teacher's feedback", { size: 7, bold: true, width: innerW, lineHeightFactor: 1.35 }), size: 7, bold: true, color: [255, 255, 255], gapAfter: 2.5, highlightBg: true });
       blocks.push({ text: measure(q.explain, { size: 8, width: innerW, lineHeightFactor: 1.26 }), size: 8, color: PDF_MUTED, gapAfter: 0 });
@@ -544,7 +590,7 @@
       var innerX = cx + cardPad;
       card.blocks.forEach(function(b){
         if(b.highlightBg){
-          innerY = drawHighlightBadge(b.text.lines[0] || "", innerX, innerY, b.text.lh, { size: b.size, bold: b.bold, textColor: b.color });
+          innerY = drawHighlightBadge(b.text.lines[0] || "", innerX, innerY, b.text.lh, { size: b.size, bold: b.bold, textColor: b.color, bg: b.bg });
         } else {
           innerY = drawLines(b.text.lines, innerX, innerY, b.text.lh, { size: b.size, bold: b.bold, color: b.color, font: b.font });
         }

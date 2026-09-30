@@ -81,10 +81,13 @@
       <div class="progress-fill" id="progress-fill" style="width:0%"></div>
     </div>
 
+    <div class="question-meta" id="question-meta"></div>
     <p class="question-text" id="question-text"></p>
     <pre class="code-block hidden" id="question-code"></pre>
 
     <div class="options" id="options-wrap" role="group" aria-label="Answer options"></div>
+
+    <div class="hint-area" id="hint-area"></div>
 
     <div class="feedback" id="feedback" aria-live="polite">
       <div class="verdict" id="feedback-verdict"></div>
@@ -142,6 +145,10 @@
   function backendRecord(ctx, minutesTaken){
     if(!BACKEND_URL) return Promise.resolve({ ok:false });
     var selected = ctx.answers.map(function(a){ return a ? a.selected : -1; });
+    // score/total are both in MARKS (a hard question is worth 2, minus 1 if
+    // a hint was used on it) rather than a raw question count, so they stay
+    // consistent with what the student's own results screen and PDF show.
+    var report = computeReport(ctx);
     return fetchWithTimeout(BACKEND_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -149,8 +156,8 @@
             "&exam=" + encodeURIComponent(ctx.examKey) +
             "&name=" + encodeURIComponent(ctx.name) +
             "&class=" + encodeURIComponent(ctx.cls) +
-            "&score=" + encodeURIComponent(computeReport(ctx).correctCount) +
-            "&total=" + encodeURIComponent(EXAMS[ctx.examKey].questions.length) +
+            "&score=" + encodeURIComponent(report.correctCount) +
+            "&total=" + encodeURIComponent(report.total) +
             "&answersJson=" + encodeURIComponent(JSON.stringify(selected)) +
             "&timestamp=" + encodeURIComponent(ctx.completedAt) +
             "&minutesTaken=" + encodeURIComponent(minutesTaken || "")
@@ -231,7 +238,10 @@
     // completely unaffected by the shuffle — only what's shown on screen
     // during the live quiz is reordered.
     questionOrder: null,
-    optionOrder: null
+    optionOrder: null,
+    // canonicalQuestionIndex -> true once the student has requested (and
+    // confirmed) the hint for that question during this attempt.
+    hintUsedFor: {}
   };
 
   // Fisher-Yates shuffle — returns a new array, leaves the input untouched.
@@ -300,13 +310,108 @@
   var sectionLabel = document.getElementById("section-label");
   var questionCount = document.getElementById("question-count");
   var progressFill = document.getElementById("progress-fill");
+  var questionMeta = document.getElementById("question-meta");
   var questionText = document.getElementById("question-text");
   var questionCode = document.getElementById("question-code");
   var optionsWrap = document.getElementById("options-wrap");
+  var hintArea = document.getElementById("hint-area");
   var feedbackEl = document.getElementById("feedback");
   var feedbackVerdict = document.getElementById("feedback-verdict");
   var feedbackExplain = document.getElementById("feedback-explain");
   var btnNext = document.getElementById("btn-next");
+
+  // ---------- Difficulty badge ----------
+  function renderQuestionMeta(q){
+    questionMeta.innerHTML = "";
+    if(!q.difficulty){ questionMeta.classList.add("hidden"); return; }
+    questionMeta.classList.remove("hidden");
+    var diffBadge = document.createElement("span");
+    diffBadge.className = "diff-badge diff-" + q.difficulty;
+    diffBadge.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+    questionMeta.appendChild(diffBadge);
+    if(q.difficulty === "hard"){
+      var marksNote = document.createElement("span");
+      marksNote.className = "marks-note";
+      marksNote.textContent = "Worth 2 marks";
+      questionMeta.appendChild(marksNote);
+    }
+  }
+
+  // ---------- Hint request flow (Hard questions only) ----------
+  // Three states per question, rendered into #hint-area: a trigger button,
+  // a confirm-with-warning panel, and the revealed hint. Requesting (and
+  // confirming) the hint records canonicalIdx in state.hintUsedFor, which
+  // selectAnswer() reads to apply the 1-mark deduction.
+  function showHintTrigger(q, canonicalIdx){
+    hintArea.innerHTML = "";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "hint-trigger";
+    btn.textContent = "Need a hint? (−1 mark)";
+    btn.addEventListener("click", function(){ showHintConfirm(q, canonicalIdx); });
+    hintArea.appendChild(btn);
+  }
+
+  function showHintConfirm(q, canonicalIdx){
+    hintArea.innerHTML = "";
+    var box = document.createElement("div");
+    box.className = "hint-confirm";
+    var warn = document.createElement("p");
+    warn.className = "hint-warn-text";
+    warn.textContent = "Using this hint will cost you 1 mark on this question. Do you want to continue?";
+    box.appendChild(warn);
+    var actions = document.createElement("div");
+    actions.className = "hint-confirm-actions";
+    var yesBtn = document.createElement("button");
+    yesBtn.type = "button";
+    yesBtn.className = "btn btn-primary";
+    yesBtn.textContent = "Yes, show hint";
+    yesBtn.addEventListener("click", function(){
+      state.hintUsedFor[canonicalIdx] = true;
+      showHintReveal(q);
+    });
+    var noBtn = document.createElement("button");
+    noBtn.type = "button";
+    noBtn.className = "btn btn-secondary";
+    noBtn.textContent = "Cancel";
+    noBtn.addEventListener("click", function(){ showHintTrigger(q, canonicalIdx); });
+    actions.appendChild(yesBtn);
+    actions.appendChild(noBtn);
+    box.appendChild(actions);
+    hintArea.appendChild(box);
+  }
+
+  function showHintReveal(q){
+    hintArea.innerHTML = "";
+    var box = document.createElement("div");
+    box.className = "hint-reveal";
+    var lbl = document.createElement("p");
+    lbl.className = "hint-reveal-label";
+    lbl.textContent = "Hint (−1 mark)";
+    box.appendChild(lbl);
+    var txt = document.createElement("p");
+    txt.textContent = q.hint;
+    box.appendChild(txt);
+    hintArea.appendChild(box);
+  }
+
+  function renderHintArea(q, canonicalIdx){
+    hintArea.innerHTML = "";
+    if(!(q.difficulty === "hard" && q.hint)){
+      hintArea.classList.add("hidden");
+      return;
+    }
+    hintArea.classList.remove("hidden");
+    if(state.hintUsedFor[canonicalIdx]) showHintReveal(q);
+    else showHintTrigger(q, canonicalIdx);
+  }
+
+  // ---------- Celebration badge (correct answer on a Hard question) ----------
+  function celebrationBadgeHtml(hintUsed){
+    return '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      '<path d="M12 3.5 L14.6 9.2 L20.8 9.9 L16.2 14.1 L17.5 20.3 L12 17 L6.5 20.3 L7.8 14.1 L3.2 9.9 L9.4 9.2 Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>' +
+      '</svg><span>Hard question mastered' + (hintUsed ? "" : " — full marks!") + '</span>';
+  }
 
   function startAttempt(examKey, name, cls){
     state.examKey = examKey;
@@ -318,6 +423,7 @@
     state.completedAt = null;
     state.startedAt = Date.now();
     state.minutesTaken = null;
+    state.hintUsedFor = {};
 
     var shuffle = buildAttemptShuffle(examKey);
     state.questionOrder = shuffle.questionOrder;
@@ -414,6 +520,7 @@
     questionCount.textContent = "Question " + (state.index + 1) + " of " + total;
     progressFill.style.width = ((state.index) / total * 100) + "%";
 
+    renderQuestionMeta(q);
     questionText.textContent = q.q;
 
     if(q.code){
@@ -460,9 +567,13 @@
 
     var already = state.answers[canonicalIdx];
     if(already){
+      hintArea.innerHTML = "";
+      hintArea.classList.add("hidden");
       lockOptions(already.selected, q.correct, order);
-      showFeedback(already.correct, q.explain);
+      showFeedback(already.correct, q.explain, q, already.hintUsed);
       btnNext.classList.remove("hidden");
+    } else {
+      renderHintArea(q, canonicalIdx);
     }
   }
 
@@ -476,11 +587,14 @@
     if(state.answers[canonicalIdx]) return;
 
     var isCorrect = selectedCanonicalIdx === q.correct;
-    state.answers[canonicalIdx] = { selected: selectedCanonicalIdx, correct: isCorrect };
+    var hintUsed = !!state.hintUsedFor[canonicalIdx];
+    state.answers[canonicalIdx] = { selected: selectedCanonicalIdx, correct: isCorrect, hintUsed: hintUsed };
 
     var order = state.optionOrder[canonicalIdx];
     lockOptions(selectedCanonicalIdx, q.correct, order);
-    showFeedback(isCorrect, q.explain);
+    hintArea.innerHTML = "";
+    hintArea.classList.add("hidden");
+    showFeedback(isCorrect, q.explain, q, hintUsed);
     btnNext.classList.remove("hidden");
     btnNext.focus();
   }
@@ -498,12 +612,31 @@
     });
   }
 
-  function showFeedback(isCorrect, explainText){
+  function showFeedback(isCorrect, explainText, q, hintUsed){
     feedbackEl.classList.remove("correct","incorrect");
     feedbackEl.classList.add(isCorrect ? "correct" : "incorrect");
     feedbackEl.classList.add("show");
     feedbackVerdict.textContent = isCorrect ? "Correct" : "Not quite";
     feedbackExplain.textContent = explainText;
+
+    var existingNote = feedbackEl.querySelector(".hint-used-inline");
+    if(existingNote) existingNote.remove();
+    var existingCelebrate = feedbackEl.querySelector(".celebrate-badge");
+    if(existingCelebrate) existingCelebrate.remove();
+
+    if(hintUsed){
+      var note = document.createElement("p");
+      note.className = "hint-used-inline";
+      note.textContent = "Hint used on this question — 1 mark deducted.";
+      feedbackExplain.insertAdjacentElement("afterend", note);
+    }
+
+    if(isCorrect && q && q.difficulty === "hard"){
+      var celebrate = document.createElement("div");
+      celebrate.className = "celebrate-badge";
+      celebrate.innerHTML = celebrationBadgeHtml(hintUsed);
+      feedbackEl.appendChild(celebrate);
+    }
   }
 
   btnNext.addEventListener("click", function(){

@@ -603,8 +603,11 @@
         var row = document.createElement("div");
         row.className = "admin-question-row";
         var pctClass = pct === null ? "" : (pct < 50 ? "low" : (pct >= 85 ? "high" : ""));
+        var diffBadgeHtml = q.difficulty
+          ? ' <span class="diff-badge diff-' + q.difficulty + '" style="margin-left:6px;">' + q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) + '</span>'
+          : "";
         row.innerHTML =
-          '<div class="qtop"><div class="qtext">Q' + (qi + 1) + '. ' + escapeHtml(q.q) + '</div>' +
+          '<div class="qtop"><div class="qtext">Q' + (qi + 1) + '. ' + escapeHtml(q.q) + diffBadgeHtml + '</div>' +
           '<div class="qpct ' + pctClass + '">' + (pct === null ? "—" : pct + "%") + '</div></div>' +
           '<div class="qmiss">' + (mostCommonWrong === null
             ? "No incorrect answers recorded."
