@@ -180,6 +180,33 @@
     background: var(--bg);
   }
   .first-attempt-note strong{ font-weight: 700; }
+
+  .qwrong-toggle{
+    margin-top: 6px;
+    font-size: 12px;
+  }
+  .qwrong-list{
+    margin: 8px 0 0;
+    padding: 8px 0 0;
+    border-top: 1px dashed var(--line);
+    list-style: none;
+    font-size: 12.5px;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .qwrong-list .wrong-name{ color: var(--ink); font-weight: 600; }
+
+  .profile-summary{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: baseline;
+    margin-bottom: 18px;
+  }
+  .profile-summary h3{ font-size: 17px; margin: 0; }
+  .profile-summary .muted{ color: var(--muted); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -243,6 +270,7 @@
 
     <div class="admin-tabs no-print" id="admin-tabs">
       <button class="admin-tab active" data-tab="students">Students</button>
+      <button class="admin-tab" data-tab="byStudent">By student</button>
       <button class="admin-tab" data-tab="classes">Class overview</button>
       <button class="admin-tab" data-tab="questions">Question analysis</button>
     </div>
@@ -261,6 +289,29 @@
             <tbody></tbody>
           </table>
         </div>
+      </div>
+
+      <div class="admin-panel" id="panel-byStudent">
+        <div class="admin-toolbar no-print">
+          <select id="filter-class-bystudent">
+            <option value="">All classes</option>
+          </select>
+          <input type="text" id="filter-search-bystudent" placeholder="Search by name" />
+        </div>
+        <p class="admin-status">Every exam a student has attempted, averaged into one overall score — click a row for their full history.</p>
+        <div class="table-scroll">
+          <table class="admin-table" id="bystudent-table">
+            <thead><tr><th>Name</th><th>Class</th><th>Exams taken</th><th>Overall avg</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="panel-profile">
+        <div class="admin-toolbar no-print">
+          <button class="btn btn-secondary admin-detail-back" id="btn-back-profile">← Back to by-student list</button>
+        </div>
+        <div id="profile-body"></div>
       </div>
 
       <div class="admin-panel" id="panel-classes">
@@ -460,7 +511,7 @@
     document.querySelectorAll(".admin-tab").forEach(function(btn){
       btn.classList.toggle("active", btn.dataset.tab === name);
     });
-    ["students","classes","questions","detail"].forEach(function(id){
+    ["students","byStudent","classes","questions","profile","detail"].forEach(function(id){
       document.getElementById("panel-" + id).classList.toggle("active", id === name);
     });
   }
@@ -525,14 +576,15 @@
   examFilterEl.addEventListener("change", renderAll);
 
   function renderAll(){
-    populateClassFilter();
+    populateClassFilter(document.getElementById("filter-class"));
+    populateClassFilter(document.getElementById("filter-class-bystudent"));
     renderStudents();
+    renderByStudent();
     renderClasses();
     renderQuestions();
   }
 
-  function populateClassFilter(){
-    var sel = document.getElementById("filter-class");
+  function populateClassFilter(sel){
     var current = sel.value;
     sel.innerHTML = '<option value="">All classes</option>';
     var examKeys = selectedExamKeys();
@@ -622,10 +674,131 @@
         "<td>" + attemptPct(a) + "%</td>" +
         "<td>" + attemptBadge + "</td>" +
         "<td>" + fmtDateShort(a.timestamp) + "</td>";
-      tr.addEventListener("click", function(){ openDetail(a); });
+      tr.addEventListener("click", function(){ openDetail(a, "students"); });
       tbody.appendChild(tr);
     });
   }
+
+  // ============================================================
+  // By-student tab — one row per STUDENT (not per attempt), averaging
+  // every exam they've taken into one overall score. This is the view
+  // for "how is this one student doing overall", as distinct from the
+  // Students tab above (which is one row per individual attempt) and
+  // Class overview (which averages a whole class, not one student).
+  // ============================================================
+  var filterClassByStudent = document.getElementById("filter-class-bystudent");
+  var filterSearchByStudent = document.getElementById("filter-search-bystudent");
+  filterClassByStudent.addEventListener("change", renderByStudent);
+  filterSearchByStudent.addEventListener("input", renderByStudent);
+
+  function filteredAttemptsForByStudent(){
+    var examKeys = selectedExamKeys();
+    var cls = filterClassByStudent.value;
+    var q = filterSearchByStudent.value.trim().toLowerCase();
+    return attempts.filter(function(a){
+      if(examKeys.indexOf(a.exam || "dp") === -1) return false;
+      if(cls && a.className !== cls) return false;
+      if(q && (a.name || "").toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+  }
+
+  // Groups flat attempt rows into one entry per (name, class) pair. Name
+  // alone isn't a safe key across different classes; uid isn't in the
+  // normalized shape here, and two different students sharing both the
+  // same name AND class is rare enough that teachers can tell them apart
+  // from the attempt list if it ever happens.
+  function groupByStudent(rows){
+    var groups = {};
+    var order = [];
+    rows.forEach(function(a){
+      var key = (a.name || "") + "|" + (a.className || "");
+      if(!groups[key]){ groups[key] = { name: a.name, className: a.className, attempts: [] }; order.push(key); }
+      groups[key].attempts.push(a);
+    });
+    return order.map(function(key){ return groups[key]; });
+  }
+
+  function renderByStudent(){
+    var tbody = document.querySelector("#bystudent-table tbody");
+    tbody.innerHTML = "";
+    var groups = groupByStudent(filteredAttemptsForByStudent()).sort(function(a, b){
+      return (a.name || "").localeCompare(b.name || "");
+    });
+
+    if(groups.length === 0){
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      td.colSpan = 4;
+      td.className = "wrap-cell";
+      td.textContent = loaded ? "No attempts match these filters." : "";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    groups.forEach(function(g){
+      var avg = Math.round(g.attempts.reduce(function(s, a){ return s + attemptPct(a); }, 0) / g.attempts.length);
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + escapeHtml(g.name || "") + "</td>" +
+        "<td>" + escapeHtml(g.className || "") + "</td>" +
+        "<td>" + g.attempts.length + "</td>" +
+        "<td>" + avg + "%</td>";
+      tr.addEventListener("click", function(){ openStudentProfile(g); });
+      tbody.appendChild(tr);
+    });
+  }
+
+  function openStudentProfile(group){
+    var container = document.getElementById("profile-body");
+    container.innerHTML = "";
+
+    var avg = Math.round(group.attempts.reduce(function(s, a){ return s + attemptPct(a); }, 0) / group.attempts.length);
+    var summary = document.createElement("div");
+    summary.className = "profile-summary";
+    summary.innerHTML =
+      "<h3>" + escapeHtml(group.name || "") + "</h3>" +
+      "<span class=\"muted\">" + escapeHtml(group.className || "") + "</span>" +
+      "<span class=\"muted\">" + group.attempts.length + " exam" + (group.attempts.length === 1 ? "" : "s") + " taken · " + avg + "% overall average</span>";
+    container.appendChild(summary);
+
+    var table = document.createElement("table");
+    table.className = "admin-table";
+    var tbody = document.createElement("tbody");
+    var thead = document.createElement("thead");
+    thead.innerHTML = "<tr><th>Exam</th><th>Score</th><th>%</th><th>Attempt</th><th>Date</th></tr>";
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    group.attempts.slice().sort(function(a, b){ return new Date(b.timestamp) - new Date(a.timestamp); }).forEach(function(a){
+      var examKey = a.exam || "dp";
+      var exam = EXAMS[examKey];
+      var attemptBadge = a.attemptNumber >= 2
+        ? '<span class="attempt-badge retake" title="Used their one retake — this score is final.">Retake · final</span>'
+        : '<span class="attempt-badge">1st attempt</span>';
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + escapeHtml(examLabel(examKey)) + "</td>" +
+        "<td>" + a.score + "/" + (a.total || (exam ? exam.questions.length : "?")) + "</td>" +
+        "<td>" + attemptPct(a) + "%</td>" +
+        "<td>" + attemptBadge + "</td>" +
+        "<td>" + fmtDateShort(a.timestamp) + "</td>";
+      tr.addEventListener("click", function(){ openDetail(a, "profile"); });
+      tbody.appendChild(tr);
+    });
+
+    var scrollWrap = document.createElement("div");
+    scrollWrap.className = "table-scroll";
+    scrollWrap.appendChild(table);
+    container.appendChild(scrollWrap);
+
+    showTab("profile");
+  }
+
+  document.getElementById("btn-back-profile").addEventListener("click", function(){
+    showTab("byStudent");
+  });
 
   // ============================================================
   // Class overview tab
@@ -721,6 +894,11 @@
         var correctCount = 0;
         var total = 0;
         var wrongCounts = {};
+        // Who got it wrong and what they chose, for the drill-down --
+        // "track performance of ... a specific question" means more than
+        // an aggregate percentage to act on; naming names is what lets a
+        // teacher actually follow up.
+        var wrongStudents = [];
 
         examAttempts.forEach(function(a){
           var sel = Array.isArray(a.answers) ? a.answers[qi] : undefined;
@@ -730,8 +908,10 @@
             correctCount++;
           } else {
             wrongCounts[sel] = (wrongCounts[sel] || 0) + 1;
+            wrongStudents.push({ name: a.name, className: a.className, chosenText: q.options[sel] });
           }
         });
+        wrongStudents.sort(function(x, y){ return (x.name || "").localeCompare(y.name || ""); });
 
         var pct = total ? Math.round((correctCount / total) * 100) : null;
         var mostCommonWrong = null, mostCommonWrongCount = 0;
@@ -754,6 +934,31 @@
           '<div class="qmiss">' + (mostCommonWrong === null
             ? "No incorrect answers recorded."
             : "Most common wrong answer: " + escapeHtml(q.options[mostCommonWrong]) + " (" + mostCommonWrongCount + "×)") + '</div>';
+
+        if(wrongStudents.length){
+          var toggleBtn = document.createElement("button");
+          toggleBtn.type = "button";
+          toggleBtn.className = "link-btn qwrong-toggle";
+          toggleBtn.textContent = "Show who got this wrong (" + wrongStudents.length + ")";
+
+          var list = document.createElement("ul");
+          list.className = "qwrong-list hidden";
+          wrongStudents.forEach(function(ws){
+            var li = document.createElement("li");
+            li.innerHTML = '<span class="wrong-name">' + escapeHtml(ws.name || "") + '</span> (' + escapeHtml(ws.className || "") + ') — chose: ' + escapeHtml(ws.chosenText || "");
+            list.appendChild(li);
+          });
+
+          toggleBtn.addEventListener("click", function(){
+            var willShow = list.classList.contains("hidden");
+            list.classList.toggle("hidden");
+            toggleBtn.textContent = willShow ? "Hide" : ("Show who got this wrong (" + wrongStudents.length + ")");
+          });
+
+          row.appendChild(toggleBtn);
+          row.appendChild(list);
+        }
+
         container.appendChild(row);
       });
     });
@@ -767,8 +972,15 @@
   // Student detail (reuses buildReportFragment + PDF from report-lib.js)
   // ============================================================
   var detailCtx = null;
+  // Where "← Back" should return to -- the flat Students list, or the
+  // By-student profile this detail was opened from.
+  var detailReturnTo = "students";
 
-  function openDetail(attempt){
+  function openDetail(attempt, returnTo){
+    detailReturnTo = returnTo || "students";
+    document.getElementById("btn-back").textContent = detailReturnTo === "profile"
+      ? "← Back to " + (attempt.name || "student") + "'s history"
+      : "← Back to student list";
     var examKey = attempt.exam || "dp";
     // Firestore stores which questions used a hint (attempt.hints), unlike
     // the old Apps-Script/Sheets backend which only had room for the
@@ -800,7 +1012,7 @@
   }
 
   document.getElementById("btn-back").addEventListener("click", function(){
-    showTab("students");
+    showTab(detailReturnTo);
   });
 
   wirePdfButton(

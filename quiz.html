@@ -83,6 +83,24 @@
 
   <!-- ============ START SCREEN (signed in) ============ -->
   <section id="screen-start" class="card hidden">
+    <div class="perf-meter" id="perf-meter">
+      <div class="ring-wrap">
+        <svg width="72" height="72" viewBox="0 0 72 72">
+          <circle class="ring-track" cx="36" cy="36" r="30" stroke-width="7"></circle>
+          <circle class="ring-fill" id="perf-ring-fill" cx="36" cy="36" r="30" stroke-width="7"
+            stroke-dasharray="188.5" stroke-dashoffset="188.5"></circle>
+        </svg>
+        <div class="ring-pct empty" id="perf-ring-pct">—</div>
+      </div>
+      <div class="meter-body">
+        <p class="meter-title">Your overall performance</p>
+        <p class="meter-desc" id="perf-meter-desc">Loading your progress…</p>
+        <div class="meter-action">
+          <button class="btn btn-secondary" id="btn-my-progress" type="button">My Progress</button>
+        </div>
+      </div>
+    </div>
+
     <div class="account-banner">
       <h2 class="step-title" style="margin-bottom:0;">Before you begin</h2>
       <button class="link-btn" id="btn-logout-start" type="button">Not you? Log out</button>
@@ -152,6 +170,26 @@
       <button class="btn btn-secondary" id="btn-logout-results">Log out</button>
     </div>
     <p class="cohort-note no-print" id="print-status" aria-live="polite"></p>
+
+    <div class="whatsapp-send no-print">
+      <p class="whatsapp-title">Send a copy to WhatsApp</p>
+      <div class="whatsapp-row">
+        <input type="tel" id="input-whatsapp-phone" placeholder="Your WhatsApp number, e.g. 9665XXXXXXXX" inputmode="tel" autocomplete="tel" />
+        <button class="btn btn-secondary" id="btn-whatsapp-send" type="button">Send</button>
+      </div>
+      <p class="whatsapp-note">Include your country code. We'll download your PDF and open WhatsApp with a message ready — WhatsApp doesn't let a website attach a file automatically, so just attach the downloaded PDF yourself before you hit send.</p>
+      <p class="cohort-note" id="whatsapp-status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- ============ MY PROGRESS SCREEN ============ -->
+  <section id="screen-progress" class="card hidden">
+    <div class="account-banner">
+      <h2 class="step-title" style="margin-bottom:0;">My Progress</h2>
+      <button class="link-btn" id="btn-back-progress" type="button">← Back to start</button>
+    </div>
+    <p class="step-sub">Your results across every practice topic for your class.</p>
+    <div id="progress-list"></div>
   </section>
 
 </div>
@@ -177,7 +215,7 @@
   // ============================================================
   // Screen management
   // ============================================================
-  var SCREEN_IDS = ["screen-auth","screen-start","screen-quiz","screen-results"];
+  var SCREEN_IDS = ["screen-auth","screen-start","screen-quiz","screen-results","screen-progress"];
   function showScreen(name){
     SCREEN_IDS.forEach(function(id){
       var el = document.getElementById(id);
@@ -350,7 +388,11 @@
     // Guards against a fast double-click/tap on "Finish" calling
     // finishAttempt() twice for the same attempt -- see finishAttempt()'s
     // comment for what that race used to cause.
-    finishing: false
+    finishing: false,
+    // Consecutive correct answers so far this attempt (any difficulty),
+    // reset to 0 on a wrong answer. A "Streak!" badge shows at every
+    // multiple of 5.
+    streak: 0
   };
 
   // Fisher-Yates shuffle — returns a new array, leaves the input untouched.
@@ -610,6 +652,14 @@
       '</svg><span>Hard question mastered' + (hintUsed ? "" : " — full marks!") + '</span>';
   }
 
+  // ---------- Streak badge (N consecutive correct answers, any difficulty) ----------
+  function streakBadgeHtml(count){
+    return '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      '<path d="M12 21c-4 0-7-2.7-7-6.5C5 10.5 8 8 9.5 4c.3 2 1.3 3.3 2.5 4.3C13.5 4.8 13 3 13 3c3 1.5 6 5 6 9.5C19 18.3 16 21 12 21Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>' +
+      '<path d="M12 21c-1.8 0-3.2-1.2-3.2-3 0-1.7 1-2.7 1.7-3.8.5 1 1 1.6 1.5 2 .5-1 .7-1.8.7-1.8 1.3.9 2.5 2 2.5 3.6 0 1.8-1.4 3-3.2 3Z" fill="currentColor"/>' +
+      '</svg><span>Streak! ' + count + ' correct in a row</span>';
+  }
+
   function startAttempt(examKey){
     state.examKey = examKey;
     state.index = 0;
@@ -621,6 +671,7 @@
     state.hintUsedFor = {};
     state.saveFailed = false;
     state.finishing = false;
+    state.streak = 0;
     btnNext.disabled = false;
 
     var shuffle = buildAttemptShuffle(examKey);
@@ -797,11 +848,18 @@
     var hintUsed = !!state.hintUsedFor[canonicalIdx];
     state.answers[canonicalIdx] = { selected: selectedCanonicalIdx, correct: isCorrect, hintUsed: hintUsed };
 
+    // Consecutive-correct streak, independent of difficulty -- resets on
+    // any wrong answer. Only a fresh answer (never a re-render of an
+    // already-answered question) can hit a new milestone, so this is
+    // computed here rather than in showFeedback() itself.
+    state.streak = isCorrect ? (state.streak || 0) + 1 : 0;
+    var streakHit = (isCorrect && state.streak > 0 && state.streak % 5 === 0) ? state.streak : null;
+
     var order = state.optionOrder[canonicalIdx];
     lockOptions(selectedCanonicalIdx, q.correct, order);
     hintArea.innerHTML = "";
     hintArea.classList.add("hidden");
-    showFeedback(isCorrect, q.explain, q, hintUsed);
+    showFeedback(isCorrect, q.explain, q, hintUsed, streakHit);
     btnNext.classList.remove("hidden");
     btnNext.focus();
   }
@@ -819,7 +877,7 @@
     });
   }
 
-  function showFeedback(isCorrect, explainText, q, hintUsed){
+  function showFeedback(isCorrect, explainText, q, hintUsed, streakHit){
     feedbackEl.classList.remove("correct","incorrect");
     feedbackEl.classList.add(isCorrect ? "correct" : "incorrect");
     feedbackEl.classList.add("show");
@@ -830,6 +888,8 @@
     if(existingNote) existingNote.remove();
     var existingCelebrate = feedbackEl.querySelector(".celebrate-badge");
     if(existingCelebrate) existingCelebrate.remove();
+    var existingStreak = feedbackEl.querySelector(".streak-badge");
+    if(existingStreak) existingStreak.remove();
 
     if(hintUsed){
       var note = document.createElement("p");
@@ -843,6 +903,16 @@
       celebrate.className = "celebrate-badge";
       celebrate.innerHTML = celebrationBadgeHtml(hintUsed);
       feedbackEl.appendChild(celebrate);
+    }
+
+    // Can appear alongside the hard-question celebration above (e.g. the
+    // 5th consecutive correct answer happens to also be a hard one) --
+    // they mark two different things and both are worth showing.
+    if(streakHit){
+      var streak = document.createElement("div");
+      streak.className = "streak-badge";
+      streak.innerHTML = streakBadgeHtml(streakHit);
+      feedbackEl.appendChild(streak);
     }
   }
 
@@ -934,6 +1004,12 @@
     progressFill.style.width = "100%";
     var report = computeReport(ctx);
 
+    // Fresh results screen -- clear any status text (and, since a new
+    // attempt's PDF is different content, the phone number field too)
+    // left over from a WhatsApp send on a previous results screen.
+    document.getElementById("whatsapp-status").textContent = "";
+    document.getElementById("input-whatsapp-phone").value = "";
+
     var band = report.pct >= 90 ? "Excellent work." : report.pct >= 70 ? "Good grasp of the material." : "Worth another look at the topics you missed.";
     resultSub.textContent = band;
 
@@ -984,6 +1060,12 @@
   }
 
   wirePdfButton(document.getElementById("btn-print"), printStatus, function(){ return window.__studentReportCtx; });
+  wireWhatsAppButton(
+    document.getElementById("btn-whatsapp-send"),
+    document.getElementById("input-whatsapp-phone"),
+    document.getElementById("whatsapp-status"),
+    function(){ return window.__studentReportCtx; }
+  );
 
   document.getElementById("btn-back-to-start").addEventListener("click", function(){
     goToStartScreen();
@@ -998,6 +1080,146 @@
   document.getElementById("btn-logout-results").addEventListener("click", doLogout);
 
   // ============================================================
+  // Overall performance meter + "My Progress" screen
+  // ============================================================
+  // Purely client-side aggregation: loop the small, fixed list of exam
+  // topics this student's class can take (examChoicesForClass(), from
+  // quiz-data.js) and look up each one's attempt via the existing
+  // per-exam getMyAttempt() call. No new Firestore rule is needed --
+  // students already have read access to their own attempt docs, this
+  // just reads several of them instead of one.
+  var RING_CIRCUMFERENCE = 2 * Math.PI * 30;
+  var perfMeterEl = document.getElementById("perf-meter");
+  var perfRingFill = document.getElementById("perf-ring-fill");
+  var perfRingPct = document.getElementById("perf-ring-pct");
+  var perfMeterDesc = document.getElementById("perf-meter-desc");
+  var progressListEl = document.getElementById("progress-list");
+
+  function fetchProgressRecords(){
+    var user = state.currentUser;
+    var choices = examChoicesForClass(user.class);
+    return Promise.all(choices.map(function(choice){
+      return PQFirebase.getMyAttempt(user.uid, choice.key).then(function(existing){
+        return { key: choice.key, label: choice.label || EXAMS[choice.key].title, existing: existing || null };
+      }).catch(function(){
+        return { key: choice.key, label: choice.label || EXAMS[choice.key].title, existing: null };
+      });
+    }));
+  }
+
+  function renderPerfMeter(records){
+    var attempted = records.filter(function(r){ return r.existing; });
+    var totalScore = 0, totalMax = 0;
+    attempted.forEach(function(r){
+      if(typeof r.existing.score === "number" && typeof r.existing.total === "number"){
+        totalScore += r.existing.score;
+        totalMax += r.existing.total;
+      }
+    });
+    var pct = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : null;
+
+    if(pct === null){
+      // Fully hide the fill arc (rather than just collapsing it to
+      // zero length) -- a zero-length dash with round linecaps still
+      // paints a small dot at the start point, which looked like a
+      // stray mark on an otherwise-empty ring.
+      perfRingFill.style.opacity = "0";
+      perfRingFill.style.strokeDashoffset = String(RING_CIRCUMFERENCE);
+      perfRingPct.textContent = "—";
+      perfRingPct.classList.add("empty");
+    } else {
+      perfRingFill.style.opacity = "1";
+      perfRingFill.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - pct / 100));
+      perfRingPct.textContent = pct + "%";
+      perfRingPct.classList.remove("empty");
+    }
+
+    if(records.length === 0){
+      perfMeterDesc.textContent = "";
+    } else if(attempted.length === 0){
+      perfMeterDesc.textContent = "Not started yet — your performance will appear here once you complete a quiz.";
+    } else if(attempted.length < records.length){
+      perfMeterDesc.textContent = "Across " + attempted.length + " of " + records.length + " topics completed so far — keep going!";
+    } else {
+      perfMeterDesc.textContent = "Across all " + records.length + " of your " + (records.length === 1 ? "topic" : "topics") + ".";
+    }
+  }
+
+  function loadPerformanceMeter(){
+    var choices = examChoicesForClass(state.currentUser.class);
+    if(choices.length === 0){
+      perfMeterEl.classList.add("hidden");
+      return;
+    }
+    perfMeterEl.classList.remove("hidden");
+    fetchProgressRecords().then(renderPerfMeter);
+  }
+
+  function renderProgressList(records){
+    progressListEl.innerHTML = "";
+    if(records.length === 0){
+      progressListEl.innerHTML = '<p class="cohort-note">No practice topics are set up for your class yet.</p>';
+      return;
+    }
+    records.forEach(function(r){
+      var row = document.createElement("div");
+      row.className = "progress-row";
+
+      var left = document.createElement("div");
+      var title = document.createElement("p");
+      title.className = "pr-title";
+      title.textContent = r.label;
+      left.appendChild(title);
+      var sub = document.createElement("p");
+      sub.className = "pr-sub";
+      left.appendChild(sub);
+
+      var right = document.createElement("div");
+      right.className = "pr-right";
+      var statusSpan = document.createElement("span");
+
+      if(!r.existing){
+        statusSpan.className = "pr-status not-started";
+        statusSpan.textContent = "Not started";
+        sub.textContent = "No attempts yet.";
+      } else {
+        var attemptNumber = r.existing.attemptNumber || 1;
+        var hasScore = typeof r.existing.score === "number" && typeof r.existing.total === "number";
+        var scoreText = hasScore ? (r.existing.score + "/" + r.existing.total) : null;
+        var dateText = fmtDate(r.existing.completedAt);
+        if(attemptNumber >= 2){
+          statusSpan.className = "pr-status done";
+          statusSpan.textContent = "Both attempts used";
+        } else {
+          statusSpan.className = "pr-status in-progress";
+          statusSpan.textContent = "1 retake left";
+        }
+        sub.textContent = (scoreText ? "Scored " + scoreText : "Completed") + " on " + dateText + ".";
+        if(hasScore){
+          var scoreEl = document.createElement("span");
+          scoreEl.className = "pr-score";
+          scoreEl.textContent = Math.round((r.existing.score / r.existing.total) * 100) + "%";
+          right.appendChild(scoreEl);
+        }
+      }
+
+      right.appendChild(statusSpan);
+      row.appendChild(left);
+      row.appendChild(right);
+      progressListEl.appendChild(row);
+    });
+  }
+
+  function openProgressScreen(){
+    progressListEl.innerHTML = '<p class="cohort-note">Loading your progress…</p>';
+    showScreen("progress");
+    fetchProgressRecords().then(renderProgressList);
+  }
+
+  document.getElementById("btn-my-progress").addEventListener("click", openProgressScreen);
+  document.getElementById("btn-back-progress").addEventListener("click", function(){ showScreen("start"); });
+
+  // ============================================================
   // Wiring it together: react to Firebase's sign-in state
   // ============================================================
   function goToStartScreen(){
@@ -1010,6 +1232,7 @@
       startGreeting.textContent += " Ready when you are.";
     }
     checkAttemptStatus();
+    loadPerformanceMeter();
     showScreen("start");
   }
 

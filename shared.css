@@ -22,6 +22,9 @@
     --diff-hard: #7C3AED;
     --diff-hard-bg: #EEE7FC;
     --diff-hard-line: #D9C9F7;
+    --streak: #EA580C;
+    --streak-bg: #FFEDD5;
+    --streak-line: #FED7AA;
     --input-bg: #FCFDFE;
     --code-bg: #0F2137;
     --code-text: #DCE9F7;
@@ -52,6 +55,9 @@
       --diff-hard: #C4B5FD;
       --diff-hard-bg: rgba(196,181,253,0.16);
       --diff-hard-line: rgba(196,181,253,0.35);
+      --streak: #FDBA74;
+      --streak-bg: rgba(253,186,116,0.16);
+      --streak-line: rgba(253,186,116,0.35);
       --input-bg: #1B2636;
       --code-bg: #05101F;
       --code-text: #CFE2F5;
@@ -82,6 +88,9 @@
     --diff-hard: #C4B5FD;
     --diff-hard-bg: rgba(196,181,253,0.16);
     --diff-hard-line: rgba(196,181,253,0.35);
+    --streak: #FDBA74;
+    --streak-bg: rgba(253,186,116,0.16);
+    --streak-line: rgba(253,186,116,0.35);
     --input-bg: #1B2636;
     --code-bg: #05101F;
     --code-text: #CFE2F5;
@@ -652,6 +661,32 @@
     100%{ transform: scale(1); opacity: 1; }
   }
 
+  /* Distinct from .celebrate-badge (which marks a single hard question
+     answered correctly) -- this marks N consecutive correct answers in a
+     row, of any difficulty, and can appear alongside it on the same
+     question. */
+  .streak-badge{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--streak-bg);
+    border: 1px solid var(--streak-line);
+    color: var(--streak);
+    font-size: 13.5px;
+    font-weight: 700;
+    animation: celebrate-pop 0.35s ease;
+  }
+
+  .streak-badge svg{
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    color: var(--streak);
+  }
+
   .quiz-footer{
     display: flex;
     justify-content: flex-end;
@@ -777,6 +812,156 @@
 
   .attempt-status.done{
     border-left-color: var(--muted);
+  }
+
+  /* ---------- Overall performance meter (top of start screen) ---------- */
+
+  .perf-meter{
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 20px;
+    margin-bottom: 22px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--accent-tint);
+  }
+
+  .perf-meter .ring-wrap{
+    position: relative;
+    flex: 0 0 auto;
+    width: 72px;
+    height: 72px;
+  }
+
+  .perf-meter svg{ transform: rotate(-90deg); }
+
+  .perf-meter .ring-track{ stroke: var(--line); fill: none; }
+
+  .perf-meter .ring-fill{
+    stroke: var(--accent);
+    fill: none;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.7s ease;
+  }
+
+  .perf-meter .ring-pct{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16.5px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .perf-meter .ring-pct.empty{
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .perf-meter .meter-body{
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .perf-meter .meter-title{
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin: 0 0 5px;
+  }
+
+  .perf-meter .meter-desc{
+    font-size: 13.5px;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  .perf-meter .meter-action{
+    margin-top: 11px;
+  }
+
+  .perf-meter .meter-action .btn{
+    padding: 7px 16px;
+    font-size: 13px;
+  }
+
+  @media (max-width: 480px){
+    .perf-meter{ flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
+
+  /* ---------- My Progress screen ---------- */
+
+  .progress-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    margin-bottom: 10px;
+  }
+
+  .progress-row .pr-title{
+    font-weight: 700;
+    font-size: 14.5px;
+    margin: 0 0 3px;
+  }
+
+  .progress-row .pr-sub{
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .progress-row .pr-right{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+  }
+
+  .progress-row .pr-status{
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    border: 1px solid var(--line);
+  }
+
+  .progress-row .pr-status.not-started{
+    background: var(--bg);
+    color: var(--muted);
+  }
+
+  .progress-row .pr-status.in-progress{
+    background: var(--diff-moderate-bg);
+    color: var(--diff-moderate);
+    border-color: var(--diff-moderate-line);
+  }
+
+  .progress-row .pr-status.done{
+    background: var(--correct-bg);
+    color: var(--correct);
+    border-color: var(--correct-line);
+  }
+
+  .progress-row .pr-score{
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  @media (max-width: 480px){
+    .progress-row{ flex-direction: column; align-items: flex-start; gap: 8px; }
+    .progress-row .pr-right{ align-self: flex-end; }
   }
 
   .feedback-block{
@@ -944,6 +1129,62 @@
     gap: 12px;
     margin-top: 28px;
     flex-wrap: wrap;
+  }
+
+  /* ---------- WhatsApp "send a copy" (results screen) ---------- */
+
+  .whatsapp-send{
+    margin-top: 22px;
+    padding: 18px 20px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+  }
+
+  .whatsapp-title{
+    font-size: 13.5px;
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+
+  .whatsapp-row{
+    display: flex;
+    gap: 10px;
+  }
+
+  .whatsapp-row input[type="tel"]{
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 15px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--input-bg);
+    color: var(--ink);
+    font-family: inherit;
+  }
+
+  .whatsapp-row input[type="tel"]:focus{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+
+  .whatsapp-row .btn{
+    flex: 0 0 auto;
+    padding: 10px 20px;
+  }
+
+  .whatsapp-note{
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 10px 0 0;
+  }
+
+  @media (max-width: 480px){
+    .whatsapp-row{ flex-direction: column; }
+    .whatsapp-row .btn{ width: 100%; }
   }
 
   .hidden{ display: none !important; }

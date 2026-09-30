@@ -714,3 +714,84 @@
       }, 30);
     });
   }
+
+  // ------------------------------------------------------------------
+  // WhatsApp "send a copy" flow
+  //
+  // WhatsApp's click-to-chat link (wa.me) can only pre-fill a TEXT
+  // message -- there is no way for a plain static website to attach a
+  // file to it automatically (that needs the paid WhatsApp Business
+  // API, which this site doesn't have). The best honest approximation:
+  // download the same results PDF the "Download PDF" button produces,
+  // then open a WhatsApp chat with the student's number and a message
+  // already typed out, and tell the student to attach the file they
+  // just downloaded themselves before hitting send in WhatsApp. This
+  // is surfaced as normal status text, not hidden or glossed over.
+  // ------------------------------------------------------------------
+
+  // Accepts digits, spaces, dashes, parentheses, and an optional
+  // leading "+" or "00" international prefix; returns a plain digit
+  // string (what wa.me expects, country code + number, no "+") or null
+  // if what's left doesn't look like a real phone number.
+  function normalizeWhatsAppNumber(raw){
+    var s = (raw || "").trim();
+    if(s.indexOf("+") === 0) s = s.slice(1);
+    else if(s.indexOf("00") === 0) s = s.slice(2);
+    var digits = s.replace(/\D/g, "");
+    if(digits.length < 8 || digits.length > 15) return null;
+    return digits;
+  }
+
+  function buildWhatsAppMessage(ctx, report){
+    var namePart = ctx.name ? ctx.name + " — " : "";
+    return "Hi! Here's my practice quiz result for \"" + report.exam.title + "\": " +
+      report.correctCount + "/" + report.total + " (" + report.pct + "%). " +
+      "(" + namePart + (ctx.cls || "") + ") I've attached the PDF copy of my full results.";
+  }
+
+  function wireWhatsAppButton(btn, phoneInput, statusEl, getCtx){
+    btn.addEventListener("click", function(){
+      if(btn.disabled) return;
+      if(statusEl) statusEl.textContent = "";
+
+      var ctx = getCtx();
+      if(!ctx){
+        if(statusEl) statusEl.textContent = "Nothing to send yet.";
+        return;
+      }
+
+      var digits = normalizeWhatsAppNumber(phoneInput ? phoneInput.value : "");
+      if(!digits){
+        if(statusEl) statusEl.textContent = "Enter a valid WhatsApp number with your country code (8–15 digits), e.g. 9665XXXXXXXX.";
+        if(phoneInput) phoneInput.focus();
+        return;
+      }
+
+      btn.disabled = true;
+      var originalLabel = btn.textContent;
+      btn.textContent = "Preparing…";
+
+      setTimeout(async function(){
+        try{
+          var report = computeReport(ctx);
+          var blob = buildResultsPDF(ctx);
+          if(!blob){
+            if(statusEl) statusEl.textContent = "Couldn't generate the PDF in this browser. Try again.";
+            return;
+          }
+          await offerPdfDownload(pdfFilename(ctx), blob);
+          var message = buildWhatsAppMessage(ctx, report);
+          var waUrl = "https://wa.me/" + digits + "?text=" + encodeURIComponent(message);
+          window.open(waUrl, "_blank", "noopener");
+          if(statusEl){
+            statusEl.textContent = "Your PDF downloaded, and WhatsApp is opening with a message ready — attach the downloaded PDF yourself before you hit send (WhatsApp doesn't let a website attach it for you).";
+          }
+        } catch(err){
+          if(statusEl) statusEl.textContent = "Something went wrong. Please try again.";
+        } finally {
+          btn.disabled = false;
+          btn.textContent = originalLabel;
+        }
+      }, 30);
+    });
+  }
