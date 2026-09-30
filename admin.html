@@ -129,15 +129,6 @@
 
   .admin-detail-back{ margin-bottom: 16px; }
 
-  .admin-note{
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px dashed var(--line);
-  }
-
   .empty-note{
     font-size: 13.5px;
     color: var(--muted);
@@ -249,7 +240,6 @@
     </div>
     <p class="cohort-note"><button class="link-btn" id="link-admin-forgot-password" type="button">Forgot your password?</button></p>
     <p class="cohort-note" id="login-status" aria-live="polite">Checking your account…</p>
-    <p class="admin-note">There is no sign-up here — new admin logins can't be created from this page. Only <strong>ashraf2k</strong> is recognized as the teacher/admin account, and access is enforced by this project's Firestore security rules, not by this page, so only that email can ever see student data however this page is reached.</p>
   </section>
 
   <!-- ============ DASHBOARD SCREEN ============ -->
@@ -259,6 +249,7 @@
         <option value="">All exams</option>
       </select>
       <button class="btn btn-secondary" id="btn-refresh">Refresh data</button>
+      <a class="btn btn-secondary" href="index.html" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">Home</a>
       <button class="btn btn-secondary" id="btn-logout">Log out</button>
     </div>
     <p class="admin-status" id="admin-status">Loading…</p>
