@@ -24,6 +24,7 @@ import {
   doc,
   getDoc,
   setDoc,
+  deleteDoc,
   collection,
   getDocs,
   query,
@@ -185,6 +186,19 @@ function listAllAttempts(){
   });
 }
 
+// Admin-only (enforced by security rules, not just this check): wipes a
+// single student's attempt at a single exam, letting them take it again
+// as if they'd never attempted it -- the next write for that
+// uid+examKey is treated as a brand-new attemptNumber 1 (see the
+// "create" rule in firestore.rules, which requires the document not to
+// already exist). This is the only way to undo the "at most two
+// attempts" limit for a student who, say, submitted a test run by
+// mistake or whose retake also needs clearing.
+function deleteAttempt(uid, examKey){
+  return deleteDoc(doc(db, "attempts", attemptId(uid, examKey)))
+    .then(function(){ return { ok: true }; });
+}
+
 window.PQFirebase = {
   signUp: signUp,
   logIn: logIn,
@@ -194,5 +208,6 @@ window.PQFirebase = {
   getMyProfile: getMyProfile,
   getMyAttempt: getMyAttempt,
   recordAttempt: recordAttempt,
-  listAllAttempts: listAllAttempts
+  listAllAttempts: listAllAttempts,
+  deleteAttempt: deleteAttempt
 };

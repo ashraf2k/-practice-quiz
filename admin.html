@@ -312,8 +312,10 @@
         <div class="admin-toolbar no-print">
           <button class="btn btn-secondary admin-detail-back" id="btn-back">← Back to student list</button>
           <button class="btn btn-primary" id="btn-detail-print">Download PDF</button>
+          <button class="btn btn-danger" id="btn-detail-reset">Reset this attempt</button>
         </div>
         <p class="admin-status no-print" id="detail-print-status"></p>
+        <p class="admin-status no-print" id="detail-reset-status"></p>
         <div id="student-detail"></div>
       </div>
     </div>
@@ -518,6 +520,7 @@
   // than rename every reference, normalize once here.
   function normalizeAttempt(raw){
     return {
+      uid: raw.uid,
       exam: raw.examKey,
       name: raw.name,
       className: raw.class,
@@ -687,10 +690,10 @@
   }
 
   // Groups flat attempt rows into one entry per (name, class) pair. Name
-  // alone isn't a safe key across different classes; uid isn't in the
-  // normalized shape here, and two different students sharing both the
-  // same name AND class is rare enough that teachers can tell them apart
-  // from the attempt list if it ever happens.
+  // alone isn't a safe key across different classes, and two different
+  // students sharing both the same name AND class is rare enough that
+  // teachers can tell them apart from the attempt list if it ever happens
+  // (uid is available on each row if that's ever worth keying on instead).
   function groupByStudent(rows){
     var groups = {};
     var order = [];
@@ -955,11 +958,17 @@
   // Student detail (reuses buildReportFragment + PDF from report-lib.js)
   // ============================================================
   var detailCtx = null;
+  // The raw (normalized) attempt record behind the currently-open detail
+  // view -- kept separately from detailCtx because detailCtx is reshaped
+  // for buildReportFragment()/the PDF and drops uid, which the reset
+  // button below needs.
+  var detailAttempt = null;
   // Where "← Back" should return to -- the flat Students list, or the
   // By-student profile this detail was opened from.
   var detailReturnTo = "students";
 
   function openDetail(attempt, returnTo){
+    detailAttempt = attempt;
     detailReturnTo = returnTo || "students";
     document.getElementById("btn-back").textContent = detailReturnTo === "profile"
       ? "← Back to " + (attempt.name || "student") + "'s history"
@@ -991,11 +1000,65 @@
     }
     container.appendChild(buildReportFragment(detailCtx));
     document.getElementById("detail-print-status").textContent = "";
+    var resetStatusEl = document.getElementById("detail-reset-status");
+    resetStatusEl.textContent = "";
+    resetStatusEl.classList.remove("warn");
+    document.getElementById("btn-detail-reset").disabled = false;
     showTab("detail");
   }
 
   document.getElementById("btn-back").addEventListener("click", function(){
     showTab(detailReturnTo);
+  });
+
+  // ------------------------------------------------------------
+  // Reset (delete) this attempt -- lets the student take the exam again
+  // from scratch, as if they'd never submitted it (enforced server-side:
+  // firestore.rules only allows the admin account to delete an attempt
+  // doc at all, and the next write for that uid+examKey is then treated
+  // as a brand-new attemptNumber 1, same as a student who's never
+  // attempted it).
+  // ------------------------------------------------------------
+  document.getElementById("btn-detail-reset").addEventListener("click", function(){
+    if(!detailAttempt || !detailAttempt.uid){
+      document.getElementById("detail-reset-status").textContent = "Can't reset this attempt — it's missing the student's account id.";
+      document.getElementById("detail-reset-status").classList.add("warn");
+      return;
+    }
+    var studentName = detailAttempt.name || "this student";
+    var examKey = detailAttempt.exam || "dp";
+    var confirmed = window.confirm(
+      "Reset " + studentName + "'s attempt at \"" + examLabel(examKey) + "\"?\n\n" +
+      "This permanently deletes their saved answers and score for this exam, and lets them take it again from scratch (a fresh 1st attempt, with the retake available again too). This cannot be undone."
+    );
+    if(!confirmed) return;
+
+    var resetBtn = document.getElementById("btn-detail-reset");
+    var resetStatusEl = document.getElementById("detail-reset-status");
+    resetBtn.disabled = true;
+    document.getElementById("btn-detail-print").disabled = true;
+    resetStatusEl.classList.remove("warn");
+    resetStatusEl.textContent = "Resetting…";
+
+    PQFirebase.deleteAttempt(detailAttempt.uid, examKey).then(function(){
+      // Drop it from the locally-cached list too, so every tab's counts
+      // and tables are correct immediately, without waiting on a manual
+      // "Refresh data" click or re-fetching from Firestore.
+      attempts = attempts.filter(function(a){
+        return !(a.uid === detailAttempt.uid && (a.exam || "dp") === examKey);
+      });
+      renderAll();
+      adminStatus.classList.remove("warn");
+      adminStatus.textContent = "Reset " + studentName + "'s attempt at " + examLabel(examKey) + " — they can take it again from scratch.";
+      showTab(detailReturnTo);
+    }).catch(function(err){
+      resetBtn.disabled = false;
+      document.getElementById("btn-detail-print").disabled = false;
+      resetStatusEl.classList.add("warn");
+      resetStatusEl.textContent = (err && err.code === "permission-denied")
+        ? "Firestore denied this request — this account isn't recognised as admin by firestore.rules (check isAdmin() there)."
+        : "Couldn't reset this attempt. Check your internet connection and try again.";
+    });
   });
 
   wirePdfButton(

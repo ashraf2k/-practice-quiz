@@ -16,7 +16,10 @@
 //     A third attempt (another update once attemptNumber is already 2)
 //     is rejected outright, and so is anyone trying to touch someone
 //     else's attempt or switch which exam/uid a document belongs to.
-//   - No one can ever delete a submitted attempt.
+//   - A submitted attempt can never be deleted by the student -- only
+//     the teacher's own account can delete one, to reset a student back
+//     to "no attempt yet" for that exam (e.g. a mistaken test run, or
+//     clearing a used-up retake so they can try again).
 //   - Only the teacher's own account (matched by email below) can list
 //     every attempt across every student, which is what powers the
 //     admin dashboard.
@@ -71,7 +74,10 @@ service cloud.firestore {
                     && (resource.data.attemptNumber == 1 || !('attemptNumber' in resource.data))
                     && request.resource.data.attemptNumber == 2;
 
-      allow delete: if false;
+      // Only the teacher/admin account can delete an attempt (a student
+      // never can) -- this is the "reset" action in the admin dashboard,
+      // letting that student take the exam fresh again.
+      allow delete: if isAdmin();
     }
   }
 }

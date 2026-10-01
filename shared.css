@@ -313,6 +313,18 @@
 
   .btn-secondary:hover{ background: var(--accent-tint); }
 
+  /* Destructive admin actions (resetting/deleting a student's attempt) --
+     reuses the existing --incorrect red token rather than introducing a
+     new color, so it already has light/dark variants for free. */
+  .btn-danger{
+    background: transparent;
+    color: var(--incorrect);
+    border: 1px solid var(--incorrect-line);
+  }
+
+  .btn-danger:hover{ background: var(--incorrect-bg); }
+  .btn-danger:disabled{ opacity: 0.6; cursor: default; }
+
   .btn-row{
     display: flex;
     gap: 12px;
