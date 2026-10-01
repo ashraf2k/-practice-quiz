@@ -21,6 +21,9 @@
     --card-2: #2B5FC4; --card-2-bg: #E9F0FE; --card-2-line: #CBDDFB;
     --card-3: #A8580E; --card-3-bg: #FBEEE0; --card-3-line: #F2D9BB;
     --shadow: 0 1px 2px rgba(22,33,59,0.04), 0 12px 28px -12px rgba(22,33,59,0.14);
+    /* The logo artwork is drawn in navy/blue for a light backdrop, so it
+       needs no plate here -- it sits straight on the page background. */
+    --logo-plate: transparent;
   }
 
   @media (prefers-color-scheme: dark){
@@ -40,6 +43,10 @@
       --card-2: #8AB2FF; --card-2-bg: rgba(91,140,246,0.14); --card-2-line: rgba(91,140,246,0.32);
       --card-3: #F0A860; --card-3-bg: rgba(240,168,96,0.14); --card-3-line: rgba(240,168,96,0.32);
       --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 16px 32px -14px rgba(0,0,0,0.5);
+      /* Its navy text would disappear against a dark page, so here it gets
+         a small near-white plate of its own -- the same backdrop the
+         artwork was actually drawn for. */
+      --logo-plate: #F7F7F8;
     }
   }
   :root[data-theme="dark"]{
@@ -58,6 +65,7 @@
     --card-2: #8AB2FF; --card-2-bg: rgba(91,140,246,0.14); --card-2-line: rgba(91,140,246,0.32);
     --card-3: #F0A860; --card-3-bg: rgba(240,168,96,0.14); --card-3-line: rgba(240,168,96,0.32);
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 16px 32px -14px rgba(0,0,0,0.5);
+    --logo-plate: #F7F7F8;
   }
 
   *{ box-sizing: border-box; }
@@ -118,31 +126,28 @@
 
   header.top .brand{
     display: flex;
-    align-items: center;
-    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
   }
 
-  header.top .mark{
-    flex: 0 0 auto;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-    background: var(--accent-tint);
-    border-radius: 11px;
-  }
-
-  header.top h1{
-    font-size: 16.5px;
-    font-weight: 700;
+  header.top .logo-wrap{
     margin: 0;
-    letter-spacing: -0.01em;
+    line-height: 0;
+    background: var(--logo-plate);
+    border-radius: 10px;
+    padding: 6px 10px;
+    transition: background 0.15s;
+  }
+
+  header.top .logo-img{
+    display: block;
+    height: 76px;
+    width: auto;
   }
 
   header.top p{
-    margin: 1px 0 0;
+    margin: 0;
     font-size: 12px;
     color: var(--muted);
   }
@@ -347,17 +352,8 @@
 
   <header class="top">
     <div class="brand">
-      <div class="mark" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M17 3 L28 7 V16 C28 23.5 23.3 28.8 17 31 C10.7 28.8 6 23.5 6 16 V7 L17 3 Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-          <circle cx="17" cy="15.5" r="3.4" stroke="currentColor" stroke-width="1.8"/>
-          <path d="M13 22 C13 19 21 19 21 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div>
-        <h1>Computer Science Practice Hub</h1>
-        <p>By Mr. Ashraf Elbialy</p>
-      </div>
+      <h1 class="logo-wrap"><img class="logo-img" src="logo.png" alt="iLearnCS — Learn, Practice, Master Computer Science"></h1>
+      <p>Computer Science Learn & Practice Hub</p>
     </div>
     <a class="admin-link" href="admin.html">Teacher login</a>
   </header>
@@ -426,7 +422,7 @@
     </div>
   </div>
 
-  <footer class="foot">Shared by your teacher for exam practice</footer>
+  <footer class="foot">iLearnCS — shared by Mr. Ashraf Elbialy for exam practice</footer>
 
 </div>
 </body>
