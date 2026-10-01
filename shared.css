@@ -28,6 +28,9 @@
     --input-bg: #FCFDFE;
     --code-bg: #0F2137;
     --code-text: #DCE9F7;
+    /* The logo artwork is drawn in navy/blue for a light backdrop, so it
+       needs no plate here -- it sits straight on the page background. */
+    --logo-plate: transparent;
   }
 
   @media (prefers-color-scheme: dark){
@@ -61,6 +64,10 @@
       --input-bg: #1B2636;
       --code-bg: #05101F;
       --code-text: #CFE2F5;
+      /* Its navy text would disappear against a dark page, so here it gets
+         a small near-white plate of its own -- the same backdrop the
+         artwork was actually drawn for. */
+      --logo-plate: #F7F7F8;
     }
   }
 
@@ -94,6 +101,7 @@
     --input-bg: #1B2636;
     --code-bg: #05101F;
     --code-text: #CFE2F5;
+    --logo-plate: #F7F7F8;
   }
 
   *{ box-sizing: border-box; }
@@ -131,14 +139,20 @@
     padding: 0 4px;
   }
 
-  header.top .mark{
+  header.top .logo-link{
     flex: 0 0 auto;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
+    display: block;
+    line-height: 0;
+    background: var(--logo-plate);
+    border-radius: 8px;
+    padding: 3px 5px;
+    transition: background 0.15s;
+  }
+
+  header.top .logo-img{
+    display: block;
+    height: 48px;
+    width: auto;
   }
 
   header.top h1{
