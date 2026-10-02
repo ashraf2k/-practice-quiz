@@ -20,6 +20,7 @@
     --card-1: #146C6A; --card-1-bg: #E4F1F0; --card-1-line: #C7E3E1;
     --card-2: #2B5FC4; --card-2-bg: #E9F0FE; --card-2-line: #CBDDFB;
     --card-3: #A8580E; --card-3-bg: #FBEEE0; --card-3-line: #F2D9BB;
+    --card-4: #7C3AED; --card-4-bg: #EEE7FC; --card-4-line: #D9C9F7;
     --shadow: 0 1px 2px rgba(22,33,59,0.04), 0 12px 28px -12px rgba(22,33,59,0.14);
     /* The logo artwork is drawn in navy/blue for a light backdrop, so it
        needs no plate here -- it sits straight on the page background. */
@@ -42,6 +43,7 @@
       --card-1: #5BD6CE; --card-1-bg: rgba(59,182,175,0.14); --card-1-line: rgba(59,182,175,0.32);
       --card-2: #8AB2FF; --card-2-bg: rgba(91,140,246,0.14); --card-2-line: rgba(91,140,246,0.32);
       --card-3: #F0A860; --card-3-bg: rgba(240,168,96,0.14); --card-3-line: rgba(240,168,96,0.32);
+      --card-4: #C4B5FD; --card-4-bg: rgba(196,181,253,0.16); --card-4-line: rgba(196,181,253,0.35);
       --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 16px 32px -14px rgba(0,0,0,0.5);
       /* Its navy text would disappear against a dark page, so here it gets
          a small near-white plate of its own -- the same backdrop the
@@ -64,6 +66,7 @@
     --card-1: #5BD6CE; --card-1-bg: rgba(59,182,175,0.14); --card-1-line: rgba(59,182,175,0.32);
     --card-2: #8AB2FF; --card-2-bg: rgba(91,140,246,0.14); --card-2-line: rgba(91,140,246,0.32);
     --card-3: #F0A860; --card-3-bg: rgba(240,168,96,0.14); --card-3-line: rgba(240,168,96,0.32);
+    --card-4: #C4B5FD; --card-4-bg: rgba(196,181,253,0.16); --card-4-line: rgba(196,181,253,0.35);
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 16px 32px -14px rgba(0,0,0,0.5);
     --logo-plate: #F7F7F8;
   }
@@ -110,7 +113,7 @@
 
   .wrap{
     width: 100%;
-    max-width: 640px;
+    max-width: 680px;
     position: relative;
     z-index: 1;
   }
@@ -120,7 +123,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     padding: 0 4px;
   }
 
@@ -162,16 +165,19 @@
     border: 1px solid var(--line);
     border-radius: 999px;
     white-space: nowrap;
-    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    display: inline-block;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
   }
   .admin-link:hover{
     color: var(--accent);
     border-color: var(--card-1-line);
     background: var(--accent-tint);
+    transform: translateY(-1px);
   }
+  .admin-link:active{ transform: translateY(0); }
 
   .hero{
-    padding: 6px 6px 30px;
+    padding: 6px 6px 28px;
     text-align: center;
   }
 
@@ -191,8 +197,8 @@
   }
 
   .hero h2{
-    font-size: 30px;
-    line-height: 1.18;
+    font-size: 29px;
+    line-height: 1.2;
     margin: 0 0 12px;
     letter-spacing: -0.02em;
   }
@@ -201,7 +207,7 @@
     color: var(--muted);
     font-size: 15px;
     line-height: 1.6;
-    margin: 0 auto 26px;
+    margin: 0 auto 24px;
     max-width: 460px;
   }
 
@@ -221,7 +227,9 @@
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .cta:hover{ transform: translateY(-1px); box-shadow: 0 14px 28px -8px rgba(20,108,106,0.55); }
+  .cta svg{ transition: transform 0.15s ease; }
+  .cta:hover{ transform: translateY(-2px); box-shadow: 0 16px 30px -8px rgba(20,108,106,0.55); }
+  .cta:hover svg{ transform: translateX(3px); }
   .cta:active{ transform: translateY(0); }
 
   .cta:focus-visible{
@@ -242,31 +250,51 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--muted);
-    margin: 0 0 12px;
+    margin: 0 0 6px;
+    padding: 0 4px;
+  }
+
+  .topics-hint{
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 0 0 14px;
     padding: 0 4px;
   }
 
   .topics{
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 12px;
     margin-bottom: 30px;
   }
 
-  @media (max-width: 620px){
+  @media (max-width: 480px){
     .topics{ grid-template-columns: 1fr; }
   }
 
   .topic-card{
+    display: block;
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 14px;
     padding: 20px 18px;
     box-shadow: var(--shadow);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   }
 
-  .topic-card:hover{ transform: translateY(-2px); }
+  .topic-card:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 18px 34px -16px rgba(22,33,59,0.24);
+  }
+  .topic-card:active{ transform: translateY(-1px); }
+
+  .topic-card:focus-visible{
+    outline: 2px solid var(--accent-dark);
+    outline-offset: 2px;
+  }
 
   .topic-card .icon{
     width: 34px;
@@ -280,6 +308,7 @@
   .topic-card.c1 .icon{ background: var(--card-1-bg); color: var(--card-1); }
   .topic-card.c2 .icon{ background: var(--card-2-bg); color: var(--card-2); }
   .topic-card.c3 .icon{ background: var(--card-3-bg); color: var(--card-3); }
+  .topic-card.c4 .icon{ background: var(--card-4-bg); color: var(--card-4); }
 
   .topic-card .badge{
     display: inline-block;
@@ -292,6 +321,7 @@
   .topic-card.c1 .badge{ background: var(--card-1-bg); color: var(--card-1); border: 1px solid var(--card-1-line); }
   .topic-card.c2 .badge{ background: var(--card-2-bg); color: var(--card-2); border: 1px solid var(--card-2-line); }
   .topic-card.c3 .badge{ background: var(--card-3-bg); color: var(--card-3); border: 1px solid var(--card-3-line); }
+  .topic-card.c4 .badge{ background: var(--card-4-bg); color: var(--card-4); border: 1px solid var(--card-4-line); }
 
   .topic-card h3{
     font-size: 15px;
@@ -306,33 +336,28 @@
     margin: 0;
   }
 
-  .features{
-    background: var(--surface-soft);
-    border: 1px solid var(--line);
+  .topic-card .go{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 14px;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .topic-card.c1 .go{ color: var(--card-1); }
+  .topic-card.c2 .go{ color: var(--card-2); }
+  .topic-card.c3 .go{ color: var(--card-3); }
+  .topic-card.c4 .go{ color: var(--card-4); }
+  .topic-card .go svg{ transition: transform 0.15s ease; }
+  .topic-card:hover .go svg{ transform: translateX(3px); }
+
+  .topics-empty{
+    font-size: 13px;
+    color: var(--muted);
+    padding: 16px;
+    text-align: center;
+    border: 1px dashed var(--line);
     border-radius: 14px;
-    padding: 20px 20px;
-    margin-bottom: 26px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px 18px;
-  }
-
-  @media (max-width: 480px){
-    .features{ grid-template-columns: 1fr; }
-  }
-
-  .features .feature{
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 13.5px;
-    line-height: 1.45;
-  }
-
-  .features .feature svg{
-    flex: 0 0 auto;
-    margin-top: 1px;
-    color: var(--accent);
   }
 
   .cta-wrap{
@@ -364,7 +389,7 @@
       Practice portal
     </span>
     <h2>Practice a little, understand a lot more.</h2>
-    <p class="lede">Short, focused quizzes built around exactly what your class is studying right now — instant feedback on every answer, and a report for your teacher at the end.</p>
+    <p class="lede">Short, focused quizzes for exactly what your class is studying right now — instant feedback on every answer, and a report for your teacher at the end.</p>
     <div class="cta-wrap">
       <a class="cta" href="quiz.html">
         Start the practice quiz
@@ -374,56 +399,106 @@
     </div>
   </section>
 
-  <p class="section-label">Choose your topic based on your class</p>
-  <div class="topics">
-    <div class="topic-card c1">
-      <div class="icon" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L19 6V11C19 15.5 16 19 12 21C8 19 5 15.5 5 11V6L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 12L11.5 14L15 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <span class="badge">10AM1 – 10AM6</span>
-      <h3>Data Privacy Practice</h3>
-      <p>Unit 1: Technology, IP &amp; Security — real data-breach case studies, profiling, surveillance, and protecting your digital footprint.</p>
-    </div>
-    <div class="topic-card c2">
-      <div class="icon" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4V9M12 9L7 13M12 9L17 13M7 13V18M17 13V18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="4" r="1.6" fill="currentColor"/><circle cx="7" cy="18" r="1.6" fill="currentColor"/><circle cx="17" cy="18" r="1.6" fill="currentColor"/></svg>
-      </div>
-      <span class="badge">10BR1 – 10BR3</span>
-      <h3>IGCSE 0478: Conditional Statements</h3>
-      <p>Selection (IF / CASE) statements and the Program Development Life Cycle — one of two IGCSE Computer Science topics to pick from.</p>
-    </div>
-    <div class="topic-card c3">
-      <div class="icon" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M11 7.5H14.5C15.6 7.5 16.5 8.4 16.5 9.5V13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      </div>
-      <span class="badge">10BR1 – 10BR3</span>
-      <h3>IGCSE 0478: Algorithm Design &amp; Problem-Solving</h3>
-      <p>Abstraction &amp; decomposition, standard algorithms, validation &amp; verification, and trace tables — the second IGCSE topic choice.</p>
-    </div>
+  <p class="section-label">Available practice topics</p>
+  <p class="topics-hint">Tap a topic below to jump straight to it once you're logged in.</p>
+  <div class="topics" id="topics-wrap">
+    <!-- Filled in from quiz-data.js by the script at the bottom of the
+         page, so this list can never go stale when a topic is added. -->
   </div>
-
-  <p class="section-label">What you get</p>
-  <div class="features">
-    <div class="feature">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span>Instant feedback and an explanation after every answer</span>
-    </div>
-    <div class="feature">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span>A "Streak" badge and celebration every 5 correct answers in a row</span>
-    </div>
-    <div class="feature">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span>Your teacher's feedback on strengths and weaknesses at the end</span>
-    </div>
-    <div class="feature">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span>Download your results as a PDF when you're done</span>
-    </div>
-  </div>
+  <noscript><p class="topics-empty">Enable JavaScript to see the list of available practice topics, or go straight to the <a href="quiz.html">practice quiz</a>.</p></noscript>
 
   <footer class="foot">iLearnCS — shared by Mr. Ashraf Elbialy for exam practice</footer>
 
 </div>
+
+<script src="quiz-data.js"></script>
+<script>
+(function(){
+  // Curated heading/colour/icon per exam key, so the cards look
+  // hand-designed rather than auto-generated. Any FUTURE exam key added
+  // to quiz-data.js that isn't listed here still gets a card (via the
+  // fallback below) instead of silently vanishing from this page.
+  var META = {
+    dp: {
+      heading: "Data Privacy Practice",
+      color: "c1",
+      icon: '<path d="M12 3L19 6V11C19 15.5 16 19 12 21C8 19 5 15.5 5 11V6L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 12L11.5 14L15 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
+    },
+    datarep: {
+      heading: "Topic 1: Data Representation",
+      color: "c4",
+      icon: '<rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.5" fill="currentColor"/><rect x="4" y="13" width="7" height="7" rx="1.5" fill="currentColor"/><rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>'
+    },
+    igcse: {
+      heading: "Conditional Statements & SDLC",
+      color: "c2",
+      icon: '<path d="M12 4V9M12 9L7 13M12 9L17 13M7 13V18M17 13V18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="4" r="1.6" fill="currentColor"/><circle cx="7" cy="18" r="1.6" fill="currentColor"/><circle cx="17" cy="18" r="1.6" fill="currentColor"/>'
+    },
+    algo: {
+      heading: "Topic 7: Algorithm Design & Problem-Solving",
+      color: "c3",
+      icon: '<rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M11 7.5H14.5C15.6 7.5 16.5 8.4 16.5 9.5V13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
+    }
+  };
+  var FALLBACK_ICON = '<circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8V13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16" r="0.9" fill="currentColor"/>';
+  var FALLBACK_COLORS = ["c1","c2","c3","c4"];
+  var GO_ARROW = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function formatClasses(arr){
+    if(!arr || arr.length === 0) return "";
+    if(arr.length === 1) return arr[0];
+    return arr[0] + " – " + arr[arr.length - 1];
+  }
+
+  var wrap = document.getElementById("topics-wrap");
+  var keys = (typeof EXAMS === "object" && EXAMS) ? Object.keys(EXAMS) : [];
+
+  if(keys.length === 0){
+    var empty = document.createElement("p");
+    empty.className = "topics-empty";
+    empty.textContent = "No practice topics are set up yet — check back soon.";
+    wrap.appendChild(empty);
+    return;
+  }
+
+  keys.forEach(function(key, i){
+    var exam = EXAMS[key];
+    var meta = META[key] || { heading: exam.title, color: FALLBACK_COLORS[i % FALLBACK_COLORS.length], icon: FALLBACK_ICON };
+
+    var card = document.createElement("a");
+    card.className = "topic-card " + meta.color;
+    // The class/topic dropdown on quiz.html reads this once, right after
+    // login, and pre-selects it -- see refreshTopicField() there. Safe to
+    // always pass: a class that doesn't offer this topic just ignores it.
+    card.href = "quiz.html?topic=" + encodeURIComponent(key);
+
+    var iconWrap = document.createElement("div");
+    iconWrap.className = "icon";
+    iconWrap.setAttribute("aria-hidden", "true");
+    iconWrap.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' + meta.icon + '</svg>';
+    card.appendChild(iconWrap);
+
+    var badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = formatClasses(exam.classes);
+    card.appendChild(badge);
+
+    var h3 = document.createElement("h3");
+    h3.textContent = meta.heading;
+    card.appendChild(h3);
+
+    var p = document.createElement("p");
+    p.textContent = exam.subtitle || "";
+    card.appendChild(p);
+
+    var go = document.createElement("span");
+    go.className = "go";
+    go.innerHTML = "Start practice " + GO_ARROW;
+    card.appendChild(go);
+
+    wrap.appendChild(card);
+  });
+})();
+</script>
 </body>
 </html>

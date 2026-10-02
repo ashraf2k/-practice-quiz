@@ -515,6 +515,16 @@
   var startStatus = document.getElementById("start-status");
   var btnStart = document.getElementById("btn-start");
 
+  // index.html's topic cards link here as quiz.html?topic=<key> so a
+  // student who already knows which topic they want lands with it
+  // pre-selected instead of having to find it again in the dropdown.
+  // Consumed (and cleared) the first time it's actually usable, in
+  // refreshTopicField() below, so it never fights a later manual change.
+  var urlTopicPreselect = (function(){
+    try { return new URLSearchParams(window.location.search).get("topic") || null; }
+    catch(e){ return null; }
+  })();
+
   // Some classes (currently the IGCSE 10BR classes) have more than one
   // practice topic to pick from — show a second dropdown for those, built
   // from quiz-data.js's examChoicesForClass(), and hide/reset it otherwise.
@@ -530,6 +540,10 @@
         inputTopic.appendChild(opt);
       });
       fieldTopic.classList.remove("hidden");
+      if(urlTopicPreselect && choices.some(function(c){ return c.key === urlTopicPreselect; })){
+        inputTopic.value = urlTopicPreselect;
+      }
+      urlTopicPreselect = null; // only ever honoured once
     } else {
       fieldTopic.classList.add("hidden");
       inputTopic.innerHTML = '<option value="" disabled selected>Choose a topic</option>';
