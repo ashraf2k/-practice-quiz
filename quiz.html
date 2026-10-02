@@ -393,8 +393,84 @@
     // Consecutive correct answers so far this attempt (any difficulty),
     // reset to 0 on a wrong answer. A "Streak!" badge shows at every
     // multiple of 5.
-    streak: 0
+    streak: 0,
+    // Only used for exams with EXAMS[key].adaptive === true (currently
+    // just "datarep"). { level, streak } -- see buildAdaptiveState() and
+    // updateAdaptiveLevel() below. null for every non-adaptive exam, and
+    // never written to Firestore: it only decides the live ORDER
+    // questions are served in, not what's scored or stored.
+    adapt: null
   };
+
+  // ---------- Live difficulty-adaptive question ordering ----------
+  // Opt-in per exam (EXAMS[key].adaptive) so dp/igcse/algo keep their
+  // existing fixed-shuffle behaviour untouched.
+  var ADAPT_LEVELS = ["easy", "moderate", "hard"];
+
+  // One-time per attempt: splits the exam's questions into their two
+  // section pools (same split buildAttemptShuffle always used) and
+  // independently shuffles each pool, so same-difficulty ties still come
+  // out in a different order every attempt. Starts the adaptive level at
+  // the easiest tier.
+  function buildAdaptiveState(examKey){
+    var exam = EXAMS[examKey];
+    var qs = examQuestions(examKey);
+    var aCount = exam.sectionA.count;
+    var poolA = [], poolB = [];
+    qs.forEach(function(q, i){ (i < aCount ? poolA : poolB).push(i); });
+    return { level: 0, streak: 0, poolA: shuffled(poolA), poolB: shuffled(poolB) };
+  }
+
+  // Removes and returns the canonical index of the best-matching question
+  // left in `pool` for the desired difficulty level (0=easy, 1=moderate,
+  // 2=hard): tries that level first, then the next-nearest levels, so the
+  // pool is never left stranded once one difficulty tier runs dry -- every
+  // question in the pool still gets served exactly once, just not always
+  // at the "ideal" difficulty once a tier is exhausted.
+  function pickFromPool(pool, desiredLevel){
+    var qs = examQuestions(state.examKey);
+    var tierOrder = [0, 1, 2].slice().sort(function(a, b){
+      return Math.abs(a - desiredLevel) - Math.abs(b - desiredLevel);
+    });
+    for(var t = 0; t < tierOrder.length; t++){
+      for(var i = 0; i < pool.length; i++){
+        var q = qs[pool[i]];
+        var qLevel = ADAPT_LEVELS.indexOf(q.difficulty || "moderate");
+        if(qLevel === tierOrder[t]) return pool.splice(i, 1)[0];
+      }
+    }
+    return pool.shift(); // pool is non-empty whenever this is called
+  }
+
+  // Section A's own pool is always drained first (matching the section
+  // ordering every other exam already uses), then Section B's.
+  function pickNextAdaptiveIndex(){
+    var adapt = state.adapt;
+    var pool = adapt.poolA.length > 0 ? adapt.poolA : adapt.poolB;
+    return pickFromPool(pool, adapt.level);
+  }
+
+  // Called right after an answer is scored, for adaptive exams only. Two
+  // correct answers in a row step the level up one tier (capped at
+  // "hard"); any wrong answer steps it down one tier immediately (floored
+  // at "easy"). Returns the new level index when this answer just pushed
+  // the level UP (so the caller can show the "leveling up" banner), or
+  // null otherwise.
+  function updateAdaptiveLevel(isCorrect){
+    var adapt = state.adapt;
+    var oldLevel = adapt.level;
+    if(isCorrect){
+      adapt.streak++;
+      if(adapt.streak >= 2 && adapt.level < ADAPT_LEVELS.length - 1){
+        adapt.level++;
+        adapt.streak = 0;
+      }
+    } else {
+      adapt.streak = 0;
+      if(adapt.level > 0) adapt.level--;
+    }
+    return adapt.level > oldLevel ? adapt.level : null;
+  }
 
   // Fisher-Yates shuffle — returns a new array, leaves the input untouched.
   function shuffled(arr){
@@ -414,15 +490,21 @@
   function buildAttemptShuffle(examKey){
     var exam = EXAMS[examKey];
     var qs = examQuestions(examKey);
-    var aCount = exam.sectionA.count;
-
-    var indicesA = [], indicesB = [];
-    qs.forEach(function(q, i){ (i < aCount ? indicesA : indicesB).push(i); });
-
-    var questionOrder = shuffled(indicesA).concat(shuffled(indicesB));
     var optionOrder = qs.map(function(q){
       return shuffled(q.options.map(function(_, i){ return i; }));
     });
+
+    if(exam.adaptive){
+      // questionOrder is grown one pick at a time as the student answers
+      // (see pickNextAdaptiveIndex() / the btnNext handler) rather than
+      // fully precomputed here -- start empty.
+      return { questionOrder: [], optionOrder: optionOrder };
+    }
+
+    var aCount = exam.sectionA.count;
+    var indicesA = [], indicesB = [];
+    qs.forEach(function(q, i){ (i < aCount ? indicesA : indicesB).push(i); });
+    var questionOrder = shuffled(indicesA).concat(shuffled(indicesB));
 
     return { questionOrder: questionOrder, optionOrder: optionOrder };
   }
@@ -748,11 +830,14 @@
     streakStarLayer.classList.remove("show");
     streakStarLayer.innerHTML = "";
 
+    var exam = EXAMS[examKey];
+    state.adapt = exam.adaptive ? buildAdaptiveState(examKey) : null;
+
     var shuffle = buildAttemptShuffle(examKey);
     state.questionOrder = shuffle.questionOrder;
     state.optionOrder = shuffle.optionOrder;
+    if(exam.adaptive) state.questionOrder.push(pickNextAdaptiveIndex());
 
-    var exam = EXAMS[examKey];
     setHeader(exam.title, exam.subtitle);
     showScreen("quiz");
     renderQuestion();
@@ -929,11 +1014,16 @@
     state.streak = isCorrect ? (state.streak || 0) + 1 : 0;
     var streakHit = (isCorrect && state.streak > 0 && state.streak % 5 === 0) ? state.streak : null;
 
+    // Adaptive-only: did this answer just push the live difficulty level
+    // up a tier? (null for every non-adaptive exam, since state.adapt is
+    // null there.)
+    var levelUpHit = state.adapt ? updateAdaptiveLevel(isCorrect) : null;
+
     var order = state.optionOrder[canonicalIdx];
     lockOptions(selectedCanonicalIdx, q.correct, order);
     hintArea.innerHTML = "";
     hintArea.classList.add("hidden");
-    showFeedback(isCorrect, q.explain, q, hintUsed, streakHit);
+    showFeedback(isCorrect, q.explain, q, hintUsed, streakHit, levelUpHit);
     btnNext.classList.remove("hidden");
     btnNext.focus();
   }
@@ -951,7 +1041,7 @@
     });
   }
 
-  function showFeedback(isCorrect, explainText, q, hintUsed, streakHit){
+  function showFeedback(isCorrect, explainText, q, hintUsed, streakHit, levelUpHit){
     feedbackEl.classList.remove("correct","incorrect");
     feedbackEl.classList.add(isCorrect ? "correct" : "incorrect");
     feedbackEl.classList.add("show");
@@ -964,6 +1054,8 @@
     if(existingCelebrate) existingCelebrate.remove();
     var existingStreak = feedbackEl.querySelector(".streak-badge");
     if(existingStreak) existingStreak.remove();
+    var existingMastery = feedbackEl.querySelector(".mastery-badge");
+    if(existingMastery) existingMastery.remove();
 
     if(hintUsed){
       var note = document.createElement("p");
@@ -989,12 +1081,36 @@
       feedbackEl.appendChild(streak);
       showStreakStar(streakHit);
     }
+
+    // Adaptive-only: this answer just stepped the live difficulty level up
+    // a tier (two correct in a row) -- tell the student a harder question
+    // is coming next and that they're making real progress on the topic.
+    if(levelUpHit){
+      var mastery = document.createElement("div");
+      mastery.className = "mastery-badge";
+      mastery.innerHTML = masteryBadgeHtml(levelUpHit);
+      feedbackEl.appendChild(mastery);
+    }
+  }
+
+  // ---------- Level-up banner (adaptive exams only) ----------
+  function masteryBadgeHtml(levelIdx){
+    var tierLabel = difficultyLabel(ADAPT_LEVELS[levelIdx]);
+    return '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      '<path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg><span>Leveling up to ' + tierLabel + ' questions — you’re on your way to mastering this topic!</span>';
   }
 
   btnNext.addEventListener("click", function(){
     var total = examQuestions(state.examKey).length;
     if(state.index < total - 1){
       state.index += 1;
+      // Adaptive exams only have questionOrder filled in up to the
+      // question just answered -- pick the next one now, based on how
+      // the student has done so far (see pickNextAdaptiveIndex()).
+      if(state.adapt && state.questionOrder.length <= state.index){
+        state.questionOrder.push(pickNextAdaptiveIndex());
+      }
       renderQuestion();
     } else {
       // Guard against a fast double-click/tap on "Finish": the results

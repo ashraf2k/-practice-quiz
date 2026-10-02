@@ -25,6 +25,9 @@
     --streak: #EA580C;
     --streak-bg: #FFEDD5;
     --streak-line: #FED7AA;
+    --mastery: #1D4ED8;
+    --mastery-bg: #DBEAFE;
+    --mastery-line: #BFDBFE;
     --input-bg: #FCFDFE;
     --code-bg: #0F2137;
     --code-text: #DCE9F7;
@@ -61,6 +64,9 @@
       --streak: #FDBA74;
       --streak-bg: rgba(253,186,116,0.16);
       --streak-line: rgba(253,186,116,0.35);
+      --mastery: #93C5FD;
+      --mastery-bg: rgba(147,197,253,0.16);
+      --mastery-line: rgba(147,197,253,0.35);
       --input-bg: #1B2636;
       --code-bg: #05101F;
       --code-text: #CFE2F5;
@@ -98,6 +104,9 @@
     --streak: #FDBA74;
     --streak-bg: rgba(253,186,116,0.16);
     --streak-line: rgba(253,186,116,0.35);
+    --mastery: #93C5FD;
+    --mastery-bg: rgba(147,197,253,0.16);
+    --mastery-line: rgba(147,197,253,0.35);
     --input-bg: #1B2636;
     --code-bg: #05101F;
     --code-text: #CFE2F5;
@@ -711,6 +720,32 @@
     width: 20px;
     height: 20px;
     color: var(--streak);
+  }
+
+  /* Adaptive exams only (quiz.html's state.adapt) -- shown when two
+     correct answers in a row step the live difficulty up a tier. Can
+     appear alongside .celebrate-badge/.streak-badge on the same question
+     since all three mark different things. */
+  .mastery-badge{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--mastery-bg);
+    border: 1px solid var(--mastery-line);
+    color: var(--mastery);
+    font-size: 13.5px;
+    font-weight: 700;
+    animation: celebrate-pop 0.35s ease;
+  }
+
+  .mastery-badge svg{
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    color: var(--mastery);
   }
 
   /* ---------- Big "liquid crystal" star (centered streak celebration) ----------

@@ -43,6 +43,51 @@
         { type:"tf", q:"Regularly updating your devices and apps has no real effect on protecting your privacy or security.", options:["True","False"], correct:1, explain:"Updates often include security patches that close vulnerabilities attackers could otherwise exploit.", topic:"Protecting Your Privacy" }
       ]
     },
+    datarep: {
+      key: "datarep",
+      title: "IGCSE Computer Science 0478 — Topic 1: Data Representation",
+      subtitle: "Paper 1 · Number systems, text/sound/image representation, and data storage & compression",
+      classes: ["10BR1","10BR2","10BR3"],
+      sectionA: { label: "1.1 Number Systems", count: 9 },
+      sectionB: { label: "1.2 & 1.3: Text, Sound, Images & Storage", count: 12 },
+      hasGrade: true,
+      // Opts into quiz.html's live difficulty-adaptive question order (see
+      // the "adapt" logic there): instead of one upfront shuffle, the next
+      // question is picked just-in-time based on how the student is doing
+      // -- two correct answers in a row steps up a difficulty tier, a wrong
+      // answer steps down one. Every question is still served exactly once
+      // per attempt (same total marks, same per-topic stats), so this flag
+      // changes ORDER only -- scoring, review, and the admin dashboard are
+      // unaffected. dp/igcse/algo don't set this, so they keep today's
+      // fixed-shuffle behaviour exactly as-is.
+      adaptive: true,
+      questions: [
+        // ---------------- SECTION A: 1.1 Number Systems (9) ----------------
+        { type:"mcq", q:"What is the 8-bit binary number 10101100 in denary?", options:["172","184","108","220"], correct:0, explain:"Sum the place values of the 1 bits: 128 + 32 + 8 + 4 = 172.", topic:"Base Conversions", difficulty:"easy" },
+        { type:"mcq", q:"What is the denary number 189 written as an 8-bit binary integer?", options:["10111101","10111110","11000101","10110101"], correct:0, explain:"189 = 128 + 32 + 16 + 8 + 4 + 1, so the 1 bits go in those positions: 10111101.", topic:"Base Conversions", difficulty:"easy" },
+        { type:"mcq", q:"What is the 8-bit binary number 10111110 written in hexadecimal?", options:["BE","BF","AE","CE"], correct:0, explain:"Split the byte into two 4-bit nibbles: 1011 = B, 1110 = E, giving BE.", topic:"Base Conversions", difficulty:"easy" },
+        { type:"mcq", q:"Adding the 8-bit binary integers 11011000 and 01101101 produces a 9-bit result. What is that result?", code:"  1101 1000\n+ 0110 1101\n-----------", options:["1 0100 0101","0 0100 0101","1 1011 1101","1 0011 0101"], correct:0, explain:"Adding column by column with carries gives 1 0100 0101 (325 in denary).", topic:"Binary Addition & Overflow", difficulty:"moderate" },
+        { type:"mcq", q:"Why does adding 11011000 and 01101101 cause an overflow error if the result must be stored in a single 8-bit register?", options:["The true sum (325) needs 9 bits, but an 8-bit register can only hold values up to 255","Binary addition cannot handle a carry out of the final column","One of the two numbers being added is actually negative","8-bit registers cannot store a byte that contains three 1 bits in a row"], correct:0, explain:"325 exceeds the maximum value an 8-bit register can represent (255), so the 9th bit is lost — this is overflow.", topic:"Binary Addition & Overflow", difficulty:"moderate" },
+        { type:"mcq", q:"What is the denary integer -42 written as an 8-bit two's complement binary integer?", options:["11010110","11010101","11010111","00101010"], correct:0, explain:"Write +42 as 00101010, flip every bit to get 11010101, then add 1: 11010110.", topic:"Two's Complement", difficulty:"hard", hint:"Work through the three steps in order: write the positive binary value first, flip all the bits, and only then add 1 — don't skip the final addition." },
+        { type:"mcq", q:"What denary value does the 8-bit two's complement binary integer 11100101 represent?", options:["-27","-37","27","-29"], correct:0, explain:"The MSB has place value -128. -128 + 64 + 32 + 4 + 1 = -27.", topic:"Two's Complement", difficulty:"hard", hint:"Remember that in 8-bit two's complement the most significant bit is worth -128, not +128 — add up every place value, including that negative one, to reach the total." },
+        { type:"mcq", q:"00111000 (56 in denary) is shifted logically 2 places to the right. What are the binary and denary values of the result?", options:["00001110 (14)","00011100 (28)","00001011 (11)","00000111 (7)"], correct:0, explain:"Shifting right by 2 places divides the value by 4: 56 / 4 = 14, giving the binary pattern 00001110.", topic:"Logical Shifts", difficulty:"moderate" },
+        { type:"mcq", q:"What is the mathematical effect of a logical shift 3 places to the left, and when does this break down?", options:["It multiplies the value by 8 (2^3), but breaks down if 1 bits are shifted out of the MSB and lost","It divides the value by 8 (2^3), but breaks down if the number is odd","It multiplies the value by 3, and never breaks down for an 8-bit register","It adds 3 to the value, but breaks down only for negative numbers"], correct:0, explain:"Each left shift doubles the value, so 3 shifts multiply by 2^3 = 8. This breaks down (overflows) if significant 1 bits are shifted out of the most significant bit.", topic:"Logical Shifts", difficulty:"moderate" },
+
+        // ---------------- SECTION B: 1.2 & 1.3 Text, Sound, Images & Storage (12) ----------------
+        { type:"mcq", q:"What is meant by the term 'character set'?", options:["A defined list of characters recognised by a computer, where each character is mapped to a unique binary code","Any list of symbols a person can draw by hand","The total number of files a computer can store at once","A list of fonts installed on a computer"], correct:0, explain:"A character set maps every recognised character to a unique binary code so computers can store and process text.", topic:"ASCII vs Unicode", difficulty:"easy" },
+        { type:"mcq", q:"Which statement correctly describes a difference between ASCII and Unicode?", options:["ASCII uses 7-8 bits and covers roughly 128-256 characters, mainly for English; Unicode uses 16-32 bits and can represent over 100,000 characters, including global scripts and emoji","ASCII can represent every global language, while Unicode is limited to English characters only","ASCII and Unicode both use exactly 8 bits per character, so they represent the same number of symbols","Unicode is a sound format, while ASCII is only used for images"], correct:0, explain:"ASCII's smaller bit-length limits it to English-focused characters, while Unicode's larger bit-length supports a huge, global character range.", topic:"ASCII vs Unicode", difficulty:"moderate" },
+        { type:"mcq", q:"In ASCII, 'A' has the denary code 65. What is the denary code for 'D'?", options:["68","67","69","100"], correct:0, explain:"ASCII codes run consecutively through the alphabet: A=65, B=66, C=67, D=68.", topic:"ASCII vs Unicode", difficulty:"easy" },
+        { type:"mcq", q:"How is an analogue sound wave converted into digital form?", options:["The amplitude of the wave is sampled at regular time intervals, and each sample is converted into a binary value and stored sequentially","The frequency of the wave is permanently removed and replaced with silence","The wave is converted directly into ASCII text characters","The wave is compressed first, and only then sampled"], correct:0, explain:"Sampling records the wave's amplitude at regular intervals; each sample is then stored as a binary value.", topic:"Sound Sampling", difficulty:"moderate" },
+        { type:"mcq", q:"What happens when the sample resolution used to record sound is increased?", options:["Sound quality improves (more accurate amplitude values), but file size increases because more bits are needed to store each sample","Sound quality gets worse, but file size decreases","Neither sound quality nor file size is affected by sample resolution","File size decreases while sound quality improves"], correct:0, explain:"More bits per sample capture amplitude more precisely (better quality), but each sample takes up more storage, so file size grows.", topic:"Sound Sampling", difficulty:"moderate" },
+        { type:"mcq", q:"What is a pixel?", options:["The smallest single component (picture element) of a digital bitmap image","A unit used to measure sound sample rate","The file extension used for compressed images","A measure of how many colours a monitor can display at once"], correct:0, explain:"A pixel ('picture element') is the smallest individual component that makes up a digital bitmap image.", topic:"Pixels & Colour Depth", difficulty:"easy" },
+        { type:"mcq", q:"An image has a colour depth of 8 bits. What is the maximum number of unique colours it can represent?", options:["256","128","64","16"], correct:0, explain:"With n bits of colour depth, the maximum number of colours is 2^n. Here, 2^8 = 256.", topic:"Pixels & Colour Depth", difficulty:"easy" },
+        { type:"mcq", q:"Which of these is metadata typically stored in a digital bitmap image file?", options:["The image's dimensions/resolution and colour depth","The exact RGB value of every single pixel in the image","The name of the person who last opened the file","The battery level of the camera that took the photo"], correct:0, explain:"Metadata (such as dimensions, colour depth, and file format) describes the image so software can render the raw pixel data correctly.", topic:"Pixels & Colour Depth", difficulty:"easy" },
+        { type:"mcq", q:"Using the IEC binary prefixes required by the 0478 syllabus, how many KiB are in 1 MiB, and how many Bytes are in 1 KiB?", options:["1024 KiB in 1 MiB; 1024 Bytes in 1 KiB","1000 KiB in 1 MiB; 1000 Bytes in 1 KiB","1024 KiB in 1 MiB; 1000 Bytes in 1 KiB","1000 KiB in 1 MiB; 1024 Bytes in 1 KiB"], correct:0, explain:"The 0478 syllabus always uses binary (IEC) prefixes: 1 MiB = 1024 KiB, and 1 KiB = 1024 Bytes.", topic:"Storage Calculations", difficulty:"easy" },
+        { type:"mcq", q:"An image is 2000 x 1000 pixels with a colour depth of 24 bits. What is its file size in MiB?", code:"Total pixels = 2000 x 1000\nTotal bits = pixels x 24\nBytes = bits / 8\nMiB = Bytes / (1024 x 1024)", options:["5.72 MiB","6 MiB","1.91 MiB","45.78 MiB"], correct:0, explain:"2,000,000 pixels x 24 bits = 48,000,000 bits = 6,000,000 Bytes. 6,000,000 / (1024 x 1024) = 5.72 MiB.", topic:"Storage Calculations", difficulty:"hard", hint:"Work through it in stages: total pixels, then total bits, then divide by 8 for bytes, then divide by 1024 twice (not 1000) to reach MiB." },
+        { type:"mcq", q:"Why does lossy compression suit video streaming but is unsuitable for text or code files?", options:["Lossy compression permanently discards less-noticeable data to save space, which is fine for video but corrupts the exact precision text/code needs","Lossy compression only works on files larger than 1 GB, which text files never reach","Lossy compression makes files larger, which is why text files avoid it","Text files cannot be compressed by any method, lossy or lossless"], correct:0, explain:"Lossy compression permanently removes some data to shrink file size — acceptable for video where small losses go unnoticed, but destructive for text/code, which must be stored exactly.", topic:"Compression & RLE", difficulty:"moderate" },
+        { type:"mcq", q:"A row of pixels reads: W W W W W B B B W W. What is this sequence encoded as, using Run-Length Encoding (RLE)?", options:["5W 3B 2W","5W 3B 3W","4W 3B 3W","5W 2B 3W"], correct:0, explain:"RLE records each run as a count followed by its value: five W's, three B's, then two W's — 5W 3B 2W.", topic:"Compression & RLE", difficulty:"moderate" }
+      ]
+    },
     igcse: {
       key: "igcse",
       title: "IGCSE Computer Science 0478 Practice",
@@ -134,13 +179,14 @@
   };
 
   // Which exam(s) a class can practise. Most classes map straight to one
-  // exam; 10BR classes have two IGCSE topics to choose between, so the
+  // exam; 10BR classes have three IGCSE topics to choose between, so the
   // quiz page shows a second "Topic" dropdown built from this list.
   var EXAM_CHOICES_BY_CLASS = [
     { test: /^10am/i, choices: [
       { key: "dp" }
     ] },
     { test: /^10br/i, choices: [
+      { key: "datarep", label: "Topic 1: Data Representation" },
       { key: "algo", label: "Topic 7: Algorithm Design & Problem-Solving" },
       { key: "igcse", label: "Conditional Statements practice questions" }
     ] }
