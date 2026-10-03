@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="shared.css?v=20261004" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -360,11 +360,14 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<script src="quiz-data.js"></script>
-<script src="exam-data.js"></script>
-<script src="report-lib.js"></script>
-<script src="firebase-config.js"></script>
-<script type="module" src="firebase-init.js"></script>
+<!-- ?v=20261004 -- cache-busting; see the longer comment above this same
+     block in quiz.html. Bump this version string here too whenever one
+     of these shared files changes. -->
+<script src="quiz-data.js?v=20261004"></script>
+<script src="exam-data.js?v=20261004"></script>
+<script src="report-lib.js?v=20261004"></script>
+<script src="firebase-config.js?v=20261004"></script>
+<script type="module" src="firebase-init.js?v=20261004"></script>
 <script type="module">
 (function(){
 
@@ -626,21 +629,40 @@
     };
   }
 
+  // listAllExamAttempts() (and deleteExamAttempt(), used by the reset
+  // button below) only exist on PQFirebase as of this same change --
+  // calling a function that isn't there throws SYNCHRONOUSLY, before any
+  // promise/catch gets a chance to run. A browser that has today's
+  // admin.html but is still serving an OLDER cached firebase-init.js
+  // (a 600KB+ bundle, cached far more aggressively than this small HTML
+  // file) would hit exactly that: the whole dashboard going blank
+  // instead of just the new tab, because the throw happens while
+  // building Promise.all()'s argument list, before loadData() ever
+  // reaches renderAll(). examAttemptsSupported() guards every call site
+  // so a stale bundle degrades to "Exam Practice isn't available yet --
+  // refresh the page" instead of breaking Students/By-student/etc. too.
+  function examAttemptsSupported(){
+    return typeof PQFirebase.listAllExamAttempts === "function" && typeof PQFirebase.deleteExamAttempt === "function";
+  }
+
   function loadData(){
     adminStatus.classList.remove("warn");
     adminStatus.textContent = "Loading…";
     Promise.all([
       PQFirebase.listAllAttempts(),
-      PQFirebase.listAllExamAttempts()
+      examAttemptsSupported() ? PQFirebase.listAllExamAttempts() : Promise.resolve(null)
     ]).then(function(results){
       // Keep every attempt across all exams/papers here; the various
       // exam/class/search/paper filters below decide what's actually
       // shown in each tab.
       attempts = results[0].map(normalizeAttempt);
-      examAttempts = results[1].map(normalizeExamAttempt);
+      var examAttemptsLoaded = results[1] !== null;
+      examAttempts = examAttemptsLoaded ? results[1].map(normalizeExamAttempt) : [];
       loaded = true;
       adminStatus.textContent = "Loaded " + attempts.length + " submitted attempt" + (attempts.length === 1 ? "" : "s") +
-        " and " + examAttempts.length + " exam-practice result" + (examAttempts.length === 1 ? "" : "s") +
+        (examAttemptsLoaded
+          ? " and " + examAttempts.length + " exam-practice result" + (examAttempts.length === 1 ? "" : "s")
+          : " (exam-practice results need a page refresh to load -- your browser has an older cached version of a script this page needs)") +
         " · refreshed " + new Date().toLocaleTimeString();
       renderAll();
     }).catch(function(err){
@@ -1228,7 +1250,13 @@
       var td = document.createElement("td");
       td.colSpan = 6;
       td.className = "wrap-cell";
-      td.textContent = loaded ? "No exam-practice results match these filters." : "";
+      if(!loaded){
+        td.textContent = "";
+      } else if(!examAttemptsSupported()){
+        td.textContent = "This tab needs a newer script this browser hasn't loaded yet -- try a hard refresh (Ctrl/Cmd+Shift+R).";
+      } else {
+        td.textContent = "No exam-practice results match these filters.";
+      }
       tr.appendChild(td);
       tbody.appendChild(tr);
       return;
@@ -1314,6 +1342,11 @@
   // allows unlimited retakes; this just clears the saved record so the
   // student no longer shows as having attempted this paper.
   document.getElementById("btn-examdetail-reset").addEventListener("click", function(){
+    if(!examAttemptsSupported()){
+      document.getElementById("examdetail-reset-status").textContent = "This browser has an older cached script -- try a hard refresh (Ctrl/Cmd+Shift+R), then try resetting again.";
+      document.getElementById("examdetail-reset-status").classList.add("warn");
+      return;
+    }
     if(!examDetailAttempt || !examDetailAttempt.uid){
       document.getElementById("examdetail-reset-status").textContent = "Can't reset this attempt — it's missing the student's account id.";
       document.getElementById("examdetail-reset-status").classList.add("warn");

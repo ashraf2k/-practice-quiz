@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Topical Exam Practice</title>
-<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="shared.css?v=20261004" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -35,6 +35,9 @@
     <div id="paper-summary"></div>
 
     <div id="last-result" class="attempt-status hidden"></div>
+    <div class="btn-row hidden" id="view-report-row">
+      <button class="btn btn-secondary" id="btn-view-report">View full report</button>
+    </div>
 
     <div class="resume-prompt hidden" id="resume-prompt">
       <p id="resume-prompt-text"></p>
@@ -102,7 +105,7 @@
 
   <!-- ============ RESULTS SCREEN ============ -->
   <section id="screen-results" class="card hidden">
-    <h2 class="step-title">Exam practice complete</h2>
+    <h2 class="step-title" id="results-title">Exam practice complete</h2>
     <p class="step-sub" id="result-sub"></p>
 
     <div id="results-body"></div>
@@ -116,9 +119,12 @@
 
 </div>
 
-<script src="exam-data.js"></script>
-<script src="firebase-config.js"></script>
-<script type="module" src="firebase-init.js"></script>
+<!-- ?v=20261004 -- cache-busting; see the longer comment above this same
+     block in quiz.html. Bump this version string here too whenever one
+     of these shared files changes. -->
+<script src="exam-data.js?v=20261004"></script>
+<script src="firebase-config.js?v=20261004"></script>
+<script type="module" src="firebase-init.js?v=20261004"></script>
 <script type="module">
 (function(){
 
@@ -477,12 +483,153 @@
   var resultSub = document.getElementById("result-sub");
   var resultsBody = document.getElementById("results-body");
   var saveStatus = document.getElementById("save-status");
+  var resultsTitle = document.getElementById("results-title");
 
   function bandText(pct){
     if(pct >= 85) return "Excellent — you're on top of this topic.";
     if(pct >= 70) return "Good grasp overall, with a few gaps to close.";
     if(pct >= 50) return "A fair start — focus your revision on the areas below.";
     return "This topic needs more revision — the areas below are the place to start.";
+  }
+
+  function escapeHtml(str){
+    var div = document.createElement("div");
+    div.textContent = str == null ? "" : String(str);
+    return div.innerHTML;
+  }
+
+  function markBadgeClass(earned, total){
+    if(total > 0 && earned >= total) return "full";
+    if(earned > 0) return "partial";
+    return "none";
+  }
+
+  // Builds the FULL answers report -- every question the student was
+  // served, their own typed answer, marks earned/total, the official
+  // mark scheme, and the explanation -- not just the ones they missed.
+  // `results` is either the live state.results from the run that just
+  // finished, or a saved record's `perQuestion` array when a returning
+  // student is viewing an earlier attempt's report; both share the same
+  // { id, topic, difficulty, earned, total, answerText } shape, so this
+  // one function renders both cases identically.
+  function buildExamReportFragment(results, paper){
+    var frag = document.createDocumentFragment();
+
+    var totalEarned = results.reduce(function(s, r){ return s + r.earned; }, 0);
+    var totalMarks = results.reduce(function(s, r){ return s + r.total; }, 0);
+    var pct = totalMarks ? Math.round((totalEarned / totalMarks) * 100) : 0;
+
+    var scoreBox = document.createElement("div");
+    scoreBox.className = "exam-score-box";
+    scoreBox.innerHTML = "<div class=\"exam-score-num\">" + totalEarned + " / " + totalMarks + "</div><div class=\"exam-score-pct\">" + pct + "%</div>";
+    frag.appendChild(scoreBox);
+
+    var strengths = results.filter(function(r){ return r.earned === r.total; });
+    var weak = results.filter(function(r){ return r.earned < r.total; });
+
+    if(strengths.length){
+      var sTitle = document.createElement("p");
+      sTitle.className = "section-label";
+      sTitle.style.marginTop = "22px";
+      sTitle.textContent = "Strengths (full marks)";
+      frag.appendChild(sTitle);
+      var sWrap = document.createElement("div");
+      sWrap.className = "topic-chip-row";
+      strengths.forEach(function(r){
+        var chip = document.createElement("span");
+        chip.className = "topic-chip good";
+        chip.textContent = r.topic;
+        sWrap.appendChild(chip);
+      });
+      frag.appendChild(sWrap);
+    }
+
+    if(weak.length){
+      var wTitle = document.createElement("p");
+      wTitle.className = "section-label";
+      wTitle.style.marginTop = "22px";
+      wTitle.textContent = "Areas to revisit";
+      frag.appendChild(wTitle);
+      var wWrap = document.createElement("div");
+      wWrap.className = "topic-chip-row";
+      weak.forEach(function(r){
+        var chip = document.createElement("span");
+        chip.className = "topic-chip";
+        chip.textContent = r.topic;
+        wWrap.appendChild(chip);
+      });
+      frag.appendChild(wWrap);
+    } else {
+      var allGood = document.createElement("p");
+      allGood.className = "cohort-note";
+      allGood.style.marginTop = "22px";
+      allGood.textContent = "Full marks on every question — nothing to flag for revision this time.";
+      frag.appendChild(allGood);
+    }
+
+    var heading = document.createElement("p");
+    heading.className = "review-heading";
+    heading.style.marginTop = "26px";
+    heading.textContent = "Question-by-question review";
+    frag.appendChild(heading);
+
+    results.forEach(function(r, idx){
+      var q = (paper && paper.questions || []).filter(function(qq){ return qq.id === r.id; })[0];
+
+      var item = document.createElement("div");
+      item.className = "review-item";
+
+      var rq = document.createElement("p");
+      rq.className = "rq";
+      var num = document.createElement("span");
+      num.className = "num";
+      num.textContent = (idx + 1) + ".";
+      rq.appendChild(num);
+      rq.appendChild(document.createTextNode(q ? q.prompt : r.topic));
+      var diffBadge = document.createElement("span");
+      diffBadge.className = "diff-badge diff-" + (DIFF_CSS_CLASS[r.difficulty] || "easy");
+      diffBadge.textContent = examPaperDifficultyLabel(r.difficulty);
+      rq.appendChild(diffBadge);
+      var markBadge = document.createElement("span");
+      markBadge.className = "badge " + markBadgeClass(r.earned, r.total);
+      markBadge.textContent = r.earned + " / " + r.total;
+      rq.appendChild(markBadge);
+      item.appendChild(rq);
+
+      var ansClass = r.earned === r.total ? "answer-correct" : (r.earned > 0 ? "answer-partial" : "answer-wrong");
+      var yourAnswer = document.createElement("p");
+      yourAnswer.className = "review-line " + ansClass;
+      yourAnswer.innerHTML = "<span class=\"lbl\">Your answer: </span><span class=\"val\">" + escapeHtml(r.answerText || "(no answer)") + "</span>";
+      item.appendChild(yourAnswer);
+
+      if(q && q.markPoints && q.markPoints.length){
+        var msLabel = document.createElement("p");
+        msLabel.className = "review-explain-label";
+        msLabel.textContent = "Mark scheme";
+        item.appendChild(msLabel);
+        var msList = document.createElement("ul");
+        msList.className = "markscheme-list";
+        q.markPoints.forEach(function(mp){
+          var li = document.createElement("li");
+          li.textContent = mp.text + " (" + mp.marks + (mp.marks === 1 ? " mark" : " marks") + ")";
+          msList.appendChild(li);
+        });
+        item.appendChild(msList);
+      }
+
+      var explainLabel = document.createElement("p");
+      explainLabel.className = "review-explain-label";
+      explainLabel.textContent = "Explanation";
+      item.appendChild(explainLabel);
+      var explain = document.createElement("p");
+      explain.className = "review-explain";
+      explain.textContent = q ? q.explanation : "";
+      item.appendChild(explain);
+
+      frag.appendChild(item);
+    });
+
+    return frag;
   }
 
   function finishAttempt(){
@@ -493,63 +640,11 @@
     var totalMarks = state.results.reduce(function(s, r){ return s + r.total; }, 0);
     var pct = totalMarks ? Math.round((totalEarned / totalMarks) * 100) : 0;
 
+    resultsTitle.textContent = "Exam practice complete";
     resultSub.textContent = bandText(pct);
 
-    var strengths = state.results.filter(function(r){ return r.earned === r.total; });
-    var weak = state.results.filter(function(r){ return r.earned < r.total; })
-      .slice()
-      .sort(function(a, b){ return (a.earned / a.total) - (b.earned / b.total); });
-
     resultsBody.innerHTML = "";
-
-    var scoreBox = document.createElement("div");
-    scoreBox.className = "exam-score-box";
-    scoreBox.innerHTML = "<div class=\"exam-score-num\">" + totalEarned + " / " + totalMarks + "</div><div class=\"exam-score-pct\">" + pct + "%</div>";
-    resultsBody.appendChild(scoreBox);
-
-    if(strengths.length){
-      var sTitle = document.createElement("p");
-      sTitle.className = "section-label";
-      sTitle.style.marginTop = "22px";
-      sTitle.textContent = "Strengths (full marks)";
-      resultsBody.appendChild(sTitle);
-      var sWrap = document.createElement("div");
-      sWrap.className = "topic-chip-row";
-      strengths.forEach(function(r){
-        var chip = document.createElement("span");
-        chip.className = "topic-chip good";
-        chip.textContent = r.topic;
-        sWrap.appendChild(chip);
-      });
-      resultsBody.appendChild(sWrap);
-    }
-
-    if(weak.length){
-      var wTitle = document.createElement("p");
-      wTitle.className = "section-label";
-      wTitle.style.marginTop = "22px";
-      wTitle.textContent = "Areas to revisit, weakest first";
-      resultsBody.appendChild(wTitle);
-
-      weak.forEach(function(r){
-        var q = state.paper.questions.filter(function(qq){ return qq.id === r.id; })[0];
-        var block = document.createElement("div");
-        block.className = "feedback-block revisit-block";
-        var head = document.createElement("div");
-        head.className = "revisit-head";
-        head.innerHTML = "<span class=\"fb-title\">" + r.topic + "</span><span class=\"revisit-score\">" + r.earned + " / " + r.total + "</span>";
-        block.appendChild(head);
-        var expl = document.createElement("p");
-        expl.textContent = q ? q.explanation : "";
-        block.appendChild(expl);
-        resultsBody.appendChild(block);
-      });
-    } else {
-      var allGood = document.createElement("p");
-      allGood.className = "cohort-note";
-      allGood.textContent = "Full marks on every question — nothing to flag for revision this time.";
-      resultsBody.appendChild(allGood);
-    }
+    resultsBody.appendChild(buildExamReportFragment(state.results, state.paper));
 
     showScreen("results");
 
@@ -591,6 +686,9 @@
   var startGreeting = document.getElementById("start-greeting");
   var paperSummary = document.getElementById("paper-summary");
   var lastResultEl = document.getElementById("last-result");
+  var viewReportRow = document.getElementById("view-report-row");
+  var btnViewReport = document.getElementById("btn-view-report");
+  var lastRecord = null;
   var btnStart = document.getElementById("btn-start");
   var resumePrompt = document.getElementById("resume-prompt");
   var resumePromptText = document.getElementById("resume-prompt-text");
@@ -653,14 +751,35 @@
   }
 
   function renderLastResult(record){
+    lastRecord = record;
     if(!record){
       lastResultEl.className = "attempt-status hidden";
+      viewReportRow.classList.add("hidden");
       return;
     }
     lastResultEl.className = "attempt-status retake";
     lastResultEl.innerHTML = "Your last run scored <strong>" + record.totalEarned + " / " + record.totalMarks + "</strong> (" + record.pct + "%)" +
       (record.completedAt ? " on " + fmtDateSimple(record.completedAt) : "") + ". Practice again any time — there's no limit.";
+    viewReportRow.classList.remove("hidden");
   }
+
+  // Lets a returning student pull up the same full per-question report
+  // they'd see right after finishing, from their last saved attempt --
+  // record.perQuestion is stored with exactly the shape
+  // buildExamReportFragment() expects (see recordExamAttempt() above).
+  function renderViewOnlyReport(record){
+    resultsTitle.textContent = "Your full report";
+    resultSub.textContent = "Scored " + record.totalEarned + " / " + record.totalMarks + " (" + record.pct + "%)" +
+      (record.completedAt ? " on " + fmtDateSimple(record.completedAt) : "") + ".";
+    resultsBody.innerHTML = "";
+    resultsBody.appendChild(buildExamReportFragment(record.perQuestion || [], state.paper));
+    saveStatus.textContent = "";
+    showScreen("results");
+  }
+
+  btnViewReport.addEventListener("click", function(){
+    if(lastRecord) renderViewOnlyReport(lastRecord);
+  });
 
   function fmtDateSimple(iso){
     try {

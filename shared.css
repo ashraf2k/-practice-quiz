@@ -1355,7 +1355,23 @@
 
   .review-line.answer-correct .val{ color: var(--correct); font-weight: 600; }
   .review-line.answer-wrong .val{ color: var(--incorrect); font-weight: 600; }
+  .review-line.answer-partial .val{ color: var(--diff-moderate); font-weight: 600; }
   .review-line.hint-used-note .val{ color: var(--diff-hard); font-weight: 600; }
+
+  /* Read-only mark-scheme bullet list in the exam-practice full report --
+     same wording shown live via .markpoint-row, just without the
+     tick/select controls since this is a past attempt's record. */
+  .markscheme-list{
+    margin: 6px 0 10px;
+    padding-left: 20px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  .markscheme-list li{
+    margin-bottom: 4px;
+  }
 
   .review-item .rq .diff-badge{ margin-left: 8px; }
 
@@ -1389,6 +1405,12 @@
 
   .badge.correct{ background: var(--correct-bg); color: var(--correct); }
   .badge.wrong{ background: var(--incorrect-bg); color: var(--incorrect); }
+
+  /* Marks-based variants (full/partial/zero), used by the exam-practice
+     question-by-question review where scoring isn't simply right/wrong. */
+  .badge.full{ background: var(--correct-bg); color: var(--correct); }
+  .badge.partial{ background: var(--diff-moderate-bg); color: var(--diff-moderate); }
+  .badge.none{ background: var(--incorrect-bg); color: var(--incorrect); }
 
   .results-actions{
     display: flex;
