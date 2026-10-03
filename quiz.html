@@ -113,6 +113,21 @@
 
     <div class="attempt-status hidden" id="attempt-status"></div>
 
+    <div class="resume-prompt hidden" id="resume-prompt">
+      <p id="resume-prompt-text"></p>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-resume">Resume</button>
+        <button class="btn btn-secondary" id="btn-start-over">Start over</button>
+      </div>
+      <div class="restart-confirm hidden" id="restart-confirm">
+        <p class="restart-warn-text" id="restart-warn-text"></p>
+        <div class="btn-row">
+          <button class="btn btn-danger" id="btn-confirm-restart">Yes, start over</button>
+          <button class="btn btn-secondary" id="btn-cancel-restart">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-start">Start practice</button>
       <button class="btn btn-secondary hidden" id="btn-view-report">View my report</button>
@@ -614,11 +629,21 @@
 
   var attemptStatusEl = document.getElementById("attempt-status");
   var btnViewReport = document.getElementById("btn-view-report");
+  var resumePrompt = document.getElementById("resume-prompt");
+  var resumePromptText = document.getElementById("resume-prompt-text");
+  var btnResume = document.getElementById("btn-resume");
+  var btnStartOver = document.getElementById("btn-start-over");
+  var restartConfirm = document.getElementById("restart-confirm");
+  var restartWarnText = document.getElementById("restart-warn-text");
+  var btnConfirmRestart = document.getElementById("btn-confirm-restart");
+  var btnCancelRestart = document.getElementById("btn-cancel-restart");
 
-  // What the LAST getMyAttempt() check found, so btnStart/btnViewReport
-  // know what to do without re-checking on every click, and so a check
-  // for an old topic selection can be told apart from the current one.
-  var pendingCheck = { examKey: null, existing: null };
+  // What the LAST check found, so the buttons below know what to do
+  // without re-checking on every click, and so a check for an old topic
+  // selection can be told apart from the current one. `progress` is an
+  // unfinished-attempt checkpoint (practiceProgress) for the NEXT attempt
+  // slot only — see checkAttemptStatus().
+  var pendingCheck = { examKey: null, existing: null, progress: null };
 
   // The exam the student would start right now: the class's one exam for
   // a single-choice class, or whatever's picked in the topic dropdown for
@@ -630,16 +655,34 @@
     return choices[0].key;
   }
 
-  // Shows/hides the inline "you've done this before" message and the
-  // View my report / Start practice buttons to match. `existing` is the
-  // raw Firestore attempt record for the current topic, or null/undefined
-  // if there isn't one yet.
-  function renderAttemptStatus(existing){
+  // Shows/hides the inline "you've done this before" message, the Resume/
+  // Start-over prompt, and the View my report / Start practice buttons to
+  // match. `existing` is the raw completed-attempt record (or null);
+  // `progress` is an in-progress checkpoint for the NEXT attempt slot (or
+  // null) — see checkAttemptStatus() for how a stale one is filtered out.
+  function renderAttemptStatus(existing, progress){
     attemptStatusEl.className = "attempt-status hidden";
     attemptStatusEl.innerHTML = "";
+    resumePrompt.classList.add("hidden");
+    restartConfirm.classList.add("hidden");
     btnViewReport.classList.add("hidden");
     btnStart.textContent = "Start practice";
     btnStart.classList.remove("hidden");
+
+    if(existing) btnViewReport.classList.remove("hidden");
+
+    if(progress){
+      // An unfinished attempt is on file for the attempt the student
+      // would start next — offer Resume / Start over instead of the
+      // normal Start/Retake practice button.
+      btnStart.classList.add("hidden");
+      var total = examQuestions(progress.examKey).length;
+      var answeredSoFar = progress.index || 0;
+      resumePromptText.textContent = "You have an unfinished attempt in progress — Question " +
+        (answeredSoFar + 1) + " of " + total + ". Pick up where you left off, or start over.";
+      resumePrompt.classList.remove("hidden");
+      return;
+    }
 
     if(!existing) return;
 
@@ -647,8 +690,6 @@
     var scoreText = (typeof existing.score === "number" && typeof existing.total === "number")
       ? (existing.score + "/" + existing.total) : null;
     var dateText = fmtDate(existing.completedAt);
-
-    btnViewReport.classList.remove("hidden");
 
     if(attemptNumber >= 2){
       attemptStatusEl.className = "attempt-status done";
@@ -665,26 +706,65 @@
     }
   }
 
-  // Looks up whether the current topic already has an attempt on file and
-  // updates the inline message. Safe to call repeatedly (topic changes,
-  // arriving at the start screen) — a stale in-flight check for a topic
-  // the student has since changed away from is ignored when it resolves.
+  // Looks up whether the current topic already has a completed attempt
+  // and/or an in-progress checkpoint, and updates the inline message.
+  // Safe to call repeatedly (topic changes, arriving at the start screen)
+  // — a stale in-flight check for a topic the student has since changed
+  // away from is ignored when it resolves.
   function checkAttemptStatus(){
     var examKey = currentExamKeyChoice();
-    pendingCheck = { examKey: examKey, existing: null };
-    renderAttemptStatus(null);
+    pendingCheck = { examKey: examKey, existing: null, progress: null };
+    renderAttemptStatus(null, null);
     if(!examKey) return;
 
-    PQFirebase.getMyAttempt(state.currentUser.uid, examKey).then(function(existing){
+    Promise.all([
+      PQFirebase.getMyAttempt(state.currentUser.uid, examKey),
+      PQFirebase.getMyProgress(state.currentUser.uid, examKey)
+    ]).then(function(results){
       if(pendingCheck.examKey !== examKey) return;
+      var existing = results[0];
+      var progress = results[1];
+      // Only a checkpoint for the attempt the student would start NEXT is
+      // relevant — a leftover checkpoint from an attempt that's since
+      // been completed (e.g. finished on another device) is stale.
+      var nextAttemptNumber = existing ? (existing.attemptNumber || 1) + 1 : 1;
+      if(progress && (progress.attemptNumber || 1) !== nextAttemptNumber) progress = null;
       pendingCheck.existing = existing;
-      renderAttemptStatus(existing);
+      pendingCheck.progress = progress;
+      renderAttemptStatus(existing, progress);
     }).catch(function(){
       if(pendingCheck.examKey !== examKey) return;
       attemptStatusEl.className = "attempt-status";
       attemptStatusEl.textContent = "Couldn't check for a previous attempt — Start practice still works.";
     });
   }
+
+  btnResume.addEventListener("click", function(){
+    var examKey = pendingCheck.examKey;
+    var progress = pendingCheck.progress;
+    if(!examKey || !progress) return;
+    resumeAttempt(examKey, progress);
+  });
+
+  btnStartOver.addEventListener("click", function(){
+    var progress = pendingCheck.progress;
+    if(!progress) return;
+    var attemptNumber = progress.attemptNumber || 1;
+    var remainingAfter = 2 - attemptNumber;
+    restartWarnText.textContent = remainingAfter > 0
+      ? "Starting over will submit your current answers as they are right now (any unanswered questions count as incorrect) and will use one of your 2 attempts — you'll have " + remainingAfter + " attempt" + (remainingAfter === 1 ? "" : "s") + " left after this. Continue?"
+      : "This is your last attempt. Starting over will submit your current answers as they are right now (any unanswered questions count as incorrect), and you won't be able to retake this topic. Continue?";
+    restartConfirm.classList.remove("hidden");
+  });
+
+  btnCancelRestart.addEventListener("click", function(){
+    restartConfirm.classList.add("hidden");
+  });
+
+  btnConfirmRestart.addEventListener("click", function(){
+    restartConfirm.classList.add("hidden");
+    submitInProgressThenRestart();
+  });
 
   document.getElementById("input-topic").addEventListener("change", checkAttemptStatus);
 
@@ -916,6 +996,127 @@
     setHeader(exam.title, exam.subtitle);
     showScreen("quiz");
     renderQuestion();
+  }
+
+  // Rebuilds `state` from a saved practiceProgress checkpoint (see
+  // saveProgressSnapshot()) and continues the SAME attempt from exactly
+  // where it left off — same shuffle order, same answers so far, same
+  // adaptive level/streak for the datarep exam. Mirrors startAttempt()
+  // above but skips the fresh-shuffle setup.
+  function resumeAttempt(examKey, progress){
+    state.examKey = examKey;
+    state.index = progress.index || 0;
+    state.answers = progress.answers || new Array(examQuestions(examKey).length).fill(null);
+    state.reviewMode = false;
+    state.completedAt = null;
+    state.startedAt = progress.startedAt || Date.now();
+    state.minutesTaken = null;
+    state.hintUsedFor = progress.hintUsedFor || {};
+    state.saveFailed = false;
+    state.finishing = false;
+    state.streak = progress.streak || 0;
+    state.attemptNumber = progress.attemptNumber || 1;
+    state.firstAttemptSnapshot = progress.firstAttemptSnapshot || null;
+    state.questionOrder = progress.questionOrder || [];
+    state.optionOrder = progress.optionOrder || [];
+    state.adapt = progress.adapt || null;
+    btnNext.disabled = false;
+    if(streakStarTimer){ clearTimeout(streakStarTimer); streakStarTimer = null; }
+    streakStarLayer.classList.remove("show");
+    streakStarLayer.innerHTML = "";
+
+    var exam = EXAMS[examKey];
+    setHeader(exam.title, exam.subtitle);
+    showScreen("quiz");
+    renderQuestion();
+  }
+
+  // Fire-and-forget checkpoint, called every time the student moves past
+  // a question (see the btnNext handler) — lets them close the tab and
+  // resume later, same device or a different one, from exactly here.
+  // Never blocks the UI: a failed autosave just means falling back to the
+  // previous checkpoint (or the start of the attempt) if they come back,
+  // not a broken quiz right now.
+  function saveProgressSnapshot(){
+    if(!state.examKey || !state.currentUser) return;
+    PQFirebase.saveProgress(state.currentUser.uid, state.examKey, {
+      attemptNumber: state.attemptNumber || 1,
+      questionOrder: state.questionOrder,
+      optionOrder: state.optionOrder,
+      index: state.index,
+      answers: state.answers,
+      hintUsedFor: state.hintUsedFor,
+      streak: state.streak,
+      adapt: state.adapt,
+      firstAttemptSnapshot: state.firstAttemptSnapshot || null,
+      startedAt: state.startedAt
+    });
+  }
+
+  // "Start over" confirmed: rather than silently discarding the student's
+  // unfinished answers, submit them AS-IS right now (unanswered questions
+  // score 0, exactly like computeReport() already treats a null answer),
+  // using the exact same recordAttempt()/computeReport() path a normal
+  // finish uses — so it counts as using one of the 2 attempts, same as
+  // completing one normally would. Then starts a fresh attempt if one is
+  // still available.
+  function submitInProgressThenRestart(){
+    var examKey = pendingCheck.examKey;
+    var progress = pendingCheck.progress;
+    if(!examKey || !progress) return;
+
+    btnResume.disabled = true;
+    btnStartOver.disabled = true;
+    startStatus.textContent = "Submitting your in-progress attempt…";
+
+    var submittedAttemptNumber = progress.attemptNumber || 1;
+    state.examKey = examKey;
+    state.answers = progress.answers || [];
+    state.attemptNumber = submittedAttemptNumber;
+    state.firstAttemptSnapshot = progress.firstAttemptSnapshot || null;
+
+    var completedAt = new Date().toISOString();
+    var minutesTaken = progress.startedAt ? Math.max(1, Math.round((Date.now() - progress.startedAt) / 60000)) : null;
+
+    var ctx = { examKey: examKey, name: state.currentUser.name, cls: state.currentUser.class, answers: state.answers, completedAt: completedAt, minutesTaken: minutesTaken };
+    var report = computeReport(ctx);
+    var hints = state.answers.map(function(a){ return !!(a && a.hintUsed); });
+
+    var record = {
+      name: state.currentUser.name,
+      cls: state.currentUser.class,
+      attemptNumber: submittedAttemptNumber,
+      score: report.correctCount,
+      total: report.total,
+      answers: state.answers.map(function(a){ return a ? a.selected : -1; }),
+      hints: hints,
+      completedAt: completedAt,
+      minutesTaken: minutesTaken,
+      // Informational only (not read by any rule or scoring logic): flags
+      // for the teacher's admin dashboard that this was a self-submitted
+      // "start over", not a normal finish that reached every question.
+      abandoned: true
+    };
+    if(state.firstAttemptSnapshot) record.firstAttempt = state.firstAttemptSnapshot;
+
+    PQFirebase.recordAttempt(state.currentUser.uid, examKey, record)
+      .catch(function(){ /* best-effort — the progress doc is still cleared below so the student isn't stuck */ })
+      .then(function(){ return PQFirebase.deleteProgress(state.currentUser.uid, examKey); })
+      .then(function(){
+        btnResume.disabled = false;
+        btnStartOver.disabled = false;
+        startStatus.textContent = "";
+        var nextAttemptNumber = submittedAttemptNumber + 1;
+        if(nextAttemptNumber > 2){
+          // That was the last attempt — nothing left to start; refresh
+          // the start screen so "View my report" reflects the submission.
+          checkAttemptStatus();
+        } else {
+          state.attemptNumber = nextAttemptNumber;
+          state.firstAttemptSnapshot = { score: report.correctCount, total: report.total, completedAt: completedAt, minutesTaken: minutesTaken };
+          startAttempt(examKey);
+        }
+      });
   }
 
   // `record` is the raw Firestore attempt document: { answers, hints,
@@ -1186,6 +1387,7 @@
       if(state.adapt && state.questionOrder.length <= state.index){
         state.questionOrder.push(pickNextAdaptiveIndex());
       }
+      saveProgressSnapshot();
       renderQuestion();
     } else {
       // Guard against a fast double-click/tap on "Finish": the results
@@ -1263,6 +1465,12 @@
         if(!result || !result.ok) return verifyOrFlagFailure();
       })
       .catch(function(){ return verifyOrFlagFailure(); })
+      .then(function(){
+        // Only clear the resume checkpoint once the attempt is CONFIRMED
+        // saved — if it genuinely failed, keeping it around means the
+        // student's answers are still recoverable instead of silently lost.
+        if(!state.saveFailed) return PQFirebase.deleteProgress(state.currentUser.uid, state.examKey);
+      })
       .then(function(){ renderResults(ctx); });
   }
 

@@ -241,6 +241,74 @@ function recordExamAttempt(uid, paperKey, record){
     });
 }
 
+// ---------- MCQ practice progress (resume support, quiz.html) ----------
+// Separate from "attempts" above: this is scratch/working state for an
+// UNFINISHED attempt, saved after every question so a student can close
+// the tab and pick up later (same device or a different one, since this
+// lives in Firestore, not localStorage). It never gates the 2-attempt
+// cap by itself -- that's still entirely decided by the `attempts`
+// collection and its rules, same as always. quiz.html deletes this doc
+// once the attempt is actually finished (or explicitly abandoned via
+// "Start over", which records a real attempt first -- see
+// submitInProgressThenRestart() there).
+
+function progressId(uid, examKey){ return uid + "_" + examKey; }
+
+function getMyProgress(uid, examKey){
+  return getDoc(doc(db, "practiceProgress", progressId(uid, examKey))).then(function(snap){
+    return snap.exists() ? snap.data() : null;
+  });
+}
+
+// `snapshot` is a plain object matching quiz.html's in-memory `state`
+// shape closely enough to rebuild it on resume: { attemptNumber,
+// questionOrder, optionOrder, index, answers, hintUsedFor, streak, adapt,
+// firstAttemptSnapshot, startedAt }. Best-effort: a failed autosave is
+// swallowed rather than surfaced, since losing one checkpoint just means
+// falling back to the previous one (or, worst case, the start of the
+// attempt) rather than breaking the quiz the student is actively taking.
+function saveProgress(uid, examKey, snapshot){
+  var ref = doc(db, "practiceProgress", progressId(uid, examKey));
+  var payload = Object.assign({ uid: uid, examKey: examKey, updatedAt: serverTimestamp() }, snapshot);
+  return setDoc(ref, payload, { merge: false }).then(function(){ return { ok: true }; }).catch(function(err){
+    return { ok: false, error: (err && err.message) || "Could not save." };
+  });
+}
+
+function deleteProgress(uid, examKey){
+  return deleteDoc(doc(db, "practiceProgress", progressId(uid, examKey)))
+    .then(function(){ return { ok: true }; })
+    .catch(function(){ return { ok: false }; });
+}
+
+// ---------- Exam-paper progress (resume support, exam-practice.html) ----------
+// Same idea as above, for the topical free-response papers. Unlike the
+// MCQ side there's no attempt cap to interact with -- unlimited retakes
+// were already the design -- so this is purely a convenience checkpoint.
+
+function examProgressId(uid, paperKey){ return uid + "_" + paperKey; }
+
+function getMyExamProgress(uid, paperKey){
+  return getDoc(doc(db, "examProgress", examProgressId(uid, paperKey))).then(function(snap){
+    return snap.exists() ? snap.data() : null;
+  });
+}
+
+// `snapshot`: { pool, order, index, level, streak, results, startedAt }.
+function saveExamProgress(uid, paperKey, snapshot){
+  var ref = doc(db, "examProgress", examProgressId(uid, paperKey));
+  var payload = Object.assign({ uid: uid, paperKey: paperKey, updatedAt: serverTimestamp() }, snapshot);
+  return setDoc(ref, payload, { merge: false }).then(function(){ return { ok: true }; }).catch(function(err){
+    return { ok: false, error: (err && err.message) || "Could not save." };
+  });
+}
+
+function deleteExamProgress(uid, paperKey){
+  return deleteDoc(doc(db, "examProgress", examProgressId(uid, paperKey)))
+    .then(function(){ return { ok: true }; })
+    .catch(function(){ return { ok: false }; });
+}
+
 window.PQFirebase = {
   signUp: signUp,
   logIn: logIn,
@@ -253,5 +321,11 @@ window.PQFirebase = {
   listAllAttempts: listAllAttempts,
   deleteAttempt: deleteAttempt,
   getMyExamAttempt: getMyExamAttempt,
-  recordExamAttempt: recordExamAttempt
+  recordExamAttempt: recordExamAttempt,
+  getMyProgress: getMyProgress,
+  saveProgress: saveProgress,
+  deleteProgress: deleteProgress,
+  getMyExamProgress: getMyExamProgress,
+  saveExamProgress: saveExamProgress,
+  deleteExamProgress: deleteExamProgress
 };

@@ -96,5 +96,44 @@ service cloud.firestore {
 
       allow delete: if isAdmin();
     }
+
+    // Scratch "resume" checkpoints for an IN-PROGRESS MCQ attempt
+    // (quiz.html) -- NOT a graded record (that's /attempts above). Freely
+    // overwritable/deletable by its owner: whether an unfinished attempt
+    // still "counts" toward the 2-attempt cap is decided entirely by
+    // /attempts' own rules, same as always -- this collection never gates
+    // anything by itself, it just lets a student close the tab and pick
+    // up later from the same checkpoint (same device or a different one).
+    match /practiceProgress/{progressId} {
+      allow get: if request.auth != null
+                  && (progressId.split('_')[0] == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+
+      allow create, update: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && progressId == request.resource.data.uid + '_' + request.resource.data.examKey;
+
+      // No request.resource on a delete -- check the EXISTING document's
+      // owner instead (resource, not request.resource), the same pattern
+      // the get rule above uses for the same reason.
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    // Same idea for an in-progress topical exam-question attempt
+    // (exam-practice.html). Unlike practiceProgress above there's no
+    // attempt cap downstream to interact with -- examAttempts already
+    // allows unlimited retakes -- so this is purely a convenience
+    // checkpoint.
+    match /examProgress/{progressId} {
+      allow get: if request.auth != null
+                  && (progressId.split('_')[0] == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+
+      allow create, update: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && progressId == request.resource.data.uid + '_' + request.resource.data.paperKey;
+
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
   }
 }

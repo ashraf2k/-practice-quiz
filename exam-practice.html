@@ -36,6 +36,21 @@
 
     <div id="last-result" class="attempt-status hidden"></div>
 
+    <div class="resume-prompt hidden" id="resume-prompt">
+      <p id="resume-prompt-text"></p>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-resume">Resume</button>
+        <button class="btn btn-secondary" id="btn-start-over">Start over</button>
+      </div>
+      <div class="restart-confirm mild hidden" id="restart-confirm">
+        <p class="restart-warn-text" id="restart-warn-text"></p>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-confirm-restart">Yes, start over</button>
+          <button class="btn btn-secondary" id="btn-cancel-restart">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-start">Start exam practice</button>
     </div>
@@ -236,6 +251,39 @@
     renderQuestion();
   }
 
+  // Rebuilds `state` from a saved examProgress checkpoint (see
+  // saveExamProgressSnapshot()) and continues the SAME run from exactly
+  // where it left off — same questions served so far, same answers/marks
+  // recorded, same adaptive level/streak. Mirrors startAttempt() above
+  // but skips the fresh-pool setup.
+  function resumeAttempt(progress){
+    state.pool = progress.pool || [];
+    state.order = progress.order || [];
+    state.index = progress.index || 0;
+    state.level = progress.level || 0;
+    state.streak = progress.streak || 0;
+    state.results = progress.results || [];
+    state.startedAt = progress.startedAt || Date.now();
+    showScreen("question");
+    renderQuestion();
+  }
+
+  // Fire-and-forget checkpoint, called every time the student moves past
+  // a question (see the btnNext handler) — lets them close the tab and
+  // resume later, same device or a different one, from exactly here.
+  function saveExamProgressSnapshot(){
+    if(!state.paperKey || !state.currentUser) return;
+    PQFirebase.saveExamProgress(state.currentUser.uid, state.paperKey, {
+      pool: state.pool,
+      order: state.order,
+      index: state.index,
+      level: state.level,
+      streak: state.streak,
+      results: state.results,
+      startedAt: state.startedAt
+    });
+  }
+
   // ============================================================
   // Question screen
   // ============================================================
@@ -409,6 +457,7 @@
       }
       state.order.push(pickFromPool(state.pool, state.paper.questions, state.level));
       state.index += 1;
+      saveExamProgressSnapshot();
       // Small delay so the level-up banner (if any) is visible before the
       // next question replaces this screen's content.
       if(state.level > oldLevel){
@@ -523,7 +572,12 @@
       completedAt: new Date().toISOString(),
       minutesTaken: minutesTaken
     }).then(function(result){
-      saveStatus.textContent = (result && result.ok) ? "" : "Your result couldn't be saved, but your report above is still complete.";
+      var ok = !!(result && result.ok);
+      saveStatus.textContent = ok ? "" : "Your result couldn't be saved, but your report above is still complete.";
+      // Only clear the resume checkpoint once the result is CONFIRMED
+      // saved — if it failed, keeping it around means the student's
+      // in-progress answers are still recoverable instead of silently lost.
+      if(ok) return PQFirebase.deleteExamProgress(state.currentUser.uid, state.paperKey);
     }).catch(function(){
       saveStatus.textContent = "Your result couldn't be saved, but your report above is still complete.";
     });
@@ -538,6 +592,56 @@
   var paperSummary = document.getElementById("paper-summary");
   var lastResultEl = document.getElementById("last-result");
   var btnStart = document.getElementById("btn-start");
+  var resumePrompt = document.getElementById("resume-prompt");
+  var resumePromptText = document.getElementById("resume-prompt-text");
+  var btnResume = document.getElementById("btn-resume");
+  var btnStartOver = document.getElementById("btn-start-over");
+  var restartConfirm = document.getElementById("restart-confirm");
+  var restartWarnText = document.getElementById("restart-warn-text");
+  var btnConfirmRestart = document.getElementById("btn-confirm-restart");
+  var btnCancelRestart = document.getElementById("btn-cancel-restart");
+  var pendingProgress = null;
+
+  // Shows/hides the Resume / Start-over prompt in place of the normal
+  // Start/Practice-again button. `progress` is an in-progress examProgress
+  // checkpoint for this paper, or null if there isn't one.
+  function renderResumePrompt(progress){
+    pendingProgress = progress;
+    resumePrompt.classList.add("hidden");
+    restartConfirm.classList.add("hidden");
+    btnStart.classList.remove("hidden");
+    if(!progress) return;
+    btnStart.classList.add("hidden");
+    var total = state.paper.questions.length;
+    var answeredSoFar = progress.index || 0;
+    resumePromptText.textContent = "You have an unfinished run in progress — Question " +
+      (answeredSoFar + 1) + " of " + total + ". Pick up where you left off, or start over.";
+    resumePrompt.classList.remove("hidden");
+  }
+
+  btnResume.addEventListener("click", function(){
+    if(!pendingProgress) return;
+    resumeAttempt(pendingProgress);
+  });
+
+  btnStartOver.addEventListener("click", function(){
+    restartWarnText.textContent = "Starting over will discard your current progress on this run — nothing is lost permanently, you can always practice again. Continue?";
+    restartConfirm.classList.remove("hidden");
+  });
+
+  btnCancelRestart.addEventListener("click", function(){
+    restartConfirm.classList.add("hidden");
+  });
+
+  btnConfirmRestart.addEventListener("click", function(){
+    restartConfirm.classList.add("hidden");
+    btnConfirmRestart.disabled = true;
+    PQFirebase.deleteExamProgress(state.currentUser.uid, state.paperKey).then(function(){
+      btnConfirmRestart.disabled = false;
+      renderResumePrompt(null);
+      startAttempt();
+    });
+  });
 
   function renderPaperSummary(paper){
     paperSummary.innerHTML = "";
@@ -593,11 +697,18 @@
     startGreeting.textContent = "Hi " + user.name + " — " + user.class + ".";
     renderPaperSummary(state.paper);
 
-    PQFirebase.getMyExamAttempt(user.uid, state.paperKey).then(function(record){
+    Promise.all([
+      PQFirebase.getMyExamAttempt(user.uid, state.paperKey),
+      PQFirebase.getMyExamProgress(user.uid, state.paperKey)
+    ]).then(function(results){
+      var record = results[0];
+      var progress = results[1];
       renderLastResult(record);
       btnStart.textContent = record ? "Practice again" : "Start exam practice";
+      renderResumePrompt(progress);
     }).catch(function(){
       renderLastResult(null);
+      renderResumePrompt(null);
     });
 
     showScreen("start");

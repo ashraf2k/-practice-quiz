@@ -158,6 +158,11 @@
     border-color: var(--diff-moderate);
     color: var(--diff-moderate);
   }
+  .attempt-badge.abandoned{
+    background: var(--incorrect-bg);
+    border-color: var(--incorrect-line);
+    color: var(--incorrect);
+  }
 
   .first-attempt-note{
     border: 1px solid var(--line);
@@ -531,7 +536,13 @@
       // present when attemptNumber is 2, is a snapshot of the score
       // before the retake so the teacher can still see both.
       attemptNumber: raw.attemptNumber || 1,
-      firstAttempt: raw.firstAttempt || null
+      firstAttempt: raw.firstAttempt || null,
+      // True when the student clicked "Start over" on an unfinished
+      // attempt (quiz.html's resume/restart flow) rather than reaching
+      // the last question normally -- the score reflects only whatever
+      // was answered up to that point, so it's flagged here rather than
+      // shown as an ordinary completed attempt.
+      abandoned: !!raw.abandoned
     };
   }
 
@@ -645,9 +656,11 @@
       var examKey = a.exam || "dp";
       var exam = EXAMS[examKey];
       var tr = document.createElement("tr");
-      var attemptBadge = a.attemptNumber >= 2
-        ? '<span class="attempt-badge retake" title="Used their one retake — this score is final.">Retake · final</span>'
-        : '<span class="attempt-badge">1st attempt</span>';
+      var attemptBadge = a.abandoned
+        ? '<span class="attempt-badge abandoned" title="Student clicked “Start over” before finishing — submitted with whatever was answered so far.">Self-submitted · partial</span>'
+        : (a.attemptNumber >= 2
+          ? '<span class="attempt-badge retake" title="Used their one retake — this score is final.">Retake · final</span>'
+          : '<span class="attempt-badge">1st attempt</span>');
       tr.innerHTML =
         "<td>" + escapeHtml(a.name || "") + "</td>" +
         "<td>" + escapeHtml(a.className || "") + "</td>" +
@@ -756,9 +769,11 @@
     group.attempts.slice().sort(function(a, b){ return new Date(b.timestamp) - new Date(a.timestamp); }).forEach(function(a){
       var examKey = a.exam || "dp";
       var exam = EXAMS[examKey];
-      var attemptBadge = a.attemptNumber >= 2
-        ? '<span class="attempt-badge retake" title="Used their one retake — this score is final.">Retake · final</span>'
-        : '<span class="attempt-badge">1st attempt</span>';
+      var attemptBadge = a.abandoned
+        ? '<span class="attempt-badge abandoned" title="Student clicked “Start over” before finishing — submitted with whatever was answered so far.">Self-submitted · partial</span>'
+        : (a.attemptNumber >= 2
+          ? '<span class="attempt-badge retake" title="Used their one retake — this score is final.">Retake · final</span>'
+          : '<span class="attempt-badge">1st attempt</span>');
       var tr = document.createElement("tr");
       tr.innerHTML =
         "<td>" + escapeHtml(examLabel(examKey)) + "</td>" +
@@ -986,6 +1001,12 @@
     };
     var container = document.getElementById("student-detail");
     container.innerHTML = "";
+    if(attempt.abandoned){
+      var abandonedNote = document.createElement("p");
+      abandonedNote.className = "first-attempt-note";
+      abandonedNote.innerHTML = "<strong>Self-submitted, partial attempt.</strong> This student clicked “Start over” before reaching the end — the score below reflects only the questions they'd answered at that point; any remaining questions count as incorrect.";
+      container.appendChild(abandonedNote);
+    }
     if(attempt.attemptNumber >= 2 && attempt.firstAttempt && typeof attempt.firstAttempt.score === "number"){
       var note = document.createElement("p");
       note.className = "first-attempt-note";
