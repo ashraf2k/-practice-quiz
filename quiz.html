@@ -220,6 +220,11 @@
     </div>
     <p class="step-sub">Your results across every practice topic for your class.</p>
     <div id="progress-list"></div>
+
+    <div id="exam-progress-section" class="hidden">
+      <p class="progress-section-title">Topical Real Exam Questions</p>
+      <div id="exam-progress-list"></div>
+    </div>
   </section>
 
 </div>
@@ -1700,10 +1705,85 @@
     });
   }
 
+  // ---------- "Topical Real Exam Questions" rows on the same screen ----------
+  // Mirrors fetchProgressRecords()/renderProgressList() above, but for the
+  // separate exam-practice papers (exam-data.js's examPaperChoicesForClass()
+  // + the examAttempts collection, read via getMyExamAttempt()). Different
+  // data shape -- marks/percentage, unlimited retakes, no attemptNumber cap
+  // -- so it gets its own fetch/render pair and its own section below the
+  // MCQ rows, rather than being forced into the same row shape.
+  var examProgressSectionEl = document.getElementById("exam-progress-section");
+  var examProgressListEl = document.getElementById("exam-progress-list");
+
+  function fetchExamProgressRecords(){
+    var user = state.currentUser;
+    var choices = examPaperChoicesForClass(user.class);
+    return Promise.all(choices.map(function(choice){
+      return PQFirebase.getMyExamAttempt(user.uid, choice.key).then(function(existing){
+        return { key: choice.key, label: choice.label || EXAM_PAPERS[choice.key].title, existing: existing || null };
+      }).catch(function(){
+        return { key: choice.key, label: choice.label || EXAM_PAPERS[choice.key].title, existing: null };
+      });
+    }));
+  }
+
+  function renderExamProgressList(records){
+    if(records.length === 0){
+      examProgressSectionEl.classList.add("hidden");
+      return;
+    }
+    examProgressSectionEl.classList.remove("hidden");
+    examProgressListEl.innerHTML = "";
+    records.forEach(function(r){
+      var row = document.createElement("div");
+      row.className = "progress-row";
+
+      var left = document.createElement("div");
+      var title = document.createElement("p");
+      title.className = "pr-title";
+      title.textContent = r.label;
+      left.appendChild(title);
+      var sub = document.createElement("p");
+      sub.className = "pr-sub";
+      left.appendChild(sub);
+
+      var right = document.createElement("div");
+      right.className = "pr-right";
+      var statusSpan = document.createElement("span");
+
+      if(!r.existing){
+        statusSpan.className = "pr-status not-started";
+        statusSpan.textContent = "Not started";
+        sub.textContent = "No attempts yet.";
+      } else {
+        statusSpan.className = "pr-status done";
+        statusSpan.textContent = "Completed";
+        var dateText = fmtDate(r.existing.completedAt);
+        var hasScore = typeof r.existing.totalEarned === "number" && typeof r.existing.totalMarks === "number";
+        sub.textContent = (hasScore ? "Scored " + r.existing.totalEarned + "/" + r.existing.totalMarks : "Completed") +
+          " on " + dateText + ". Unlimited retakes — practice again any time.";
+        if(hasScore){
+          var scoreEl = document.createElement("span");
+          scoreEl.className = "pr-score";
+          scoreEl.textContent = (typeof r.existing.pct === "number" ? r.existing.pct : Math.round((r.existing.totalEarned / r.existing.totalMarks) * 100)) + "%";
+          right.appendChild(scoreEl);
+        }
+      }
+
+      right.appendChild(statusSpan);
+      row.appendChild(left);
+      row.appendChild(right);
+      examProgressListEl.appendChild(row);
+    });
+  }
+
   function openProgressScreen(){
     progressListEl.innerHTML = '<p class="cohort-note">Loading your progress…</p>';
+    examProgressListEl.innerHTML = "";
+    examProgressSectionEl.classList.add("hidden");
     showScreen("progress");
     fetchProgressRecords().then(renderProgressList);
+    fetchExamProgressRecords().then(renderExamProgressList);
   }
 
   document.getElementById("btn-my-progress").addEventListener("click", openProgressScreen);

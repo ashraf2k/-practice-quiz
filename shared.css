@@ -1156,6 +1156,14 @@
 
   /* ---------- My Progress screen ---------- */
 
+  .progress-section-title{
+    font-size: 14px;
+    font-weight: 700;
+    margin: 26px 0 10px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+
   .progress-row{
     display: flex;
     align-items: center;

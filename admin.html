@@ -260,6 +260,7 @@
       <button class="admin-tab" data-tab="byStudent">By student</button>
       <button class="admin-tab" data-tab="classes">Class overview</button>
       <button class="admin-tab" data-tab="questions">Question analysis</button>
+      <button class="admin-tab" data-tab="examPractice">Exam Practice</button>
     </div>
 
     <div id="admin-panels">
@@ -319,6 +320,40 @@
         <p class="admin-status no-print" id="detail-reset-status"></p>
         <div id="student-detail"></div>
       </div>
+
+      <!-- "Topical Real Exam Questions" (exam-practice.html) -- a separate
+           collection (examAttempts) from the MCQ "attempts" collection
+           every other tab above reads, with its own data shape (marks out
+           of a paper total + percentage, unlimited retakes so at most one
+           row per student+paper) so it gets its own list/detail pair
+           rather than being forced into the MCQ tables above. -->
+      <div class="admin-panel" id="panel-examPractice">
+        <div class="admin-toolbar no-print">
+          <select id="filter-paper">
+            <option value="">All topics</option>
+          </select>
+          <select id="filter-class-exampractice">
+            <option value="">All classes</option>
+          </select>
+          <input type="text" id="filter-search-exampractice" placeholder="Search by name" />
+        </div>
+        <p class="admin-status">Free-response, AI-assisted keyword grading, unlimited retakes — each student has at most one row per topic: their latest run.</p>
+        <div class="table-scroll">
+          <table class="admin-table" id="exampractice-table">
+            <thead><tr><th>Name</th><th>Class</th><th>Topic</th><th>Marks</th><th>%</th><th>Date</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="panel-examDetail">
+        <div class="admin-toolbar no-print">
+          <button class="btn btn-secondary admin-detail-back" id="btn-back-examdetail">← Back to Exam Practice list</button>
+          <button class="btn btn-danger" id="btn-examdetail-reset">Reset this attempt</button>
+        </div>
+        <p class="admin-status no-print" id="examdetail-reset-status"></p>
+        <div id="exampractice-detail"></div>
+      </div>
     </div>
   </section>
 
@@ -326,6 +361,7 @@
 
 <script src="jspdf.min.js"></script>
 <script src="quiz-data.js"></script>
+<script src="exam-data.js"></script>
 <script src="report-lib.js"></script>
 <script src="firebase-config.js"></script>
 <script type="module" src="firebase-init.js"></script>
@@ -343,6 +379,27 @@
     opt.textContent = EXAMS[key].title;
     examFilterEl.appendChild(opt);
   });
+
+  // Same idea, for the separate "Topical Real Exam Questions" papers
+  // (exam-data.js's EXAM_PAPERS) shown on the Exam Practice tab -- a
+  // different data source from EXAMS above, so it gets its own filter
+  // dropdown rather than being merged into filter-exam.
+  var EXAM_PAPER_KEYS = Object.keys(EXAM_PAPERS);
+  var paperFilterEl = document.getElementById("filter-paper");
+  EXAM_PAPER_KEYS.forEach(function(key){
+    var opt = document.createElement("option");
+    opt.value = key;
+    opt.textContent = EXAM_PAPERS[key].title;
+    paperFilterEl.appendChild(opt);
+  });
+  function selectedPaperKeys(){
+    var v = paperFilterEl.value;
+    return v ? [v] : EXAM_PAPER_KEYS.slice();
+  }
+  function paperLabel(paperKey){
+    return (EXAM_PAPERS[paperKey] && EXAM_PAPERS[paperKey].title) || paperKey;
+  }
+  paperFilterEl.addEventListener("change", renderExamPractice);
 
   // "" (All exams) expands to every exam key; a specific selection narrows to one.
   function selectedExamKeys(){
@@ -497,7 +554,7 @@
     document.querySelectorAll(".admin-tab").forEach(function(btn){
       btn.classList.toggle("active", btn.dataset.tab === name);
     });
-    ["students","byStudent","classes","questions","profile","detail"].forEach(function(id){
+    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail"].forEach(function(id){
       document.getElementById("panel-" + id).classList.toggle("active", id === name);
     });
   }
@@ -512,6 +569,7 @@
   // Data loading
   // ============================================================
   var attempts = [];
+  var examAttempts = [];
   var loaded = false;
   var adminStatus = document.getElementById("admin-status");
 
@@ -546,15 +604,44 @@
     };
   }
 
+  // Firestore examAttempts docs (exam-practice.html's "Topical Real Exam
+  // Questions") are keyed by uid/paperKey and use `paperKey` / `class` /
+  // `completedAt`, same normalize-once approach as normalizeAttempt()
+  // above -- but note this is a genuinely different shape (marks out of
+  // a paper total + percentage, no attemptNumber/retake concept since
+  // retakes are unlimited there) rather than the same shape renamed.
+  function normalizeExamAttempt(raw){
+    return {
+      uid: raw.uid,
+      paperKey: raw.paperKey,
+      name: raw.name,
+      className: raw.class,
+      perQuestion: raw.perQuestion || [],
+      totalEarned: raw.totalEarned,
+      totalMarks: raw.totalMarks,
+      pct: raw.pct,
+      topicStats: raw.topicStats || [],
+      timestamp: raw.completedAt,
+      minutesTaken: raw.minutesTaken
+    };
+  }
+
   function loadData(){
     adminStatus.classList.remove("warn");
     adminStatus.textContent = "Loading…";
-    PQFirebase.listAllAttempts().then(function(list){
-      // Keep every attempt across all exams here; the exam/class/search
-      // filters below decide what's actually shown in each tab.
-      attempts = list.map(normalizeAttempt);
+    Promise.all([
+      PQFirebase.listAllAttempts(),
+      PQFirebase.listAllExamAttempts()
+    ]).then(function(results){
+      // Keep every attempt across all exams/papers here; the various
+      // exam/class/search/paper filters below decide what's actually
+      // shown in each tab.
+      attempts = results[0].map(normalizeAttempt);
+      examAttempts = results[1].map(normalizeExamAttempt);
       loaded = true;
-      adminStatus.textContent = "Loaded " + attempts.length + " submitted attempt" + (attempts.length === 1 ? "" : "s") + " · refreshed " + new Date().toLocaleTimeString();
+      adminStatus.textContent = "Loaded " + attempts.length + " submitted attempt" + (attempts.length === 1 ? "" : "s") +
+        " and " + examAttempts.length + " exam-practice result" + (examAttempts.length === 1 ? "" : "s") +
+        " · refreshed " + new Date().toLocaleTimeString();
       renderAll();
     }).catch(function(err){
       adminStatus.classList.add("warn");
@@ -575,6 +662,8 @@
     renderByStudent();
     renderClasses();
     renderQuestions();
+    populateExamPracticeClassFilter(document.getElementById("filter-class-exampractice"));
+    renderExamPractice();
   }
 
   function populateClassFilter(sel){
@@ -1083,6 +1172,183 @@
     document.getElementById("detail-print-status"),
     function(){ return detailCtx; }
   );
+
+  // ============================================================
+  // Exam Practice tab — "Topical Real Exam Questions" (exam-practice.html)
+  // Reads the separate examAttempts collection loaded in loadData() above.
+  // Unlimited retakes means each student has at most one row per paper
+  // (their latest run), so there's no attempt-number/retake badge here,
+  // and no Class-overview/Question-analysis equivalents yet -- one list,
+  // one detail view, same as the Students tab but for this data shape.
+  // ============================================================
+  var filterClassExamPractice = document.getElementById("filter-class-exampractice");
+  var filterSearchExamPractice = document.getElementById("filter-search-exampractice");
+  filterClassExamPractice.addEventListener("change", renderExamPractice);
+  filterSearchExamPractice.addEventListener("input", renderExamPractice);
+
+  function populateExamPracticeClassFilter(sel){
+    var current = sel.value;
+    sel.innerHTML = '<option value="">All classes</option>';
+    var paperKeys = selectedPaperKeys();
+    var seen = {};
+    paperKeys.forEach(function(key){
+      (EXAM_PAPERS[key].classes || []).forEach(function(cls){
+        if(seen[cls]) return;
+        seen[cls] = true;
+        var opt = document.createElement("option");
+        opt.value = cls;
+        opt.textContent = cls;
+        sel.appendChild(opt);
+      });
+    });
+    sel.value = current;
+  }
+
+  function filteredExamAttempts(){
+    var paperKeys = selectedPaperKeys();
+    var cls = filterClassExamPractice.value;
+    var q = filterSearchExamPractice.value.trim().toLowerCase();
+    return examAttempts.filter(function(a){
+      if(paperKeys.indexOf(a.paperKey) === -1) return false;
+      if(cls && a.className !== cls) return false;
+      if(q && (a.name || "").toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+  }
+
+  function renderExamPractice(){
+    var tbody = document.querySelector("#exampractice-table tbody");
+    tbody.innerHTML = "";
+    var rows = filteredExamAttempts().slice().sort(function(a, b){
+      return new Date(b.timestamp) - new Date(a.timestamp);
+    });
+
+    if(rows.length === 0){
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      td.colSpan = 6;
+      td.className = "wrap-cell";
+      td.textContent = loaded ? "No exam-practice results match these filters." : "";
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+      return;
+    }
+
+    rows.forEach(function(a){
+      var pct = typeof a.pct === "number" ? a.pct : (a.totalMarks ? Math.round((a.totalEarned / a.totalMarks) * 100) : 0);
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + escapeHtml(a.name || "") + "</td>" +
+        "<td>" + escapeHtml(a.className || "") + "</td>" +
+        "<td>" + escapeHtml(paperLabel(a.paperKey)) + "</td>" +
+        "<td>" + a.totalEarned + "/" + a.totalMarks + "</td>" +
+        "<td>" + pct + "%</td>" +
+        "<td>" + fmtDateShort(a.timestamp) + "</td>";
+      tr.addEventListener("click", function(){ openExamDetail(a); });
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ------------------------------------------------------------
+  // Exam Practice detail view — per-question breakdown (topic, marks
+  // earned/total, and the student's own typed answer). No PDF export
+  // here yet (unlike the MCQ detail view), since buildReportFragment()/
+  // wirePdfButton() in report-lib.js are built around MCQ questions and
+  // options, not free-response mark schemes.
+  // ------------------------------------------------------------
+  var examDetailAttempt = null;
+
+  function openExamDetail(attempt){
+    examDetailAttempt = attempt;
+    var container = document.getElementById("exampractice-detail");
+    container.innerHTML = "";
+
+    var summary = document.createElement("div");
+    summary.className = "profile-summary";
+    summary.innerHTML = "<h3>" + escapeHtml(attempt.name || "") + "</h3>" +
+      "<span class=\"muted\">" + escapeHtml(attempt.className || "") + " · " + escapeHtml(paperLabel(attempt.paperKey)) +
+      (attempt.timestamp ? " · " + fmtDateShort(attempt.timestamp) : "") + "</span>";
+    container.appendChild(summary);
+
+    var pct = typeof attempt.pct === "number" ? attempt.pct : (attempt.totalMarks ? Math.round((attempt.totalEarned / attempt.totalMarks) * 100) : 0);
+    var summaryRow = document.createElement("div");
+    summaryRow.className = "admin-summary-row";
+    summaryRow.innerHTML =
+      "<div class=\"admin-card\"><div class=\"label\">Score</div><div class=\"value\">" + attempt.totalEarned + "/" + attempt.totalMarks + "</div></div>" +
+      "<div class=\"admin-card\"><div class=\"label\">Percentage</div><div class=\"value\">" + pct + "%</div></div>" +
+      (attempt.minutesTaken ? "<div class=\"admin-card\"><div class=\"label\">Time taken</div><div class=\"value\">" + attempt.minutesTaken + " min</div></div>" : "");
+    container.appendChild(summaryRow);
+
+    (attempt.perQuestion || []).forEach(function(r){
+      var row = document.createElement("div");
+      row.className = "admin-question-row";
+      var qPct = r.total ? Math.round((r.earned / r.total) * 100) : 0;
+      var top = document.createElement("div");
+      top.className = "qtop";
+      top.innerHTML = "<span class=\"qtext\">" + escapeHtml(r.topic || "") + "</span>" +
+        "<span class=\"qpct " + (qPct >= 70 ? "high" : (qPct < 50 ? "low" : "")) + "\">" + r.earned + "/" + r.total + "</span>";
+      row.appendChild(top);
+      if(r.answerText){
+        var ans = document.createElement("p");
+        ans.className = "qmiss wrap-cell";
+        ans.textContent = "Student's answer: " + r.answerText;
+        row.appendChild(ans);
+      }
+      container.appendChild(row);
+    });
+
+    var resetStatusEl = document.getElementById("examdetail-reset-status");
+    resetStatusEl.textContent = "";
+    resetStatusEl.classList.remove("warn");
+    document.getElementById("btn-examdetail-reset").disabled = false;
+    showTab("examDetail");
+  }
+
+  document.getElementById("btn-back-examdetail").addEventListener("click", function(){
+    showTab("examPractice");
+  });
+
+  // Mirrors the MCQ "Reset this attempt" button above (same firestore.rules
+  // isAdmin()-only enforcement) but deletes from examAttempts instead --
+  // there's no retake to "free up" here since exam-practice.html already
+  // allows unlimited retakes; this just clears the saved record so the
+  // student no longer shows as having attempted this paper.
+  document.getElementById("btn-examdetail-reset").addEventListener("click", function(){
+    if(!examDetailAttempt || !examDetailAttempt.uid){
+      document.getElementById("examdetail-reset-status").textContent = "Can't reset this attempt — it's missing the student's account id.";
+      document.getElementById("examdetail-reset-status").classList.add("warn");
+      return;
+    }
+    var studentName = examDetailAttempt.name || "this student";
+    var paperKey = examDetailAttempt.paperKey;
+    var confirmed = window.confirm(
+      "Reset " + studentName + "'s exam-practice result for \"" + paperLabel(paperKey) + "\"?\n\n" +
+      "This permanently deletes their saved result for this topic. They can practice it again any time — this cannot be undone."
+    );
+    if(!confirmed) return;
+
+    var resetBtn = document.getElementById("btn-examdetail-reset");
+    var resetStatusEl = document.getElementById("examdetail-reset-status");
+    resetBtn.disabled = true;
+    resetStatusEl.classList.remove("warn");
+    resetStatusEl.textContent = "Resetting…";
+
+    PQFirebase.deleteExamAttempt(examDetailAttempt.uid, paperKey).then(function(){
+      examAttempts = examAttempts.filter(function(a){
+        return !(a.uid === examDetailAttempt.uid && a.paperKey === paperKey);
+      });
+      renderAll();
+      adminStatus.classList.remove("warn");
+      adminStatus.textContent = "Reset " + studentName + "'s result for " + paperLabel(paperKey) + ".";
+      showTab("examPractice");
+    }).catch(function(err){
+      resetBtn.disabled = false;
+      resetStatusEl.classList.add("warn");
+      resetStatusEl.textContent = (err && err.code === "permission-denied")
+        ? "Firestore denied this request — this account isn't recognised as admin by firestore.rules (check isAdmin() there)."
+        : "Couldn't reset this attempt. Check your internet connection and try again.";
+    });
+  });
 
 })();
 </script>

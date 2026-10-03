@@ -277,7 +277,7 @@
   // "Topical Real Exam Questions" dropdown on quiz.html's start screen.
   var EXAM_PAPER_CHOICES_BY_CLASS = [
     { test: /^10br/i, choices: [
-      { key: "datarep_exam", label: "Topic 1: Data Representation" }
+      { key: "datarep_exam", label: "Topic 1: Data Representation — IGCSE exam style" }
     ] }
   ];
 

@@ -214,6 +214,30 @@ function getMyExamAttempt(uid, paperKey){
   });
 }
 
+// Admin-only (enforced by security rules, not just this check): every
+// Topical Real Exam Questions result across every student/paper, newest
+// first. Mirrors listAllAttempts() above, but reads the separate
+// examAttempts collection -- since exam-practice.html allows unlimited
+// retakes, each document is just one student's latest run on one paper.
+function listAllExamAttempts(){
+  var q = query(collection(db, "examAttempts"), orderBy("recordedAt", "desc"));
+  return getDocs(q).then(function(snap){
+    var out = [];
+    snap.forEach(function(d){ out.push(d.data()); });
+    return out;
+  });
+}
+
+// Admin-only (enforced by security rules, not just this check): clears a
+// single student's saved exam-practice result for one paper. Unlike
+// deleteAttempt() above this doesn't "free up" a retake -- exam-practice
+// already allows unlimited retakes -- it just removes the record so it
+// no longer shows as attempted (e.g. a mistaken test run).
+function deleteExamAttempt(uid, paperKey){
+  return deleteDoc(doc(db, "examAttempts", examAttemptId(uid, paperKey)))
+    .then(function(){ return { ok: true }; });
+}
+
 // `record`: { name, cls, perQuestion, totalEarned, totalMarks, pct,
 // topicStats, completedAt, minutesTaken }. perQuestion/topicStats are
 // plain arrays of plain objects (Firestore-safe), built by
@@ -322,6 +346,8 @@ window.PQFirebase = {
   deleteAttempt: deleteAttempt,
   getMyExamAttempt: getMyExamAttempt,
   recordExamAttempt: recordExamAttempt,
+  listAllExamAttempts: listAllExamAttempts,
+  deleteExamAttempt: deleteExamAttempt,
   getMyProgress: getMyProgress,
   saveProgress: saveProgress,
   deleteProgress: deleteProgress,
