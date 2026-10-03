@@ -1018,7 +1018,7 @@
     state.attemptNumber = progress.attemptNumber || 1;
     state.firstAttemptSnapshot = progress.firstAttemptSnapshot || null;
     state.questionOrder = progress.questionOrder || [];
-    state.optionOrder = progress.optionOrder || [];
+    state.optionOrder = unpackOptionOrder(progress.optionOrder);
     state.adapt = progress.adapt || null;
     btnNext.disabled = false;
     if(streakStarTimer){ clearTimeout(streakStarTimer); streakStarTimer = null; }
@@ -1029,6 +1029,22 @@
     setHeader(exam.title, exam.subtitle);
     showScreen("quiz");
     renderQuestion();
+  }
+
+  // Firestore rejects an array whose elements are themselves arrays
+  // ("nested arrays are not supported") -- but state.optionOrder is
+  // exactly that: one shuffled-option-index array per question. Wrap each
+  // inner array in a tiny object before saving, and unwrap it again on
+  // the way back in (see resumeAttempt()), so the checkpoint survives a
+  // real round-trip through the Firestore SDK, which validates and
+  // throws on this SYNCHRONOUSLY -- before any network call, and before
+  // the btnNext handler ever reaches renderQuestion() -- which is exactly
+  // what made "Next" appear to silently do nothing.
+  function packOptionOrder(optionOrder){
+    return (optionOrder || []).map(function(arr){ return { o: arr }; });
+  }
+  function unpackOptionOrder(packed){
+    return (packed || []).map(function(item){ return (item && item.o) || []; });
   }
 
   // Fire-and-forget checkpoint, called every time the student moves past
@@ -1042,7 +1058,7 @@
     PQFirebase.saveProgress(state.currentUser.uid, state.examKey, {
       attemptNumber: state.attemptNumber || 1,
       questionOrder: state.questionOrder,
-      optionOrder: state.optionOrder,
+      optionOrder: packOptionOrder(state.optionOrder),
       index: state.index,
       answers: state.answers,
       hintUsedFor: state.hintUsedFor,
