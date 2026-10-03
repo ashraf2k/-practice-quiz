@@ -300,6 +300,14 @@
 
   .link-btn:hover{ color: var(--accent-dark); }
 
+  /* A plain horizontal rule separating two independent sections within the
+     same card (e.g. "Practice Questions" vs. "Topical Real Exam
+     Questions" on quiz.html's start screen). */
+  .section-divider{
+    border-top: 1px solid var(--line);
+    margin: 30px 0 24px;
+  }
+
   .account-banner{
     display: flex;
     justify-content: space-between;
@@ -1382,6 +1390,196 @@
   }
 
   .hidden{ display: none !important; }
+
+  /* ---------- Topical exam practice (exam-practice.html) ---------- */
+
+  .exam-textarea{
+    width: 100%;
+    font-size: 15.5px;
+    padding: 12px 13px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--input-bg);
+    color: var(--ink);
+    font-family: inherit;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .exam-textarea:focus{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+
+  .field.invalid .exam-textarea{
+    border-color: var(--incorrect);
+  }
+
+  /* Live running total as the student ticks/selects marks against the
+     scheme -- three states so it's clear at a glance whether they've
+     covered everything, something, or nothing yet. */
+  .check-score-banner{
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  .check-score-banner.full{
+    background: var(--correct-bg);
+    border-color: var(--correct-line);
+    color: var(--correct);
+  }
+
+  .check-score-banner.partial{
+    background: var(--diff-moderate-bg);
+    border-color: var(--diff-moderate-line);
+    color: var(--diff-moderate);
+  }
+
+  .check-score-banner.none{
+    background: var(--incorrect-bg);
+    border-color: var(--incorrect-line);
+    color: var(--incorrect);
+  }
+
+  /* One row per mark-scheme point -- a checkbox (1-mark points) or a
+     dropdown (multi-mark points) the student can override, plus the
+     mark-scheme wording itself as the label. */
+  .markpoint-row{
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .markpoint-row:last-child{
+    border-bottom: none;
+  }
+
+  .markpoint-row label{
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    padding-top: 2px;
+  }
+
+  .markpoint-control{
+    flex: 0 0 auto;
+    padding-top: 2px;
+  }
+
+  .markpoint-control input[type="checkbox"]{
+    width: 19px;
+    height: 19px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .markpoint-control select{
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 6px 9px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--ink);
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .markpoint-control select:focus{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  /* ---------- Exam-practice results screen ---------- */
+
+  .exam-score-box{
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 20px 0 24px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .exam-score-num{
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--accent-dark);
+    line-height: 1;
+  }
+
+  .exam-score-pct{
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .topic-chip-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .topic-chip{
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  .topic-chip.good{
+    background: var(--correct-bg);
+    color: var(--correct);
+    border-color: var(--correct-line);
+  }
+
+  /* A weak-area block reuses .feedback-block's shape but recolors it to
+     the "needs attention" palette instead of the neutral accent tint. */
+  .revisit-block{
+    border-color: var(--incorrect-line);
+    border-left-color: var(--incorrect);
+    background: var(--incorrect-bg);
+  }
+
+  .revisit-block .fb-title{
+    color: var(--incorrect);
+  }
+
+  .revisit-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .revisit-head .fb-title{
+    margin: 0;
+  }
+
+  .revisit-score{
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--incorrect);
+    color: #fff;
+    white-space: nowrap;
+  }
 
   /* ---------- Print ---------- */
 

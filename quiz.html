@@ -120,6 +120,25 @@
 
     <p class="cohort-note" id="start-note">At the end you'll get teacher's feedback on your strengths and weaknesses, and you can download your results as a PDF.</p>
     <p class="cohort-note" id="start-status" aria-live="polite"></p>
+
+    <div class="section-divider hidden" id="exam-practice-divider"></div>
+
+    <div id="exam-practice-section" class="hidden">
+      <h2 class="step-title" style="font-size:18px; margin-bottom:6px;">Topical Real Exam Questions</h2>
+      <p class="cohort-note" style="margin-top:0;">Free-response, exam-style questions with real mark allocations. Answer in your own words, then click “AI, check my answer!” for an instant suggested mark against the official scheme — difficulty adapts as you go, starting easy and getting harder, with unlimited practice.</p>
+
+      <div class="field" id="field-exam-topic">
+        <label for="input-exam-topic">Exam paper</label>
+        <select id="input-exam-topic">
+          <option value="" disabled selected>Choose a topic</option>
+        </select>
+        <div class="err">Please choose a topic.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btn-start-exam-practice">Start exam practice</button>
+      </div>
+    </div>
   </section>
 
   <!-- ============ QUIZ SCREEN ============ -->
@@ -197,6 +216,7 @@
 
 <script src="jspdf.min.js"></script>
 <script src="quiz-data.js"></script>
+<script src="exam-data.js"></script>
 <script src="report-lib.js"></script>
 <script src="firebase-config.js"></script>
 <script type="module" src="firebase-init.js"></script>
@@ -550,6 +570,47 @@
     }
     return choices;
   }
+
+  // ---------- Second section: "Topical Real Exam Questions" ----------
+  // Separate from the practice-quiz topic dropdown above -- sourced from
+  // exam-data.js's examPaperChoicesForClass() (currently just the 10BR
+  // classes' one Data Representation paper). Hidden entirely for classes
+  // with no exam papers set up yet; shown as its own dropdown + button
+  // otherwise, always as a dropdown (even with a single paper) since this
+  // is its own menu rather than an extension of the practice-quiz one.
+  var examPracticeDivider = document.getElementById("exam-practice-divider");
+  var examPracticeSection = document.getElementById("exam-practice-section");
+  var fieldExamTopic = document.getElementById("field-exam-topic");
+  var inputExamTopic = document.getElementById("input-exam-topic");
+  var btnStartExamPractice = document.getElementById("btn-start-exam-practice");
+
+  function refreshExamPaperField(cls){
+    var choices = examPaperChoicesForClass(cls);
+    fieldExamTopic.classList.remove("invalid");
+    if(choices.length === 0){
+      examPracticeDivider.classList.add("hidden");
+      examPracticeSection.classList.add("hidden");
+      return choices;
+    }
+    examPracticeDivider.classList.remove("hidden");
+    examPracticeSection.classList.remove("hidden");
+    inputExamTopic.innerHTML = '<option value="" disabled selected>Choose a topic</option>';
+    choices.forEach(function(choice){
+      var opt = document.createElement("option");
+      opt.value = choice.key;
+      opt.textContent = choice.label || EXAM_PAPERS[choice.key].title;
+      inputExamTopic.appendChild(opt);
+    });
+    if(choices.length === 1) inputExamTopic.value = choices[0].key;
+    return choices;
+  }
+
+  btnStartExamPractice.addEventListener("click", function(){
+    var key = inputExamTopic.value;
+    if(!key){ fieldExamTopic.classList.add("invalid"); return; }
+    fieldExamTopic.classList.remove("invalid");
+    window.location.href = "exam-practice.html?topic=" + encodeURIComponent(key);
+  });
 
   var attemptStatusEl = document.getElementById("attempt-status");
   var btnViewReport = document.getElementById("btn-view-report");
@@ -1436,6 +1497,7 @@
     if(choices.length <= 1){
       startGreeting.textContent += " Ready when you are.";
     }
+    refreshExamPaperField(user.class);
     checkAttemptStatus();
     loadPerformanceMeter();
     showScreen("start");

@@ -79,5 +79,22 @@ service cloud.firestore {
       // letting that student take the exam fresh again.
       allow delete: if isAdmin();
     }
+
+    // Topical exam-question practice (exam-practice.html): free-response
+    // questions self-checked against a keyword-assisted grader, with
+    // UNLIMITED retakes -- so unlike /attempts there's no attemptNumber
+    // dance. Each document always holds just that student's most recent
+    // completed run for that paper; writing it again simply overwrites it.
+    match /examAttempts/{attemptId} {
+      allow get: if request.auth != null
+                  && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+
+      allow create, update: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && attemptId == request.resource.data.uid + '_' + request.resource.data.paperKey;
+
+      allow delete: if isAdmin();
+    }
   }
 }

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Topical Exam Practice</title>
+<link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+<div class="wrap" id="wrap">
+
+  <header class="top">
+    <a class="logo-link" href="index.html" aria-label="iLearnCS home">
+      <img class="logo-img" src="logo.png" alt="iLearnCS">
+    </a>
+    <div>
+      <h1 id="header-title">Topical Exam Practice</h1>
+      <p id="header-sub">Loading…</p>
+    </div>
+  </header>
+
+  <!-- ============ LOADING / NOT SIGNED IN ============ -->
+  <section id="screen-loading" class="card">
+    <p class="cohort-note" id="loading-status">Checking your sign-in…</p>
+  </section>
+
+  <!-- ============ START SCREEN ============ -->
+  <section id="screen-start" class="card hidden">
+    <div class="account-banner">
+      <h2 class="step-title" style="margin-bottom:0;">Topical Real Exam Questions</h2>
+      <a class="link-btn" href="quiz.html">← Back to practice menu</a>
+    </div>
+    <p class="step-sub" id="start-greeting"></p>
+
+    <div id="paper-summary"></div>
+
+    <div id="last-result" class="attempt-status hidden"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-start">Start exam practice</button>
+    </div>
+    <p class="cohort-note">Free-response, exam-style questions with real mark allocations. Answer each one, then click <strong>“AI, check my answer!”</strong> — it suggests a mark against the official scheme (looking for key terms), which is always shown too so you can double-check and adjust it yourself. Difficulty adapts as you go, and you can practice again as many times as you like.</p>
+  </section>
+
+  <!-- ============ QUESTION SCREEN ============ -->
+  <section id="screen-question" class="card hidden">
+    <div class="quiz-meta">
+      <span class="section-label" id="q-topic-label">Topic</span>
+      <span class="count" id="q-count">Question 1 of 20</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="q-progress-fill" style="width:0%"></div>
+    </div>
+
+    <div class="question-meta" id="q-meta"></div>
+    <p class="question-text" id="q-prompt" style="white-space:pre-wrap;"></p>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="answer-textarea">Your answer</label>
+      <textarea id="answer-textarea" class="exam-textarea" rows="5" placeholder="Type your full working and/or answer here…"></textarea>
+      <div class="err" id="answer-err">Please write an answer before checking it.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-check">AI, check my answer!</button>
+    </div>
+    <p class="cohort-note" id="check-disclaimer">Automated check — it looks for the key terms and values the mark scheme asks for. Always compare with the official mark scheme below and adjust the ticks yourself if it missed something.</p>
+
+    <div id="check-area" class="hidden">
+      <div class="check-score-banner" id="check-score-banner"></div>
+
+      <p class="section-label" style="margin-top:22px;">Mark scheme — tick what you actually covered</p>
+      <div id="markpoints-list"></div>
+
+      <div class="feedback-block" style="margin-top:18px;">
+        <p class="fb-title">Explanation</p>
+        <p id="q-explanation"></p>
+      </div>
+
+      <div id="level-banner"></div>
+    </div>
+
+    <div class="quiz-footer no-print">
+      <button class="btn btn-primary hidden" id="btn-next">Next question</button>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS SCREEN ============ -->
+  <section id="screen-results" class="card hidden">
+    <h2 class="step-title">Exam practice complete</h2>
+    <p class="step-sub" id="result-sub"></p>
+
+    <div id="results-body"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-practice-again">Practice again</button>
+      <a class="btn btn-secondary" href="quiz.html">Back to practice menu</a>
+    </div>
+    <p class="cohort-note" id="save-status" aria-live="polite"></p>
+  </section>
+
+</div>
+
+<script src="exam-data.js"></script>
+<script src="firebase-config.js"></script>
+<script type="module" src="firebase-init.js"></script>
+<script type="module">
+(function(){
+
+  // ============================================================
+  // Screens
+  // ============================================================
+  var SCREEN_IDS = ["loading","start","question","results"];
+  function showScreen(name){
+    SCREEN_IDS.forEach(function(id){
+      var el = document.getElementById("screen-" + id);
+      if(!el) return;
+      if(id === name) el.classList.remove("hidden");
+      else el.classList.add("hidden");
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function setHeader(title, sub){
+    document.getElementById("header-title").textContent = title;
+    document.getElementById("header-sub").textContent = sub;
+  }
+
+  // ============================================================
+  // Adaptive engine (mirrors quiz.html's, minus the section split --
+  // this paper is one unified pool of 20, tiered by difficulty only)
+  // ============================================================
+  var TIERS = ["easy", "intermediate", "hard"];
+  var DIFF_CSS_CLASS = { easy: "easy", intermediate: "moderate", hard: "hard" };
+
+  function shuffled(arr){
+    var a = arr.slice();
+    for(var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function pickFromPool(pool, qs, desiredLevel){
+    var tierOrder = [0, 1, 2].slice().sort(function(a, b){
+      return Math.abs(a - desiredLevel) - Math.abs(b - desiredLevel);
+    });
+    for(var t = 0; t < tierOrder.length; t++){
+      for(var i = 0; i < pool.length; i++){
+        var qLevel = TIERS.indexOf(qs[pool[i]].difficulty);
+        if(qLevel === tierOrder[t]) return pool.splice(i, 1)[0];
+      }
+    }
+    return pool.shift();
+  }
+
+  // ============================================================
+  // Keyword-assisted grader
+  // ============================================================
+  function normalize(s){ return (s || "").toLowerCase(); }
+  function normalizeTight(s){ return normalize(s).replace(/[\s,]+/g, ""); }
+
+  function numericMatch(studentText, values){
+    var tight = normalizeTight(studentText);
+    for(var i = 0; i < values.length; i++){
+      var v = normalizeTight(values[i]);
+      if(!v) continue;
+      if(/^-?\d+(\.\d+)?$/.test(v)){
+        // Pure-number token: require a non-digit/dot boundary on both
+        // sides so "4" doesn't match inside "14" or "40".
+        var re = new RegExp("(^|[^0-9.])" + v.replace(/\./g, "\\.") + "($|[^0-9])");
+        if(re.test(tight)) return true;
+      } else if(tight.indexOf(v) !== -1){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function keywordGroupMatches(studentText, group){
+    var norm = normalize(studentText);
+    return group.some(function(kw){ return norm.indexOf(normalize(kw)) !== -1; });
+  }
+
+  function rleMatch(studentText, tokens){
+    var tight = normalizeTight(studentText);
+    return tokens.every(function(tok){ return tight.indexOf(tok) !== -1; });
+  }
+
+  // Returns the SUGGESTED marks for one mark point (0..mp.marks). The
+  // student can always override this via the checkbox/selector before it
+  // counts toward their score -- see renderMarkPoints().
+  function gradeMarkPoint(studentText, mp){
+    if(!studentText || !studentText.trim()) return 0;
+    var m = mp.match;
+    if(m.type === "numeric") return numericMatch(studentText, m.values) ? mp.marks : 0;
+    if(m.type === "rle") return rleMatch(studentText, m.tokens) ? mp.marks : 0;
+    if(m.type === "keywords"){
+      var matchedCount = m.groups.filter(function(g){ return keywordGroupMatches(studentText, g); }).length;
+      if(m.marksPerGroup){
+        return Math.min(matchedCount, m.needCount) * m.marksPerGroup;
+      }
+      return matchedCount >= m.needCount ? mp.marks : 0;
+    }
+    return 0;
+  }
+
+  // ============================================================
+  // State
+  // ============================================================
+  var state = {
+    currentUser: null,
+    paperKey: null,
+    paper: null,
+    pool: null,
+    order: [],
+    index: 0,
+    level: 0,
+    streak: 0,
+    results: [], // { id, topic, difficulty, earned, total, answerText }
+    startedAt: null
+  };
+
+  function startAttempt(){
+    var qs = state.paper.questions;
+    state.pool = shuffled(qs.map(function(_, i){ return i; }));
+    state.order = [];
+    state.index = 0;
+    state.level = 0;
+    state.streak = 0;
+    state.results = [];
+    state.startedAt = Date.now();
+    state.order.push(pickFromPool(state.pool, qs, state.level));
+    showScreen("question");
+    renderQuestion();
+  }
+
+  // ============================================================
+  // Question screen
+  // ============================================================
+  var qTopicLabel = document.getElementById("q-topic-label");
+  var qCount = document.getElementById("q-count");
+  var qProgressFill = document.getElementById("q-progress-fill");
+  var qMeta = document.getElementById("q-meta");
+  var qPrompt = document.getElementById("q-prompt");
+  var answerTextarea = document.getElementById("answer-textarea");
+  var answerField = answerTextarea.closest(".field");
+  var btnCheck = document.getElementById("btn-check");
+  var checkArea = document.getElementById("check-area");
+  var checkScoreBanner = document.getElementById("check-score-banner");
+  var markpointsList = document.getElementById("markpoints-list");
+  var qExplanation = document.getElementById("q-explanation");
+  var levelBanner = document.getElementById("level-banner");
+  var btnNext = document.getElementById("btn-next");
+
+  var currentChecked = false;
+  var currentControls = []; // one per markPoint: { get: fn, mp }
+
+  function currentQuestion(){
+    return state.paper.questions[state.order[state.index]];
+  }
+
+  function renderQuestion(){
+    var q = currentQuestion();
+    var total = state.paper.questions.length;
+
+    qTopicLabel.textContent = q.topic;
+    qCount.textContent = "Question " + (state.index + 1) + " of " + total;
+    qProgressFill.style.width = (state.index / total * 100) + "%";
+
+    qMeta.innerHTML = "";
+    var diffBadge = document.createElement("span");
+    diffBadge.className = "diff-badge diff-" + DIFF_CSS_CLASS[q.difficulty];
+    diffBadge.textContent = examPaperDifficultyLabel(q.difficulty);
+    qMeta.appendChild(diffBadge);
+    var marksNote = document.createElement("span");
+    marksNote.className = "marks-note";
+    marksNote.textContent = "Worth " + q.marks + (q.marks === 1 ? " mark" : " marks");
+    qMeta.appendChild(marksNote);
+
+    qPrompt.textContent = q.prompt;
+    answerTextarea.value = "";
+    answerField.classList.remove("invalid");
+    btnCheck.disabled = false;
+    btnCheck.textContent = "AI, check my answer!";
+
+    checkArea.classList.add("hidden");
+    checkScoreBanner.className = "check-score-banner";
+    markpointsList.innerHTML = "";
+    levelBanner.innerHTML = "";
+    btnNext.classList.add("hidden");
+    currentChecked = false;
+    currentControls = [];
+
+    answerTextarea.focus();
+  }
+
+  function recomputeLiveScore(){
+    var q = currentQuestion();
+    var earned = currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0);
+    checkScoreBanner.className = "check-score-banner " + (earned === q.marks ? "full" : (earned > 0 ? "partial" : "none"));
+    checkScoreBanner.textContent = "You've ticked " + earned + " of " + q.marks + (q.marks === 1 ? " mark" : " marks") + " for this question.";
+    return earned;
+  }
+
+  function renderMarkPoints(q, studentText){
+    markpointsList.innerHTML = "";
+    currentControls = [];
+
+    q.markPoints.forEach(function(mp, i){
+      var suggested = gradeMarkPoint(studentText, mp);
+      var row = document.createElement("div");
+      row.className = "markpoint-row";
+
+      var controlWrap = document.createElement("div");
+      controlWrap.className = "markpoint-control";
+
+      if(mp.marks === 1){
+        var cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.id = "mp-" + i;
+        cb.checked = suggested >= 1;
+        cb.addEventListener("change", recomputeLiveScore);
+        controlWrap.appendChild(cb);
+        currentControls.push({ get: function(){ return cb.checked ? mp.marks : 0; } });
+      } else {
+        var sel = document.createElement("select");
+        sel.id = "mp-" + i;
+        for(var v = 0; v <= mp.marks; v++){
+          var opt = document.createElement("option");
+          opt.value = String(v);
+          opt.textContent = v + " / " + mp.marks;
+          if(v === suggested) opt.selected = true;
+          sel.appendChild(opt);
+        }
+        sel.addEventListener("change", recomputeLiveScore);
+        controlWrap.appendChild(sel);
+        currentControls.push({ get: function(){ return parseInt(sel.value, 10) || 0; } });
+      }
+
+      var label = document.createElement("label");
+      label.setAttribute("for", "mp-" + i);
+      label.textContent = mp.text;
+
+      row.appendChild(controlWrap);
+      row.appendChild(label);
+      markpointsList.appendChild(row);
+    });
+
+    recomputeLiveScore();
+  }
+
+  btnCheck.addEventListener("click", function(){
+    var text = answerTextarea.value;
+    if(!text.trim()){
+      answerField.classList.add("invalid");
+      return;
+    }
+    answerField.classList.remove("invalid");
+
+    var q = currentQuestion();
+    renderMarkPoints(q, text);
+    qExplanation.textContent = q.explanation;
+    checkArea.classList.remove("hidden");
+    currentChecked = true;
+    btnCheck.textContent = "Checked — edit your answer above and check again anytime";
+    btnNext.classList.remove("hidden");
+    btnNext.focus();
+  });
+
+  function levelUpBannerHtml(levelIdx){
+    var tierLabel = examPaperDifficultyLabel(TIERS[levelIdx]);
+    return '<div class="mastery-badge">' +
+      '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      '<path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      '<span>Leveling up to ' + tierLabel + ' questions — you’re on your way to mastering this topic!</span></div>';
+  }
+
+  btnNext.addEventListener("click", function(){
+    if(!currentChecked) return;
+    var q = currentQuestion();
+    var earned = currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0);
+
+    state.results.push({
+      id: q.id, topic: q.topic, difficulty: q.difficulty,
+      earned: earned, total: q.marks,
+      answerText: answerTextarea.value
+    });
+
+    // Adaptive step: full marks twice in a row steps the tier up; any
+    // non-full-marks answer steps it down immediately.
+    var oldLevel = state.level;
+    if(earned === q.marks){
+      state.streak++;
+      if(state.streak >= 2 && state.level < TIERS.length - 1){
+        state.level++;
+        state.streak = 0;
+      }
+    } else {
+      state.streak = 0;
+      if(state.level > 0) state.level--;
+    }
+
+    var total = state.paper.questions.length;
+    if(state.index < total - 1){
+      if(state.level > oldLevel){
+        levelBanner.innerHTML = levelUpBannerHtml(state.level);
+      }
+      state.order.push(pickFromPool(state.pool, state.paper.questions, state.level));
+      state.index += 1;
+      // Small delay so the level-up banner (if any) is visible before the
+      // next question replaces this screen's content.
+      if(state.level > oldLevel){
+        btnNext.disabled = true;
+        setTimeout(function(){ btnNext.disabled = false; renderQuestion(); }, 1100);
+      } else {
+        renderQuestion();
+      }
+    } else {
+      finishAttempt();
+    }
+  });
+
+  // ============================================================
+  // Results screen
+  // ============================================================
+  var resultSub = document.getElementById("result-sub");
+  var resultsBody = document.getElementById("results-body");
+  var saveStatus = document.getElementById("save-status");
+
+  function bandText(pct){
+    if(pct >= 85) return "Excellent — you're on top of this topic.";
+    if(pct >= 70) return "Good grasp overall, with a few gaps to close.";
+    if(pct >= 50) return "A fair start — focus your revision on the areas below.";
+    return "This topic needs more revision — the areas below are the place to start.";
+  }
+
+  function finishAttempt(){
+    var qProgressFillEl = document.getElementById("q-progress-fill");
+    if(qProgressFillEl) qProgressFillEl.style.width = "100%";
+
+    var totalEarned = state.results.reduce(function(s, r){ return s + r.earned; }, 0);
+    var totalMarks = state.results.reduce(function(s, r){ return s + r.total; }, 0);
+    var pct = totalMarks ? Math.round((totalEarned / totalMarks) * 100) : 0;
+
+    resultSub.textContent = bandText(pct);
+
+    var strengths = state.results.filter(function(r){ return r.earned === r.total; });
+    var weak = state.results.filter(function(r){ return r.earned < r.total; })
+      .slice()
+      .sort(function(a, b){ return (a.earned / a.total) - (b.earned / b.total); });
+
+    resultsBody.innerHTML = "";
+
+    var scoreBox = document.createElement("div");
+    scoreBox.className = "exam-score-box";
+    scoreBox.innerHTML = "<div class=\"exam-score-num\">" + totalEarned + " / " + totalMarks + "</div><div class=\"exam-score-pct\">" + pct + "%</div>";
+    resultsBody.appendChild(scoreBox);
+
+    if(strengths.length){
+      var sTitle = document.createElement("p");
+      sTitle.className = "section-label";
+      sTitle.style.marginTop = "22px";
+      sTitle.textContent = "Strengths (full marks)";
+      resultsBody.appendChild(sTitle);
+      var sWrap = document.createElement("div");
+      sWrap.className = "topic-chip-row";
+      strengths.forEach(function(r){
+        var chip = document.createElement("span");
+        chip.className = "topic-chip good";
+        chip.textContent = r.topic;
+        sWrap.appendChild(chip);
+      });
+      resultsBody.appendChild(sWrap);
+    }
+
+    if(weak.length){
+      var wTitle = document.createElement("p");
+      wTitle.className = "section-label";
+      wTitle.style.marginTop = "22px";
+      wTitle.textContent = "Areas to revisit, weakest first";
+      resultsBody.appendChild(wTitle);
+
+      weak.forEach(function(r){
+        var q = state.paper.questions.filter(function(qq){ return qq.id === r.id; })[0];
+        var block = document.createElement("div");
+        block.className = "feedback-block revisit-block";
+        var head = document.createElement("div");
+        head.className = "revisit-head";
+        head.innerHTML = "<span class=\"fb-title\">" + r.topic + "</span><span class=\"revisit-score\">" + r.earned + " / " + r.total + "</span>";
+        block.appendChild(head);
+        var expl = document.createElement("p");
+        expl.textContent = q ? q.explanation : "";
+        block.appendChild(expl);
+        resultsBody.appendChild(block);
+      });
+    } else {
+      var allGood = document.createElement("p");
+      allGood.className = "cohort-note";
+      allGood.textContent = "Full marks on every question — nothing to flag for revision this time.";
+      resultsBody.appendChild(allGood);
+    }
+
+    showScreen("results");
+
+    // Save (unlimited retakes -- always overwrites the one record for
+    // this student+paper with their latest run).
+    var topicStats = state.results.map(function(r){
+      return { topic: r.topic, difficulty: r.difficulty, earned: r.earned, total: r.total };
+    });
+    var minutesTaken = state.startedAt ? Math.max(1, Math.round((Date.now() - state.startedAt) / 60000)) : null;
+
+    saveStatus.textContent = "Saving your results…";
+    PQFirebase.recordExamAttempt(state.currentUser.uid, state.paperKey, {
+      name: state.currentUser.name,
+      cls: state.currentUser.class,
+      perQuestion: state.results,
+      totalEarned: totalEarned,
+      totalMarks: totalMarks,
+      pct: pct,
+      topicStats: topicStats,
+      completedAt: new Date().toISOString(),
+      minutesTaken: minutesTaken
+    }).then(function(result){
+      saveStatus.textContent = (result && result.ok) ? "" : "Your result couldn't be saved, but your report above is still complete.";
+    }).catch(function(){
+      saveStatus.textContent = "Your result couldn't be saved, but your report above is still complete.";
+    });
+  }
+
+  document.getElementById("btn-practice-again").addEventListener("click", startAttempt);
+
+  // ============================================================
+  // Start screen
+  // ============================================================
+  var startGreeting = document.getElementById("start-greeting");
+  var paperSummary = document.getElementById("paper-summary");
+  var lastResultEl = document.getElementById("last-result");
+  var btnStart = document.getElementById("btn-start");
+
+  function renderPaperSummary(paper){
+    paperSummary.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "cohort-note";
+    p.style.marginBottom = "18px";
+    p.textContent = paper.subtitle;
+    paperSummary.appendChild(p);
+  }
+
+  function renderLastResult(record){
+    if(!record){
+      lastResultEl.className = "attempt-status hidden";
+      return;
+    }
+    lastResultEl.className = "attempt-status retake";
+    lastResultEl.innerHTML = "Your last run scored <strong>" + record.totalEarned + " / " + record.totalMarks + "</strong> (" + record.pct + "%)" +
+      (record.completedAt ? " on " + fmtDateSimple(record.completedAt) : "") + ". Practice again any time — there's no limit.";
+  }
+
+  function fmtDateSimple(iso){
+    try {
+      var d = new Date(iso);
+      return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+    } catch(e){ return ""; }
+  }
+
+  btnStart.addEventListener("click", startAttempt);
+
+  // ============================================================
+  // Boot: auth + pick the paper from ?topic= (or the class's only one)
+  // ============================================================
+  function initForUser(user){
+    state.currentUser = user;
+    var choices = examPaperChoicesForClass(user.class);
+
+    if(choices.length === 0){
+      document.getElementById("loading-status").textContent = "There are no topical exam-question papers set up for your class yet.";
+      showScreen("loading");
+      return;
+    }
+
+    var requested = (function(){
+      try { return new URLSearchParams(window.location.search).get("topic"); }
+      catch(e){ return null; }
+    })();
+    var match = choices.filter(function(c){ return c.key === requested; })[0] || choices[0];
+
+    state.paperKey = match.key;
+    state.paper = EXAM_PAPERS[match.key];
+
+    setHeader(state.paper.title, state.paper.subtitle);
+    startGreeting.textContent = "Hi " + user.name + " — " + user.class + ".";
+    renderPaperSummary(state.paper);
+
+    PQFirebase.getMyExamAttempt(user.uid, state.paperKey).then(function(record){
+      renderLastResult(record);
+      btnStart.textContent = record ? "Practice again" : "Start exam practice";
+    }).catch(function(){
+      renderLastResult(null);
+    });
+
+    showScreen("start");
+  }
+
+  PQFirebase.onAuthChange(function(user){
+    if(!user){
+      // Not signed in here -- quiz.html owns the login form, and the
+      // Firebase session (tab-scoped) carries over when a student
+      // arrives via its "Start exam practice" link.
+      window.location.href = "quiz.html";
+      return;
+    }
+    initForUser(user);
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -199,6 +199,48 @@ function deleteAttempt(uid, examKey){
     .then(function(){ return { ok: true }; });
 }
 
+// ---------- Exam-paper attempts (exam-practice.html) ----------
+// A separate, simpler collection from "attempts" above: topical
+// exam-question practice allows UNLIMITED retakes (see firestore.rules),
+// so there's no attemptNumber gating -- every completed run just
+// overwrites the student's one document for that uid+paperKey, which
+// always reflects their latest result.
+
+function examAttemptId(uid, paperKey){ return uid + "_" + paperKey; }
+
+function getMyExamAttempt(uid, paperKey){
+  return getDoc(doc(db, "examAttempts", examAttemptId(uid, paperKey))).then(function(snap){
+    return snap.exists() ? snap.data() : null;
+  });
+}
+
+// `record`: { name, cls, perQuestion, totalEarned, totalMarks, pct,
+// topicStats, completedAt, minutesTaken }. perQuestion/topicStats are
+// plain arrays of plain objects (Firestore-safe), built by
+// exam-practice.html.
+function recordExamAttempt(uid, paperKey, record){
+  var ref = doc(db, "examAttempts", examAttemptId(uid, paperKey));
+  var payload = {
+    uid: uid,
+    paperKey: paperKey,
+    name: record.name,
+    class: record.cls,
+    perQuestion: record.perQuestion,
+    totalEarned: record.totalEarned,
+    totalMarks: record.totalMarks,
+    pct: record.pct,
+    topicStats: record.topicStats,
+    completedAt: record.completedAt,
+    minutesTaken: record.minutesTaken != null ? record.minutesTaken : null,
+    recordedAt: serverTimestamp()
+  };
+  return setDoc(ref, payload, { merge: false })
+    .then(function(){ return { ok: true }; })
+    .catch(function(err){
+      return { ok: false, error: (err && err.message) || "Could not save." };
+    });
+}
+
 window.PQFirebase = {
   signUp: signUp,
   logIn: logIn,
@@ -209,5 +251,7 @@ window.PQFirebase = {
   getMyAttempt: getMyAttempt,
   recordAttempt: recordAttempt,
   listAllAttempts: listAllAttempts,
-  deleteAttempt: deleteAttempt
+  deleteAttempt: deleteAttempt,
+  getMyExamAttempt: getMyExamAttempt,
+  recordExamAttempt: recordExamAttempt
 };
