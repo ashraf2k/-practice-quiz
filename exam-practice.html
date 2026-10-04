@@ -3,8 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<!-- Browsers (not just GitHub Pages' CDN) can cache an HTML page itself,
+     not only the ?v=-versioned scripts/styles it loads -- a bumped ?v=
+     on exam-data.js etc. doesn't help if THIS document is served from a
+     stale local cache in the first place. Matters here more than on most
+     pages: this is the page that hides exam-specific UI (e.g. the mark
+     scheme during a single-attempt paper) by paper, so a stale copy of
+     this file is a real exposure, not just an inconvenience. -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <title>Topical Exam Practice</title>
-<link rel="stylesheet" href="shared.css?v=20261004c" />
+<link rel="stylesheet" href="shared.css?v=20261004d" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -119,12 +129,12 @@
 
 </div>
 
-<!-- ?v=20261004c -- cache-busting; see the longer comment above this same
+<!-- ?v=20261004d -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="exam-data.js?v=20261004c"></script>
-<script src="firebase-config.js?v=20261004c"></script>
-<script type="module" src="firebase-init.js?v=20261004c"></script>
+<script src="exam-data.js?v=20261004d"></script>
+<script src="firebase-config.js?v=20261004d"></script>
+<script type="module" src="firebase-init.js?v=20261004d"></script>
 <script type="module">
 (function(){
 
