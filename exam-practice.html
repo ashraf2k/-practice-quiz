@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Topical Exam Practice</title>
-<link rel="stylesheet" href="shared.css?v=20261004b" />
+<link rel="stylesheet" href="shared.css?v=20261004c" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -87,7 +87,7 @@
     <div id="check-area" class="hidden">
       <div class="check-score-banner" id="check-score-banner"></div>
 
-      <p class="section-label" style="margin-top:22px;">Mark scheme — tick what you actually covered</p>
+      <p class="section-label" id="markpoints-label" style="margin-top:22px;">Mark scheme — tick what you actually covered</p>
       <div id="markpoints-list"></div>
 
       <div class="feedback-block" style="margin-top:18px;">
@@ -119,12 +119,12 @@
 
 </div>
 
-<!-- ?v=20261004b -- cache-busting; see the longer comment above this same
+<!-- ?v=20261004c -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="exam-data.js?v=20261004b"></script>
-<script src="firebase-config.js?v=20261004b"></script>
-<script type="module" src="firebase-init.js?v=20261004b"></script>
+<script src="exam-data.js?v=20261004c"></script>
+<script src="firebase-config.js?v=20261004c"></script>
+<script type="module" src="firebase-init.js?v=20261004c"></script>
 <script type="module">
 (function(){
 
@@ -303,6 +303,8 @@
   var btnCheck = document.getElementById("btn-check");
   var checkArea = document.getElementById("check-area");
   var checkScoreBanner = document.getElementById("check-score-banner");
+  var checkDisclaimer = document.getElementById("check-disclaimer");
+  var markpointsLabel = document.getElementById("markpoints-label");
   var markpointsList = document.getElementById("markpoints-list");
   var qExplanation = document.getElementById("q-explanation");
   var levelBanner = document.getElementById("level-banner");
@@ -354,13 +356,37 @@
     var q = currentQuestion();
     var earned = currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0);
     checkScoreBanner.className = "check-score-banner " + (earned === q.marks ? "full" : (earned > 0 ? "partial" : "none"));
-    checkScoreBanner.textContent = "You've ticked " + earned + " of " + q.marks + (q.marks === 1 ? " mark" : " marks") + " for this question.";
+    // "Ticked" describes the normal markpoints-list checkboxes/selects
+    // below this banner -- on a single-attempt paper those aren't shown
+    // (see renderMarkPoints()), so the wording shouldn't imply the
+    // student ticked anything themselves.
+    checkScoreBanner.textContent = state.paper.singleAttempt
+      ? "Scored " + earned + " of " + q.marks + (q.marks === 1 ? " mark" : " marks") + " for this question."
+      : "You've ticked " + earned + " of " + q.marks + (q.marks === 1 ? " mark" : " marks") + " for this question.";
     return earned;
   }
 
   function renderMarkPoints(q, studentText){
     markpointsList.innerHTML = "";
     currentControls = [];
+
+    // A single-attempt paper (no retake, e.g. comm9618_exam) is meant to
+    // behave like a real exam -- showing the official mark-scheme bullet
+    // points and letting the student self-tick them mid-exam would hand
+    // them the marking criteria (and a way to inflate their own score)
+    // before they've even finished. Score silently from the same
+    // gradeMarkPoint() call everywhere else only SUGGESTS a tick from,
+    // just without rendering anything the student can see or edit.
+    if(state.paper.singleAttempt){
+      markpointsLabel.classList.add("hidden");
+      q.markPoints.forEach(function(mp){
+        var suggested = gradeMarkPoint(studentText, mp);
+        currentControls.push({ get: function(){ return suggested; } });
+      });
+      recomputeLiveScore();
+      return;
+    }
+    markpointsLabel.classList.remove("hidden");
 
     q.markPoints.forEach(function(mp, i){
       var suggested = gradeMarkPoint(studentText, mp);
@@ -835,6 +861,14 @@
     // finishAttempt() or later via "View full report", so it's hidden
     // once here for the whole page rather than in both of those places.
     btnPracticeAgain.classList.toggle("hidden", !!state.paper.singleAttempt);
+
+    // The disclaimer above "AI, check my answer!" normally points at the
+    // mark scheme shown just below -- for a single-attempt paper that
+    // mark scheme is never shown (see renderMarkPoints()), so this needs
+    // its own wording rather than referencing something that isn't there.
+    checkDisclaimer.textContent = state.paper.singleAttempt
+      ? "Automated check — your mark comes from the same key-term check used everywhere else, but the official mark scheme itself isn't shown during this single-attempt exam. Make your answer as complete as you can before checking it."
+      : "Automated check — it looks for the key terms and values the mark scheme asks for. Always compare with the official mark scheme below and adjust the ticks yourself if it missed something.";
 
     Promise.all([
       PQFirebase.getMyExamAttempt(user.uid, state.paperKey),

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261004b" />
+<link rel="stylesheet" href="shared.css?v=20261004c" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -238,7 +238,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261004b -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261004c -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -251,11 +251,11 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261004b"></script>
-<script src="exam-data.js?v=20261004b"></script>
-<script src="report-lib.js?v=20261004b"></script>
-<script src="firebase-config.js?v=20261004b"></script>
-<script type="module" src="firebase-init.js?v=20261004b"></script>
+<script src="quiz-data.js?v=20261004c"></script>
+<script src="exam-data.js?v=20261004c"></script>
+<script src="report-lib.js?v=20261004c"></script>
+<script src="firebase-config.js?v=20261004c"></script>
+<script type="module" src="firebase-init.js?v=20261004c"></script>
 <script type="module">
 (function(){
 
