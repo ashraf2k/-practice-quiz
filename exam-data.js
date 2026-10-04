@@ -269,6 +269,83 @@
           explanation: "RLE relies on consecutive repeats of identical data. When data alternates every pixel, every item forms a run of length 1 — storing a count AND a colour value for each of the 8 runs needs far more than the original 8 bits, so the “compressed” data is actually bigger (negative compression)."
         }
       ]
+    },
+
+    // Source: the "Cambridge CAIE CS 9618 Class Test — Topic 14:
+    // Communication & Internet Technologies (14.1 Protocols & 14.2
+    // Circuit & Packet Switching)" document's Section C (Q26-Q30 in that
+    // source's own numbering, renumbered Q1-Q5 here to match this paper's
+    // own local id convention, same as datarep_exam above). Every
+    // question's marks are the verified total of its own markPoints,
+    // which sum to 16 -- matching the source's own "16 Marks Total" for
+    // this section. This is a one-shot CLASS TEST, not ongoing topic
+    // practice -- singleAttempt:true (see exam-practice.html) means no
+    // retake is offered once a student submits, enforced both in the UI
+    // and, like quiz-data.js's comm9618's maxAttempts:1, server-side in
+    // firestore.rules.
+    comm9618_exam: {
+      key: "comm9618_exam",
+      title: "Topic 14: Communication & Internet Technologies — Exam Practice",
+      subtitle: "5 exam-style questions · Protocols, email, BitTorrent, circuit & packet switching · 16 marks total",
+      classes: ["12BR"],
+      totalMarks: 16,
+      singleAttempt: true,
+      questions: [
+        {
+          id: "Q1", marks: 3, difficulty: "intermediate",
+          topic: "TCP/IP Layers & Transport Layer",
+          prompt: "(a) State the four layers of the TCP/IP protocol suite in correct order from top to bottom. [2 marks]\n(b) Describe one function of the Transport layer. [1 mark]",
+          markPoints: [
+            { text: "(a) Application and Transport named as the top two layers", marks: 1, match: { type: "keywords", groups: [["application"], ["transport"]], needCount: 2 } },
+            { text: "(a) Internet (or Network) and Link (or Data Link) named as the bottom two layers", marks: 1, match: { type: "keywords", groups: [["internet","network"], ["link","data link"]], needCount: 2 } },
+            { text: "(b) Any one of: end-to-end delivery between hosts; breaks data into packets with sequence numbers; ensures error-free/reliable arrival, retransmitting lost packets", marks: 1, match: { type: "keywords", groups: [["end-to-end","end to end","host to host","sender to receiver","host-to-host"], ["sequence number","breaks the data","breaks data into packets","splits data into packets"], ["retransmit","error-free","error free","reliable delivery","ensures delivery","guarantees delivery","reliable transmission"]], needCount: 1 } }
+          ],
+          explanation: "The TCP/IP stack, top to bottom, is Application, Transport, Internet, and Link. The Transport layer manages end-to-end delivery between hosts — for example, breaking data into packets with sequence numbers and working to ensure it arrives correctly, retransmitting anything lost along the way."
+        },
+        {
+          id: "Q2", marks: 3, difficulty: "intermediate",
+          topic: "Email Protocols",
+          prompt: "(a) Name the protocol used to send emails between mail servers. [1 mark]\n(b) Explain one operational difference between POP3 and IMAP when retrieving emails. [2 marks]",
+          markPoints: [
+            { text: "(a) SMTP (Simple Mail Transfer Protocol)", marks: 1, match: { type: "keywords", groups: [["smtp"]], needCount: 1 } },
+            { text: "(b) POP3 downloads email messages onto the client computer (removing them from the server)", marks: 1, match: { type: "keywords", groups: [["pop3"], ["download","downloads","remove","removes","removed","deletes","local","locally","client computer","client device"]], needCount: 2 } },
+            { text: "(b) IMAP stores emails on the server and synchronizes them across multiple client devices", marks: 1, match: { type: "keywords", groups: [["imap"], ["server","synchron","sync","multiple device","every device","any device","across devices"]], needCount: 2 } }
+          ],
+          explanation: "SMTP (Simple Mail Transfer Protocol) sends email between a client and a mail server, and between mail servers. POP3 downloads messages onto the client device and typically removes them from the server, while IMAP keeps messages stored on the server and synchronises them across every device the student checks mail from."
+        },
+        {
+          id: "Q3", marks: 3, difficulty: "intermediate",
+          topic: "BitTorrent / Peer-to-Peer Sharing",
+          prompt: "Explain what is meant by the phrase: \"BitTorrent protocol provides peer-to-peer file sharing.\" [3 marks]",
+          markPoints: [
+            { text: "Allows sharing of files between thousands of users connected over the internet", marks: 1, match: { type: "keywords", groups: [["thousands","many users","multiple users","large number","numerous"]], needCount: 1 } },
+            { text: "Users share files directly with each other / users' computers act as peers", marks: 1, match: { type: "keywords", groups: [["directly","peer","peers","each other","between users","user to user","computer to computer"]], needCount: 1 } },
+            { text: "No central web server/device is used; all users are of equal status", marks: 1, match: { type: "keywords", groups: [["no central","without a central","decentralis","decentraliz","no single server","not stored on one server","equal status","no main server"]], needCount: 1 } }
+          ],
+          explanation: "BitTorrent lets a file be shared among many users at once over the internet. Rather than everyone downloading from one central web server, users' own computers connect directly to each other as peers, uploading and downloading pieces between themselves, with no single central device and every peer treated equally."
+        },
+        {
+          id: "Q4", marks: 4, difficulty: "hard",
+          topic: "Circuit Switching: Benefits & Drawbacks",
+          prompt: "Circuit switching can be used for data transmission.\n(a) State two benefits of circuit switching. [2 marks]\n(b) State two drawbacks of circuit switching. [2 marks]",
+          markPoints: [
+            { text: "(a) Any two of: guaranteed/dedicated bandwidth; minimal delay/real-time transmission; packets arrive in sequence", marks: 2, match: { type: "keywords", groups: [["guaranteed bandwidth","dedicated bandwidth","dedicated channel","dedicated line","dedicated connection","reserved bandwidth"], ["real-time","real time","minimal delay","no delay","low delay","low latency","immediate","consistent speed","constant rate"], ["in sequence","in order","sequential","same order","no reordering","arrive in order"]], needCount: 2, marksPerGroup: 1 } },
+            { text: "(b) Any two of: bandwidth wasted when idle; channel unavailable to other users; setup time required; a link failure drops the whole connection", marks: 2, match: { type: "keywords", groups: [["wasted","waste","unused capacity","idle","inefficient use"], ["unavailable","busy","blocked","tied up","in use","can't be used","cannot be used","not available to other"], ["setup time","set up time","time to establish","establish the circuit","connection time","takes time to connect"], ["fail","drop","breaks the connection","connection is lost","call drops","entire connection fails","whole connection fails"]], needCount: 2, marksPerGroup: 1 } }
+          ],
+          explanation: "Benefits: a dedicated circuit gives guaranteed/reserved bandwidth and a consistent, real-time connection, with packets arriving in the same order they were sent. Drawbacks: that same dedicated channel sits idle (wasting bandwidth) whenever no data is being sent, stays unavailable to every other user for as long as the call lasts, takes time to set up before any data can flow, and the whole connection is lost if any link along that one fixed path fails."
+        },
+        {
+          id: "Q5", marks: 3, difficulty: "hard",
+          topic: "Routers & Packet Switching",
+          prompt: "Describe the role and function of a router in packet switching across the internet. [3 marks]",
+          markPoints: [
+            { text: "Examines the destination IP address in the packet header", marks: 1, match: { type: "keywords", groups: [["destination ip","destination address","ip address"]], needCount: 1 } },
+            { text: "Consults its internal routing table", marks: 1, match: { type: "keywords", groups: [["routing table"]], needCount: 1 } },
+            { text: "Selects the optimal/fastest next hop route across the network", marks: 1, match: { type: "keywords", groups: [["next hop","next-hop","best route","optimal route","fastest route","best path","most efficient route","selects the route","chooses the route","determines the route","forwards it along"]], needCount: 1 } }
+          ],
+          explanation: "A router reads the destination IP address in a packet's header, checks it against its own routing table, and uses that to choose the best next-hop route to forward the packet along, moving it closer to its destination across the network."
+        }
+      ]
     }
   };
 
@@ -278,6 +355,9 @@
   var EXAM_PAPER_CHOICES_BY_CLASS = [
     { test: /^10br/i, choices: [
       { key: "datarep_exam", label: "Topic 1: Data Representation — IGCSE exam style" }
+    ] },
+    { test: /^12br/i, choices: [
+      { key: "comm9618_exam", label: "Topic 14: Communication & Internet Technologies — A Level exam style" }
     ] }
   ];
 

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261004" />
+<link rel="stylesheet" href="shared.css?v=20261004b" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -360,14 +360,14 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261004 -- cache-busting; see the longer comment above this same
+<!-- ?v=20261004b -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261004"></script>
-<script src="exam-data.js?v=20261004"></script>
-<script src="report-lib.js?v=20261004"></script>
-<script src="firebase-config.js?v=20261004"></script>
-<script type="module" src="firebase-init.js?v=20261004"></script>
+<script src="quiz-data.js?v=20261004b"></script>
+<script src="exam-data.js?v=20261004b"></script>
+<script src="report-lib.js?v=20261004b"></script>
+<script src="firebase-config.js?v=20261004b"></script>
+<script type="module" src="firebase-init.js?v=20261004b"></script>
 <script type="module">
 (function(){
 
@@ -717,6 +717,26 @@
     return total ? Math.round((Number(a.score) / total) * 100) : 0;
   }
 
+  // Shared "1st attempt" / "Retake · final" badge for the Students and
+  // Profile tabs' attempt tables. `exam` is the EXAMS[...] entry this
+  // attempt belongs to (may be undefined for a stale/unknown key -- falls
+  // back to the original 2-attempt wording in that case, same as before
+  // examMaxAttempts()/maxAttempts existed). A single-attempt exam
+  // (maxAttempts === 1, e.g. comm9618) never has anything to call a
+  // "retake" -- every non-abandoned row for it is just its one attempt.
+  function attemptBadgeHtml(a, exam){
+    if(a.abandoned){
+      return '<span class="attempt-badge abandoned" title="Student clicked “Start over” before finishing — submitted with whatever was answered so far.">Self-submitted · partial</span>';
+    }
+    var maxAttempts = (exam && typeof exam.maxAttempts === "number") ? exam.maxAttempts : 2;
+    if(maxAttempts <= 1){
+      return '<span class="attempt-badge">Only attempt</span>';
+    }
+    return (a.attemptNumber >= maxAttempts)
+      ? '<span class="attempt-badge retake" title="Used their one retake — this score is final.">Retake · final</span>'
+      : '<span class="attempt-badge">1st attempt</span>';
+  }
+
   function fmtDateShort(iso){
     try{
       var d = new Date(iso);
@@ -767,11 +787,7 @@
       var examKey = a.exam || "dp";
       var exam = EXAMS[examKey];
       var tr = document.createElement("tr");
-      var attemptBadge = a.abandoned
-        ? '<span class="attempt-badge abandoned" title="Student clicked “Start over” before finishing — submitted with whatever was answered so far.">Self-submitted · partial</span>'
-        : (a.attemptNumber >= 2
-          ? '<span class="attempt-badge retake" title="Used their one retake — this score is final.">Retake · final</span>'
-          : '<span class="attempt-badge">1st attempt</span>');
+      var attemptBadge = attemptBadgeHtml(a, exam);
       tr.innerHTML =
         "<td>" + escapeHtml(a.name || "") + "</td>" +
         "<td>" + escapeHtml(a.className || "") + "</td>" +
@@ -880,11 +896,7 @@
     group.attempts.slice().sort(function(a, b){ return new Date(b.timestamp) - new Date(a.timestamp); }).forEach(function(a){
       var examKey = a.exam || "dp";
       var exam = EXAMS[examKey];
-      var attemptBadge = a.abandoned
-        ? '<span class="attempt-badge abandoned" title="Student clicked “Start over” before finishing — submitted with whatever was answered so far.">Self-submitted · partial</span>'
-        : (a.attemptNumber >= 2
-          ? '<span class="attempt-badge retake" title="Used their one retake — this score is final.">Retake · final</span>'
-          : '<span class="attempt-badge">1st attempt</span>');
+      var attemptBadge = attemptBadgeHtml(a, exam);
       var tr = document.createElement("tr");
       tr.innerHTML =
         "<td>" + escapeHtml(examLabel(examKey)) + "</td>" +

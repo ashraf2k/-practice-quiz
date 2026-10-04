@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Topical Exam Practice</title>
-<link rel="stylesheet" href="shared.css?v=20261004" />
+<link rel="stylesheet" href="shared.css?v=20261004b" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -57,7 +57,7 @@
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-start">Start exam practice</button>
     </div>
-    <p class="cohort-note">Free-response, exam-style questions with real mark allocations. Answer each one, then click <strong>“AI, check my answer!”</strong> — it suggests a mark against the official scheme (looking for key terms), which is always shown too so you can double-check and adjust it yourself. Difficulty adapts as you go, and you can practice again as many times as you like.</p>
+    <p class="cohort-note" id="start-disclaimer">Free-response, exam-style questions with real mark allocations. Answer each one, then click <strong>“AI, check my answer!”</strong> — it suggests a mark against the official scheme (looking for key terms), which is always shown too so you can double-check and adjust it yourself. Difficulty adapts as you go, and you can practice again as many times as you like.</p>
   </section>
 
   <!-- ============ QUESTION SCREEN ============ -->
@@ -119,12 +119,12 @@
 
 </div>
 
-<!-- ?v=20261004 -- cache-busting; see the longer comment above this same
+<!-- ?v=20261004b -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="exam-data.js?v=20261004"></script>
-<script src="firebase-config.js?v=20261004"></script>
-<script type="module" src="firebase-init.js?v=20261004"></script>
+<script src="exam-data.js?v=20261004b"></script>
+<script src="firebase-config.js?v=20261004b"></script>
+<script type="module" src="firebase-init.js?v=20261004b"></script>
 <script type="module">
 (function(){
 
@@ -484,6 +484,7 @@
   var resultsBody = document.getElementById("results-body");
   var saveStatus = document.getElementById("save-status");
   var resultsTitle = document.getElementById("results-title");
+  var btnPracticeAgain = document.getElementById("btn-practice-again");
 
   function bandText(pct){
     if(pct >= 85) return "Excellent — you're on top of this topic.";
@@ -678,12 +679,13 @@
     });
   }
 
-  document.getElementById("btn-practice-again").addEventListener("click", startAttempt);
+  btnPracticeAgain.addEventListener("click", startAttempt);
 
   // ============================================================
   // Start screen
   // ============================================================
   var startGreeting = document.getElementById("start-greeting");
+  var startDisclaimer = document.getElementById("start-disclaimer");
   var paperSummary = document.getElementById("paper-summary");
   var lastResultEl = document.getElementById("last-result");
   var viewReportRow = document.getElementById("view-report-row");
@@ -748,6 +750,13 @@
     p.style.marginBottom = "18px";
     p.textContent = paper.subtitle;
     paperSummary.appendChild(p);
+
+    // This page is shared by every paper for the class, so the "practice
+    // again any time" promise in the static disclaimer only holds for
+    // the unlimited-retake papers -- swap it out for a single-attempt one.
+    startDisclaimer.innerHTML = paper.singleAttempt
+      ? "Free-response, exam-style questions with real mark allocations. Answer each one, then click <strong>“AI, check my answer!”</strong> — it suggests a mark against the official scheme (looking for key terms), which is always shown too so you can double-check and adjust it yourself. Difficulty adapts as you go. <strong>This is a single-attempt exam — once you submit, there is no retake,</strong> so make sure you're ready before you start."
+      : "Free-response, exam-style questions with real mark allocations. Answer each one, then click <strong>“AI, check my answer!”</strong> — it suggests a mark against the official scheme (looking for key terms), which is always shown too so you can double-check and adjust it yourself. Difficulty adapts as you go, and you can practice again as many times as you like.";
   }
 
   function renderLastResult(record){
@@ -757,9 +766,13 @@
       viewReportRow.classList.add("hidden");
       return;
     }
-    lastResultEl.className = "attempt-status retake";
-    lastResultEl.innerHTML = "Your last run scored <strong>" + record.totalEarned + " / " + record.totalMarks + "</strong> (" + record.pct + "%)" +
-      (record.completedAt ? " on " + fmtDateSimple(record.completedAt) : "") + ". Practice again any time — there's no limit.";
+    var singleAttempt = !!(state.paper && state.paper.singleAttempt);
+    lastResultEl.className = singleAttempt ? "attempt-status done" : "attempt-status retake";
+    lastResultEl.innerHTML = (singleAttempt ? "You scored <strong>" : "Your last run scored <strong>") + record.totalEarned + " / " + record.totalMarks + "</strong> (" + record.pct + "%)" +
+      (record.completedAt ? " on " + fmtDateSimple(record.completedAt) : "") +
+      (singleAttempt
+        ? ". This was a single-attempt exam, so no retake is available. You can still view your full report below."
+        : ". Practice again any time — there's no limit.");
     viewReportRow.classList.remove("hidden");
   }
 
@@ -816,6 +829,13 @@
     startGreeting.textContent = "Hi " + user.name + " — " + user.class + ".";
     renderPaperSummary(state.paper);
 
+    // "Practice again" (on the results screen) only ever makes sense for
+    // an unlimited-retake paper -- a single-attempt paper's one attempt is
+    // already spent by the time results show, whether that's right after
+    // finishAttempt() or later via "View full report", so it's hidden
+    // once here for the whole page rather than in both of those places.
+    btnPracticeAgain.classList.toggle("hidden", !!state.paper.singleAttempt);
+
     Promise.all([
       PQFirebase.getMyExamAttempt(user.uid, state.paperKey),
       PQFirebase.getMyExamProgress(user.uid, state.paperKey)
@@ -823,8 +843,23 @@
       var record = results[0];
       var progress = results[1];
       renderLastResult(record);
-      btnStart.textContent = record ? "Practice again" : "Start exam practice";
-      renderResumePrompt(progress);
+      // A single-attempt paper with a record on file has already used its
+      // one attempt -- lock out Start/Resume entirely rather than offering
+      // a relabelled "Practice again" or a resumable checkpoint. (A
+      // leftover in-progress checkpoint shouldn't coexist with a completed
+      // record for this kind of paper, but this is ignored defensively
+      // either way.)
+      var locked = !!(record && state.paper.singleAttempt);
+      if(locked){
+        btnStart.classList.add("hidden");
+        resumePrompt.classList.add("hidden");
+        restartConfirm.classList.add("hidden");
+        pendingProgress = null;
+      } else {
+        btnStart.classList.remove("hidden");
+        btnStart.textContent = record ? "Practice again" : "Start exam practice";
+        renderResumePrompt(progress);
+      }
     }).catch(function(){
       renderLastResult(null);
       renderResumePrompt(null);

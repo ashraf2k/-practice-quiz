@@ -175,6 +175,64 @@
         { type:"tf", q:"The decision symbol (diamond) in a standard flowchart has one input flow line and two output flow lines representing True/False or Yes/No paths.", options:["True","False"], correct:0, explain:"A decision diamond takes one flow line in and produces two flow lines out, one for each possible outcome of the condition (True/False or Yes/No).", topic:"Flowchart Symbols", difficulty:"easy" },
         { type:"tf", q:"System decomposition involves combining several small sub-systems into one large monolithic program.", options:["True","False"], correct:1, explain:"Decomposition is the opposite: it breaks a large, complex system down into smaller, more manageable sub-systems, rather than combining smaller pieces into one big program.", topic:"Abstraction & Decomposition", difficulty:"easy" }
       ]
+    },
+    comm9618: {
+      key: "comm9618",
+      title: "AS & A Level Computer Science 9618 — Topic 14: Communication & Internet Technologies",
+      subtitle: "14.1 Protocols & 14.2 Circuit & Packet Switching",
+      classes: ["12BR"],
+      sectionA: { label: "Multiple Choice", count: 20 },
+      sectionB: { label: "True / False", count: 5 },
+      hasGrade: true,
+      // Same opt-in live difficulty-adaptive ordering as datarep (see the
+      // long comment on that entry above) -- two correct in a row steps up
+      // a tier, one wrong steps down, Section A's pool drains before
+      // Section B's.
+      adaptive: true,
+      // This is a one-shot CLASS TEST, not ongoing topic practice -- the
+      // teacher asked for no retakes on this specific exam. Every other
+      // exam in this file leaves maxAttempts unset and keeps today's
+      // default of 2 (one attempt + one retake, see examMaxAttempts() in
+      // quiz.html); this is the only exam that sets it to 1, enforced both
+      // here (the UI never offers a retake) and server-side in
+      // firestore.rules (a second write for this examKey is rejected
+      // outright, not just hidden client-side).
+      maxAttempts: 1,
+      questions: [
+        // ---------------- SECTION A: Multiple Choice (20) ----------------
+        // Easy tier (8) -- 1 mark each
+        { type:"mcq", q:"Which of the following best defines a network protocol?", options:["Hardware used to physically connect computers","A standard set of rules enabling successful data transfer between devices","A software browser used to display web pages","An algorithm used to generate dynamic IP addresses"], correct:1, explain:"A protocol is a standard set of rules that lets devices exchange data successfully, regardless of the specific hardware or software each one runs.", topic:"Protocol Basics", difficulty:"easy" },
+        { type:"mcq", q:"How many layers make up the TCP/IP protocol suite stack in the Cambridge 9618 syllabus?", options:["3 layers","4 layers","5 layers","7 layers"], correct:1, explain:"The TCP/IP suite is modelled as 4 layers: Application, Transport, Internet, and Link.", topic:"TCP/IP Layers", difficulty:"easy" },
+        { type:"mcq", q:"Which TCP/IP layer is directly associated with high-level user applications?", options:["Link Layer","Internet Layer","Transport Layer","Application Layer"], correct:3, explain:"The Application layer is the topmost layer, and the one user-facing programs (browsers, email clients) interact with directly.", topic:"TCP/IP Layers", difficulty:"easy" },
+        { type:"mcq", q:"Which application-layer protocol is responsible for transferring hypertext web page documents across the World Wide Web?", options:["FTP","HTTP","SMTP","POP3"], correct:1, explain:"HTTP (HyperText Transfer Protocol) is the application-layer protocol used to request and transfer web page documents.", topic:"Application Layer Protocols", difficulty:"easy" },
+        { type:"mcq", q:"Which email protocol is used to \"push\" or send an email message from a client to a mail server?", options:["POP3","IMAP","SMTP","BitTorrent"], correct:2, explain:"SMTP (Simple Mail Transfer Protocol) is used to send/push email from a client to a mail server, and between mail servers.", topic:"Email Protocols", difficulty:"easy" },
+        { type:"mcq", q:"What is the primary function of the lowest layer (Link layer) in the TCP/IP stack?", options:["Routing packets across remote networks","Interconnecting nodes/hosts on a network and framing","Managing email downloading","Domain name resolution"], correct:1, explain:"The Link layer is the lowest layer, responsible for interconnecting hosts on a physical network and framing data for transmission.", topic:"TCP/IP Layers", difficulty:"easy" },
+        { type:"mcq", q:"In packet switching, what two main components make up a transmitted packet?", options:["Header (containing delivery instructions) and payload/data body","User ID and password","MAC address and URL","Public key and private key"], correct:0, explain:"Every packet is made up of a header (containing delivery/addressing instructions) and a payload (the actual data being carried).", topic:"Packet Structure", difficulty:"easy" },
+        { type:"mcq", q:"Which device operates at the Network/Internet layer to route packets across different networks?", options:["Switch","Hub","Router","Repeater"], correct:2, explain:"A router operates at the Network/Internet layer, examining destination addresses to route packets between different networks.", topic:"Network Devices", difficulty:"easy" },
+
+        // Intermediate tier (8) -- 1 mark each
+        { type:"mcq", q:"What is a key difference between POP3 and IMAP when receiving emails?", options:["POP3 sends emails, while IMAP receives emails.","POP3 downloads emails to the client computer, whereas IMAP keeps emails stored on the server accessible from any device.","POP3 uses public key encryption, while IMAP uses symmetric keys.","POP3 operates at the Link layer, while IMAP operates at the Transport layer."], correct:1, explain:"POP3 downloads email to the client and typically removes it from the server, while IMAP keeps mail on the server so it stays accessible and synced from any device.", topic:"Email Protocols", difficulty:"moderate" },
+        { type:"mcq", q:"Which protocol is designed specifically for peer-to-peer (P2P) file sharing across the internet without a central web server?", options:["FTP","BitTorrent","SMTP","ICMP"], correct:1, explain:"BitTorrent is a protocol built specifically for peer-to-peer file sharing, without relying on one central web server.", topic:"BitTorrent / P2P", difficulty:"moderate" },
+        { type:"mcq", q:"What is the role of a \"tracker\" in the BitTorrent protocol?", options:["It encrypts the chunks of data being transferred.","It is a central server that maintains a list of all peers downloading/uploading content.","It reassembles received packets in sequence.","It allocates dynamic IP addresses."], correct:1, explain:"A BitTorrent tracker is a central server that keeps track of which peers are currently sharing a given file, helping them find each other.", topic:"BitTorrent / P2P", difficulty:"moderate" },
+        { type:"mcq", q:"How does the Transport layer ensure that incoming data is directed to the correct application on a host?", options:["By checking the MAC address","By reading the destination Port Number in the TCP header","By checking the IP address in the IP header","By executing a hashing algorithm"], correct:1, explain:"The Transport layer reads the destination port number in its header to deliver incoming data to the correct application on the host.", topic:"Transport Layer & Ports", difficulty:"moderate" },
+        { type:"mcq", q:"In circuit switching, what must occur before data transmission can begin?", options:["Data is split into independent packets.","A dedicated physical circuit/path is established between sender and receiver.","Each node dynamically chooses a different route for each packet.","The message is uploaded to a torrent tracker."], correct:1, explain:"Circuit switching requires a dedicated physical path to be established between sender and receiver before any data is transmitted.", topic:"Circuit Switching", difficulty:"moderate" },
+        { type:"mcq", q:"Which layer of the TCP/IP stack adds packet sequence numbers to ensure correct reassembly?", options:["Link Layer","Internet Layer","Transport Layer","Application Layer"], correct:2, explain:"The Transport layer adds sequence numbers to packets so they can be correctly reassembled in order at the destination.", topic:"Transport Layer & Ports", difficulty:"moderate" },
+        { type:"mcq", q:"What is a major drawback of circuit switching compared to packet switching?", options:["Packets can arrive out of order.","Dedicated bandwidth is tied up for the duration of the connection even when no data is being sent.","Packets require large headers for routing.","It cannot be used on telephone networks (PSTN)."], correct:1, explain:"In circuit switching, the dedicated channel stays reserved for the whole connection, wasting bandwidth whenever no data is actually being sent.", topic:"Circuit Switching", difficulty:"moderate" },
+        { type:"mcq", q:"In BitTorrent terminology, what is a \"seed\"?", options:["A peer that has a complete copy of the file and is actively uploading it.","A corrupted packet that requires retransmission.","The initial request sent to a DNS server.","An encryption key used to unlock torrent files."], correct:0, explain:"A seed is a peer that holds a complete copy of the file and is actively uploading it to others in the swarm.", topic:"BitTorrent / P2P", difficulty:"moderate" },
+
+        // Hard tier (4) -- 2 marks each
+        { type:"mcq", q:"An IP datagram contains both an IP Header and a TCP Header. In which header are the Destination IP Address and Destination Port Number located, respectively?", options:["Destination IP Address in TCP Header; Destination Port in IP Header","Destination IP Address in IP Header; Destination Port in TCP Header","Both in the IP Header","Both in the TCP Header"], correct:1, explain:"The IP header carries addressing information like the destination IP address (used to route the packet between networks), while the TCP header carries the destination port number (used to deliver the data to the right application).", topic:"Packet Structure", difficulty:"hard", hint:"Think about what each header's job actually is: the IP header's job is getting the packet to the right MACHINE, while the TCP header's job is getting the data to the right PROGRAM on that machine." },
+        { type:"mcq", q:"How does a router utilize its routing table during packet switching?", options:["It inspects user passwords to verify access.","It examines the destination IP address of each packet and selects the optimal next hop route based on network conditions.","It modifies sequence numbers in the TCP header.","It establishes a dedicated physical wire connection between sender and receiver."], correct:1, explain:"A router reads a packet's destination IP address, looks it up against its routing table, and forwards the packet along the best next-hop route.", topic:"Network Devices", difficulty:"hard", hint:"Read the second half of each option carefully — several of them describe real router-adjacent ideas that still aren't what a routing table itself is actually used for." },
+        { type:"mcq", q:"Which statement accurately contrasts connectionless and connection-oriented packet switching?", options:["Connectionless transmission establishes a physical circuit; connection-oriented does not.","Connectionless dispatches packets without checking if the receiver is ready, whereas connection-oriented requires an initial handshake/acknowledgement.","Connectionless uses TCP, while connection-oriented uses IP.","Connection-oriented transmission sends all packets along the same physical wire without headers."], correct:1, explain:"Connectionless transmission sends packets without first confirming the receiver is ready; connection-oriented transmission requires an initial handshake/acknowledgement before data flows.", topic:"Packet Switching Types", difficulty:"hard", hint:"Picture what has to happen right before the FIRST bit of data goes out in each case — does one side need to hear back from the other first, or not?" },
+        { type:"mcq", q:"Why is packet switching particularly well-suited for email transmission compared to circuit switching?", options:["Email requires dedicated reserved bandwidth during composition.","Email is non-real-time data, allowing packets to travel via different routes and be reassembled without holding up dedicated network channels.","Email does not use IP addresses.","Packet switching prevents emails from being stored on mail servers."], correct:1, explain:"Email doesn't need to arrive instantly, so its packets can take different routes and be reassembled at the destination — there's no need to tie up a dedicated channel the whole time, unlike circuit switching.", topic:"Circuit vs Packet Switching", difficulty:"hard", hint:"Ask yourself whether reading an email a few seconds later than it was sent actually matters — then think about what kind of data genuinely needs a reserved, always-open channel instead." },
+
+        // ---------------- SECTION B: True / False (5) ----------------
+        { type:"tf", q:"A network protocol provides a standard set of rules making communication independent of specific hardware and software platforms.", options:["True","False"], correct:0, explain:"That's the defining feature of a protocol: a shared, standard set of rules that lets different hardware and software communicate successfully.", topic:"Protocol Basics", difficulty:"easy" },
+        { type:"tf", q:"HTTP operates at the Transport layer of the TCP/IP suite.", options:["True","False"], correct:1, explain:"False — HTTP is an Application-layer protocol, not a Transport-layer one.", topic:"Application Layer Protocols", difficulty:"easy" },
+        { type:"tf", q:"In BitTorrent, a \"swarm\" refers to all the peers actively downloading or uploading a specific file.", options:["True","False"], correct:0, explain:"A swarm is the full group of peers currently downloading or uploading pieces of a particular file.", topic:"BitTorrent / P2P", difficulty:"moderate" },
+        { type:"tf", q:"Circuit switching is connectionless because packets are dispatched independently across the network without prior setup.", options:["True","False"], correct:1, explain:"False — circuit switching is connection-oriented: it requires a dedicated circuit to be set up before any data is sent. Packet switching can be connectionless.", topic:"Circuit Switching", difficulty:"moderate" },
+        { type:"tf", q:"In a layered protocol stack, each layer can only communicate directly with its adjacent layers.", options:["True","False"], correct:0, explain:"In a layered protocol stack, each layer only ever communicates directly with the layers immediately above and below it.", topic:"Protocol Layering", difficulty:"hard", hint:"Trace how data actually flows down through the 4 TCP/IP layers on its way out of a machine — does the Application layer ever hand data straight to the Link layer, skipping over what's in between?" }
+      ]
     }
   };
 
@@ -189,6 +247,9 @@
       { key: "datarep", label: "Topic 1: Data Representation" },
       { key: "algo", label: "Topic 7: Algorithm Design & Problem-Solving" },
       { key: "igcse", label: "Conditional Statements practice questions" }
+    ] },
+    { test: /^12br/i, choices: [
+      { key: "comm9618" }
     ] }
   ];
 
@@ -208,6 +269,15 @@
   }
 
   function examQuestions(examKey){ return EXAMS[examKey].questions; }
+
+  // How many attempts (including the first) this exam allows before it's
+  // locked for good. Unset on every pre-existing exam, which all keep the
+  // original "1 fresh attempt + 1 retake" behaviour (2); comm9618 is the
+  // first exam to set this to 1 (no retake at all).
+  function examMaxAttempts(examKey){
+    var exam = EXAMS[examKey];
+    return (exam && typeof exam.maxAttempts === "number") ? exam.maxAttempts : 2;
+  }
 
   // Display label for a question's difficulty. The internal value stored
   // on each question ("easy"/"moderate"/"hard" -- also the suffix on the

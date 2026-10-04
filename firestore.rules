@@ -16,6 +16,14 @@
 //     A third attempt (another update once attemptNumber is already 2)
 //     is rejected outright, and so is anyone trying to touch someone
 //     else's attempt or switch which exam/uid a document belongs to.
+//     EXCEPTION: the "comm9618" exam allows only ONE attempt -- its
+//     retake `update` is blocked outright, so its first write (the
+//     `create`) is the only write that will ever succeed.
+//   - The topical exam-question papers (exam-practice.html's
+//     examAttempts) normally allow UNLIMITED retakes (a plain overwrite,
+//     no attemptNumber at all). EXCEPTION: the "comm9618_exam" paper is
+//     single-attempt -- once its one document is created, any further
+//     write to it is rejected the same way.
 //   - A submitted attempt can never be deleted by the student -- only
 //     the teacher's own account can delete one, to reset a student back
 //     to "no attempt yet" for that exam (e.g. a mistaken test run, or
@@ -66,13 +74,20 @@ service cloud.firestore {
       // pre-retake-feature attempt (no attemptNumber field at all) the
       // same as attemptNumber 1, so older records already in the
       // database are still eligible for one retake.
+      //
+      // comm9618 is a single-attempt exam (no retake at all, see
+      // quiz-data.js's EXAMS.comm9618.maxAttempts) -- excluded here so its
+      // first (and only) write can only ever be the `create` above, never
+      // this `update`. Every other exam keeps its original 1-retake
+      // behaviour untouched.
       allow update: if request.auth != null
                     && resource.data.uid == request.auth.uid
                     && request.resource.data.uid == request.auth.uid
                     && resource.data.examKey == request.resource.data.examKey
                     && attemptId == request.resource.data.uid + '_' + request.resource.data.examKey
                     && (resource.data.attemptNumber == 1 || !('attemptNumber' in resource.data))
-                    && request.resource.data.attemptNumber == 2;
+                    && request.resource.data.attemptNumber == 2
+                    && resource.data.examKey != 'comm9618';
 
       // Only the teacher/admin account can delete an attempt (a student
       // never can) -- this is the "reset" action in the admin dashboard,
@@ -81,18 +96,30 @@ service cloud.firestore {
     }
 
     // Topical exam-question practice (exam-practice.html): free-response
-    // questions self-checked against a keyword-assisted grader, with
-    // UNLIMITED retakes -- so unlike /attempts there's no attemptNumber
-    // dance. Each document always holds just that student's most recent
-    // completed run for that paper; writing it again simply overwrites it.
+    // questions self-checked against a keyword-assisted grader. Most
+    // papers allow UNLIMITED retakes -- so unlike /attempts there's no
+    // attemptNumber dance, and each document just holds that student's
+    // most recent completed run for that paper, overwritten on every
+    // retake. comm9618_exam is the exception (see exam-data.js's
+    // EXAM_PAPERS.comm9618_exam.singleAttempt): create/update are split
+    // below so its one document, once created, can never be overwritten.
     match /examAttempts/{attemptId} {
       allow get: if request.auth != null
                   && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
       allow list: if isAdmin();
 
-      allow create, update: if request.auth != null
+      // The first (and, for a single-attempt paper, only) write -- always
+      // allowed regardless of paperKey, same as /attempts' own `create`.
+      allow create: if request.auth != null
                     && request.resource.data.uid == request.auth.uid
                     && attemptId == request.resource.data.uid + '_' + request.resource.data.paperKey;
+
+      // A retake overwrite -- allowed for every paper EXCEPT comm9618_exam,
+      // whose one document is locked the moment it exists.
+      allow update: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && attemptId == request.resource.data.uid + '_' + request.resource.data.paperKey
+                    && resource.data.paperKey != 'comm9618_exam';
 
       allow delete: if isAdmin();
     }

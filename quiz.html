@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261004" />
+<link rel="stylesheet" href="shared.css?v=20261004b" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -51,6 +51,9 @@
           <option>10BR1</option>
           <option>10BR2</option>
           <option>10BR3</option>
+        </optgroup>
+        <optgroup label="AS &amp; A Level Computer Science 9618 — 12BR">
+          <option>12BR</option>
         </optgroup>
       </select>
       <div class="err">Please choose your class.</div>
@@ -140,7 +143,7 @@
 
     <div id="exam-practice-section" class="hidden">
       <h2 class="step-title" style="font-size:18px; margin-bottom:6px;">Topical Real Exam Questions</h2>
-      <p class="cohort-note" style="margin-top:0;">Free-response, exam-style questions with real mark allocations. Answer in your own words, then click “AI, check my answer!” for an instant suggested mark against the official scheme — difficulty adapts as you go, starting easy and getting harder, with unlimited practice.</p>
+      <p class="cohort-note" id="exam-practice-blurb" style="margin-top:0;">Free-response, exam-style questions with real mark allocations. Answer in your own words, then click “AI, check my answer!” for an instant suggested mark against the official scheme — difficulty adapts as you go, starting easy and getting harder, with unlimited practice.</p>
 
       <div class="field" id="field-exam-topic">
         <label for="input-exam-topic">Exam paper</label>
@@ -235,7 +238,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261004 -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261004b -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -248,11 +251,11 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261004"></script>
-<script src="exam-data.js?v=20261004"></script>
-<script src="report-lib.js?v=20261004"></script>
-<script src="firebase-config.js?v=20261004"></script>
-<script type="module" src="firebase-init.js?v=20261004"></script>
+<script src="quiz-data.js?v=20261004b"></script>
+<script src="exam-data.js?v=20261004b"></script>
+<script src="report-lib.js?v=20261004b"></script>
+<script src="firebase-config.js?v=20261004b"></script>
+<script type="module" src="firebase-init.js?v=20261004b"></script>
 <script type="module">
 (function(){
 
@@ -421,14 +424,17 @@
     // canonicalQuestionIndex -> true once the student has requested (and
     // confirmed) the hint for that question during this attempt.
     hintUsedFor: {},
-    // Which attempt this is for the current exam: 1 (fresh) or 2 (the one
-    // allowed retake). Set right before startAttempt() and read again in
-    // finishAttempt() / showExistingCompletion() / renderResults().
+    // Which attempt this is for the current exam: 1 (fresh) or higher for
+    // an allowed retake, up to examMaxAttempts(examKey) (2 for every
+    // existing exam; 1 -- no retake at all -- for comm9618). Set right
+    // before startAttempt() and read again in finishAttempt() /
+    // showExistingCompletion() / renderResults().
     attemptNumber: 1,
-    // Only set when attemptNumber is 2: a small snapshot of the first
-    // attempt's score, carried into the retake's Firestore record so the
-    // teacher's admin view can still see it even though this write
-    // replaces the first attempt's answers as the one that counts.
+    // Only set on an exam's final allowed attempt: a small snapshot of the
+    // first attempt's score, carried into the retake's Firestore record so
+    // the teacher's admin view can still see it even though this write
+    // replaces the first attempt's answers as the one that counts. Always
+    // null for a single-attempt exam (there is no earlier attempt to snapshot).
     firstAttemptSnapshot: null,
     // Set by finishAttempt() when PQFirebase.recordAttempt() did NOT
     // actually save (rejected by Firestore's rules, or a network/other
@@ -613,6 +619,7 @@
   // is its own menu rather than an extension of the practice-quiz one.
   var examPracticeDivider = document.getElementById("exam-practice-divider");
   var examPracticeSection = document.getElementById("exam-practice-section");
+  var examPracticeBlurb = document.getElementById("exam-practice-blurb");
   var fieldExamTopic = document.getElementById("field-exam-topic");
   var inputExamTopic = document.getElementById("input-exam-topic");
   var btnStartExamPractice = document.getElementById("btn-start-exam-practice");
@@ -635,6 +642,24 @@
       inputExamTopic.appendChild(opt);
     });
     if(choices.length === 1) inputExamTopic.value = choices[0].key;
+
+    // The retake clause at the end of the blurb varies by paper -- this
+    // section can offer several papers for one class, so say the right
+    // thing whether they're all single-attempt (comm9618_exam, currently
+    // 12BR's only paper), all unlimited (every other paper today), or
+    // -- not true of any class yet, but handled rather than silently
+    // claiming the wrong thing for a future mixed class -- a mix of both.
+    var singleCount = choices.filter(function(c){
+      var paper = EXAM_PAPERS[c.key];
+      return paper && paper.singleAttempt;
+    }).length;
+    var retakeClause = singleCount === 0
+      ? "with unlimited practice"
+      : (singleCount === choices.length
+        ? (choices.length === 1 ? "but note: this is a single-attempt paper, with no retake" : "but note: these are single-attempt papers, with no retake")
+        : "though note some of these papers allow only a single attempt, with no retake");
+    examPracticeBlurb.textContent = "Free-response, exam-style questions with real mark allocations. Answer in your own words, then click “AI, check my answer!” for an instant suggested mark against the official scheme — difficulty adapts as you go, starting easy and getting harder, " + retakeClause + ".";
+
     return choices;
   }
 
@@ -678,7 +703,8 @@
   // match. `existing` is the raw completed-attempt record (or null);
   // `progress` is an in-progress checkpoint for the NEXT attempt slot (or
   // null) — see checkAttemptStatus() for how a stale one is filtered out.
-  function renderAttemptStatus(existing, progress){
+  function renderAttemptStatus(existing, progress, examKey){
+    var maxAttempts = examMaxAttempts(examKey);
     attemptStatusEl.className = "attempt-status hidden";
     attemptStatusEl.innerHTML = "";
     resumePrompt.classList.add("hidden");
@@ -709,11 +735,15 @@
       ? (existing.score + "/" + existing.total) : null;
     var dateText = fmtDate(existing.completedAt);
 
-    if(attemptNumber >= 2){
+    if(attemptNumber >= maxAttempts){
       attemptStatusEl.className = "attempt-status done";
-      attemptStatusEl.innerHTML = "You've used both of your attempts at this topic" +
+      attemptStatusEl.innerHTML = (maxAttempts <= 1
+        ? "You've already completed this exam"
+        : "You've used both of your attempts at this topic") +
         (scoreText ? " — final score <strong>" + scoreText + "</strong>." : ".") +
-        " You can still view your full report below.";
+        (maxAttempts <= 1
+          ? " This exam allows a single attempt only, so no retake is available. You can still view your full report below."
+          : " You can still view your full report below.");
       btnStart.classList.add("hidden");
     } else {
       attemptStatusEl.className = "attempt-status retake";
@@ -732,7 +762,7 @@
   function checkAttemptStatus(){
     var examKey = currentExamKeyChoice();
     pendingCheck = { examKey: examKey, existing: null, progress: null };
-    renderAttemptStatus(null, null);
+    renderAttemptStatus(null, null, examKey);
     if(!examKey) return;
 
     Promise.all([
@@ -749,7 +779,7 @@
       if(progress && (progress.attemptNumber || 1) !== nextAttemptNumber) progress = null;
       pendingCheck.existing = existing;
       pendingCheck.progress = progress;
-      renderAttemptStatus(existing, progress);
+      renderAttemptStatus(existing, progress, examKey);
     }).catch(function(){
       if(pendingCheck.examKey !== examKey) return;
       attemptStatusEl.className = "attempt-status";
@@ -768,9 +798,10 @@
     var progress = pendingCheck.progress;
     if(!progress) return;
     var attemptNumber = progress.attemptNumber || 1;
-    var remainingAfter = 2 - attemptNumber;
+    var maxAttempts = examMaxAttempts(progress.examKey);
+    var remainingAfter = maxAttempts - attemptNumber;
     restartWarnText.textContent = remainingAfter > 0
-      ? "Starting over will submit your current answers as they are right now (any unanswered questions count as incorrect) and will use one of your 2 attempts — you'll have " + remainingAfter + " attempt" + (remainingAfter === 1 ? "" : "s") + " left after this. Continue?"
+      ? "Starting over will submit your current answers as they are right now (any unanswered questions count as incorrect) and will use one of your " + maxAttempts + " attempts — you'll have " + remainingAfter + " attempt" + (remainingAfter === 1 ? "" : "s") + " left after this. Continue?"
       : "This is your last attempt. Starting over will submit your current answers as they are right now (any unanswered questions count as incorrect), and you won't be able to retake this topic. Continue?";
     restartConfirm.classList.remove("hidden");
   });
@@ -1141,7 +1172,7 @@
         btnStartOver.disabled = false;
         startStatus.textContent = "";
         var nextAttemptNumber = submittedAttemptNumber + 1;
-        if(nextAttemptNumber > 2){
+        if(nextAttemptNumber > examMaxAttempts(examKey)){
           // That was the last attempt — nothing left to start; refresh
           // the start screen so "View my report" reflects the submission.
           checkAttemptStatus();
@@ -1211,15 +1242,16 @@
       startStatus.textContent = "";
 
       var attemptNumber = existing ? (existing.attemptNumber || 1) + 1 : 1;
-      if(attemptNumber > 2){
-        // Both attempts already used — nothing to start; refresh the
-        // inline status so Start practice hides and View my report shows.
-        renderAttemptStatus(existing);
+      var maxAttempts = examMaxAttempts(examKey);
+      if(attemptNumber > maxAttempts){
+        // All allowed attempts already used — nothing to start; refresh
+        // the inline status so Start practice hides and View my report shows.
+        renderAttemptStatus(existing, null, examKey);
         return;
       }
 
       state.attemptNumber = attemptNumber;
-      state.firstAttemptSnapshot = (attemptNumber === 2 && existing) ? {
+      state.firstAttemptSnapshot = (attemptNumber === maxAttempts && attemptNumber > 1 && existing) ? {
         score: existing.score,
         total: existing.total,
         completedAt: existing.completedAt,
@@ -1522,14 +1554,15 @@
     resultSub.textContent = band;
 
     var attemptNumber = state.attemptNumber || 1;
+    var maxAttempts = examMaxAttempts(ctx.examKey);
     var completedDateText = fmtDate(state.completedAt);
     reviewBanner.classList.remove("hidden");
 
-    // When this is the 2nd (final) attempt, mention the first attempt's
+    // When this is the final allowed attempt, mention the first attempt's
     // score too, if it was captured — so the "full report" a student can
     // come back to also shows their improvement, not just the final score.
     var firstAttemptText = "";
-    if(attemptNumber >= 2 && state.firstAttemptSnapshot && typeof state.firstAttemptSnapshot.score === "number" && typeof state.firstAttemptSnapshot.total === "number"){
+    if(attemptNumber >= maxAttempts && state.firstAttemptSnapshot && typeof state.firstAttemptSnapshot.score === "number" && typeof state.firstAttemptSnapshot.total === "number"){
       firstAttemptText = " Your first attempt scored " + state.firstAttemptSnapshot.score + "/" + state.firstAttemptSnapshot.total + ".";
     }
 
@@ -1542,10 +1575,10 @@
         "Please check your internet connection and try again — if this keeps happening, tell your teacher so they can check the account setup.";
     } else if(state.reviewMode){
       reviewBanner.classList.remove("warn");
-      reviewBanner.innerHTML = attemptNumber >= 2
+      reviewBanner.innerHTML = attemptNumber >= maxAttempts
         ? "This is your final submitted attempt at this topic (recorded " + completedDateText + ")." + firstAttemptText + " Showing your submitted response below."
         : "You already submitted this practice (recorded " + completedDateText + "). You still have one retake left if you'd like to try again — go back to the start screen to use it.";
-    } else if(attemptNumber >= 2){
+    } else if(attemptNumber >= maxAttempts){
       reviewBanner.classList.remove("warn");
       reviewBanner.innerHTML = "That was your final attempt at this topic — nice work getting through it!" + firstAttemptText;
     } else {
@@ -1692,12 +1725,13 @@
         sub.textContent = "No attempts yet.";
       } else {
         var attemptNumber = r.existing.attemptNumber || 1;
+        var maxAttempts = examMaxAttempts(r.key);
         var hasScore = typeof r.existing.score === "number" && typeof r.existing.total === "number";
         var scoreText = hasScore ? (r.existing.score + "/" + r.existing.total) : null;
         var dateText = fmtDate(r.existing.completedAt);
-        if(attemptNumber >= 2){
+        if(attemptNumber >= maxAttempts){
           statusSpan.className = "pr-status done";
-          statusSpan.textContent = "Both attempts used";
+          statusSpan.textContent = maxAttempts <= 1 ? "Completed — no retake" : "Both attempts used";
         } else {
           statusSpan.className = "pr-status in-progress";
           statusSpan.textContent = "1 retake left";
@@ -1773,8 +1807,10 @@
         statusSpan.textContent = "Completed";
         var dateText = fmtDate(r.existing.completedAt);
         var hasScore = typeof r.existing.totalEarned === "number" && typeof r.existing.totalMarks === "number";
+        var paper = EXAM_PAPERS[r.key];
+        var retakeText = (paper && paper.singleAttempt) ? "This was a single-attempt exam — no retake available." : "Unlimited retakes — practice again any time.";
         sub.textContent = (hasScore ? "Scored " + r.existing.totalEarned + "/" + r.existing.totalMarks : "Completed") +
-          " on " + dateText + ". Unlimited retakes — practice again any time.";
+          " on " + dateText + ". " + retakeText;
         if(hasScore){
           var scoreEl = document.createElement("span");
           scoreEl.className = "pr-score";

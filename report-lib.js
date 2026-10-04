@@ -108,10 +108,17 @@
       }
     }
 
+    // A single-attempt exam (exam.maxAttempts === 1, e.g. comm9618) has no
+    // retake to suggest -- point at the next assessment instead.
+    var canRetake = exam.maxAttempts !== 1;
     if(weaknesses.length){
-      paragraphs.push("Suggested next step: review the material covering " + weaknesses[0].topic.toLowerCase() + ", then retake this practice to check progress.");
+      paragraphs.push(canRetake
+        ? "Suggested next step: review the material covering " + weaknesses[0].topic.toLowerCase() + ", then retake this practice to check progress."
+        : "Suggested next step: review the material covering " + weaknesses[0].topic.toLowerCase() + " ahead of the next assessment — this was a single-attempt exam, so there's no retake to check progress with here.");
     } else if(report.pct < 100){
-      paragraphs.push("Suggested next step: revisit the one or two missed questions above, then retake the practice for a perfect score.");
+      paragraphs.push(canRetake
+        ? "Suggested next step: revisit the one or two missed questions above, then retake the practice for a perfect score."
+        : "Suggested next step: revisit the one or two missed questions above ahead of the next assessment.");
     } else {
       paragraphs.push("Suggested next step: none — full marks. Ready to move on.");
     }
