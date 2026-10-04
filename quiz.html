@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261004d" />
+<link rel="stylesheet" href="shared.css?v=20261005" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -243,7 +243,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261004d -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261005 -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -256,11 +256,11 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261004d"></script>
-<script src="exam-data.js?v=20261004d"></script>
-<script src="report-lib.js?v=20261004d"></script>
-<script src="firebase-config.js?v=20261004d"></script>
-<script type="module" src="firebase-init.js?v=20261004d"></script>
+<script src="quiz-data.js?v=20261005"></script>
+<script src="exam-data.js?v=20261005"></script>
+<script src="report-lib.js?v=20261005"></script>
+<script src="firebase-config.js?v=20261005"></script>
+<script type="module" src="firebase-init.js?v=20261005"></script>
 <script type="module">
 (function(){
 
@@ -1634,6 +1634,15 @@
   // per-exam getMyAttempt() call. No new Firestore rule is needed --
   // students already have read access to their own attempt docs, this
   // just reads several of them instead of one.
+  //
+  // "Your overall performance" combines TWO separate graded collections:
+  // the MCQ/TF practice quizzes above (/attempts, via fetchProgressRecords())
+  // AND the free-response exam-practice papers (/examAttempts, via
+  // fetchExamProgressRecords() -- defined further below, alongside the
+  // "Topical Real Exam Questions" list it also feeds). Both are fetched by
+  // loadPerformanceMeter() and merged by renderPerfMeter() so the ring
+  // reflects everything the student has been graded on, not just one half
+  // of it.
   var RING_CIRCUMFERENCE = 2 * Math.PI * 30;
   var perfMeterEl = document.getElementById("perf-meter");
   var perfRingFill = document.getElementById("perf-ring-fill");
@@ -1653,13 +1662,26 @@
     }));
   }
 
-  function renderPerfMeter(records){
+  // renderPerfMeter() takes a COMBINED set of records -- both the MCQ/TF
+  // practice-quiz attempts (quiz-data.js's examChoicesForClass() + the
+  // /attempts collection) and the free-response exam-practice papers
+  // (exam-data.js's examPaperChoicesForClass() + the /examAttempts
+  // collection) -- so "Your overall performance" reflects everything the
+  // student has been graded on, not just the MCQ/TF quizzes.
+  function renderPerfMeter(combined){
+    var records = combined.quiz.concat(combined.examPapers);
     var attempted = records.filter(function(r){ return r.existing; });
     var totalScore = 0, totalMax = 0;
-    attempted.forEach(function(r){
-      if(typeof r.existing.score === "number" && typeof r.existing.total === "number"){
+    combined.quiz.forEach(function(r){
+      if(r.existing && typeof r.existing.score === "number" && typeof r.existing.total === "number"){
         totalScore += r.existing.score;
         totalMax += r.existing.total;
+      }
+    });
+    combined.examPapers.forEach(function(r){
+      if(r.existing && typeof r.existing.totalEarned === "number" && typeof r.existing.totalMarks === "number"){
+        totalScore += r.existing.totalEarned;
+        totalMax += r.existing.totalMarks;
       }
     });
     var pct = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : null;
@@ -1692,13 +1714,16 @@
   }
 
   function loadPerformanceMeter(){
-    var choices = examChoicesForClass(state.currentUser.class);
-    if(choices.length === 0){
+    var quizChoices = examChoicesForClass(state.currentUser.class);
+    var examPaperChoices = examPaperChoicesForClass(state.currentUser.class);
+    if(quizChoices.length === 0 && examPaperChoices.length === 0){
       perfMeterEl.classList.add("hidden");
       return;
     }
     perfMeterEl.classList.remove("hidden");
-    fetchProgressRecords().then(renderPerfMeter);
+    Promise.all([ fetchProgressRecords(), fetchExamProgressRecords() ]).then(function(results){
+      renderPerfMeter({ quiz: results[0], examPapers: results[1] });
+    });
   }
 
   function renderProgressList(records){
