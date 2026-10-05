@@ -287,6 +287,7 @@
       "icon sub   go";
     column-gap: 12px;
     align-items: center;
+    align-content: center;
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 12px;
@@ -377,6 +378,53 @@
   .topic-card:hover .go{ opacity: 1; }
   .topic-card:hover .go svg{ transform: translateX(3px); }
 
+  /* Topics are grouped by class (10AM / 10BR / 12BR), each under its own header */
+  .topic-nav{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 18px;
+  }
+  .topic-nav a{
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--ink, inherit);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 13px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .topic-nav a:hover{ border-color: var(--accent-dark); }
+  .topic-nav a span{ color: var(--muted); font-weight: 600; margin-left: 4px; }
+
+  .topic-group{ margin-bottom: 26px; scroll-margin-top: 16px; }
+  .topic-group-head{
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 2px 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .topic-group-head h2{
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .topic-group-head .sub{
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .topic-group .topics{ margin-bottom: 0; }
+  .topic-card .badge{ display: none; }
+  .topic-card{
+    grid-template-areas:
+      "icon title go"
+      "icon sub   go";
+  }
+
   .topics-empty{
     font-size: 13px;
     color: var(--muted);
@@ -427,7 +475,7 @@
 
   <p class="section-label">Available practice topics</p>
   <p class="topics-hint">Tap a topic below to jump straight to it once you're logged in.</p>
-  <div class="topics" id="topics-wrap">
+  <div class="topic-groups" id="topics-wrap">
     <!-- Filled in from quiz-data.js by the script at the bottom of the
          page, so this list can never go stale when a topic is added. -->
   </div>
@@ -437,10 +485,10 @@
 
 </div>
 
-<!-- ?v=20261005i -- cache-busting; see the longer comment above this same
+<!-- ?v=20261005j -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever this
      file changes. -->
-<script src="quiz-data.js?v=20261005i"></script>
+<script src="quiz-data.js?v=20261005j"></script>
 <script>
 (function(){
   // Curated heading/colour/icon per exam key, so the cards look
@@ -515,7 +563,61 @@
     return;
   }
 
-  keys.forEach(function(key, i){
+  var GROUP_ORDER = ["10AM","10BR","12BR"];
+  function groupOf(exam){
+    var c = (exam.classes && exam.classes[0]) || "";
+    var m = /^\d+[A-Za-z]+/.exec(c);
+    return m ? m[0].toUpperCase() : "Other";
+  }
+  var groups = {};
+  keys.forEach(function(k){
+    var g = groupOf(EXAMS[k]);
+    (groups[g] = groups[g] || []).push(k);
+  });
+  var groupNames = GROUP_ORDER.filter(function(g){ return groups[g]; })
+    .concat(Object.keys(groups).filter(function(g){ return GROUP_ORDER.indexOf(g) < 0; }));
+
+  // Within a class, order by the "Sprint 1.x" / "Paper n" subtitle (stable).
+  Object.keys(groups).forEach(function(g){
+    groups[g] = groups[g].map(function(k, idx){ return {k:k, idx:idx}; })
+      .sort(function(a, b){
+        var sa = EXAMS[a.k].subtitle || "", sb = EXAMS[b.k].subtitle || "";
+        return sa.localeCompare(sb, undefined, {numeric:true}) || a.idx - b.idx;
+      }).map(function(o){ return o.k; });
+  });
+
+  var nav = document.createElement("nav");
+  nav.className = "topic-nav";
+  nav.setAttribute("aria-label", "Jump to class");
+  groupNames.forEach(function(g){
+    var a = document.createElement("a");
+    a.href = "#grp-" + g;
+    a.innerHTML = g + "<span>" + groups[g].length + "</span>";
+    nav.appendChild(a);
+  });
+  wrap.appendChild(nav);
+
+  function gridFor(g){
+    var sec = document.createElement("section");
+    sec.className = "topic-group";
+    sec.id = "grp-" + g;
+    var head = document.createElement("div");
+    head.className = "topic-group-head";
+    head.innerHTML = "<h2>" + g + "</h2><span class=\"sub\">" + groups[g].length + (groups[g].length === 1 ? " topic" : " topics") + "</span>";
+    sec.appendChild(head);
+    var grid = document.createElement("div");
+    grid.className = "topics";
+    sec.appendChild(grid);
+    wrap.appendChild(sec);
+    return grid;
+  }
+
+  var grids = {};
+  groupNames.forEach(function(g){ grids[g] = gridFor(g); });
+
+  var ordered = [];
+  groupNames.forEach(function(g){ ordered = ordered.concat(groups[g]); });
+  ordered.forEach(function(key, i){
     var exam = EXAMS[key];
     var meta = META[key] || { heading: exam.title, color: FALLBACK_COLORS[i % FALLBACK_COLORS.length], icon: FALLBACK_ICON };
 
@@ -550,7 +652,7 @@
     go.innerHTML = "Start practice " + GO_ARROW;
     card.appendChild(go);
 
-    wrap.appendChild(card);
+    grids[groupOf(exam)].appendChild(card);
   });
 })();
 </script>
