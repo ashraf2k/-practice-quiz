@@ -346,6 +346,93 @@
           explanation: "A router reads the destination IP address in a packet's header, checks it against its own routing table, and uses that to choose the best next-hop route to forward the packet along, moving it closer to its destination across the network."
         }
       ]
+    },
+
+    // Source: the teacher-supplied "Grade 10AM Practice Quiz: Systematic
+    // Troubleshooting" document's Section 3 (Short Answer, Q31-Q35 in that
+    // source's own numbering, renumbered Q1-Q5 here to match this paper's
+    // own local id convention, same as datarep_exam above). Every
+    // question's marks are the verified total of its own markPoints,
+    // summing to 7. Two of the source's questions (Q34/Q35) originally
+    // awarded 0.5 marks per valid step named (4 steps for 2 marks each) --
+    // that doesn't fit this page's self-grading UI, which only offers
+    // whole-mark steps (see renderMarkPoints()'s <select> in
+    // exam-practice.html), so those two were restructured as "any TWO of
+    // several valid steps, worth 1 mark each" instead -- same total marks,
+    // same list of acceptable answers, just whole-number marking.
+    troubleshoot_exam: {
+      key: "troubleshoot_exam",
+      title: "Sprint 1.1: Systematic Troubleshooting — Exam Practice",
+      subtitle: "5 exam-style questions · Troubleshooting method, data migration, printers, email & displays · 7 marks total",
+      classes: ["10AM1","10AM2","10AM3","10AM4","10AM5","10AM6"],
+      totalMarks: 7,
+      questions: [
+        {
+          id: "Q1", marks: 1, difficulty: "easy",
+          topic: "Troubleshooting Methodology",
+          prompt: "List the first two steps of the 6-step systematic troubleshooting methodology, in order.",
+          markPoints: [
+            {
+              text: "Step 1: Identify the problem; Step 2: Establish a hypothesis about the likely cause",
+              marks: 1,
+              match: { type: "keywords", groups: [["identify the problem","identifying the problem","identify the issue","gather information"], ["establish a hypothesis","hypothesis","establish the cause","likely cause","probable cause"]], needCount: 2 }
+            }
+          ],
+          explanation: "The method begins by identifying the problem — gathering information from the user and the system — then establishing a hypothesis about its probable cause, ready to test as Step 3."
+        },
+        {
+          id: "Q2", marks: 1, difficulty: "intermediate",
+          topic: "Data Migration",
+          prompt: "Explain why it is necessary to back up data before starting a device migration.",
+          markPoints: [
+            {
+              text: "Protects against permanent data loss if something goes wrong or is interrupted during the transfer",
+              marks: 1,
+              match: { type: "keywords", groups: [["data loss","lose data","losing data","lost if","nothing is lost","goes wrong","fails","failure","corrupt","interrupted","safety net","in case","backup copy"]], needCount: 1 }
+            }
+          ],
+          explanation: "Backing up first means that if the migration fails, is interrupted, or something is corrupted partway through, nothing is permanently lost — the backup can be used to restore the data."
+        },
+        {
+          id: "Q3", marks: 1, difficulty: "intermediate",
+          topic: "Printer Troubleshooting",
+          prompt: "A newly installed printer fails to print a test page because of a driver issue. What should you do to resolve this?",
+          markPoints: [
+            {
+              text: "Go to the printer manufacturer's official website and download/install the correct driver for the exact model and operating system",
+              marks: 1,
+              match: { type: "keywords", groups: [["manufacturer","official website","manufacturer's website","official site"], ["driver"]], needCount: 2 }
+            }
+          ],
+          explanation: "Drivers should come from the printer manufacturer's own official website, matched exactly to the printer model and the operating system version in use — generic or third-party drivers can cause the same failure again."
+        },
+        {
+          id: "Q4", marks: 2, difficulty: "hard",
+          topic: "Email Troubleshooting",
+          prompt: "Nora cannot send or receive emails on her desktop client. State two troubleshooting steps she should try before reinstalling the software or contacting her service provider.",
+          markPoints: [
+            {
+              text: "Any two of: check the internet connection; verify account credentials/server settings; check mailbox storage capacity; check spam/filter folders; check antivirus/firewall settings; restart the computer",
+              marks: 2,
+              match: { type: "keywords", groups: [["internet connection","connection is stable","wifi","network connection","check her connection"], ["credentials","password","server settings","account settings","incoming server","outgoing server"], ["storage capacity","mailbox full","mailbox storage","out of space","quota","full mailbox"], ["spam folder","filter","junk folder","filters"], ["antivirus","firewall"], ["restart the computer","reboot","restart the device","power cycle","restart her computer"]], needCount: 2, marksPerGroup: 1 }
+            }
+          ],
+          explanation: "Before escalating to a reinstall or the service provider, sensible checks include: the internet connection itself, the account's credentials and server settings, whether the mailbox has run out of storage, spam/filter folders hiding messages, antivirus or firewall software blocking the client, and simply restarting the computer."
+        },
+        {
+          id: "Q5", marks: 2, difficulty: "hard",
+          topic: "HDMI/Display Troubleshooting",
+          prompt: "A student's laptop will not project to an external display via HDMI. Describe two steps in a diagnostic escalation path to fix or isolate the issue.",
+          markPoints: [
+            {
+              text: "Any two of: check physical connections/power/input source; check the laptop's display output setting (extend/duplicate); update drivers or try a different cable/port; test a different device or a different display",
+              marks: 2,
+              match: { type: "keywords", groups: [["cable","connection","power","input source","hdmi port","plugged in"], ["display settings","extend","duplicate","output setting","projection mode","display output"], ["driver","different cable","different port","update"], ["different device","different display","another monitor","another display","isolate","swap"]], needCount: 2, marksPerGroup: 1 }
+            }
+          ],
+          explanation: "A sensible escalation path checks the physical connection and power/input source first, then the laptop's own display output setting (extend vs duplicate), then drivers or swapping the cable/port, and finally isolates the fault by testing a different device on the same display, or the same laptop on a different display."
+        }
+      ]
     }
   };
 
@@ -353,6 +440,9 @@
   // which exam PAPER(s) a class can practise, for the second
   // "Topical Real Exam Questions" dropdown on quiz.html's start screen.
   var EXAM_PAPER_CHOICES_BY_CLASS = [
+    { test: /^10am/i, choices: [
+      { key: "troubleshoot_exam", label: "Sprint 1.1: Systematic Troubleshooting — exam style" }
+    ] },
     { test: /^10br/i, choices: [
       { key: "datarep_exam", label: "Topic 1: Data Representation — IGCSE exam style" }
     ] },
