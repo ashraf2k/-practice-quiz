@@ -265,6 +265,39 @@ function recordExamAttempt(uid, paperKey, record){
     });
 }
 
+// Admin-only (enforced by security rules, not just this check): lets the
+// teacher re-read a student's typed answer and correct the mark a question
+// was given. The self/auto-graded mark from exam-practice.html isn't
+// always right -- especially on the single-attempt "real exam" papers
+// (e.g. comm9618_exam) where the student never gets a chance to notice or
+// fix a mis-grade themselves. Unlike recordExamAttempt() above (a full
+// overwrite from the student's own completed run), this is a partial
+// `merge: true` write that only touches the marking fields, leaving uid,
+// paperKey, name, class, completedAt, minutesTaken and recordedAt exactly
+// as the student's original submission left them.
+// `record`: { perQuestion, totalEarned, totalMarks, pct, topicStats,
+// regradedBy, regradedAt }. admin.html recomputes all of these from its
+// own edited per-question marks -- the same derivation exam-practice.html's
+// finishAttempt() does for a fresh attempt -- and stamps who/when so the
+// change is auditable later.
+function regradeExamAttempt(uid, paperKey, record){
+  var ref = doc(db, "examAttempts", examAttemptId(uid, paperKey));
+  var payload = {
+    perQuestion: record.perQuestion,
+    totalEarned: record.totalEarned,
+    totalMarks: record.totalMarks,
+    pct: record.pct,
+    topicStats: record.topicStats,
+    regradedBy: record.regradedBy != null ? record.regradedBy : null,
+    regradedAt: record.regradedAt != null ? record.regradedAt : null
+  };
+  return setDoc(ref, payload, { merge: true })
+    .then(function(){ return { ok: true }; })
+    .catch(function(err){
+      return { ok: false, error: (err && err.message) || "Could not save." };
+    });
+}
+
 // ---------- MCQ practice progress (resume support, quiz.html) ----------
 // Separate from "attempts" above: this is scratch/working state for an
 // UNFINISHED attempt, saved after every question so a student can close
@@ -348,6 +381,7 @@ window.PQFirebase = {
   recordExamAttempt: recordExamAttempt,
   listAllExamAttempts: listAllExamAttempts,
   deleteExamAttempt: deleteExamAttempt,
+  regradeExamAttempt: regradeExamAttempt,
   getMyProgress: getMyProgress,
   saveProgress: saveProgress,
   deleteProgress: deleteProgress,

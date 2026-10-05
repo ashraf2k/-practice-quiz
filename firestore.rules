@@ -31,6 +31,12 @@
 //   - Only the teacher's own account (matched by email below) can list
 //     every attempt across every student, which is what powers the
 //     admin dashboard.
+//   - The teacher's account can also OVERWRITE an existing examAttempts
+//     document's marks (the admin "regrade" feature) regardless of
+//     paperKey, including the single-attempt comm9618_exam paper whose
+//     student-side update rule is otherwise locked shut -- this is the
+//     only way a mis-graded free-response answer gets corrected after
+//     the fact, since the student can't self-correct it.
 //
 // To add more teacher/admin accounts later, add another
 // "|| request.auth.token.email == '...'" clause inside isAdmin().
@@ -120,6 +126,12 @@ service cloud.firestore {
                     && request.resource.data.uid == request.auth.uid
                     && attemptId == request.resource.data.uid + '_' + request.resource.data.paperKey
                     && resource.data.paperKey != 'comm9618_exam';
+
+      // Admin regrade -- the teacher correcting a question's mark after
+      // the fact. Deliberately has no paperKey exception (unlike the
+      // student-side update rule above): comm9618_exam is single-attempt
+      // for the STUDENT, not un-correctable by the teacher.
+      allow update: if isAdmin();
 
       allow delete: if isAdmin();
     }

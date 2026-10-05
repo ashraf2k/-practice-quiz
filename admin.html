@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261005b" />
+<link rel="stylesheet" href="shared.css?v=20261005c" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -131,6 +131,26 @@
   .admin-question-row .qpct.low{ color: var(--incorrect); }
   .admin-question-row .qpct.high{ color: var(--correct); }
   .admin-question-row .qmiss{ font-size: 12.5px; color: var(--muted); }
+
+  /* Admin regrade control (exam-practice detail view) -- lets the teacher
+     override the mark a question was given. Mirrors exam-practice.html's
+     own self-grading <select> styling (.markpoint-control select) so it
+     reads as "the same kind of control", just on the admin side. */
+  .admin-question-row.edited{ border-color: var(--accent); }
+  .qmark-edit{ display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+  .qmark-edit select{
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--ink);
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .qmark-edit select:focus{ outline: 2px solid var(--accent); outline-offset: 1px; }
+  .regrade-note{ font-size: 12px; color: var(--muted); margin: -4px 0 16px; }
 
   .admin-detail-back{ margin-bottom: 16px; }
 
@@ -354,8 +374,11 @@
       <div class="admin-panel" id="panel-examDetail">
         <div class="admin-toolbar no-print">
           <button class="btn btn-secondary admin-detail-back" id="btn-back-examdetail">← Back to Exam Practice list</button>
+          <button class="btn btn-primary" id="btn-examdetail-save" disabled>Save regrade</button>
           <button class="btn btn-danger" id="btn-examdetail-reset">Reset this attempt</button>
         </div>
+        <p class="regrade-note no-print">Change a question's mark below if the student's answer deserves a different score, then save.</p>
+        <p class="admin-status no-print" id="examdetail-save-status"></p>
         <p class="admin-status no-print" id="examdetail-reset-status"></p>
         <div id="exampractice-detail"></div>
       </div>
@@ -365,14 +388,14 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261005b -- cache-busting; see the longer comment above this same
+<!-- ?v=20261005c -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261005b"></script>
-<script src="exam-data.js?v=20261005b"></script>
-<script src="report-lib.js?v=20261005b"></script>
-<script src="firebase-config.js?v=20261005b"></script>
-<script type="module" src="firebase-init.js?v=20261005b"></script>
+<script src="quiz-data.js?v=20261005c"></script>
+<script src="exam-data.js?v=20261005c"></script>
+<script src="report-lib.js?v=20261005c"></script>
+<script src="firebase-config.js?v=20261005c"></script>
+<script type="module" src="firebase-init.js?v=20261005c"></script>
 <script type="module">
 (function(){
 
@@ -542,6 +565,7 @@
   // someone signs in with the wrong email — it grants nothing by itself.
   PQFirebase.onAuthChange(function(user){
     if(!user){
+      currentAdminEmail = null;
       showLoginScreen();
       return;
     }
@@ -552,6 +576,7 @@
       PQFirebase.logOut();
       return;
     }
+    currentAdminEmail = user.email || null;
     showDashboard();
   });
 
@@ -579,6 +604,9 @@
   var attempts = [];
   var examAttempts = [];
   var loaded = false;
+  // Set once per sign-in (below), so a saved regrade can be stamped with
+  // who made it.
+  var currentAdminEmail = null;
   var adminStatus = document.getElementById("admin-status");
 
   // Firestore attempt docs are keyed by uid/examKey and use `examKey` /
@@ -630,7 +658,12 @@
       pct: raw.pct,
       topicStats: raw.topicStats || [],
       timestamp: raw.completedAt,
-      minutesTaken: raw.minutesTaken
+      minutesTaken: raw.minutesTaken,
+      // Only present once an admin has used the regrade feature below --
+      // absent on every attempt still showing the student's original
+      // self/auto-graded marks.
+      regradedBy: raw.regradedBy || null,
+      regradedAt: raw.regradedAt || null
     };
   }
 
@@ -1302,37 +1335,112 @@
   // options, not free-response mark schemes.
   // ------------------------------------------------------------
   var examDetailAttempt = null;
+  // Parallel array to examDetailAttempt.perQuestion -- examDetailEdits[i]
+  // is the (possibly admin-edited) earned mark currently showing for
+  // question i. Starts as a copy of each question's original earned mark
+  // every time openExamDetail() runs, including right after a successful
+  // save (see below), so "has this been changed since it was last saved"
+  // is always a simple comparison against examDetailAttempt itself.
+  var examDetailEdits = [];
+
+  function examDetailQuestionTotalMarks(){
+    return (examDetailAttempt.perQuestion || []).reduce(function(s, r){ return s + r.total; }, 0);
+  }
+
+  function examDetailHasChanges(){
+    if(!examDetailAttempt) return false;
+    return (examDetailAttempt.perQuestion || []).some(function(r, i){ return examDetailEdits[i] !== r.earned; });
+  }
+
+  // Recomputes and redraws the Score/Percentage/Time-taken cards from the
+  // CURRENT edits (not yet saved), the same way finishAttempt() in
+  // exam-practice.html derives them from perQuestion in the first place.
+  function renderExamDetailSummary(){
+    var totalEarned = examDetailEdits.reduce(function(s, v){ return s + v; }, 0);
+    var totalMarks = examDetailQuestionTotalMarks();
+    var pct = totalMarks ? Math.round((totalEarned / totalMarks) * 100) : 0;
+    var summaryRow = document.getElementById("examdetail-summary-row");
+    if(!summaryRow) return;
+    summaryRow.innerHTML =
+      "<div class=\"admin-card\"><div class=\"label\">Score</div><div class=\"value\">" + totalEarned + "/" + totalMarks + "</div></div>" +
+      "<div class=\"admin-card\"><div class=\"label\">Percentage</div><div class=\"value\">" + pct + "%</div></div>" +
+      (examDetailAttempt.minutesTaken ? "<div class=\"admin-card\"><div class=\"label\">Time taken</div><div class=\"value\">" + examDetailAttempt.minutesTaken + " min</div></div>" : "");
+  }
+
+  function updateExamDetailSaveState(){
+    document.getElementById("btn-examdetail-save").disabled = !examDetailHasChanges();
+  }
 
   function openExamDetail(attempt){
     examDetailAttempt = attempt;
+    examDetailEdits = (attempt.perQuestion || []).map(function(r){ return r.earned; });
     var container = document.getElementById("exampractice-detail");
     container.innerHTML = "";
 
+    var regradedNote = attempt.regradedBy
+      ? " · Regraded by " + escapeHtml(attempt.regradedBy) + (attempt.regradedAt ? " on " + fmtDateShort(attempt.regradedAt) : "")
+      : "";
     var summary = document.createElement("div");
     summary.className = "profile-summary";
     summary.innerHTML = "<h3>" + escapeHtml(attempt.name || "") + "</h3>" +
       "<span class=\"muted\">" + escapeHtml(attempt.className || "") + " · " + escapeHtml(paperLabel(attempt.paperKey)) +
-      (attempt.timestamp ? " · " + fmtDateShort(attempt.timestamp) : "") + "</span>";
+      (attempt.timestamp ? " · " + fmtDateShort(attempt.timestamp) : "") + regradedNote + "</span>";
     container.appendChild(summary);
 
-    var pct = typeof attempt.pct === "number" ? attempt.pct : (attempt.totalMarks ? Math.round((attempt.totalEarned / attempt.totalMarks) * 100) : 0);
     var summaryRow = document.createElement("div");
+    summaryRow.id = "examdetail-summary-row";
     summaryRow.className = "admin-summary-row";
-    summaryRow.innerHTML =
-      "<div class=\"admin-card\"><div class=\"label\">Score</div><div class=\"value\">" + attempt.totalEarned + "/" + attempt.totalMarks + "</div></div>" +
-      "<div class=\"admin-card\"><div class=\"label\">Percentage</div><div class=\"value\">" + pct + "%</div></div>" +
-      (attempt.minutesTaken ? "<div class=\"admin-card\"><div class=\"label\">Time taken</div><div class=\"value\">" + attempt.minutesTaken + " min</div></div>" : "");
     container.appendChild(summaryRow);
 
-    (attempt.perQuestion || []).forEach(function(r){
+    (attempt.perQuestion || []).forEach(function(r, i){
+      var original = r.earned;
       var row = document.createElement("div");
       row.className = "admin-question-row";
-      var qPct = r.total ? Math.round((r.earned / r.total) * 100) : 0;
+
       var top = document.createElement("div");
       top.className = "qtop";
-      top.innerHTML = "<span class=\"qtext\">" + escapeHtml(r.topic || "") + "</span>" +
-        "<span class=\"qpct " + (qPct >= 70 ? "high" : (qPct < 50 ? "low" : "")) + "\">" + r.earned + "/" + r.total + "</span>";
+
+      var qtext = document.createElement("span");
+      qtext.className = "qtext";
+      qtext.textContent = r.topic || "";
+      top.appendChild(qtext);
+
+      var markWrap = document.createElement("span");
+      markWrap.className = "qmark-edit";
+
+      var badge = document.createElement("span");
+      badge.className = "qpct";
+      markWrap.appendChild(badge);
+
+      var select = document.createElement("select");
+      select.setAttribute("aria-label", "Marks for " + (r.topic || "this question"));
+      for(var v = 0; v <= r.total; v++){
+        var opt = document.createElement("option");
+        opt.value = String(v);
+        opt.textContent = v + "/" + r.total;
+        select.appendChild(opt);
+      }
+      select.value = String(r.earned);
+      markWrap.appendChild(select);
+      top.appendChild(markWrap);
       row.appendChild(top);
+
+      function syncRow(earned){
+        var qPct = r.total ? Math.round((earned / r.total) * 100) : 0;
+        badge.textContent = earned + "/" + r.total;
+        badge.className = "qpct " + (qPct >= 70 ? "high" : (qPct < 50 ? "low" : ""));
+        row.classList.toggle("edited", earned !== original);
+      }
+      syncRow(r.earned);
+
+      select.addEventListener("change", function(){
+        var earned = +select.value;
+        examDetailEdits[i] = earned;
+        syncRow(earned);
+        renderExamDetailSummary();
+        updateExamDetailSaveState();
+      });
+
       if(r.answerText){
         var ans = document.createElement("p");
         ans.className = "qmiss wrap-cell";
@@ -1341,6 +1449,13 @@
       }
       container.appendChild(row);
     });
+
+    renderExamDetailSummary();
+
+    var saveStatusEl = document.getElementById("examdetail-save-status");
+    saveStatusEl.textContent = "";
+    saveStatusEl.classList.remove("warn");
+    updateExamDetailSaveState();
 
     var resetStatusEl = document.getElementById("examdetail-reset-status");
     resetStatusEl.textContent = "";
@@ -1351,6 +1466,86 @@
 
   document.getElementById("btn-back-examdetail").addEventListener("click", function(){
     showTab("examPractice");
+  });
+
+  // Lets the admin correct a question's awarded mark after re-reading the
+  // student's typed answer, then persist it -- the self/auto-graded mark
+  // isn't always right, and for single-attempt papers (comm9618_exam) the
+  // student has no way to flag or fix that themselves.
+  document.getElementById("btn-examdetail-save").addEventListener("click", function(){
+    if(!examAttemptsSupported() || typeof PQFirebase.regradeExamAttempt !== "function"){
+      document.getElementById("examdetail-save-status").textContent = "This browser has an older cached script -- try a hard refresh (Ctrl/Cmd+Shift+R), then try saving again.";
+      document.getElementById("examdetail-save-status").classList.add("warn");
+      return;
+    }
+    if(!examDetailAttempt || !examDetailAttempt.uid){
+      document.getElementById("examdetail-save-status").textContent = "Can't save this regrade — it's missing the student's account id.";
+      document.getElementById("examdetail-save-status").classList.add("warn");
+      return;
+    }
+    if(!examDetailHasChanges()) return;
+
+    var studentName = examDetailAttempt.name || "this student";
+    var paperKey = examDetailAttempt.paperKey;
+    var perQuestion = examDetailAttempt.perQuestion.map(function(r, i){
+      return { id: r.id, topic: r.topic, difficulty: r.difficulty, earned: examDetailEdits[i], total: r.total, answerText: r.answerText };
+    });
+    var totalEarned = perQuestion.reduce(function(s, r){ return s + r.earned; }, 0);
+    var totalMarks = perQuestion.reduce(function(s, r){ return s + r.total; }, 0);
+    var pct = totalMarks ? Math.round((totalEarned / totalMarks) * 100) : 0;
+    var topicStats = perQuestion.map(function(r){
+      return { topic: r.topic, difficulty: r.difficulty, earned: r.earned, total: r.total };
+    });
+
+    var confirmed = window.confirm(
+      "Save the updated marks for " + studentName + "'s \"" + paperLabel(paperKey) + "\" result?\n\n" +
+      "New score: " + totalEarned + "/" + totalMarks + " (" + pct + "%). This replaces their saved result."
+    );
+    if(!confirmed) return;
+
+    var saveBtn = document.getElementById("btn-examdetail-save");
+    var saveStatusEl = document.getElementById("examdetail-save-status");
+    saveBtn.disabled = true;
+    saveStatusEl.classList.remove("warn");
+    saveStatusEl.textContent = "Saving…";
+
+    PQFirebase.regradeExamAttempt(examDetailAttempt.uid, paperKey, {
+      perQuestion: perQuestion,
+      totalEarned: totalEarned,
+      totalMarks: totalMarks,
+      pct: pct,
+      topicStats: topicStats,
+      regradedBy: currentAdminEmail,
+      regradedAt: new Date().toISOString()
+    }).then(function(res){
+      if(res && res.ok === false) throw new Error(res.error || "Could not save.");
+      var updated = Object.assign({}, examDetailAttempt, {
+        perQuestion: perQuestion,
+        totalEarned: totalEarned,
+        totalMarks: totalMarks,
+        pct: pct,
+        topicStats: topicStats,
+        regradedBy: currentAdminEmail,
+        regradedAt: new Date().toISOString()
+      });
+      examAttempts = examAttempts.map(function(a){
+        return (a.uid === updated.uid && a.paperKey === updated.paperKey) ? updated : a;
+      });
+      renderAll();
+      adminStatus.classList.remove("warn");
+      adminStatus.textContent = "Updated " + studentName + "'s marks for " + paperLabel(paperKey) + ".";
+      // Re-render the detail view fresh off the saved values, so they
+      // become the new baseline (edited highlighting clears, Save
+      // disables again until something changes a second time).
+      openExamDetail(updated);
+      document.getElementById("examdetail-save-status").textContent = "Saved. New score: " + totalEarned + "/" + totalMarks + " (" + pct + "%).";
+    }).catch(function(err){
+      saveBtn.disabled = false;
+      saveStatusEl.classList.add("warn");
+      saveStatusEl.textContent = (err && err.code === "permission-denied")
+        ? "Firestore denied this request — this account isn't recognised as admin by firestore.rules (check isAdmin() there)."
+        : "Couldn't save these marks. Check your internet connection and try again.";
+    });
   });
 
   // Mirrors the MCQ "Reset this attempt" button above (same firestore.rules
