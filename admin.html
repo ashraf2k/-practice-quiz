@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261005c" />
+<link rel="stylesheet" href="shared.css?v=20261005d" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -150,6 +150,12 @@
     cursor: pointer;
   }
   .qmark-edit select:focus{ outline: 2px solid var(--accent); outline-offset: 1px; }
+  .qblock{ margin-top: 10px; }
+  .qblock-label{ font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 3px; }
+  .qblock-body{ font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .qblock-body.none{ color: var(--muted); font-style: italic; }
+  .qblock-body.qexplain{ margin-top: 6px; color: var(--muted); }
+  .qscheme{ margin: 0; padding-left: 18px; font-size: 13px; }
   .regrade-note{ font-size: 12px; color: var(--muted); margin: -4px 0 16px; }
 
   .admin-detail-back{ margin-bottom: 16px; }
@@ -388,14 +394,14 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261005c -- cache-busting; see the longer comment above this same
+<!-- ?v=20261005d -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261005c"></script>
-<script src="exam-data.js?v=20261005c"></script>
-<script src="report-lib.js?v=20261005c"></script>
-<script src="firebase-config.js?v=20261005c"></script>
-<script type="module" src="firebase-init.js?v=20261005c"></script>
+<script src="quiz-data.js?v=20261005d"></script>
+<script src="exam-data.js?v=20261005d"></script>
+<script src="report-lib.js?v=20261005d"></script>
+<script src="firebase-config.js?v=20261005d"></script>
+<script type="module" src="firebase-init.js?v=20261005d"></script>
 <script type="module">
 (function(){
 
@@ -1441,11 +1447,57 @@
         updateExamDetailSaveState();
       });
 
-      if(r.answerText){
-        var ans = document.createElement("p");
-        ans.className = "qmiss wrap-cell";
-        ans.textContent = "Student's answer: " + r.answerText;
-        row.appendChild(ans);
+      // Look the question up in the paper definition (exam-data.js) by id,
+      // so the teacher sees what was asked and the official mark scheme
+      // next to the student's answer -- none of that is stored on the
+      // attempt itself, only id/topic/marks/answerText are.
+      var paper = EXAM_PAPERS[attempt.paperKey];
+      var def = null;
+      if(paper){
+        (paper.questions || []).forEach(function(q){ if(q.id === r.id) def = q; });
+      }
+
+      function addBlock(label, cls){
+        var block = document.createElement("div");
+        block.className = "qblock " + (cls || "");
+        var lab = document.createElement("div");
+        lab.className = "qblock-label";
+        lab.textContent = label;
+        block.appendChild(lab);
+        row.appendChild(block);
+        return block;
+      }
+
+      if(def){
+        var qb = addBlock("Question");
+        var qp = document.createElement("div");
+        qp.className = "qblock-body";
+        qp.textContent = def.prompt;
+        qb.appendChild(qp);
+      }
+
+      var ab = addBlock("Student's answer");
+      var ap = document.createElement("div");
+      ap.className = "qblock-body" + (r.answerText ? "" : " none");
+      ap.textContent = r.answerText || "(no answer recorded)";
+      ab.appendChild(ap);
+
+      if(def && def.markPoints && def.markPoints.length){
+        var mb = addBlock("Mark scheme (" + def.marks + " mark" + (def.marks === 1 ? "" : "s") + ")");
+        var ul = document.createElement("ul");
+        ul.className = "qscheme";
+        def.markPoints.forEach(function(mp){
+          var li = document.createElement("li");
+          li.textContent = mp.text + " [" + mp.marks + " mark" + (mp.marks === 1 ? "" : "s") + "]";
+          ul.appendChild(li);
+        });
+        mb.appendChild(ul);
+        if(def.explanation){
+          var ex = document.createElement("div");
+          ex.className = "qblock-body qexplain";
+          ex.textContent = "Model answer: " + def.explanation;
+          mb.appendChild(ex);
+        }
       }
       container.appendChild(row);
     });
