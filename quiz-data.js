@@ -300,6 +300,71 @@
         { type:"tf", q:"In Jake's scenario, a video file on the external drive being significantly smaller than the original after a power outage indicates the file was successfully compressed.", options:["True","False"], correct:1, explain:"A significantly smaller file size after an interrupted transfer points to an incomplete write, not a successful compression — the file is missing data, not efficiently packed.", topic:"Data Migration", difficulty:"hard", hint:"A power outage mid-transfer doesn't compress anything on purpose — so what else would make a file end up smaller than it should be?" },
         { type:"tf", q:"When troubleshooting a failed Bluetooth file transfer between a phone and an office computer, physical obstacles and the distance between the devices can interrupt the connection.", options:["True","False"], correct:0, explain:"Bluetooth has a limited range and can be blocked or weakened by walls, furniture, and other obstacles between the two devices.", topic:"Bluetooth Troubleshooting", difficulty:"hard", hint:"Bluetooth is a short-range wireless signal — what two very physical, everyday factors would you expect to weaken any short-range wireless connection?" }
       ]
+    },
+
+    // Sprint 1.2: Collaboration -- 10AM. Built from the teacher's Sprint 1.2
+    // (Digital Collaboration Tools) question set: 20 MCQ + 10 True/False,
+    // each tagged easy / moderate / hard (the source's "intermediate").
+    // The source's mark scheme made every correct MCQ answer the SHORTEST
+    // option, which is as much of a giveaway as "longest is correct", so
+    // option wording/lengths were rebalanced and the correct position is
+    // varied; facts, accepted answers and question order are unchanged.
+    collab: {
+      key: "collab",
+      title: "Digital Collaboration Tools Practice",
+      subtitle: "Sprint 1.2 · Google Drive, Docs, Meet & Groups · DigiChamps Level 10",
+      classes: ["10AM1","10AM2","10AM3","10AM4","10AM5","10AM6"],
+      sectionA: { label: "Multiple choice", count: 20 },
+      sectionB: { label: "True / False", count: 10 },
+      hasGrade: false,
+      // Same opt-in live difficulty-adaptive ordering as troubleshoot above;
+      // attempts default to 2 (one attempt + one retake).
+      adaptive: true,
+      questions: [
+        // ---------------- SECTION A: Multiple Choice (20) ----------------
+        // Easy tier (7)
+        { type:"mcq", q:"What is the primary purpose of a collaboration tool?", options:["A utility that defragments disks and removes old system files","An application that lets several people work together on a task","A hardware part that boosts the bandwidth of a network router","A scanner that checks local storage for unverified extensions"], correct:1, explain:"A collaboration tool lets multiple users work on the same task at the same time, wherever they are.", topic:"Collaboration Tools", difficulty:"easy" },
+        { type:"mcq", q:"Which Google tool is mainly used for secure cloud storage and sharing files across devices?", options:["Google Meet","Google Groups","Google Calendar","Google Drive"], correct:3, explain:"Google Drive stores files in the cloud so they can be opened and shared from any device with a Google account.", topic:"Google Drive", difficulty:"easy" },
+        { type:"mcq", q:"In Google Drive, which button do you click first to upload a file from your computer?", options:["The \"Shared with me\" folder view","The \"New\" button at the top left","The \"Storage\" settings panel","The \"My Drive\" dropdown menu"], correct:1, explain:"The \"New\" button opens the menu that includes File upload and Folder upload.", topic:"Google Drive", difficulty:"easy" },
+        { type:"mcq", q:"Where do you click to reach the \"Share\" option for a selected file in Google Drive?", options:["The \"More actions\" (three dots) icon","The trash bin icon on the main toolbar","The storage bar in the bottom left corner","The account picture in the top right corner"], correct:0, explain:"Selecting a file and clicking the three-dot \"More actions\" icon reveals Share (along with other file actions).", topic:"Google Drive", difficulty:"easy" },
+        { type:"mcq", q:"Which Google Docs feature lets team members see each other's edits live as they happen?", options:["Version history logging tool","Offline document syncing mode","Automatic spelling checking","Real-time co-editing support"], correct:3, explain:"Real-time co-editing shows everyone's changes instantly in the same document, so there's no need to merge separate copies.", topic:"Google Docs", difficulty:"easy" },
+        { type:"mcq", q:"How is each collaborator's live cursor shown while co-editing a shared Google Doc?", options:["With a highlighted pattern behind every paragraph","With a coloured cursor unique to that member","With a flashing red border around the whole screen","With a pop-up sound whenever new text is added"], correct:1, explain:"Each collaborator gets their own coloured cursor (with their name), so you can see who is editing where.", topic:"Google Docs", difficulty:"easy" },
+        { type:"mcq", q:"Which Google tool is designed for online video meetings and virtual brainstorming sessions?", options:["Google Docs","Google Meet","Google Groups","Google Drive"], correct:1, explain:"Google Meet is the video-conferencing tool, used for meetings and virtual brainstorming.", topic:"Google Meet", difficulty:"easy" },
+
+        // Moderate tier (7)
+        { type:"mcq", q:"Which symbol must you type in a Google Docs comment to tag a collaborator directly?", options:["#","$","&","@"], correct:3, explain:"Typing @ followed by a name or email tags that person, and they are notified about the comment.", topic:"Google Docs", difficulty:"moderate" },
+        { type:"mcq", q:"Which menu path in Google Docs adds a bookmark to a selected location in a document?", options:["Format → Paragraph styles → Add navigation link","View → Show document outline panel","Insert → Bookmark from the menu bar","Tools → Line numbers and document structure"], correct:2, explain:"Select the location, then use Insert → Bookmark to add a bookmark you can link back to.", topic:"Google Docs", difficulty:"moderate" },
+        { type:"mcq", q:"How does Google Docs save your work while you edit online?", options:["Only when you choose File → Save from the menu","Every 30 minutes through a scheduled backup script","Automatically and continuously, as you type","Only when you close the browser window"], correct:2, explain:"Google Docs saves continuously as you type, so changes aren't lost if the page closes.", topic:"Google Docs", difficulty:"moderate" },
+        { type:"mcq", q:"Which icon do you click in Google Docs to see the history of edits made to a document?", options:["The Share button","The video call icon","The bookmark ribbon icon","The history icon"], correct:3, explain:"The history (clock) icon opens Version History, which lists earlier versions and who made them.", topic:"Google Docs", difficulty:"moderate" },
+        { type:"mcq", q:"Under General Access in Google Drive, which setting limits a file to the people you have invited?", options:["Anyone with the link","Public on the web, searchable","Restricted to invited users","Open to the whole domain"], correct:2, explain:"\"Restricted\" means only people who have been explicitly added can open the file.", topic:"Google Drive", difficulty:"moderate" },
+        { type:"mcq", q:"Which Google tool lets a team leader create a mailing group to contact many members at once?", options:["Google Groups mailing lists","Google Workspace Admin Console","Google Meet video calls","Google Chat direct messages"], correct:0, explain:"Google Groups creates a group email address so one message reaches every member.", topic:"Google Groups", difficulty:"moderate" },
+        { type:"mcq", q:"Which option in Google Meet lets you plan a meeting and send invitations through Google Calendar?", options:["Create an instant link to share right now","Create a meeting for later, copying the link","Start a broadcast to a Groups email list","Schedule in Google Calendar to invite guests"], correct:3, explain:"\"Schedule in Google Calendar\" creates a calendar event with the Meet link and emails the invitations.", topic:"Google Meet", difficulty:"moderate" },
+
+        // Hard tier (6) -- 2 marks each
+        { type:"mcq", q:"Rick's team of 8 members in different locations must write one project report without merging conflicting files sent by email. Which workflow solves this best?", options:["Email a separate Word attachment to each member every day","Upload a static PDF to Google Drive and ask members to re-download it","Create a Google Group for each paragraph and email drafts to the leader","Share one Google Doc so everyone co-edits it in real time"], correct:3, explain:"One shared Google Doc supports real-time co-editing, so there are no separate copies to merge by hand.", topic:"Google Docs", difficulty:"hard" },
+        { type:"mcq", q:"Ms. Alia wants to start a video meeting directly from inside a Google Doc. What should she do?", options:["Copy the document link into a new Google Groups email","Download the Doc as a PDF and attach it to a calendar event","Click the video icon in the top right corner of the Doc","Enable automatic video conferencing in Google Drive settings"], correct:2, explain:"The video (Meet) icon in the top right of Google Docs starts a call without leaving the document.", topic:"Google Meet", difficulty:"hard" },
+        { type:"mcq", q:"How can an editor in a Google Doc notify a teammate and assign them a specific task?", options:["Highlight the text in red and save a new Version History entry","Add a comment and tag the teammate using @email","Insert a bookmark and paste its link into Google Calendar","Set General Access to \"Restricted\" and click Done"], correct:1, explain:"Adding a comment and tagging the person with @ notifies them and lets you assign the task to them.", topic:"Google Docs", difficulty:"hard" },
+        { type:"mcq", q:"What happens when you choose \"Schedule in Google Calendar\" while creating a new Google Meet meeting?", options:["Invitations are emailed and the link is added to guests' calendars","A live camera feed opens immediately with a temporary link on screen","Access is restricted so only Google Group owners can join","The meeting transcript is saved automatically to a Google Drive folder"], correct:0, explain:"The meeting is created as a calendar event: guests receive email invitations and the Meet link appears on their calendars.", topic:"Google Meet", difficulty:"hard" },
+        { type:"mcq", q:"Which information is required in the first step of creating a new Google Group?", options:["Members' phone numbers, card details and home addresses","Drive folder permissions, bookmark links and billing details","The group name, group email address and group description","A Meet video PIN, the scheduled time and the timezone"], correct:2, explain:"The first step asks for a group name, a group email address and a short description.", topic:"Google Groups", difficulty:"hard" },
+        { type:"mcq", q:"In Google Docs Version History, what key information is shown alongside each saved version?", options:["The IP addresses and device MAC numbers of all editors","The bandwidth used and compression ratios achieved while editing","The version and the names of the contributors who made it","The Google Meet participants who viewed the file during calls"], correct:2, explain:"Version History lists each saved version with who contributed, so you can review or restore earlier drafts.", topic:"Google Docs", difficulty:"hard" },
+
+        // ---------------- SECTION B: True / False (10) ----------------
+        // Easy tier (3)
+        { type:"tf", q:"Google Drive lets users open shared files from any device by logging in to their Google account.", options:["True","False"], correct:0, explain:"Files in Google Drive live in the cloud, so any device signed in to your account can reach them.", topic:"Google Drive", difficulty:"easy" },
+        { type:"tf", q:"In Google Docs, comments can only be added to plain text, not to images.", options:["True","False"], correct:1, explain:"Comments can be added to both text and images in Google Docs.", topic:"Google Docs", difficulty:"easy" },
+        { type:"tf", q:"Google Meet lets you start an instant video meeting or schedule one for later.", options:["True","False"], correct:0, explain:"Meet supports both an instant meeting link and scheduling ahead through Google Calendar.", topic:"Google Meet", difficulty:"easy" },
+
+        // Moderate tier (4)
+        { type:"tf", q:"In Google Drive, choosing \"Anyone with the link\" under General Access lets anyone who receives the link open the file.", options:["True","False"], correct:0, explain:"\"Anyone with the link\" means the link alone is enough to open the file, with no invitation needed.", topic:"Google Drive", difficulty:"moderate" },
+        { type:"tf", q:"Adding a bookmark in Google Docs shows a blue ribbon icon next to the selected text.", options:["True","False"], correct:0, explain:"A bookmark appears as a small blue ribbon beside the chosen location.", topic:"Google Docs", difficulty:"moderate" },
+        { type:"tf", q:"In Google Docs Version History, past edits can no longer be viewed once the file has been closed.", options:["True","False"], correct:1, explain:"Version History keeps earlier drafts and contributor names so they can be viewed again later.", topic:"Google Docs", difficulty:"moderate" },
+        { type:"tf", q:"When you tag a teammate with @ in a Google Docs comment, an assignment notification can be sent to them.", options:["True","False"], correct:0, explain:"Tagging with @ notifies the person, and the comment can be assigned to them as a task.", topic:"Google Docs", difficulty:"moderate" },
+
+        // Hard tier (3) -- 2 marks each
+        { type:"tf", q:"Creating a Google Group requires every member to hold a paid enterprise licence before they can be added.", options:["True","False"], correct:1, explain:"Google Groups can be created and shared using standard Google accounts, with no paid enterprise licence required for members.", topic:"Google Groups", difficulty:"hard" },
+        { type:"tf", q:"Starting a Google Meet call from inside a Google Doc lets you share both the call link and the document for collaboration.", options:["True","False"], correct:0, explain:"Calling from within the Doc lets the team talk and edit the same document together.", topic:"Google Meet", difficulty:"hard" },
+        { type:"tf", q:"If four team members edit a Google Doc at the same time, all their edits merge into one live document instead of creating four separate files.", options:["True","False"], correct:0, explain:"Real-time co-editing keeps one live document, which avoids the version conflicts of emailing separate copies.", topic:"Google Docs", difficulty:"hard" }
+      ]
     }
   };
 
@@ -309,6 +374,7 @@
   var EXAM_CHOICES_BY_CLASS = [
     { test: /^10am/i, choices: [
       { key: "troubleshoot", label: "Sprint 1.1: Systematic Troubleshooting" },
+      { key: "collab", label: "Sprint 1.2: Collaboration" },
       { key: "dp", label: "Sprint 1.4: Data Privacy" }
     ] },
     { test: /^10br/i, choices: [
