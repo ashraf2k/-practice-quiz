@@ -268,22 +268,30 @@
 
   .topics{
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
     margin-bottom: 30px;
   }
 
-  @media (max-width: 480px){
+  @media (max-width: 560px){
     .topics{ grid-template-columns: 1fr; }
   }
 
+  /* Compact horizontal tile: icon | badge + title + one-line blurb | arrow */
   .topic-card{
-    display: block;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 18px;
+    grid-template-areas:
+      "icon badge go"
+      "icon title go"
+      "icon sub   go";
+    column-gap: 12px;
+    align-items: center;
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 20px 18px;
-    box-shadow: var(--shadow);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: none;
     text-decoration: none;
     color: inherit;
     cursor: pointer;
@@ -291,10 +299,10 @@
   }
 
   .topic-card:hover{
-    transform: translateY(-3px);
-    box-shadow: 0 18px 34px -16px rgba(22,33,59,0.24);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -14px rgba(22,33,59,0.28);
   }
-  .topic-card:active{ transform: translateY(-1px); }
+  .topic-card:active{ transform: translateY(0); }
 
   .topic-card:focus-visible{
     outline: 2px solid var(--accent-dark);
@@ -302,13 +310,14 @@
   }
 
   .topic-card .icon{
+    grid-area: icon;
+    align-self: start;
     width: 34px;
     height: 34px;
     border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 12px;
   }
   .topic-card.c1 .icon{ background: var(--card-1-bg); color: var(--card-1); }
   .topic-card.c2 .icon{ background: var(--card-2-bg); color: var(--card-2); }
@@ -316,44 +325,56 @@
   .topic-card.c4 .icon{ background: var(--card-4-bg); color: var(--card-4); }
 
   .topic-card .badge{
-    display: inline-block;
-    font-size: 11px;
+    grid-area: badge;
+    justify-self: start;
+    font-size: 10px;
     font-weight: 700;
-    border-radius: 999px;
-    padding: 3px 9px;
-    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    margin-bottom: 2px;
   }
-  .topic-card.c1 .badge{ background: var(--card-1-bg); color: var(--card-1); border: 1px solid var(--card-1-line); }
-  .topic-card.c2 .badge{ background: var(--card-2-bg); color: var(--card-2); border: 1px solid var(--card-2-line); }
-  .topic-card.c3 .badge{ background: var(--card-3-bg); color: var(--card-3); border: 1px solid var(--card-3-line); }
-  .topic-card.c4 .badge{ background: var(--card-4-bg); color: var(--card-4); border: 1px solid var(--card-4-line); }
+  .topic-card.c1 .badge{ color: var(--card-1); }
+  .topic-card.c2 .badge{ color: var(--card-2); }
+  .topic-card.c3 .badge{ color: var(--card-3); }
+  .topic-card.c4 .badge{ color: var(--card-4); }
 
   .topic-card h3{
-    font-size: 15px;
-    margin: 0 0 6px;
+    grid-area: title;
+    font-size: 14px;
+    line-height: 1.3;
+    margin: 0;
     letter-spacing: -0.01em;
   }
 
   .topic-card p{
-    font-size: 13px;
-    line-height: 1.5;
+    grid-area: sub;
+    font-size: 12px;
+    line-height: 1.4;
     color: var(--muted);
-    margin: 0;
+    margin: 2px 0 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
+  /* The "Start practice" label collapses to just its arrow */
   .topic-card .go{
+    grid-area: go;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    margin-top: 14px;
-    font-size: 12.5px;
-    font-weight: 700;
+    justify-content: center;
+    font-size: 0;
+    opacity: 0.55;
+    transition: opacity 0.15s ease;
   }
   .topic-card.c1 .go{ color: var(--card-1); }
   .topic-card.c2 .go{ color: var(--card-2); }
   .topic-card.c3 .go{ color: var(--card-3); }
   .topic-card.c4 .go{ color: var(--card-4); }
   .topic-card .go svg{ transition: transform 0.15s ease; }
+  .topic-card:hover .go{ opacity: 1; }
   .topic-card:hover .go svg{ transform: translateX(3px); }
 
   .topics-empty{
@@ -416,10 +437,10 @@
 
 </div>
 
-<!-- ?v=20261005h -- cache-busting; see the longer comment above this same
+<!-- ?v=20261005i -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever this
      file changes. -->
-<script src="quiz-data.js?v=20261005h"></script>
+<script src="quiz-data.js?v=20261005i"></script>
 <script>
 (function(){
   // Curated heading/colour/icon per exam key, so the cards look
