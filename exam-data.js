@@ -271,6 +271,414 @@
       ]
     },
 
+    // Source: the teacher-supplied "Cambridge IGCSE Computer Science (0478)
+    // -- Topic 2: Data Transmission" examination, Section 3 (the ten
+    // Paper 1 exam-style questions). Each source question has been split
+    // into its lettered parts so the adaptive engine (see exam-practice.html)
+    // has a pool of small, individually graded questions across all three
+    // tiers, exactly like datarep_exam above. Every question's marks are
+    // the verified total of its own markPoints. Deliberate departures from
+    // the source text, where the source was wrong or not gradeable:
+    //   - the source's parity-block grid (its Q5) did not have a single bad
+    //     row AND column, so no bit could be located from it; the grid below
+    //     is rebuilt (odd parity, one flipped bit at Byte 3 / Bit 4, which is
+    //     the source's own stated location) and its correct value is 1.
+    //   - the "draw lines to match" question can't be drawn in a text box,
+    //     so it is asked as "describe each term".
+    //   - the four-byte parity table is asked as "which byte has an error
+    //     and why", as a list of Yes/No can't be keyword-graded reliably.
+    datatrans_exam: {
+      key: "datatrans_exam",
+      title: "Topic 2: Data Transmission — IGCSE exam style",
+      subtitle: "23 exam-style questions · Packets, serial/parallel & USB, error detection, encryption · 60 marks total",
+      classes: ["10BR1","10BR2","10BR3"],
+      totalMarks: 60,
+      questions: [
+
+        // ============== EASY TIER ==============
+        {
+          id: "Q1", marks: 3, difficulty: "easy",
+          topic: "Data Packet Structure",
+          prompt: "Data is transmitted across the Internet using packet switching. A data packet is divided into three distinct sections. State the name of each of the three sections.",
+          markPoints: [
+            { text: "Packet header", marks: 1, match: { type: "keywords", groups: [["header"]], needCount: 1 } },
+            { text: "Payload", marks: 1, match: { type: "keywords", groups: [["payload","body"]], needCount: 1 } },
+            { text: "Packet trailer", marks: 1, match: { type: "keywords", groups: [["trailer","footer"]], needCount: 1 } }
+          ],
+          explanation: "Every packet has a header at the front, the payload (the actual data being sent) in the middle, and a trailer at the end."
+        },
+        {
+          id: "Q2", marks: 3, difficulty: "easy",
+          topic: "Data Packet Structure",
+          prompt: "A data packet has a header, a payload and a trailer. For EACH of the three sections, identify one item of data that is stored in it.",
+          markPoints: [
+            { text: "Header: destination IP address // sender's/originator's IP address // packet sequence number // packet size // hop count / TTL", marks: 1, match: { type: "keywords", groups: [["destination","ip address","sequence","packet number","packet size","originator","sender","ttl","time to live","hop"]], needCount: 1 } },
+            { text: "Payload: the actual data / body of the file being sent", marks: 1, match: { type: "keywords", groups: [["actual data","the data","data being sent","file being sent","body","content","part of the file","part of the message"]], needCount: 1 } },
+            { text: "Trailer: CRC // checksum // error-checking bits // end-of-packet marker", marks: 1, match: { type: "keywords", groups: [["crc","cyclic","checksum","error check","error-check","error detect","end of packet","end-of-packet","end marker"]], needCount: 1 } }
+          ],
+          explanation: "Header: routing information such as the destination IP address, the originator's IP address, the packet sequence number and packet size. Payload: the actual data (part of the file) being sent. Trailer: error-checking data such as a CRC or checksum, and an end-of-packet marker."
+        },
+        {
+          id: "Q3", marks: 4, difficulty: "easy",
+          topic: "Serial, Parallel & Duplex Transmission",
+          prompt: "Describe each of the following data transmission terms.\n(a) Serial transmission\n(b) Parallel transmission\n(c) Simplex transmission\n(d) Full-duplex transmission",
+          markPoints: [
+            { text: "(a) Serial: data transmitted one bit at a time down a single wire / channel", marks: 1, match: { type: "keywords", groups: [["one bit at a time","1 bit at a time","single wire","one wire","single channel","one channel","bit by bit","one bit"]], needCount: 1 } },
+            { text: "(b) Parallel: several bits transmitted at once down multiple wires", marks: 1, match: { type: "keywords", groups: [["multiple wires","several wires","many wires","multiple bits","several bits","many bits","more than one bit","multiple channels","several channels","8 bits at"]], needCount: 1 } },
+            { text: "(c) Simplex: data transmitted in one direction only", marks: 1, match: { type: "keywords", groups: [["one direction","one way","one-way","single direction","only one direction"]], needCount: 1 } },
+            { text: "(d) Full-duplex: data transmitted in both directions simultaneously", marks: 1, match: { type: "keywords", groups: [["both directions","two directions","both ways","two-way","two way","at the same time","simultaneous"]], needCount: 1 } }
+          ],
+          explanation: "Serial sends one bit at a time down a single wire/channel. Parallel sends several bits at once down multiple wires. Simplex is one direction only (e.g. computer to printer). Full-duplex is both directions at the same time (e.g. a telephone call or fibre broadband)."
+        },
+        {
+          id: "Q4", marks: 3, difficulty: "easy",
+          topic: "USB Interface",
+          prompt: "A computer keyboard and mouse are connected to a desktop computer using USB cables. State three benefits of using a USB interface to connect peripheral devices to a computer.",
+          markPoints: [
+            {
+              text: "Any three of: device automatically detected / drivers installed (plug and play); standardised / universal connection; connector cannot be inserted the wrong way / backwards compatible; supplies power to the device; supports multiple high-speed data transfer rates; automatic re-transmission if an error is detected",
+              marks: 3,
+              match: {
+                type: "keywords",
+                groups: [
+                  ["automatically detected","automatically recognised","automatically recognized","plug and play","plug-and-play","drivers installed","driver installed","auto detect"],
+                  ["standard","universal","same connector","same port","common connection","widely used"],
+                  ["wrong way","either way","any way up","backwards compatible","backward compatible","reversible","cannot be inserted incorrectly"],
+                  ["power","charge","charging"],
+                  ["high-speed","high speed","data transfer rate","transfer rates","speeds"],
+                  ["re-transmi","retransmi","resend","re-send","error detect"]
+                ],
+                needCount: 3,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "Any three of: the device is automatically detected and its drivers installed (plug and play); USB is a standard/universal connection; the connector cannot easily be inserted incorrectly and newer ports are backwards compatible; USB can supply power to the device; it supports several high-speed data transfer rates; the USB protocol automatically requests re-transmission if an error is detected. (Writing just “it is fast” earns no marks.)"
+        },
+        {
+          id: "Q5", marks: 1, difficulty: "easy",
+          topic: "USB Interface",
+          prompt: "State one drawback of using a USB connection.",
+          markPoints: [
+            { text: "Any one of: maximum cable length is limited (e.g. about 5 m) without hubs; slower than internal connections / fibre optics; very early USB standards may not be supported by modern systems", marks: 1, match: { type: "keywords", groups: [["length","distance","5 m","5m","metres","meters","short"],["slower","slow","internal","fibre","fiber","pcie"],["early","old","older","usb 1","not supported","compatib"]], needCount: 1 } }
+          ],
+          explanation: "Drawbacks include: the maximum cable length is restricted (about 5 metres) without hubs; the data transfer speed is slower than internal bus connections or fibre optics; and very early USB standards may not be supported by modern systems."
+        },
+        {
+          id: "Q6", marks: 2, difficulty: "easy",
+          topic: "Error Detection in Data Transmission",
+          prompt: "An Automatic Repeat Request (ARQ) system is used to control errors during data transmission. Identify two operational features used by an ARQ system.",
+          markPoints: [
+            {
+              text: "Any two of: positive acknowledgement (ACK); negative acknowledgement (NACK); timeout",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["positive acknowledg","ack","acknowledg"],["negative acknowledg","nack","error signal"],["timeout","time out","timer","time-out","clock"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "ARQ uses a positive acknowledgement (ACK) to say a packet arrived correctly, a negative acknowledgement (NACK) to say it arrived with an error, and a timeout so the sender re-sends if no acknowledgement arrives in time."
+        },
+        {
+          id: "Q7", marks: 2, difficulty: "easy",
+          topic: "Check Digits",
+          prompt: "A barcode on a supermarket product includes a check digit. Identify two types of human error that a check digit is designed to detect when a code is entered manually or scanned.",
+          markPoints: [
+            {
+              text: "Any two of: incorrect digit entered; transposition (two adjacent digits swapped); omitted digit; extra digit; phonetic error (e.g. 13 for 30)",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["incorrect digit","wrong digit","wrong number","incorrect number","mistyped","typing error","typo"],["transpos","swapped","swap","wrong order","switched","adjacent digits"],["omit","missing","left out","forgot","leave out","too few"],["extra digit","additional digit","added digit","too many","extra number"],["phonetic","sounds like","sound"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "A check digit catches common human data-entry errors: an incorrect digit (e.g. 5 typed instead of 8), a transposition error (e.g. 52 typed instead of 25), an omitted digit, an extra digit, or a phonetic error (e.g. 13 entered instead of 30)."
+        },
+        {
+          id: "Q8", marks: 2, difficulty: "easy",
+          topic: "Encryption Concepts",
+          prompt: "Data sent across public networks can be encrypted to keep it confidential. State the meaning of the terms plaintext and ciphertext.",
+          markPoints: [
+            { text: "Plaintext: the original, unencrypted data/text that is human-readable", marks: 1, match: { type: "keywords", groups: [["original","unencrypted","not encrypted","before encrypt","readable","normal text","un-encrypted"]], needCount: 1 } },
+            { text: "Ciphertext: encrypted / scrambled data that is unreadable without the decryption key", marks: 1, match: { type: "keywords", groups: [["encrypted","scrambled","unreadable","not readable","after encrypt","cannot be read","can't be read","meaningless","coded"]], needCount: 1 } }
+          ],
+          explanation: "Plaintext is the original, readable data before encryption. Ciphertext is the scrambled, unreadable data produced by encryption, which only someone with the correct key can turn back into plaintext."
+        },
+        {
+          id: "Q9", marks: 1, difficulty: "easy",
+          topic: "Encryption Concepts",
+          prompt: "State the major security weakness of symmetric encryption when data is sent across an insecure network.",
+          markPoints: [
+            { text: "The single secret key has to be shared with the recipient (key distribution problem), so it could be intercepted", marks: 1, match: { type: "keywords", groups: [["key distribution","share the key","shared","send the key","sent the key","transmit the key","transmitted","intercept","same key","one key","secret key"]], needCount: 1 } }
+          ],
+          explanation: "Symmetric encryption uses one secret key for both encrypting and decrypting, so that key must be passed to the recipient. If it is sent over an insecure channel it can be intercepted, and then anyone can decrypt the data (the key distribution problem)."
+        },
+
+        // ============== INTERMEDIATE TIER ==============
+        {
+          id: "Q10", marks: 4, difficulty: "hard",
+          topic: "Packet Switching",
+          prompt: "Describe the process of packet switching, from the moment data is prepared for transmission on the sending device until it is put back together on the receiving device.",
+          markPoints: [
+            {
+              text: "Any four of: data is broken into small packets; each packet is given a header with the destination IP address and packet number; packets are sent independently; routers inspect the destination IP address of each packet; routers choose the most efficient route for each packet; packets may take different routes and arrive out of order; the receiver uses the packet numbers to reorder them; missing/corrupted packets are re-requested (ARQ)",
+              marks: 4,
+              match: {
+                type: "keywords",
+                groups: [
+                  ["broken","split","divided","divide","chopped","small packets","into packets"],
+                  ["header","destination","ip address","packet number","sequence number"],
+                  ["independent","separately","individually","each packet is sent","sent on their own"],
+                  ["router","node","inspect","reads the","looks at the"],
+                  ["best route","most efficient","fastest route","shortest route","optimal","efficient route","quickest"],
+                  ["different route","different path","different ways","out of order","out of sequence","arrive in a different"],
+                  ["reorder","re-order","reassembl","re-assembl","put back together","correct order","reconstruct","rebuilt","sequence number","packet number"],
+                  ["re-transmi","retransmi","resend","re-send","request","arq","missing","lost"]
+                ],
+                needCount: 4,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "The data is split into packets. Each packet gets a header (destination IP address, packet number). The packets are sent independently; routers read each packet's destination address and pick the most efficient route, so packets may take different routes and arrive out of order. The receiving device uses the packet numbers to reorder them into the original data, and asks for any missing or corrupted packet to be re-sent."
+        },
+        {
+          id: "Q11", marks: 3, difficulty: "intermediate",
+          topic: "Serial, Parallel & Duplex Transmission",
+          prompt: "A smart security camera sends HD video to a central server 50 metres away.\nState whether serial or parallel transmission is more suitable, and justify your choice with two reasons.",
+          markPoints: [
+            { text: "Serial transmission chosen", marks: 1, match: { type: "keywords", groups: [["serial"]], needCount: 1 } },
+            {
+              text: "Any two of: less signal attenuation / interference over a long distance; less risk of bit skew (bits arriving out of alignment); less risk of crosstalk between wires; cheaper cable / fewer wires",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["attenuation","interference","long distance","distance","signal loss"],["skew","out of alignment","out of sync","arrive at different","not arrive at the same"],["crosstalk","cross talk","cross-talk"],["cheaper","fewer wires","less wires","one wire","single wire","less expensive","cost"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "Serial. Over 50 m, serial suffers less signal attenuation/interference, there is no risk of bit skew (bits arriving out of alignment) and little crosstalk because there is only one data wire, and the cable is cheaper because it needs fewer wires."
+        },
+        {
+          id: "Q12", marks: 2, difficulty: "intermediate",
+          topic: "USB Interface",
+          prompt: "Explain why USB-C is considered an improvement over older USB-A connectors.",
+          markPoints: [
+            {
+              text: "Any two of: symmetrical / reversible design (can be plugged in either way up); higher data transfer rates; higher power delivery (e.g. up to 100 W); smaller / thinner connector",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["either way","both ways","any way up","reversible","symmetrical","symmetric","wrong way","upside down"],["faster","higher data","transfer rate","higher speed","gbps","speed"],["power","100w","100 w","charge laptop","charging"],["smaller","thinner","compact","slim","footprint"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "USB-C is reversible (symmetrical, so it plugs in either way up), supports much higher data transfer rates (about 10–40 Gbps), can deliver more power (up to 100 W, enough for laptops), and has a smaller, thinner connector suited to modern thin devices."
+        },
+        {
+          id: "Q13", marks: 3, difficulty: "intermediate",
+          topic: "Parity Checks",
+          prompt: "An even parity check is used during data transmission. A device receives these four bytes:\n  1 0 1 1 0 1 0 0\n  0 1 1 1 1 1 0 1\n  1 1 1 0 0 0 0 0\n  0 0 0 0 0 0 0 0\n(a) Identify the byte in which an error has been detected. [1 mark]\n(b) Explain how you know. [2 marks]",
+          markPoints: [
+            { text: "(a) The third byte, 1 1 1 0 0 0 0 0", marks: 1, match: { type: "keywords", groups: [["11100000","1 1 1 0 0 0 0 0","third","3rd","byte 3","number 3","c)"]], needCount: 1 } },
+            { text: "(b) It contains three 1s — an odd number of 1s", marks: 1, match: { type: "keywords", groups: [["three 1","3 1","three ones","3 ones","odd number","odd amount","odd count","3 ones","three"]], needCount: 1 } },
+            { text: "(b) Even parity requires an even number of 1s in every byte (the other three bytes have 4, 6 and 0 ones)", marks: 1, match: { type: "keywords", groups: [["even number","even amount","even count","should be even","must be even","needs to be even","has to be even","other bytes","others","4, 6"]], needCount: 1 } }
+          ],
+          explanation: "With even parity every byte must contain an even number of 1s. Byte 1 has four 1s, byte 2 has six, byte 4 has none — all even, so no error. Byte 3 (1 1 1 0 0 0 0 0) has three 1s, which is odd, so an error has been detected."
+        },
+        {
+          id: "Q14", marks: 2, difficulty: "intermediate",
+          topic: "Parity Checks",
+          prompt: "Explain why a standard parity check on a transmitted byte may fail to detect an error.",
+          markPoints: [
+            {
+              text: "Any two of: an even number of bits were changed (e.g. 2 bits flipped); a transposition occurred (bits swapped position); the number of 1s still matches the expected parity, so the byte looks valid despite being corrupted",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["even number","two bits","2 bits","2 bit","two bit","multiple bits","more than one bit","several bits","flipped"],["transpos","swapped","swap","changed places","switched position","moved"],["still","same number","remains","same parity","looks valid","appears correct","matches","still even","still odd","same total"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "Parity only counts the 1s. If an even number of bits flip (e.g. two), or bits swap places, the total number of 1s still has the expected parity, so the corrupted byte passes the check."
+        },
+        {
+          id: "Q15", marks: 2, difficulty: "intermediate",
+          topic: "Parity Checks",
+          prompt: "A parity block check is used. Describe how the receiving system locates a corrupted bit.",
+          markPoints: [
+            { text: "Parity is checked for every row (byte) and for every column (bit position)", marks: 1, match: { type: "keywords", groups: [["row","byte"],["column","bit position","vertical"]], needCount: 2 } },
+            { text: "The corrupted bit is at the intersection of the row and the column that have the wrong parity", marks: 1, match: { type: "keywords", groups: [["intersection","where they meet","where the row and column","cross","meet","both"]], needCount: 1 } }
+          ],
+          explanation: "The receiver recalculates the parity of each row (byte) and each column (bit position). The one row and the one column that fail the check cross at the corrupted bit — its intersection."
+        },
+        {
+          id: "Q16", marks: 3, difficulty: "intermediate",
+          topic: "Checksums",
+          prompt: "Describe how a checksum is used to detect errors during data transmission.",
+          markPoints: [
+            {
+              text: "Any three of: the sender calculates a checksum from the data using an agreed algorithm; the checksum is sent with the data; the receiver recalculates it from the received data using the same algorithm; the two checksums are compared; if they match there is no error, if they differ an error has been detected",
+              marks: 3,
+              match: {
+                type: "keywords",
+                groups: [
+                  ["sender calculates","calculated by the sender","calculated from the data","calculate a checksum","calculated using","algorithm","calculation"],
+                  ["sent with","sent along","transmitted with","transmitted along","trailer","together with","attached","included with"],
+                  ["receiver","receiving device","recalculat","re-calculat","calculated again","calculates it again","calculates again"],
+                  ["compare","comparison","match","same"],
+                  ["different","do not match","don't match","doesn't match","does not match","not the same","error is detected","error detected"]
+                ],
+                needCount: 3,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "The sender calculates a checksum from the block of data using an agreed algorithm and sends it with the data (in the trailer). The receiver recalculates the checksum from the data it received and compares it with the one received. If they match, no error is assumed; if they differ, an error has been detected."
+        },
+        {
+          id: "Q17", marks: 2, difficulty: "intermediate",
+          topic: "Echo Check",
+          prompt: "Explain why an echo check is not a completely reliable method of error detection.",
+          markPoints: [
+            {
+              text: "Any two of: if the copies differ it is impossible to tell whether the error happened on the way there or on the way back; if the error was only on the return trip the data was received correctly, so re-sending is unnecessary; every block is transmitted twice (double the bandwidth)",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["way back","return","on the way there","original transmission","impossible to know","cannot tell","can't tell","not know where","don't know where","which"],["unnecessary","already correct","received correctly","received correct","correct data","needlessly","not needed"],["twice","double","bandwidth","two times","2 times","more data"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "In an echo check the receiver sends the data back and the sender compares it with the original. If they differ, the sender cannot tell whether the error occurred on the way there or on the way back. If it only happened on the return trip, the original data was fine and re-sending is wasted effort. Every block also has to be transmitted twice, using double the bandwidth."
+        },
+        {
+          id: "Q18", marks: 2, difficulty: "intermediate",
+          topic: "Check Digits",
+          prompt: "Explain the difference between error detection during data transmission and a check digit check.",
+          markPoints: [
+            { text: "Transmission error detection (parity, checksum, etc.) finds bits corrupted by noise / interference while data travels across a network", marks: 1, match: { type: "keywords", groups: [["transmi","network","interference","noise","corrupt","bits","travel"]], needCount: 1 } },
+            { text: "A check digit is a validation check that finds human errors when data is entered manually / scanned", marks: 1, match: { type: "keywords", groups: [["validation","validate","human","manual","typed","typing","entered","entry","scan"]], needCount: 1 } }
+          ],
+          explanation: "Transmission error detection (parity, checksum, echo check, ARQ) checks whether bits were corrupted by interference while data travelled over a network. A check digit is a validation method that detects human mistakes made when data is entered manually or scanned — it is not used to check network transmission."
+        },
+        {
+          id: "Q19", marks: 3, difficulty: "intermediate",
+          topic: "Encryption Concepts",
+          prompt: "Describe how symmetric encryption operates.",
+          markPoints: [
+            {
+              text: "Any three of: plaintext is put through an encryption algorithm / cipher; one secret key encrypts the plaintext into ciphertext; the ciphertext is transmitted; the receiver uses the same secret key to decrypt it back into plaintext",
+              marks: 3,
+              match: {
+                type: "keywords",
+                groups: [["algorithm","cipher","plaintext","plain text"],["one key","single key","secret key","same key","a key","one secret"],["transmitted","sent","send","travels","across the network","ciphertext"],["decrypt","same key","same secret key","back into plaintext","turn it back","unscramble"]],
+                needCount: 3,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "The plaintext is passed through an encryption algorithm using a single secret key to produce ciphertext. The ciphertext is sent across the network, and the receiver uses the same secret key to decrypt it back into plaintext."
+        },
+        {
+          id: "Q20", marks: 2, difficulty: "intermediate",
+          topic: "Asymmetric Encryption",
+          prompt: "An e-commerce website uses asymmetric encryption to protect customers' payment details. State two reasons why asymmetric encryption is more secure than symmetric encryption for online shopping.",
+          markPoints: [
+            {
+              text: "Any two of: no secret key has to be sent across the network (no key distribution risk); the private key is never shared and stays on the server; an intercepted public key cannot be used to decrypt messages",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["no secret key","not sent","not transmitted","no key needs","doesn't need to be sent","does not need to be sent","key distribution","not shared across","no need to share","never sent"],["private key is never","never shared","kept secret","stays on the server","only the server","only the website","not shared","secret on the server"],["public key cannot","public key can't","intercepted public","public key is useless","cannot be used to decrypt","can't be used to decrypt","public key can only encrypt","only encrypt"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "With asymmetric encryption no secret key has to travel across the network, so there is no key-distribution risk; the private key is never shared and stays on the server; and an intercepted public key cannot be used to decrypt anything — it can only encrypt."
+        },
+
+        // ============== HARD TIER ==============
+        {
+          id: "Q21", marks: 3, difficulty: "hard",
+          topic: "Parity Block Check",
+          prompt: "A block of data was transmitted using odd parity, with a parity block check. Rows 1–4 are the data bytes (Parity Bit first); the last row is the parity byte used for the columns. One bit was corrupted during transmission.\n\n                  Parity   Bit2  Bit3  Bit4  Bit5  Bit6  Bit7  Bit8\nByte 1:            0         1       1       0       1       0       0       0\nByte 2:            1         0       1       1       0       1       1       0\nByte 3:            1         1       0       0       0       1       1       0\nByte 4:            1         1       0       1       0       0       1       1\nParity Byte:     0         0       1       0       0       1       0       0\n\n(a) Identify the Byte number and the Bit number of the corrupted bit. [2 marks]\n(b) State the correct value that the corrupted bit should be changed to. [1 mark]",
+          markPoints: [
+            { text: "(a) Byte 3", marks: 1, match: { type: "keywords", groups: [["byte 3","byte3","third byte","3rd byte","byte three"]], needCount: 1 } },
+            { text: "(a) Bit 4", marks: 1, match: { type: "keywords", groups: [["bit 4","bit4","fourth bit","4th bit","bit four"]], needCount: 1 } },
+            { text: "(b) 1", marks: 1, match: { type: "numeric", values: ["1"] } }
+          ],
+          explanation: "Check every row and column for ODD parity. Byte 3 (1 1 0 0 0 1 1 0) has four 1s — even, so wrong. Column Bit 4 (0, 1, 0, 1 and parity byte 0) has two 1s — even, so wrong. All other rows and columns are odd. The faulty bit is where Byte 3 and Bit 4 meet. It reads 0 but must be 1 to make both that row and that column odd again."
+        },
+        {
+          id: "Q22", marks: 4, difficulty: "hard",
+          topic: "ARQ (Automatic Repeat Request)",
+          prompt: "A mobile phone downloads a firmware update across a wireless network, using ARQ for error control. Describe, step by step, how ARQ operates when a data packet is corrupted in transit.",
+          markPoints: [
+            {
+              text: "Any four of: sender transmits the packet and starts a timer (timeout); receiver performs an error check (e.g. checksum / CRC); an error is detected; receiver sends a negative acknowledgement (or sends no positive acknowledgement); sender receives the NACK or the timeout expires before an ACK arrives; sender automatically re-transmits the packet; repeated until the packet arrives error-free or a retry limit is reached",
+              marks: 4,
+              match: {
+                type: "keywords",
+                groups: [
+                  ["timer","timeout","time out","time-out","clock"],
+                  ["error check","checksum","crc","checks the packet","checks the data","error detect","check for errors"],
+                  ["error is detected","error detected","detects an error","finds an error","corrupt","error found"],
+                  ["negative acknowledg","nack","does not send","doesn't send","no acknowledg","no positive","not send an ack","error signal"],
+                  ["expires","runs out","no ack","not received","does not receive","doesn't receive","before an ack","timeout"],
+                  ["re-send","resend","re-transmi","retransmi","sends the packet again","send again","sent again","re-sent","resent"],
+                  ["until","repeat","again and again","correctly","error-free","error free","limit","maximum"]
+                ],
+                needCount: 4,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "The sender transmits a packet and starts a timeout timer. The receiver runs an error check (checksum/CRC) on what it received and detects the error. It sends a negative acknowledgement (or simply does not send a positive one). When the sender gets the NACK, or the timer runs out before an ACK arrives, it automatically re-transmits the same packet. This repeats until the packet arrives error-free or a retry limit is reached."
+        },
+        {
+          id: "Q23", marks: 4, difficulty: "hard",
+          topic: "Asymmetric Encryption",
+          prompt: "An e-commerce website uses asymmetric encryption to secure customer payment transactions. Explain how a public key and a private key work together to send a secure message from a customer to the website's server.",
+          markPoints: [
+            {
+              text: "Any four of: a matching pair of public and private keys is generated; the server makes its public key available / sends it to the customer's browser; the customer's browser encrypts the payment data using the server's public key; the ciphertext is sent to the server; only the server's matching private key (kept secret) can decrypt it",
+              marks: 4,
+              match: {
+                type: "keywords",
+                groups: [
+                  ["pair","matching","two keys","linked","generated","mathematically"],
+                  ["public key is","makes its public key","sends its public key","sends the public key","shares its public key","public key to the","available","given to","gives the public key"],
+                  ["encrypts","encrypt","encrypted using the public","using the server's public","using the website's public","with the public key","with the server's public","with the website's public"],
+                  ["ciphertext","encrypted data","sent to the server","transmitted to the server","sends it to","sent to the website"],
+                  ["private key","only the server","only the website","only the matching","only the private"],
+                  ["decrypt"]
+                ],
+                needCount: 4,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "A matching public/private key pair is created for the server. The server gives its public key to the customer's browser. The browser encrypts the payment data with the server's public key and sends the ciphertext. Only the server's matching private key, which it keeps secret, can decrypt the data. (To send securely to a server you use the server's public key — never your own private key.)"
+        }
+      ]
+    },
+
     // Source: the "Cambridge CAIE CS 9618 Class Test — Topic 14:
     // Communication & Internet Technologies (14.1 Protocols & 14.2
     // Circuit & Packet Switching)" document's Section C (Q26-Q30 in that
@@ -444,7 +852,8 @@
       { key: "troubleshoot_exam", label: "Sprint 1.1: Systematic Troubleshooting — exam style" }
     ] },
     { test: /^10br/i, choices: [
-      { key: "datarep_exam", label: "Topic 1: Data Representation — IGCSE exam style" }
+      { key: "datarep_exam", label: "Topic 1: Data Representation — IGCSE exam style" },
+      { key: "datatrans_exam", label: "Topic 2: Data transmission - IGCSE exam style" }
     ] },
     { test: /^12br/i, choices: [
       { key: "comm9618_exam", label: "Topic 14: Communication & Internet Technologies — A Level exam style" }
