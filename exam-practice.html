@@ -14,7 +14,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Topical Exam Practice</title>
-<link rel="stylesheet" href="shared.css?v=20261005r" />
+<link rel="stylesheet" href="shared.css?v=20261005s" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -129,12 +129,12 @@
 
 </div>
 
-<!-- ?v=20261005r -- cache-busting; see the longer comment above this same
+<!-- ?v=20261005s -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="exam-data.js?v=20261005r"></script>
-<script src="firebase-config.js?v=20261005r"></script>
-<script type="module" src="firebase-init.js?v=20261005r"></script>
+<script src="exam-data.js?v=20261005s"></script>
+<script src="firebase-config.js?v=20261005s"></script>
+<script type="module" src="firebase-init.js?v=20261005s"></script>
 <script type="module">
 (function(){
 
@@ -386,8 +386,10 @@
           '<button type="button" data-t="eraser">Eraser</button>' +
           '<button type="button" data-t="undo">Undo</button>' +
           '<button type="button" data-t="clear">Clear</button>' +
+          '<button type="button" data-t="read" id="pen-read">Insert as Text</button>' +
           '<button type="button" data-t="done" class="done">Done</button>' +
         '</div>' +
+        '<p class="pen-status hidden" id="pen-status" role="status"></p>' +
         '<canvas id="pen-canvas" class="pen-canvas" aria-label="Drawing area for your handwritten answer"></canvas>' +
       '</div>' +
       '<p class="pen-saved hidden" id="pen-saved">✓ Handwritten answer ready. Tap <strong>AI, check my answer!</strong>, then tick the marks you earned yourself.</p>';
@@ -476,10 +478,135 @@
       } else if(t === "undo"){ strokes.pop(); redraw(); }
       else if(t === "clear"){ strokes = []; redraw(); }
       else if(t === "done"){ toggle.click(); }
+      else if(t === "read"){ insertAsText(); }
     });
     window.addEventListener("resize", function(){ if(!panel.classList.contains("hidden")) size(); });
 
+    // ---- Handwriting -> text ("Insert as Text") ----
+    // Free and private: a small handwriting-recognition model (TrOCR) is
+    // downloaded once into the browser cache and runs ON the device, so the
+    // drawing never leaves the tablet. It reads one line of writing at a
+    // time, so the strokes are first split into lines.
+    var statusEl = wrap.querySelector("#pen-status");
+    var readBtn = wrap.querySelector("#pen-read");
+    var recognizerPromise = null;
+    function setStatus(msg){ statusEl.textContent = msg || ""; statusEl.classList.toggle("hidden", !msg); }
+
+    function loadRecognizer(){
+      if(window.PEN_RECOGNIZER) return Promise.resolve(window.PEN_RECOGNIZER);
+      if(!recognizerPromise){
+        recognizerPromise = import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2/+esm")
+          .then(function(m){
+            return m.pipeline("image-to-text", "Xenova/trocr-small-handwritten", {
+              progress_callback: function(p){
+                if(p && p.status === "progress" && typeof p.progress === "number"){
+                  setStatus("Downloading the handwriting reader (first time only)… " + Math.round(p.progress) + "%");
+                }
+              }
+            });
+          })
+          .then(function(pipe){
+            return function(dataUrl){
+              return pipe(dataUrl).then(function(out){ return (out && out[0] && out[0].generated_text) || ""; });
+            };
+          })
+          .catch(function(err){ recognizerPromise = null; throw err; });
+      }
+      return recognizerPromise;
+    }
+
+    // Groups non-eraser strokes into lines by vertical position.
+    // Pure function of the stroke data (exposed on penDraw for testing).
+    function groupLines(list){
+      var items = list.filter(function(s){ return !s.eraser && s.pts.length; }).map(function(s){
+        var y0 = Infinity, y1 = -Infinity, x0 = Infinity, x1 = -Infinity;
+        s.pts.forEach(function(p){ y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); });
+        return { s: s, y0: y0, y1: y1, x0: x0, x1: x1, cy: (y0 + y1) / 2 };
+      }).sort(function(a, b){ return a.cy - b.cy; });
+      var lines = [];
+      items.forEach(function(it){
+        var L = lines[lines.length - 1];
+        if(L){
+          var h = Math.max(L.y1 - L.y0, 28);
+          if(it.cy <= L.y1 + h * 0.35 && it.cy >= L.y0 - h * 0.35){
+            L.items.push(it);
+            L.y0 = Math.min(L.y0, it.y0); L.y1 = Math.max(L.y1, it.y1);
+            L.x0 = Math.min(L.x0, it.x0); L.x1 = Math.max(L.x1, it.x1);
+            return;
+          }
+        }
+        lines.push({ items: [it], y0: it.y0, y1: it.y1, x0: it.x0, x1: it.x1 });
+      });
+      return lines;
+    }
+
+    // Renders one line (black ink on white, all strokes so erasers work)
+    // to a PNG data URL, cropped with padding.
+    function lineImage(L, W, H){
+      var pad = 14, sc = 2;
+      var x0 = Math.max(0, L.x0 - pad), y0 = Math.max(0, L.y0 - pad);
+      var x1 = Math.min(W, L.x1 + pad), y1 = Math.min(H, L.y1 + pad);
+      var c = document.createElement("canvas");
+      c.width = Math.max(8, Math.round((x1 - x0) * sc));
+      c.height = Math.max(8, Math.round((y1 - y0) * sc));
+      var g = c.getContext("2d");
+      g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+      g.setTransform(sc, 0, 0, sc, -x0 * sc, -y0 * sc);
+      g.lineCap = "round"; g.lineJoin = "round";
+      strokes.forEach(function(s){
+        if(!s.pts.length) return;
+        g.strokeStyle = s.eraser ? "#fff" : "#000";
+        g.lineWidth = s.eraser ? 22 : 3;
+        g.beginPath(); g.moveTo(s.pts[0][0], s.pts[0][1]);
+        if(s.pts.length === 1) g.lineTo(s.pts[0][0] + 0.1, s.pts[0][1]);
+        for(var i = 1; i < s.pts.length; i++) g.lineTo(s.pts[i][0], s.pts[i][1]);
+        g.stroke();
+      });
+      return c.toDataURL("image/png");
+    }
+
+    function insertAsText(){
+      if(!hasInk()){ setStatus("Write something in the box first, then tap Insert as Text."); return; }
+      readBtn.disabled = true;
+      var r = cv.getBoundingClientRect();
+      var lines = groupLines(strokes);
+      setStatus("Preparing the handwriting reader…");
+      loadRecognizer().then(function(rec){
+        var out = [], chain = Promise.resolve();
+        lines.forEach(function(L, i){
+          chain = chain.then(function(){
+            setStatus("Reading line " + (i + 1) + " of " + lines.length + "…");
+            return rec(lineImage(L, r.width, r.height)).then(function(t){ out.push(String(t || "").trim()); });
+          });
+        });
+        return chain.then(function(){ return out.filter(Boolean).join("\n"); });
+      }).then(function(text){
+        readBtn.disabled = false;
+        if(!text){ setStatus("Couldn't read that. Try writing larger and clearer, or type your answer."); return; }
+        var cur0 = answerTextarea.value;
+        answerTextarea.value = cur0 && !/\s$/.test(cur0) ? cur0 + "\n" + text : cur0 + text;
+        strokes = []; redraw();
+        panel.classList.add("hidden");
+        toggle.textContent = "✎ Draw your answer";
+        setStatus("");
+        saved.classList.add("hidden");
+        answerTextarea.focus();
+        note.classList.add("hidden");
+        penDraw.inserted();
+      }).catch(function(){
+        readBtn.disabled = false;
+        setStatus("Handwriting reading isn't available right now (it needs an internet connection the first time). Please type your answer, or use Done and tick your own marks.");
+      });
+    }
+
+    var insertedMsg = document.createElement("p");
+    insertedMsg.className = "pen-saved hidden";
+    insertedMsg.textContent = "✓ Converted to text above. Please check it and fix any mistakes before you check your answer.";
+    wrap.appendChild(insertedMsg);
+
     penDraw = {
+      _groupLines: groupLines,
+      inserted: function(){ insertedMsg.classList.remove("hidden"); },
       hasInk: hasInk,
       showNote: function(on){ note.classList.toggle("hidden", !on); },
       reset: function(){
@@ -488,6 +615,8 @@
         toggle.textContent = "✎ Draw your answer";
         saved.classList.add("hidden");
         note.classList.add("hidden");
+        insertedMsg.classList.add("hidden");
+        setStatus("");
       }
     };
   }

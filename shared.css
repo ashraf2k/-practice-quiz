@@ -1521,6 +1521,8 @@
     touch-action: none; /* pen/finger draws instead of scrolling the page */
     cursor: crosshair;
   }
+  .pen-status{ margin: 0 0 8px; font-size: 13.5px; color: var(--accent); }
+  .pen-tools button:disabled{ opacity: .55; cursor: wait; }
   .pen-saved{ margin: 8px 0 0; font-size: 13.5px; color: var(--muted); }
 
   .exam-textarea:focus{
