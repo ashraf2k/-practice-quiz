@@ -429,6 +429,7 @@
     font-weight: 600;
     line-height: 1.45;
     margin: 0 0 16px;
+    white-space: pre-line;
   }
 
   /* ---------- Difficulty badge (IGCSE questions) ---------- */
