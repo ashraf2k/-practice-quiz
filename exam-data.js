@@ -679,6 +679,396 @@
       ]
     },
 
+    // Source: the teacher-supplied "Cambridge IGCSE Computer Science (0478)
+    // -- Topic 3: Hardware" examination, Section 3 (the ten Paper 1
+    // exam-style questions). As with datatrans_exam above, each source
+    // question is split into its lettered parts so the adaptive engine has
+    // a pool of small, individually graded questions across all three
+    // tiers. Every question's marks are the verified total of its own
+    // markPoints. Departures from the source, where it can't be answered
+    // in a text box:
+    //   - the touchscreen True/False table (its Q4, six cells) is asked as
+    //     three short questions (multi-touch / gloves / why), 6 marks total.
+    //   - the inkjet-vs-laser four-row table (its Q6a) is asked as one
+    //     "which suits high volume / which suits photos, and why" question.
+    //   - the CPU/RAM diagram of its Q1 is described in words.
+    hardware_exam: {
+      key: "hardware_exam",
+      title: "Topic 3: Hardware — IGCSE exam style",
+      subtitle: "25 exam-style questions · CPU & FDE cycle, embedded systems, input/output & sensors, storage, network hardware · 69 marks total",
+      classes: ["10BR1","10BR2","10BR3"],
+      totalMarks: 69,
+      questions: [
+
+        // ============== EASY TIER ==============
+        {
+          id: "Q1", marks: 3, difficulty: "easy",
+          topic: "CPU Registers",
+          prompt: "The CPU in a Von Neumann computer contains several registers. Name the register described in each case.\n(a) It holds the address in memory that is currently being read from or written to. [1 mark]\n(b) It stores the result of calculations performed by the ALU. [1 mark]\n(c) It holds the actual data or instruction that has been fetched from memory, or is waiting to be written to memory. [1 mark]",
+          markPoints: [
+            { text: "(a) Memory Address Register (MAR)", marks: 1, match: { type: "keywords", groups: [["memory address register","mar"]], needCount: 1 } },
+            { text: "(b) Accumulator (ACC)", marks: 1, match: { type: "keywords", groups: [["accumulator","acc"]], needCount: 1 } },
+            { text: "(c) Memory Data Register (MDR)", marks: 1, match: { type: "keywords", groups: [["memory data register","mdr","memory buffer register"]], needCount: 1 } }
+          ],
+          explanation: "(a) The Memory Address Register (MAR) holds the address being accessed in memory. (b) The Accumulator (ACC) stores the results of ALU calculations. (c) The Memory Data Register (MDR) holds the data or instruction fetched from, or about to be written to, memory."
+        },
+        {
+          id: "Q2", marks: 2, difficulty: "easy",
+          topic: "CPU Performance Factors",
+          prompt: "Explain how the clock speed of a CPU affects its performance.",
+          markPoints: [
+            { text: "Clock speed is the number of clock cycles (FDE cycles) the CPU carries out per second", marks: 1, match: { type: "keywords", groups: [["per second","each second","every second","hertz","ghz","cycles"]], needCount: 1 } },
+            { text: "A higher clock speed means more instructions are processed per second, so the CPU is faster", marks: 1, match: { type: "keywords", groups: [["more instructions","faster","more cycles","quicker","higher performance","processes more","executes more"]], needCount: 1 } }
+          ],
+          explanation: "Clock speed is the number of clock cycles (and so FDE cycles) the CPU can carry out each second. A higher clock speed means more instructions can be processed per second, so the CPU performs faster."
+        },
+        {
+          id: "Q3", marks: 2, difficulty: "easy",
+          topic: "CPU Performance Factors",
+          prompt: "Explain how the cache size of a CPU affects its performance.",
+          markPoints: [
+            { text: "Cache is very fast memory in or near the CPU that stores frequently used data and instructions", marks: 1, match: { type: "keywords", groups: [["frequently used","most used","often used","commonly used","fast memory","high-speed","high speed","faster than ram","store"]], needCount: 1 } },
+            { text: "A larger cache means less need to fetch from the slower RAM, so processing is faster", marks: 1, match: { type: "keywords", groups: [["slower ram","from ram","less time","fewer","reduces the need","quicker access","faster access","faster","speed"]], needCount: 1 } }
+          ],
+          explanation: "Cache is high-speed memory inside or near the CPU that stores frequently used data and instructions. A larger cache holds more of them, so the CPU has to fetch from the slower RAM less often, which increases processing speed."
+        },
+        {
+          id: "Q4", marks: 2, difficulty: "easy",
+          topic: "CPU Performance Factors",
+          prompt: "Explain how the number of cores in a CPU affects its performance.",
+          markPoints: [
+            { text: "A core is an independent processing unit (with its own ALU, CU and registers)", marks: 1, match: { type: "keywords", groups: [["independent","own alu","processing unit","separate","its own","each core","a core is","individual"]], needCount: 1 } },
+            { text: "More cores allow several instructions / FDE cycles to be processed at the same time (parallel processing)", marks: 1, match: { type: "keywords", groups: [["same time","simultaneous","at once","parallel","multiple instructions","several instructions","more instructions","multitask"]], needCount: 1 } }
+          ],
+          explanation: "A core is an independent processing unit containing its own ALU, control unit and registers. With more cores, several instructions (FDE cycles) can be processed at the same time, which speeds up work that can be run in parallel."
+        },
+        {
+          id: "Q5", marks: 2, difficulty: "easy",
+          topic: "Embedded Systems",
+          prompt: "Define the term embedded system.",
+          markPoints: [
+            { text: "A combination of hardware and software designed to perform a dedicated / specific function", marks: 1, match: { type: "keywords", groups: [["dedicated","specific function","one function","single function","particular function","specific task","one task","single task","specific purpose"]], needCount: 1 } },
+            { text: "Built into a larger mechanical or electrical device / system", marks: 1, match: { type: "keywords", groups: [["built into","built in","part of a larger","inside a","within a","larger system","larger device","embedded in","inside another","part of another"]], needCount: 1 } }
+          ],
+          explanation: "An embedded system is a combination of hardware and software designed to carry out a dedicated, specific function, and which is built into a larger mechanical or electrical device (for example a washing machine or a car)."
+        },
+        {
+          id: "Q6", marks: 2, difficulty: "easy",
+          topic: "Embedded Systems",
+          prompt: "Identify two domestic appliances (devices found in a home) that contain an embedded system.",
+          markPoints: [
+            {
+              text: "Any two of: washing machine; microwave oven; dishwasher; smart TV; central heating thermostat; robot vacuum cleaner; fridge; digital camera; alarm clock",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["washing machine","washer"],["microwave"],["dishwasher"],["smart tv","television","tv"],["thermostat","central heating","heating"],["vacuum","hoover","robot"],["fridge","refrigerator","freezer"],["oven","cooker","kettle","toaster","air fryer","coffee machine"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "Any two domestic appliances with a dedicated microprocessor, for example a washing machine, microwave oven, dishwasher, smart TV, central heating thermostat or robot vacuum cleaner."
+        },
+        {
+          id: "Q7", marks: 3, difficulty: "easy",
+          topic: "Sensors & Control Systems",
+          prompt: "A smart aquarium system monitors the water conditions for tropical fish. Identify three different sensors that could be used to monitor the aquarium.",
+          markPoints: [
+            {
+              text: "Any three of: temperature sensor; pH sensor; level sensor; light sensor; flow sensor; moisture / water-clarity sensor (a generic 'water sensor' is not accepted)",
+              marks: 3,
+              match: {
+                type: "keywords",
+                groups: [["temperature","thermometer","thermistor"],["ph"],["level"],["light"],["flow"],["moisture","clarity","turbidity"]],
+                needCount: 3,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "Suitable sensors include a temperature sensor, a pH sensor, a level sensor, a light sensor, a flow sensor and a moisture / water-clarity sensor. A vague 'water sensor' is not specific enough."
+        },
+        {
+          id: "Q8", marks: 1, difficulty: "easy",
+          topic: "Virtual Memory",
+          prompt: "Define the term thrashing, in relation to virtual memory.",
+          markPoints: [
+            { text: "The CPU spends more time swapping pages between RAM and virtual memory than executing instructions, so performance slows badly", marks: 1, match: { type: "keywords", groups: [["swapping","swap","moving pages","transferring pages","paging"],["more time","most of its time","constantly","continuously","slow","than executing","instead of executing"]], needCount: 2 } }
+          ],
+          explanation: "Thrashing is when the CPU spends more time swapping data pages back and forth between RAM and virtual memory than executing instructions, which severely slows down performance."
+        },
+        {
+          id: "Q9", marks: 3, difficulty: "easy",
+          topic: "Secondary Storage",
+          prompt: "Secondary storage devices are classified as magnetic, optical or solid-state. State the category of each of the following.\n(a) Hard disk drive (HDD) [1 mark]\n(b) Blu-ray disc [1 mark]\n(c) SD card [1 mark]",
+          markPoints: [
+            { text: "(a) Magnetic", marks: 1, match: { type: "keywords", groups: [["magnetic"]], needCount: 1 } },
+            { text: "(b) Optical", marks: 1, match: { type: "keywords", groups: [["optical"]], needCount: 1 } },
+            { text: "(c) Solid-state (flash memory)", marks: 1, match: { type: "keywords", groups: [["solid-state","solid state","flash","ssd"]], needCount: 1 } }
+          ],
+          explanation: "(a) A hard disk drive is magnetic storage. (b) A Blu-ray disc is optical storage. (c) An SD card is solid-state (flash memory) storage."
+        },
+        {
+          id: "Q10", marks: 2, difficulty: "easy",
+          topic: "Cloud Storage",
+          prompt: "Define the term cloud storage.",
+          markPoints: [
+            { text: "Data is stored remotely on physical servers owned and managed by a third-party hosting company", marks: 1, match: { type: "keywords", groups: [["remote","off-site","offsite","servers","third party","third-party","hosting company","provider","data centre","data center"]], needCount: 1 } },
+            { text: "It is accessed over the Internet / a network connection", marks: 1, match: { type: "keywords", groups: [["internet","online","network","web","connection"]], needCount: 1 } }
+          ],
+          explanation: "Cloud storage keeps data remotely on physical servers that are owned and managed by a third-party hosting company, and the data is accessed through the Internet."
+        },
+        {
+          id: "Q11", marks: 3, difficulty: "easy",
+          topic: "MAC & IP Addresses",
+          prompt: "State three characteristics of a MAC address.",
+          markPoints: [
+            {
+              text: "Any three of: assigned to the NIC by the manufacturer; static / permanent (cannot be changed); six pairs of hexadecimal digits (48 bits); first half is the manufacturer code and second half the device serial number; identifies a specific device on a LAN",
+              marks: 3,
+              match: {
+                type: "keywords",
+                groups: [["manufactur","factory","nic","network interface card","network card","built in","burned"],["static","permanent","cannot be changed","does not change","doesn't change","fixed","unique"],["hexadecimal","hex","48 bit","48-bit","six pairs","6 pairs","six groups","6 groups"],["serial number","manufacturer code","oui","first three","first half","first 3","last three","last 3","second half"],["identif","physical device","local network","lan","specific device"]],
+                needCount: 3,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "A MAC address is assigned to the network interface card (NIC) at manufacture; it is static (permanent); it is written as six pairs of hexadecimal digits (48 bits); the first three bytes are the manufacturer code and the last three are the device serial number; and it identifies a specific physical device on a local network."
+        },
+
+        // ============== INTERMEDIATE TIER ==============
+        {
+          id: "Q12", marks: 2, difficulty: "intermediate",
+          topic: "CPU Performance Factors",
+          prompt: "A student compares two computers for video editing.\nComputer A: quad-core 2.8 GHz CPU with 8 MiB of cache.\nComputer B: dual-core 3.6 GHz CPU with 2 MiB of cache.\nState which computer is likely to run multi-threaded rendering software more efficiently, and justify your answer.",
+          markPoints: [
+            { text: "Computer A", marks: 1, match: { type: "keywords", groups: [["computer a","a)","quad","answer a","computer a."]], needCount: 1 } },
+            { text: "It has four cores (quad-core) compared with two, so more tasks / threads can be processed at the same time", marks: 1, match: { type: "keywords", groups: [["4 core","four core","quad","more cores","4 cores","four cores"],["same time","simultaneous","parallel","at once","threads","more tasks","more instructions"]], needCount: 2 } }
+          ],
+          explanation: "Computer A. Multi-threaded software can use several cores at once, and A has four cores compared with B's two, so four tasks or threads can be processed simultaneously."
+        },
+        {
+          id: "Q13", marks: 3, difficulty: "intermediate",
+          topic: "Embedded Systems",
+          prompt: "An automated espresso machine contains a microcontroller that manages water heating, pump pressure and bean grinding. State three characteristics of an embedded system, as shown by the coffee machine.",
+          markPoints: [
+            {
+              text: "Any three of: dedicated single purpose; program (firmware) stored permanently in ROM / non-volatile memory; uses a microprocessor / microcontroller; hardware dedicated and not easily upgraded; low power consumption; simple user interface (buttons / knobs)",
+              marks: 3,
+              match: {
+                type: "keywords",
+                groups: [["dedicated","single purpose","one purpose","single function","one function","specific function","specific task","one task"],["rom","firmware","non-volatile","non volatile","stored permanently","permanently stored"],["microprocessor","microcontroller"],["cannot be upgraded","can't be upgraded","not upgraded","not easily","cannot be expanded","fixed hardware","cannot be changed"],["low power","low electrical","little power","low energy","consumes low"],["simple","buttons","knobs","limited interface","basic interface"]],
+                needCount: 3,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "Characteristics of an embedded system: it has one dedicated function; its program (firmware) is stored permanently in ROM or other non-volatile memory; it uses a microprocessor or microcontroller rather than a general-purpose CPU; the hardware cannot easily be upgraded; it uses little power; and it has a simple user interface such as buttons or knobs."
+        },
+        {
+          id: "Q14", marks: 2, difficulty: "intermediate",
+          topic: "Touchscreens",
+          prompt: "Touchscreens can use capacitive, resistive or infra-red technology. State which TWO of these three technologies allow multi-touch gestures, such as pinching to zoom.",
+          markPoints: [
+            { text: "Capacitive", marks: 1, match: { type: "keywords", groups: [["capacitive"]], needCount: 1 } },
+            { text: "Infra-red", marks: 1, match: { type: "keywords", groups: [["infra-red","infrared","infra red","ir "," ir","ir."]], needCount: 1 } }
+          ],
+          explanation: "Capacitive screens detect electrostatic changes at several points, and infra-red grids can detect several broken beams, so both support multi-touch. A standard resistive screen registers only a single pressure point at a time."
+        },
+        {
+          id: "Q15", marks: 4, difficulty: "intermediate",
+          topic: "Touchscreens",
+          prompt: "A worker wants to use a touchscreen while wearing thick cotton gloves.\n(a) State which two of the technologies (capacitive, resistive, infra-red) will work with gloves. [2 marks]\n(b) Explain why a capacitive touchscreen does not work with gloves. [1 mark]\n(c) Explain why a resistive touchscreen does work with gloves. [1 mark]",
+          markPoints: [
+            { text: "(a) Resistive", marks: 1, match: { type: "keywords", groups: [["resistive"]], needCount: 1 } },
+            { text: "(a) Infra-red", marks: 1, match: { type: "keywords", groups: [["infra-red","infrared","infra red"]], needCount: 1 } },
+            { text: "(b) The gloves block the electrical conductivity / electrostatic charge of the finger that a capacitive screen needs", marks: 1, match: { type: "keywords", groups: [["conduct","electrical","electrostatic","charge","insulat","block"]], needCount: 1 } },
+            { text: "(c) A resistive screen works by mechanical pressure, which a gloved finger (or stylus) can still apply", marks: 1, match: { type: "keywords", groups: [["pressure","press","mechanical","push","physical"]], needCount: 1 } }
+          ],
+          explanation: "(a) Resistive and infra-red screens work with gloves. (b) Capacitive screens rely on the electrical conductivity of a bare finger, which a glove blocks. (c) Resistive screens respond to physical pressure pushing two layers together, which a gloved finger or stylus can provide. (Infra-red works because a gloved finger still breaks the light beams.)"
+        },
+        {
+          id: "Q16", marks: 4, difficulty: "intermediate",
+          topic: "Output Devices",
+          prompt: "(a) State which type of printer, inkjet or laser, is best suited to high-volume, high-speed office printing, and give one reason. [2 marks]\n(b) State which type of printer is best suited to low-volume, high-quality photo printing, and give one reason. [2 marks]",
+          markPoints: [
+            { text: "(a) Laser printer", marks: 1, match: { type: "keywords", groups: [["laser"]], needCount: 1 } },
+            { text: "(a) Reason: fast printing and / or a lower cost per page for high volumes (toner, rotating drum and fuser)", marks: 1, match: { type: "keywords", groups: [["fast","speed","quick","cost per page","cheaper per page","cheap","toner","drum","fuser","volume","large"]], needCount: 1 } },
+            { text: "(b) Inkjet printer", marks: 1, match: { type: "keywords", groups: [["inkjet","ink jet","ink-jet"]], needCount: 1 } },
+            { text: "(b) Reason: liquid ink gives high-quality, smoothly blended colour prints", marks: 1, match: { type: "keywords", groups: [["quality","detail","colour","color","photo","blend","smooth","liquid ink","resolution","nozzle"]], needCount: 1 } }
+          ],
+          explanation: "(a) A laser printer: it uses dry toner, a rotating drum and a heated fuser, which gives fast printing and a low cost per page at high volumes. (b) An inkjet printer: it squirts liquid ink through micro-nozzles, giving high-quality, smoothly blended colour output that suits photos in low volumes."
+        },
+        {
+          id: "Q17", marks: 3, difficulty: "intermediate",
+          topic: "Output Devices",
+          prompt: "Describe the operation of a 3D printer.",
+          markPoints: [
+            {
+              text: "Any three of: a 3D model is designed using CAD software; the model is sliced into thin horizontal 2D layers; the printer builds the object additively, layer by layer; material (molten plastic filament / resin / metal powder) is extruded or deposited on to the print bed; each layer is bonded / cured (heat or UV light) before the next is added",
+              marks: 3,
+              match: {
+                type: "keywords",
+                groups: [["cad","computer-aided design","computer aided design","3d model","digital model","design"],["slice","sliced","layers","cross-section","cross section"],["layer by layer","layer-by-layer","additive","one layer at a time","builds up","built up"],["filament","resin","powder","extrude","deposit","molten","plastic","material"],["cure","cured","bond","fuse","solidif","harden","uv","heat"]],
+                needCount: 3,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "A 3D model is designed with CAD software and sliced into thin horizontal layers. The printer then builds the object additively, layer by layer, depositing material such as molten plastic, resin or metal powder on to the print bed, and each layer is bonded or cured with heat or UV light before the next is added."
+        },
+        {
+          id: "Q18", marks: 3, difficulty: "intermediate",
+          topic: "Primary Storage",
+          prompt: "State three differences between RAM and ROM.",
+          markPoints: [
+            {
+              text: "Any three of: RAM is volatile, ROM is non-volatile; RAM is read/write, ROM is read-only; RAM stores programs and data in use, ROM stores start-up routines (BIOS / firmware); RAM is usually much larger in capacity than ROM",
+              marks: 3,
+              match: {
+                type: "keywords",
+                groups: [["volatile","lost when","loses","power off","power is off","switched off"],["read only","read-only","read/write","read and write","can be written","cannot be written","can't be written","can be changed","cannot be changed"],["in use","currently","running","being used","start-up","startup","bios","boot","firmware"],["larger","bigger","capacity","size","more storage","smaller"]],
+                needCount: 3,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "RAM is volatile (contents lost when the power is off) whereas ROM is non-volatile; RAM is read/write whereas ROM is read-only; RAM holds the programs and data currently in use whereas ROM holds start-up routines such as the BIOS; and RAM usually has a much larger capacity than ROM."
+        },
+        {
+          id: "Q19", marks: 3, difficulty: "intermediate",
+          topic: "Virtual Memory",
+          prompt: "Explain why a computer needs virtual memory when it is running several large software applications.",
+          markPoints: [
+            {
+              text: "Any three of: virtual memory is created on secondary storage (HDD / SSD) when RAM is full; it prevents out-of-memory errors / crashes; inactive pages are moved from RAM to virtual memory (swap space); pages are moved back to RAM when the CPU needs them",
+              marks: 3,
+              match: {
+                type: "keywords",
+                groups: [["secondary storage","hard disk","hard drive","hdd","ssd","disk","swap space"],["full","runs out","run out","not enough","exhausted","insufficient"],["crash","out of memory","out-of-memory","error","freeze"],["inactive","not in use","idle","not needed","moved","swapped","paged","pages"],["back to ram","returned","transferred back","moved back","brought back","when needed"]],
+                needCount: 3,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "When RAM is full, the operating system uses part of secondary storage (HDD/SSD) as virtual memory. Inactive pages are moved out of RAM into this swap space, which stops the system running out of memory and crashing, and they are moved back into RAM when the CPU needs them."
+        },
+        {
+          id: "Q20", marks: 4, difficulty: "hard",
+          topic: "Cloud Storage",
+          prompt: "A graphic design agency is considering moving its project files from local server hard drives to cloud storage. Give two advantages and two disadvantages of cloud storage compared with local storage.",
+          markPoints: [
+            {
+              text: "Any two advantages: access from any device / location with Internet; off-site backup / disaster recovery; capacity easily scaled up; real-time collaboration",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["any device","anywhere","any location","from home","remotely","remote access","accessed from","access from","accessible"],["backup","disaster","off-site","offsite","recover"],["scale","scalable","capacity","expand","more storage","buy extra","upgrade"],["collaborat","share","together","real-time","real time"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            },
+            {
+              text: "Any two disadvantages: needs a stable, fast Internet connection; slow transfer of large files over weak connections; security / privacy depends on the provider; ongoing subscription costs",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["internet","connection","wifi","wi-fi","online","offline","broadband"],["slow","large file","big file","upload","download","speed","bandwidth"],["security","privacy","hack","breach","cyber","third party","third-party","provider","trust"],["subscription","cost","expensive","fee","pay","price","monthly"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "Advantages: files can be reached from any device or location with an Internet connection; automatic off-site backup and disaster recovery; capacity can be scaled up without buying hardware; designers can collaborate in real time. Disadvantages: a stable, fast Internet connection is needed; large files transfer slowly on weak connections; security and privacy depend on the provider's safeguards; subscription costs continue over time."
+        },
+        {
+          id: "Q21", marks: 2, difficulty: "intermediate",
+          topic: "MAC & IP Addresses",
+          prompt: "Differentiate between a static IP address and a dynamic IP address.",
+          markPoints: [
+            { text: "Static: permanently assigned to a device and does not change when it reconnects", marks: 1, match: { type: "keywords", groups: [["permanent","does not change","doesn't change","never changes","fixed","stays the same","same every time","manually"]], needCount: 1 } },
+            { text: "Dynamic: temporarily assigned (by a DHCP server) and can change each time the device connects", marks: 1, match: { type: "keywords", groups: [["dhcp","temporar","changes","different each time","each time","every time","reconnect","lease"]], needCount: 1 } }
+          ],
+          explanation: "A static IP address is permanently assigned to a device and stays the same every time it connects. A dynamic IP address is assigned temporarily by a DHCP server and can be different each time the device connects to the network."
+        },
+        {
+          id: "Q22", marks: 2, difficulty: "intermediate",
+          topic: "Network Hardware",
+          prompt: "Describe two functions performed by a router on a network.",
+          markPoints: [
+            {
+              text: "Any two of: inspects the destination IP address in packet headers; routes packets between different networks (e.g. LAN to WAN / Internet); selects the most efficient route using routing tables; assigns dynamic IP addresses to devices on the local network (DHCP)",
+              marks: 2,
+              match: {
+                type: "keywords",
+                groups: [["destination","ip address in","header","reads the ip","inspects","looks at the ip"],["between networks","different networks","lan to","wan","internet","connects"],["efficient","best route","best path","shortest","fastest","routing table","optimal","route"],["assign","allocate","gives out","dhcp","dynamic ip"]],
+                needCount: 2,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "A router reads the destination IP address in each packet's header, forwards packets between different networks (for example from a LAN to the Internet), chooses the most efficient route using routing tables, and can assign dynamic IP addresses to devices on the local network using DHCP."
+        },
+
+        // ============== HARD TIER ==============
+        {
+          id: "Q23", marks: 4, difficulty: "hard",
+          topic: "FDE Cycle",
+          prompt: "Describe the step-by-step process of the FETCH stage of the Fetch-Decode-Execute cycle, referring to the registers and buses involved.",
+          markPoints: [
+            {
+              text: "Any four of: the address of the next instruction is copied from the PC to the MAR; the PC is incremented; the address is sent from the MAR along the address bus to RAM; the instruction at that address is fetched along the data bus; the instruction is stored in the MDR; the instruction is copied from the MDR to the CIR",
+              marks: 4,
+              match: {
+                type: "keywords",
+                groups: [["pc to the mar","pc to mar","program counter to the mar","program counter to mar","copied from the pc","copied from the program counter","pc is copied","address in the pc","from the pc"],["incremented","increased by 1","increase by 1","incremented by 1","adds 1","add 1","plus 1"],["address bus"],["data bus"],["mdr","memory data register"],["cir","current instruction register"]],
+                needCount: 4,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "The address in the Program Counter (PC) is copied to the Memory Address Register (MAR). The PC is incremented. The address is sent from the MAR along the address bus to RAM, and the instruction at that address is fetched along the data bus into the Memory Data Register (MDR). The instruction is then copied from the MDR to the Current Instruction Register (CIR)."
+        },
+        {
+          id: "Q24", marks: 4, difficulty: "hard",
+          topic: "Sensors & Control Systems",
+          prompt: "A smart aquarium keeps the water at a constant 25 °C. Describe how the microprocessor uses data from a temperature sensor to maintain this temperature.",
+          markPoints: [
+            {
+              text: "Any four of: the sensor continuously reads the temperature and sends an analogue signal; an ADC converts it to digital; the microprocessor receives the digital value; it compares the value with the stored preset value (25 °C); if below 25 °C it signals (via a DAC) the actuator to switch the heater ON; if at / above 25 °C it signals the heater OFF; the loop repeats continuously",
+              marks: 4,
+              match: {
+                type: "keywords",
+                groups: [["analogue","analog","continuously","sends the temperature","reads the temperature"],["adc","analogue to digital","analog to digital","analogue-to-digital","analog-to-digital"],["compare","compares","comparison","checks it against","checked against"],["stored","preset","pre-set","target","threshold","25"],["below","lower than","less than","too cold","too low","heater on","switch on","switches on","turns on","turn on"],["above","higher than","too hot","too high","heater off","switch off","switches off","turns off","turn off"],["dac","digital to analogue","digital to analog","actuator"],["repeat","continuous","loop","constantly","again"]],
+                needCount: 4,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "The temperature sensor continuously reads the water temperature and sends an analogue signal. An ADC converts it to digital, and the microprocessor compares it with the stored value (25 °C). If it is below 25 °C the microprocessor sends a signal (through a DAC) to the actuator to switch the heater on; if it is at or above 25 °C it switches the heater off. This monitoring loop repeats continuously. (The sensor only reads data — it never decides or controls anything.)"
+        },
+        {
+          id: "Q25", marks: 4, difficulty: "hard",
+          topic: "Solid-State Storage",
+          prompt: "Explain how data is stored and read on a solid-state drive (SSD) that uses flash memory technology.",
+          markPoints: [
+            {
+              text: "Any four of: flash memory is made of semiconductor microchips; millions of floating-gate and control-gate transistors; NAND (or NOR) logic gates; data is stored as electrical charge; a voltage makes electrons tunnel through an insulator and become trapped on the floating gate; the trapped electrons change the voltage threshold, representing 0 or 1; no moving parts, so fast access and durable",
+              marks: 4,
+              match: {
+                type: "keywords",
+                groups: [["semiconductor","microchip","chips","transistor","flash memory"],["floating gate","floating-gate","control gate","control-gate"],["nand","nor"],["electrical charge","electric charge","charge","charged"],["tunnel","trapped","trap","insulat","electrons"],["threshold","voltage","0 and 1","0s and 1s","binary"],["no moving parts","not moving","fast","durable","electronic"]],
+                needCount: 4,
+                marksPerGroup: 1
+              }
+            }
+          ],
+          explanation: "An SSD's flash memory is made of semiconductor microchips containing millions of floating-gate and control-gate transistors arranged using NAND (or NOR) gates. Data is stored as electrical charge: a voltage makes electrons tunnel through an insulating layer and become trapped on the floating gate, which changes the transistor's threshold voltage so it represents a 0 or a 1. There are no moving parts, so access is fast and the drive is durable."
+        }
+      ]
+    },
+
     // Source: the "Cambridge CAIE CS 9618 Class Test — Topic 14:
     // Communication & Internet Technologies (14.1 Protocols & 14.2
     // Circuit & Packet Switching)" document's Section C (Q26-Q30 in that
@@ -853,7 +1243,8 @@
     ] },
     { test: /^10br/i, choices: [
       { key: "datarep_exam", label: "Topic 1: Data Representation — IGCSE exam style" },
-      { key: "datatrans_exam", label: "Topic 2: Data transmission - IGCSE exam style" }
+      { key: "datatrans_exam", label: "Topic 2: Data transmission - IGCSE exam style" },
+      { key: "hardware_exam", label: "Topic 3: Hardware - IGCSE exam style" }
     ] },
     { test: /^12br/i, choices: [
       { key: "comm9618_exam", label: "Topic 14: Communication & Internet Technologies — A Level exam style" }
