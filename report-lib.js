@@ -140,6 +140,16 @@
     } catch(e){ return String(iso || ""); }
   }
 
+  // Date + time (viewer's local time zone) -- the report shows WHEN the
+  // attempt was submitted, not just the day.
+  function fmtDateTime(iso){
+    try{
+      var d = new Date(iso);
+      if(isNaN(d.getTime())) return String(iso || "");
+      return d.toLocaleString(undefined, { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+    } catch(e){ return String(iso || ""); }
+  }
+
   // ---------- Build the on-screen report (score, stats, teacher feedback, review) ----------
   function buildReportFragment(ctx){
     var report = computeReport(ctx);
@@ -158,7 +168,7 @@
     who.className = "who";
     who.textContent = ctx.name + " · " + ctx.cls;
     var dateP = document.createElement("p");
-    dateP.textContent = fmtDate(ctx.completedAt);
+    dateP.textContent = fmtDateTime(ctx.completedAt);
     side.appendChild(who); side.appendChild(dateP);
     scoreBlock.appendChild(scoreNum); scoreBlock.appendChild(side);
     frag.appendChild(scoreBlock);
@@ -465,7 +475,7 @@
     writeText(exam.subtitle, { size: 8.5, color: PDF_MUTED, marginAfter: 14 });
 
     // ---------- Student details + score panel ----------
-    var completedDateText = fmtDate(ctx.completedAt);
+    var completedDateText = fmtDateTime(ctx.completedAt);
     var panelH = exam.hasGrade ? 92 : 78;
     if(y + panelH > BOTTOM) newPage();
     var panelY = y;
@@ -501,7 +511,7 @@
 
     field("STUDENT", ctx.name, { highlight: true });
     field("CLASS", ctx.cls);
-    field("DATE", completedDateText, { bold: false, size: 10 });
+    field("DATE & TIME", completedDateText, { bold: false, size: 10 });
     if(exam.hasGrade){
       field("GRADE", getGrade(report.pct) + "  (indicative, practice only)", { bold: true, size: 10.5 });
     }

@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261005m" />
+<link rel="stylesheet" href="shared.css?v=20261005n" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -234,6 +234,7 @@
   }
   .profile-summary h3{ font-size: 17px; margin: 0; }
   .profile-summary .muted{ color: var(--muted); font-size: 13px; }
+  td.nowrap{ white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -304,7 +305,7 @@
         </div>
         <div class="table-scroll">
           <table class="admin-table" id="student-table">
-            <thead><tr><th>Name</th><th>Class</th><th>Exam</th><th>Score</th><th>%</th><th>Attempt</th><th>Date</th></tr></thead>
+            <thead><tr><th>Name</th><th>Class</th><th>Exam</th><th>Score</th><th>%</th><th>Attempt</th><th>Date &amp; time</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -371,7 +372,7 @@
         <p class="admin-status">Free-response, AI-assisted keyword grading, unlimited retakes — each student has at most one row per topic: their latest run.</p>
         <div class="table-scroll">
           <table class="admin-table" id="exampractice-table">
-            <thead><tr><th>Name</th><th>Class</th><th>Topic</th><th>Marks</th><th>%</th><th>Date</th></tr></thead>
+            <thead><tr><th>Name</th><th>Class</th><th>Topic</th><th>Marks</th><th>%</th><th>Date &amp; time</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -394,14 +395,14 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261005m -- cache-busting; see the longer comment above this same
+<!-- ?v=20261005n -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261005m"></script>
-<script src="exam-data.js?v=20261005m"></script>
-<script src="report-lib.js?v=20261005m"></script>
-<script src="firebase-config.js?v=20261005m"></script>
-<script type="module" src="firebase-init.js?v=20261005m"></script>
+<script src="quiz-data.js?v=20261005n"></script>
+<script src="exam-data.js?v=20261005n"></script>
+<script src="report-lib.js?v=20261005n"></script>
+<script src="firebase-config.js?v=20261005n"></script>
+<script type="module" src="firebase-init.js?v=20261005n"></script>
 <script type="module">
 (function(){
 
@@ -789,6 +790,17 @@
     } catch(e){ return String(iso || ""); }
   }
 
+  // Date AND time (viewer's local time zone), for the teacher's tables and
+  // detail headers -- fmtDateShort above stays date-only for anywhere a
+  // time would just be noise.
+  function fmtDateTime(iso){
+    try{
+      var d = new Date(iso);
+      if(isNaN(d.getTime())) return String(iso || "");
+      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit", timeZoneName:"short" });
+    } catch(e){ return String(iso || ""); }
+  }
+
   // ============================================================
   // Students tab
   // ============================================================
@@ -839,7 +851,7 @@
         "<td>" + a.score + "/" + (a.total || (exam ? exam.questions.length : "?")) + "</td>" +
         "<td>" + attemptPct(a) + "%</td>" +
         "<td>" + attemptBadge + "</td>" +
-        "<td>" + fmtDateShort(a.timestamp) + "</td>";
+        "<td class=\"nowrap\">" + fmtDateTime(a.timestamp) + "</td>";
       tr.addEventListener("click", function(){ openDetail(a, "students"); });
       tbody.appendChild(tr);
     });
@@ -933,7 +945,7 @@
     table.className = "admin-table";
     var tbody = document.createElement("tbody");
     var thead = document.createElement("thead");
-    thead.innerHTML = "<tr><th>Exam</th><th>Score</th><th>%</th><th>Attempt</th><th>Date</th></tr>";
+    thead.innerHTML = "<tr><th>Exam</th><th>Score</th><th>%</th><th>Attempt</th><th>Date &amp; time</th></tr>";
     table.appendChild(thead);
     table.appendChild(tbody);
 
@@ -947,7 +959,7 @@
         "<td>" + a.score + "/" + (a.total || (exam ? exam.questions.length : "?")) + "</td>" +
         "<td>" + attemptPct(a) + "%</td>" +
         "<td>" + attemptBadge + "</td>" +
-        "<td>" + fmtDateShort(a.timestamp) + "</td>";
+        "<td class=\"nowrap\">" + fmtDateTime(a.timestamp) + "</td>";
       tr.addEventListener("click", function(){ openDetail(a, "profile"); });
       tbody.appendChild(tr);
     });
@@ -1179,7 +1191,7 @@
       note.className = "first-attempt-note";
       note.innerHTML = "This student used their <strong>retake</strong> — the answers below are their final (2nd) attempt. " +
         "Their first attempt scored <strong>" + attempt.firstAttempt.score + "/" + attempt.firstAttempt.total + "</strong>" +
-        (attempt.firstAttempt.completedAt ? " on " + fmtDateShort(attempt.firstAttempt.completedAt) : "") + ".";
+        (attempt.firstAttempt.completedAt ? " on " + fmtDateTime(attempt.firstAttempt.completedAt) : "") + ".";
       container.appendChild(note);
     }
     container.appendChild(buildReportFragment(detailCtx));
@@ -1327,7 +1339,7 @@
         "<td>" + escapeHtml(paperLabel(a.paperKey)) + "</td>" +
         "<td>" + a.totalEarned + "/" + a.totalMarks + "</td>" +
         "<td>" + pct + "%</td>" +
-        "<td>" + fmtDateShort(a.timestamp) + "</td>";
+        "<td class=\"nowrap\">" + fmtDateTime(a.timestamp) + "</td>";
       tr.addEventListener("click", function(){ openExamDetail(a); });
       tbody.appendChild(tr);
     });
@@ -1384,13 +1396,13 @@
     container.innerHTML = "";
 
     var regradedNote = attempt.regradedBy
-      ? " · Regraded by " + escapeHtml(attempt.regradedBy) + (attempt.regradedAt ? " on " + fmtDateShort(attempt.regradedAt) : "")
+      ? " · Regraded by " + escapeHtml(attempt.regradedBy) + (attempt.regradedAt ? " on " + fmtDateTime(attempt.regradedAt) : "")
       : "";
     var summary = document.createElement("div");
     summary.className = "profile-summary";
     summary.innerHTML = "<h3>" + escapeHtml(attempt.name || "") + "</h3>" +
       "<span class=\"muted\">" + escapeHtml(attempt.className || "") + " · " + escapeHtml(paperLabel(attempt.paperKey)) +
-      (attempt.timestamp ? " · " + fmtDateShort(attempt.timestamp) : "") + regradedNote + "</span>";
+      (attempt.timestamp ? " · " + fmtDateTime(attempt.timestamp) : "") + regradedNote + "</span>";
     container.appendChild(summary);
 
     var summaryRow = document.createElement("div");
