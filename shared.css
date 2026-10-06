@@ -1493,6 +1493,18 @@
     resize: vertical;
   }
 
+  .exam-textarea.pen-friendly{
+    min-height: 220px;
+    font-size: 17px;
+    touch-action: manipulation;
+  }
+  .pen-hint{
+    margin: 4px 0 8px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--muted, #5b6472);
+  }
+
   .exam-textarea:focus{
     outline: 2px solid var(--accent);
     outline-offset: 1px;

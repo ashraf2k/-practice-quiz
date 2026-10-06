@@ -14,7 +14,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Topical Exam Practice</title>
-<link rel="stylesheet" href="shared.css?v=20261005p" />
+<link rel="stylesheet" href="shared.css?v=20261005q" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -129,12 +129,12 @@
 
 </div>
 
-<!-- ?v=20261005p -- cache-busting; see the longer comment above this same
+<!-- ?v=20261005q -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="exam-data.js?v=20261005p"></script>
-<script src="firebase-config.js?v=20261005p"></script>
-<script type="module" src="firebase-init.js?v=20261005p"></script>
+<script src="exam-data.js?v=20261005q"></script>
+<script src="firebase-config.js?v=20261005q"></script>
+<script type="module" src="firebase-init.js?v=20261005q"></script>
 <script type="module">
 (function(){
 
@@ -860,6 +860,26 @@
 
     state.paperKey = match.key;
     state.paper = EXAM_PAPERS[match.key];
+
+    // EXPERIMENT (pen input): on this paper only, make the answer box
+    // pen-friendly so iPad Scribble / Samsung S Pen handwriting converts
+    // straight into it. No recognition code of our own.
+    if(match.key === "datarep_exam"){
+      answerTextarea.rows = 9;
+      answerTextarea.setAttribute("spellcheck", "false");
+      answerTextarea.setAttribute("autocorrect", "off");
+      answerTextarea.setAttribute("autocapitalize", "off");
+      answerTextarea.setAttribute("autocomplete", "off");
+      answerTextarea.classList.add("pen-friendly");
+      answerTextarea.placeholder = "Type, or write here with your pen…";
+      if(!document.getElementById("pen-hint")){
+        var hint = document.createElement("p");
+        hint.id = "pen-hint";
+        hint.className = "pen-hint";
+        hint.innerHTML = "<strong>Writing with a pen?</strong> iPad: Settings › Apple Pencil › turn on <em>Scribble</em>, then write in the box. Samsung: tap the box and use the S Pen handwriting icon. Check the converted text before you continue.";
+        answerTextarea.parentNode.insertBefore(hint, answerTextarea);
+      }
+    }
 
     setHeader(state.paper.title, state.paper.subtitle);
     startGreeting.textContent = "Hi " + user.name + " — " + user.class + ".";
