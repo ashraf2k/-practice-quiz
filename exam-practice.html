@@ -14,7 +14,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Topical Exam Practice</title>
-<link rel="stylesheet" href="shared.css?v=20261005q" />
+<link rel="stylesheet" href="shared.css?v=20261005r" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -129,12 +129,12 @@
 
 </div>
 
-<!-- ?v=20261005q -- cache-busting; see the longer comment above this same
+<!-- ?v=20261005r -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="exam-data.js?v=20261005q"></script>
-<script src="firebase-config.js?v=20261005q"></script>
-<script type="module" src="firebase-init.js?v=20261005q"></script>
+<script src="exam-data.js?v=20261005r"></script>
+<script src="firebase-config.js?v=20261005r"></script>
+<script type="module" src="firebase-init.js?v=20261005r"></script>
 <script type="module">
 (function(){
 
@@ -310,6 +310,9 @@
   var qPrompt = document.getElementById("q-prompt");
   var answerTextarea = document.getElementById("answer-textarea");
   var answerField = answerTextarea.closest(".field");
+  // Pen "Draw your answer" panel (experiment, see initPenPanel()). null on
+  // every paper except the one it is switched on for.
+  var penDraw = null;
   var btnCheck = document.getElementById("btn-check");
   var checkArea = document.getElementById("check-area");
   var checkScoreBanner = document.getElementById("check-score-banner");
@@ -347,6 +350,7 @@
 
     qPrompt.textContent = q.prompt;
     answerTextarea.value = "";
+    if(penDraw) penDraw.reset();
     answerField.classList.remove("invalid");
     btnCheck.disabled = false;
     btnCheck.textContent = "AI, check my answer!";
@@ -360,6 +364,132 @@
     currentControls = [];
 
     answerTextarea.focus();
+  }
+
+
+  // ============================================================
+  // "Draw your answer" panel (experiment). A plain canvas the student can
+  // write on with a pen, finger or mouse. There is NO handwriting
+  // recognition and nothing is uploaded or saved: the drawing is just for
+  // the student's own working. A drawn-only answer scores 0 from the
+  // keyword check, so the student ticks the mark points themselves.
+  // ============================================================
+  function initPenPanel(){
+    if(penDraw) return;
+    var wrap = document.createElement("div");
+    wrap.className = "pen-wrap";
+    wrap.innerHTML =
+      '<button type="button" class="pen-toggle" id="pen-toggle">✎ Draw your answer</button>' +
+      '<div class="pen-panel hidden" id="pen-panel">' +
+        '<div class="pen-tools">' +
+          '<button type="button" data-t="pen" class="on">Pen</button>' +
+          '<button type="button" data-t="eraser">Eraser</button>' +
+          '<button type="button" data-t="undo">Undo</button>' +
+          '<button type="button" data-t="clear">Clear</button>' +
+          '<button type="button" data-t="done" class="done">Done</button>' +
+        '</div>' +
+        '<canvas id="pen-canvas" class="pen-canvas" aria-label="Drawing area for your handwritten answer"></canvas>' +
+      '</div>' +
+      '<p class="pen-saved hidden" id="pen-saved">✓ Handwritten answer ready. Tap <strong>AI, check my answer!</strong>, then tick the marks you earned yourself.</p>';
+    answerTextarea.parentNode.insertBefore(wrap, document.getElementById("answer-err"));
+
+    var note = document.createElement("p");
+    note.className = "pen-hint hidden";
+    note.textContent = "You answered by hand, so nothing was ticked for you. Compare with the mark scheme and tick the marks you earned.";
+    markpointsList.parentNode.insertBefore(note, markpointsList);
+
+    var toggle = wrap.querySelector("#pen-toggle");
+    var panel = wrap.querySelector("#pen-panel");
+    var saved = wrap.querySelector("#pen-saved");
+    var cv = wrap.querySelector("#pen-canvas");
+    var ctx = cv.getContext("2d");
+    var strokes = [], cur = null, tool = "pen", penSeen = false;
+
+    function cssVar(n, d){ var v = getComputedStyle(document.documentElement).getPropertyValue(n).trim(); return v || d; }
+    function size(){
+      var r = cv.getBoundingClientRect();
+      var dpr = window.devicePixelRatio || 1;
+      if(!r.width) return;
+      cv.width = Math.round(r.width * dpr);
+      cv.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      redraw();
+    }
+    function drawStroke(s){
+      if(!s.pts.length) return;
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.strokeStyle = s.eraser ? cssVar("--input-bg", "#fff") : cssVar("--ink", "#111");
+      ctx.lineWidth = s.eraser ? 22 : 2.4;
+      ctx.beginPath();
+      ctx.moveTo(s.pts[0][0], s.pts[0][1]);
+      if(s.pts.length === 1) ctx.lineTo(s.pts[0][0] + 0.1, s.pts[0][1]);
+      for(var i = 1; i < s.pts.length; i++) ctx.lineTo(s.pts[i][0], s.pts[i][1]);
+      ctx.stroke();
+    }
+    function redraw(){
+      var r = cv.getBoundingClientRect();
+      ctx.clearRect(0, 0, r.width, r.height);
+      strokes.forEach(drawStroke);
+    }
+    function pos(e){ var r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+
+    cv.addEventListener("pointerdown", function(e){
+      if(e.pointerType === "pen") penSeen = true;
+      // Palm rejection: once a pen has been used, ignore finger touches.
+      if(e.pointerType === "touch" && penSeen) return;
+      e.preventDefault();
+      try { cv.setPointerCapture(e.pointerId); } catch(err){}
+      cur = { eraser: tool === "eraser", pts: [pos(e)], id: e.pointerId };
+      strokes.push(cur);
+      drawStroke(cur);
+    });
+    cv.addEventListener("pointermove", function(e){
+      if(!cur || e.pointerId !== cur.id) return;
+      e.preventDefault();
+      var evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+      evs.forEach(function(ev){ cur.pts.push(pos(ev)); });
+      redraw();
+    });
+    function end(e){ if(cur && e.pointerId === cur.id) cur = null; }
+    cv.addEventListener("pointerup", end);
+    cv.addEventListener("pointercancel", end);
+    cv.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+
+    function hasInk(){ return strokes.some(function(s){ return !s.eraser && s.pts.length; }); }
+    function sync(){ saved.classList.toggle("hidden", !(hasInk() && panel.classList.contains("hidden"))); }
+
+    toggle.addEventListener("click", function(){
+      var open = panel.classList.contains("hidden");
+      panel.classList.toggle("hidden", !open);
+      toggle.textContent = open ? "✎ Hide drawing area" : (hasInk() ? "✎ Edit your drawing" : "✎ Draw your answer");
+      if(open) size();
+      sync();
+    });
+    wrap.querySelector(".pen-tools").addEventListener("click", function(e){
+      var t = e.target.getAttribute && e.target.getAttribute("data-t");
+      if(!t) return;
+      if(t === "pen" || t === "eraser"){
+        tool = t;
+        [].forEach.call(wrap.querySelectorAll(".pen-tools [data-t=pen],.pen-tools [data-t=eraser]"), function(b){
+          b.classList.toggle("on", b.getAttribute("data-t") === t);
+        });
+      } else if(t === "undo"){ strokes.pop(); redraw(); }
+      else if(t === "clear"){ strokes = []; redraw(); }
+      else if(t === "done"){ toggle.click(); }
+    });
+    window.addEventListener("resize", function(){ if(!panel.classList.contains("hidden")) size(); });
+
+    penDraw = {
+      hasInk: hasInk,
+      showNote: function(on){ note.classList.toggle("hidden", !on); },
+      reset: function(){
+        strokes = []; cur = null; redraw();
+        panel.classList.add("hidden");
+        toggle.textContent = "✎ Draw your answer";
+        saved.classList.add("hidden");
+        note.classList.add("hidden");
+      }
+    };
   }
 
   function recomputeLiveScore(){
@@ -443,7 +573,8 @@
 
   btnCheck.addEventListener("click", function(){
     var text = answerTextarea.value;
-    if(!text.trim()){
+    var drawn = !!(penDraw && penDraw.hasInk());
+    if(!text.trim() && !drawn){
       answerField.classList.add("invalid");
       return;
     }
@@ -451,6 +582,7 @@
 
     var q = currentQuestion();
     renderMarkPoints(q, text);
+    if(penDraw) penDraw.showNote(!text.trim() && drawn);
     qExplanation.textContent = q.explanation;
     checkArea.classList.remove("hidden");
     currentChecked = true;
@@ -475,7 +607,8 @@
     state.results.push({
       id: q.id, topic: q.topic, difficulty: q.difficulty,
       earned: earned, total: q.marks,
-      answerText: answerTextarea.value
+      answerText: answerTextarea.value.trim() ? answerTextarea.value
+        : ((penDraw && penDraw.hasInk()) ? "(handwritten answer, drawn with a pen. The drawing itself is not saved.)" : answerTextarea.value)
     });
 
     // Adaptive step: full marks twice in a row steps the tier up; any
@@ -872,6 +1005,7 @@
       answerTextarea.setAttribute("autocomplete", "off");
       answerTextarea.classList.add("pen-friendly");
       answerTextarea.placeholder = "Type, or write here with your pen…";
+      initPenPanel();
       if(!document.getElementById("pen-hint")){
         var hint = document.createElement("p");
         hint.id = "pen-hint";
