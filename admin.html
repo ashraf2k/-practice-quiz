@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261005s" />
+<link rel="stylesheet" href="shared.css?v=20261005t" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -293,6 +293,7 @@
       <button class="admin-tab" data-tab="classes">Class overview</button>
       <button class="admin-tab" data-tab="questions">Question analysis</button>
       <button class="admin-tab" data-tab="examPractice">Exam Practice</button>
+      <button class="admin-tab" data-tab="syllabus">Syllabus report</button>
     </div>
 
     <div id="admin-panels">
@@ -359,6 +360,29 @@
            of a paper total + percentage, unlimited retakes so at most one
            row per student+paper) so it gets its own list/detail pair
            rather than being forced into the MCQ tables above. -->
+      <div class="admin-panel" id="panel-syllabus">
+        <div class="admin-toolbar no-print">
+          <select id="filter-class-syllabus">
+            <option value="">All 10BR classes</option>
+            <option value="10BR1">10BR1</option>
+            <option value="10BR2">10BR2</option>
+            <option value="10BR3">10BR3</option>
+          </select>
+          <input type="text" id="filter-search-syllabus" placeholder="Search by name" />
+          <button class="btn btn-secondary" id="btn-syllabus-class-pdf">Download class PDF</button>
+        </div>
+        <p class="admin-status">IGCSE 10BR students rated against the Cambridge 0478 syllabus using their best attempt at every completed practice quiz and exam paper. Click a student for their full report, weak points and action plan.</p>
+        <div id="syllabus-list"></div>
+      </div>
+
+      <div class="admin-panel" id="panel-syllabusStudent">
+        <div class="admin-toolbar no-print">
+          <button class="btn btn-secondary admin-detail-back" id="btn-back-syllabus">&larr; Back to syllabus report</button>
+          <button class="btn btn-secondary" id="btn-syllabus-student-pdf">Download PDF</button>
+        </div>
+        <div id="syllabus-student-body"></div>
+      </div>
+
       <div class="admin-panel" id="panel-examPractice">
         <div class="admin-toolbar no-print">
           <select id="filter-paper">
@@ -395,14 +419,16 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261005s -- cache-busting; see the longer comment above this same
+<!-- ?v=20261005t -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261005s"></script>
-<script src="exam-data.js?v=20261005s"></script>
-<script src="report-lib.js?v=20261005s"></script>
-<script src="firebase-config.js?v=20261005s"></script>
-<script type="module" src="firebase-init.js?v=20261005s"></script>
+<script src="quiz-data.js?v=20261005t"></script>
+<script src="exam-data.js?v=20261005t"></script>
+<script src="report-lib.js?v=20261005t"></script>
+<script src="syllabus-data.js?v=20261005t"></script>
+<script src="syllabus-report.js?v=20261005t"></script>
+<script src="firebase-config.js?v=20261005t"></script>
+<script type="module" src="firebase-init.js?v=20261005t"></script>
 <script type="module">
 (function(){
 
@@ -594,7 +620,7 @@
     document.querySelectorAll(".admin-tab").forEach(function(btn){
       btn.classList.toggle("active", btn.dataset.tab === name);
     });
-    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail"].forEach(function(id){
+    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent"].forEach(function(id){
       document.getElementById("panel-" + id).classList.toggle("active", id === name);
     });
   }
@@ -731,7 +757,43 @@
     renderQuestions();
     populateExamPracticeClassFilter(document.getElementById("filter-class-exampractice"));
     renderExamPractice();
+    renderSyllabus();
   }
+
+
+  // ============================================================
+  // Syllabus report tab (10BR, Cambridge 0478)
+  // ============================================================
+  var syllabusStudents = [];
+  var syllabusShown = [];
+  var syllabusCurrent = null;
+  function renderSyllabus(){
+    var container = document.getElementById("syllabus-list");
+    if(!loaded){ container.innerHTML = '<p class="empty-note">Loading…</p>'; return; }
+    if(!window.SyllabusData || !window.SyllabusReport){ container.innerHTML = '<p class="empty-note">Syllabus report scripts did not load - refresh the page.</p>'; return; }
+    syllabusStudents = SyllabusData.analyse(attempts, examAttempts, EXAMS, EXAM_PAPERS, new Date());
+    var cls = document.getElementById("filter-class-syllabus").value;
+    var q = document.getElementById("filter-search-syllabus").value.trim().toLowerCase();
+    syllabusShown = syllabusStudents.filter(function(s){
+      return (!cls || s.className === cls) && (!q || (s.name || "").toLowerCase().indexOf(q) !== -1);
+    });
+    SyllabusReport.renderClassList(container, syllabusShown, function(s){
+      syllabusCurrent = s;
+      SyllabusReport.renderStudent(document.getElementById("syllabus-student-body"), s);
+      showTab("syllabusStudent");
+      window.scrollTo(0, 0);
+    });
+  }
+  document.getElementById("filter-class-syllabus").addEventListener("change", renderSyllabus);
+  document.getElementById("filter-search-syllabus").addEventListener("input", renderSyllabus);
+  document.getElementById("btn-back-syllabus").addEventListener("click", function(){ showTab("syllabus"); });
+  document.getElementById("btn-syllabus-student-pdf").addEventListener("click", function(){
+    if(syllabusCurrent) SyllabusReport.downloadStudent(syllabusCurrent);
+  });
+  document.getElementById("btn-syllabus-class-pdf").addEventListener("click", function(){
+    var cls = document.getElementById("filter-class-syllabus").value;
+    SyllabusReport.downloadClass(syllabusShown, cls || "10BR");
+  });
 
   function populateClassFilter(sel){
     var current = sel.value;
