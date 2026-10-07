@@ -38,6 +38,12 @@
 //     only way a mis-graded free-response answer gets corrected after
 //     the fact, since the student can't self-correct it.
 //
+//   - The teacher can ARCHIVE a student (copy all of their data into
+//     archive/{uid}, remove it from the live collections, and block that
+//     account from signing in) and later RESTORE or permanently delete
+//     them. See the `archive` match block and the admin-only create/
+//     update/delete clauses on each collection below.
+//
 // To add more teacher/admin accounts later, add another
 // "|| request.auth.token.email == '...'" clause inside isAdmin().
 rules_version = '2';
@@ -50,6 +56,24 @@ service cloud.firestore {
     match /users/{uid} {
       allow get, write: if request.auth != null && request.auth.uid == uid;
       allow get: if isAdmin();
+      // Archive / restore a student (admin dashboard): the profile is
+      // removed on archive and written back on restore.
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Archived students (admin dashboard "Archive" tab). archive/{uid} is a
+    // small summary (name, class, when/by whom); archive/{uid}/items/* holds
+    // a copy of every document that was removed from the live collections.
+    // Only the teacher can list/write/delete them. A student may read ONLY
+    // their own summary document -- that is how login learns the account
+    // has been archived and turns it away.
+    match /archive/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow get, list, create, update, delete: if isAdmin();
+
+      match /items/{itemId} {
+        allow get, list, create, update, delete: if isAdmin();
+      }
     }
 
     match /attempts/{attemptId} {
@@ -99,6 +123,9 @@ service cloud.firestore {
       // never can) -- this is the "reset" action in the admin dashboard,
       // letting that student take the exam fresh again.
       allow delete: if isAdmin();
+
+      // Restoring an archived student writes their attempt back as-is.
+      allow create, update: if isAdmin();
     }
 
     // Topical exam-question practice (exam-practice.html): free-response
@@ -133,6 +160,9 @@ service cloud.firestore {
       // for the STUDENT, not un-correctable by the teacher.
       allow update: if isAdmin();
 
+      // Restoring an archived student re-creates their documents.
+      allow create: if isAdmin();
+
       allow delete: if isAdmin();
     }
 
@@ -156,6 +186,8 @@ service cloud.firestore {
       // owner instead (resource, not request.resource), the same pattern
       // the get rule above uses for the same reason.
       allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      // Admin: archive removes these, restore writes them back.
+      allow create, update, delete: if isAdmin();
     }
 
     // Same idea for an in-progress topical exam-question attempt
@@ -173,6 +205,7 @@ service cloud.firestore {
                     && progressId == request.resource.data.uid + '_' + request.resource.data.paperKey;
 
       allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow create, update, delete: if isAdmin();
     }
   }
 }

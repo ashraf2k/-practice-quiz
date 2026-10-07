@@ -29,6 +29,8 @@ import {
   getDocs,
   query,
   orderBy,
+  where,
+  writeBatch,
   serverTimestamp
 } from "firebase/firestore";
 
@@ -85,7 +87,14 @@ function signUp(email, password, name, cls){
 function logIn(email, password){
   return authReady
     .then(function(){ return signInWithEmailAndPassword(auth, email, password); })
-    .then(function(cred){ return getMyProfile(cred.user.uid); })
+    .then(function(cred){
+      return isArchived(cred.user.uid).then(function(archived){
+        if(archived){
+          return signOut(auth).then(function(){ throw new Error(ARCHIVED_MESSAGE); });
+        }
+        return getMyProfile(cred.user.uid);
+      });
+    })
     .catch(function(err){ throw new Error(friendlyAuthError(err)); });
 }
 
@@ -103,8 +112,11 @@ function resetPassword(email){
 function onAuthChange(callback){
   return onAuthStateChanged(auth, function(user){
     if(!user){ callback(null); return; }
-    getMyProfile(user.uid).then(function(profile){
-      callback(profile || { uid: user.uid, email: user.email, name: "", class: "" });
+    isArchived(user.uid).then(function(archived){
+      if(archived){ return signOut(auth).then(function(){ callback(null); }); }
+      return getMyProfile(user.uid).then(function(profile){
+        callback(profile || { uid: user.uid, email: user.email, name: "", class: "" });
+      });
     }).catch(function(){
       callback({ uid: user.uid, email: user.email, name: "", class: "" });
     });
@@ -366,6 +378,134 @@ function deleteExamProgress(uid, paperKey){
     .catch(function(){ return { ok: false }; });
 }
 
+// ---------- Archive (admin "archive a student") ----------
+// Archiving moves EVERYTHING stored for one student (profile, graded
+// attempts, exam-paper attempts, resume checkpoints) out of the live
+// collections and into archive/{uid} (a small summary document) plus
+// archive/{uid}/items/* (one copy of each original document). Restoring
+// writes every copy back to where it came from and removes the archive
+// entry. An archived uid can no longer sign in (see isArchived above).
+// Needs the matching rules in firestore.rules (admin-only, except that
+// a student may read their OWN archive/{uid} summary -- that is how
+// login knows to turn an archived account away).
+var ARCHIVED_MESSAGE = "This account has been archived. Please speak to your teacher.";
+var ARCHIVE_COLLECTIONS = ["attempts", "examAttempts", "practiceProgress", "examProgress"];
+
+function isArchived(uid){
+  return getDoc(doc(db, "archive", uid)).then(function(snap){ return snap.exists(); })
+    .catch(function(){ return false; });
+}
+
+function archiveStudent(uid, adminEmail){
+  var items = [];
+  var profile = null;
+  return getDoc(doc(db, "users", uid)).then(function(snap){
+    if(snap.exists()) profile = snap.data();
+    return Promise.all(ARCHIVE_COLLECTIONS.map(function(col){
+      return getDocs(query(collection(db, col), where("uid", "==", uid))).then(function(qs){
+        qs.forEach(function(d){ items.push({ col: col, docId: d.id, data: d.data() }); });
+      });
+    }));
+  }).then(function(){
+    if(profile) items.push({ col: "users", docId: uid, data: profile });
+    var name = (profile && profile.name) || "";
+    var cls = (profile && profile.class) || "";
+    var email = (profile && profile.email) || "";
+    items.forEach(function(it){
+      if(!name && it.data && it.data.name) name = it.data.name;
+      if(!cls && it.data && it.data.class) cls = it.data.class;
+    });
+    // 1) Copy everything into the archive FIRST (a failure here leaves
+    //    the live data untouched). Batches of <= 400 writes.
+    var chunks = [];
+    for(var i = 0; i < items.length; i += 400) chunks.push(items.slice(i, i + 400));
+    var copy = Promise.resolve();
+    chunks.forEach(function(chunk){
+      copy = copy.then(function(){
+        var b = writeBatch(db);
+        chunk.forEach(function(it){
+          b.set(doc(db, "archive", uid, "items", it.col + "__" + it.docId), it);
+        });
+        return b.commit();
+      });
+    });
+    return copy.then(function(){
+      return setDoc(doc(db, "archive", uid), {
+        uid: uid, name: name, class: cls, email: email,
+        archivedAt: new Date().toISOString(),
+        archivedBy: adminEmail || null,
+        itemCount: items.length
+      });
+    }).then(function(){
+      // 2) Only now remove the originals.
+      var delChunks = [];
+      for(var j = 0; j < items.length; j += 400) delChunks.push(items.slice(j, j + 400));
+      var del = Promise.resolve();
+      delChunks.forEach(function(chunk){
+        del = del.then(function(){
+          var b = writeBatch(db);
+          chunk.forEach(function(it){ b.delete(doc(db, it.col, it.docId)); });
+          return b.commit();
+        });
+      });
+      return del;
+    }).then(function(){ return { ok: true, itemCount: items.length, name: name }; });
+  });
+}
+
+function listArchivedStudents(){
+  return getDocs(collection(db, "archive")).then(function(snap){
+    var out = [];
+    snap.forEach(function(d){ out.push(d.data()); });
+    return out;
+  });
+}
+
+function archiveItems(uid){
+  return getDocs(collection(db, "archive", uid, "items")).then(function(snap){
+    var out = [];
+    snap.forEach(function(d){ out.push({ ref: d.ref, item: d.data() }); });
+    return out;
+  });
+}
+
+function restoreStudent(uid){
+  return archiveItems(uid).then(function(entries){
+    var chunks = [];
+    for(var i = 0; i < entries.length; i += 400) chunks.push(entries.slice(i, i + 400));
+    var put = Promise.resolve();
+    chunks.forEach(function(chunk){
+      put = put.then(function(){
+        var b = writeBatch(db);
+        chunk.forEach(function(e){ b.set(doc(db, e.item.col, e.item.docId), e.item.data); });
+        return b.commit();
+      });
+    });
+    return put.then(function(){ return removeArchiveEntry(uid, entries); })
+      .then(function(){ return { ok: true, itemCount: entries.length }; });
+  });
+}
+
+function removeArchiveEntry(uid, entries){
+  var chunks = [];
+  for(var i = 0; i < entries.length; i += 400) chunks.push(entries.slice(i, i + 400));
+  var del = Promise.resolve();
+  chunks.forEach(function(chunk){
+    del = del.then(function(){
+      var b = writeBatch(db);
+      chunk.forEach(function(e){ b.delete(e.ref); });
+      return b.commit();
+    });
+  });
+  return del.then(function(){ return deleteDoc(doc(db, "archive", uid)); });
+}
+
+// Permanent removal from the archive (nothing is left anywhere).
+function deleteArchivedStudent(uid){
+  return archiveItems(uid).then(function(entries){ return removeArchiveEntry(uid, entries); })
+    .then(function(){ return { ok: true }; });
+}
+
 window.PQFirebase = {
   signUp: signUp,
   logIn: logIn,
@@ -387,5 +527,9 @@ window.PQFirebase = {
   deleteProgress: deleteProgress,
   getMyExamProgress: getMyExamProgress,
   saveExamProgress: saveExamProgress,
-  deleteExamProgress: deleteExamProgress
+  deleteExamProgress: deleteExamProgress,
+  archiveStudent: archiveStudent,
+  listArchivedStudents: listArchivedStudents,
+  restoreStudent: restoreStudent,
+  deleteArchivedStudent: deleteArchivedStudent
 };

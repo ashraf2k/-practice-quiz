@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261005t" />
+<link rel="stylesheet" href="shared.css?v=20261005u" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -294,6 +294,7 @@
       <button class="admin-tab" data-tab="questions">Question analysis</button>
       <button class="admin-tab" data-tab="examPractice">Exam Practice</button>
       <button class="admin-tab" data-tab="syllabus">Syllabus report</button>
+      <button class="admin-tab" data-tab="archive">Archive</button>
     </div>
 
     <div id="admin-panels">
@@ -331,7 +332,9 @@
       <div class="admin-panel" id="panel-profile">
         <div class="admin-toolbar no-print">
           <button class="btn btn-secondary admin-detail-back" id="btn-back-profile">← Back to by-student list</button>
+          <button class="btn btn-danger" id="btn-archive-profile">Archive student</button>
         </div>
+        <p class="admin-status no-print" id="profile-archive-status"></p>
         <div id="profile-body"></div>
       </div>
 
@@ -383,6 +386,17 @@
         <div id="syllabus-student-body"></div>
       </div>
 
+      <div class="admin-panel" id="panel-archive">
+        <p class="admin-status">Archived students are removed from every list and cannot sign in. Their data is kept here and can be restored at any time.</p>
+        <p class="admin-status no-print" id="archive-status"></p>
+        <div class="table-scroll">
+          <table class="admin-table" id="archive-table">
+            <thead><tr><th>Name</th><th>Class</th><th>Records</th><th>Archived on</th><th>Archived by</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="admin-panel" id="panel-examPractice">
         <div class="admin-toolbar no-print">
           <select id="filter-paper">
@@ -407,6 +421,7 @@
           <button class="btn btn-secondary admin-detail-back" id="btn-back-examdetail">← Back to Exam Practice list</button>
           <button class="btn btn-primary" id="btn-examdetail-save" disabled>Save regrade</button>
           <button class="btn btn-danger" id="btn-examdetail-reset">Reset this attempt</button>
+          <button class="btn btn-danger" id="btn-archive-examdetail">Archive student</button>
         </div>
         <p class="regrade-note no-print">Change a question's mark below if the student's answer deserves a different score, then save.</p>
         <p class="admin-status no-print" id="examdetail-save-status"></p>
@@ -419,16 +434,16 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261005t -- cache-busting; see the longer comment above this same
+<!-- ?v=20261005u -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261005t"></script>
-<script src="exam-data.js?v=20261005t"></script>
-<script src="report-lib.js?v=20261005t"></script>
-<script src="syllabus-data.js?v=20261005t"></script>
-<script src="syllabus-report.js?v=20261005t"></script>
-<script src="firebase-config.js?v=20261005t"></script>
-<script type="module" src="firebase-init.js?v=20261005t"></script>
+<script src="quiz-data.js?v=20261005u"></script>
+<script src="exam-data.js?v=20261005u"></script>
+<script src="report-lib.js?v=20261005u"></script>
+<script src="syllabus-data.js?v=20261005u"></script>
+<script src="syllabus-report.js?v=20261005u"></script>
+<script src="firebase-config.js?v=20261005u"></script>
+<script type="module" src="firebase-init.js?v=20261005u"></script>
 <script type="module">
 (function(){
 
@@ -620,7 +635,7 @@
     document.querySelectorAll(".admin-tab").forEach(function(btn){
       btn.classList.toggle("active", btn.dataset.tab === name);
     });
-    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent"].forEach(function(id){
+    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","archive"].forEach(function(id){
       document.getElementById("panel-" + id).classList.toggle("active", id === name);
     });
   }
@@ -721,7 +736,8 @@
     adminStatus.textContent = "Loading…";
     Promise.all([
       PQFirebase.listAllAttempts(),
-      examAttemptsSupported() ? PQFirebase.listAllExamAttempts() : Promise.resolve(null)
+      examAttemptsSupported() ? PQFirebase.listAllExamAttempts() : Promise.resolve(null),
+      loadArchiveList()
     ]).then(function(results){
       // Keep every attempt across all exams/papers here; the various
       // exam/class/search/paper filters below decide what's actually
@@ -758,6 +774,7 @@
     populateExamPracticeClassFilter(document.getElementById("filter-class-exampractice"));
     renderExamPractice();
     renderSyllabus();
+    renderArchive();
   }
 
 
@@ -793,6 +810,125 @@
   document.getElementById("btn-syllabus-class-pdf").addEventListener("click", function(){
     var cls = document.getElementById("filter-class-syllabus").value;
     SyllabusReport.downloadClass(syllabusShown, cls || "10BR");
+  });
+
+  // ============================================================
+  // Archive (remove a student from the live database, restorable)
+  // ============================================================
+  var archived = [];
+  var archiveNote = "";
+  function archiveSupported(){
+    return typeof PQFirebase.archiveStudent === "function" && typeof PQFirebase.listArchivedStudents === "function";
+  }
+  // Never lets a missing/blocked archive collection break the dashboard:
+  // before the new firestore.rules are published the read is denied, so
+  // fall back to an empty list plus a note on the Archive tab.
+  function loadArchiveList(){
+    if(!archiveSupported()){
+      archived = []; archiveNote = "Archive needs a page refresh -- this browser has an older cached script.";
+      return Promise.resolve(null);
+    }
+    return PQFirebase.listArchivedStudents().then(function(list){
+      archived = list || []; archiveNote = ""; return list;
+    }).catch(function(err){
+      archived = [];
+      archiveNote = (err && err.code === "permission-denied")
+        ? "The archive can't be read yet -- publish the updated firestore.rules in the Firebase console (Build -> Firestore Database -> Rules)."
+        : "Couldn't load the archive. Check your internet connection and refresh.";
+      return null;
+    });
+  }
+
+  function renderArchive(){
+    var tbody = document.querySelector("#archive-table tbody");
+    var note = document.getElementById("archive-status");
+    note.classList.toggle("warn", !!archiveNote);
+    if(archiveNote) note.textContent = archiveNote;
+    tbody.innerHTML = "";
+    if(!archived.length){
+      var tr0 = document.createElement("tr");
+      tr0.innerHTML = '<td colspan="6" class="wrap-cell">' + (loaded ? "No archived students." : "") + "</td>";
+      tbody.appendChild(tr0);
+      return;
+    }
+    archived.slice().sort(function(a, b){ return String(b.archivedAt).localeCompare(String(a.archivedAt)); }).forEach(function(s){
+      var tr = document.createElement("tr");
+      tr.style.cursor = "default";
+      tr.innerHTML =
+        "<td>" + escapeHtml(s.name || "(no name)") + "</td><td>" + escapeHtml(s.class || "") + "</td><td>" + (s.itemCount || 0) +
+        '</td><td class="nowrap">' + fmtDateTime(s.archivedAt) + "</td><td>" + escapeHtml(s.archivedBy || "") + "</td>" +
+        '<td class="nowrap"><button class="btn btn-secondary" data-act="restore">Restore</button> <button class="btn btn-danger" data-act="purge">Delete permanently</button></td>';
+      tr.querySelector('[data-act="restore"]').addEventListener("click", function(){ restoreArchived(s); });
+      tr.querySelector('[data-act="purge"]').addEventListener("click", function(){ purgeArchived(s); });
+      tbody.appendChild(tr);
+    });
+  }
+
+  function setArchiveStatus(msg, warn){
+    var el = document.getElementById("archive-status");
+    el.classList.toggle("warn", !!warn); el.textContent = msg;
+    adminStatus.classList.toggle("warn", !!warn); adminStatus.textContent = msg;
+  }
+  function archiveError(err, what){
+    return (err && err.code === "permission-denied")
+      ? "Firestore denied this request -- publish the updated firestore.rules (it now has the archive rules) and try again."
+      : "Couldn't " + what + ". Check your internet connection and try again. (" + ((err && err.message) || "unknown error") + ")";
+  }
+
+  // Shared by the By-student profile and the Exam Practice detail page.
+  function archiveStudentFlow(uid, name, cls, btn, backTab){
+    if(!archiveSupported()){ window.alert("This browser has an older cached script -- hard refresh (Ctrl/Cmd+Shift+R) and try again."); return; }
+    if(!uid){ window.alert("Can't archive this student -- their records have no account id."); return; }
+    var ok = window.confirm(
+      "Archive " + (name || "this student") + (cls ? " (" + cls + ")" : "") + "?\n\n" +
+      "All of their quiz results, exam-paper results, saved progress and profile are removed from the live database and moved to the Archive tab. " +
+      "They will no longer appear in any list and will not be able to sign in. You can restore them at any time."
+    );
+    if(!ok) return;
+    btn.disabled = true;
+    setArchiveStatus("Archiving " + (name || "student") + "…", false);
+    PQFirebase.archiveStudent(uid, currentAdminEmail).then(function(res){
+      attempts = attempts.filter(function(a){ return a.uid !== uid; });
+      examAttempts = examAttempts.filter(function(a){ return a.uid !== uid; });
+      return loadArchiveList().then(function(){
+        renderAll();
+        setArchiveStatus("Archived " + (res.name || name || "student") + " (" + res.itemCount + " records). They are in the Archive tab and can be restored.", false);
+        showTab(backTab);
+      });
+    }).catch(function(err){
+      setArchiveStatus(archiveError(err, "archive this student"), true);
+    }).then(function(){ btn.disabled = false; });
+  }
+
+  function restoreArchived(s){
+    if(!window.confirm("Restore " + (s.name || "this student") + "?\n\nAll of their records are put back and they can sign in again.")) return;
+    setArchiveStatus("Restoring " + (s.name || "student") + "…", false);
+    PQFirebase.restoreStudent(s.uid).then(function(res){
+      return Promise.all([PQFirebase.listAllAttempts(), examAttemptsSupported() ? PQFirebase.listAllExamAttempts() : Promise.resolve(null), loadArchiveList()]).then(function(r){
+        attempts = r[0].map(normalizeAttempt);
+        if(r[1] !== null) examAttempts = r[1].map(normalizeExamAttempt);
+        renderAll();
+        setArchiveStatus("Restored " + (s.name || "student") + " (" + res.itemCount + " records).", false);
+      });
+    }).catch(function(err){ setArchiveStatus(archiveError(err, "restore this student"), true); });
+  }
+
+  function purgeArchived(s){
+    if(!window.confirm("Permanently delete " + (s.name || "this student") + " from the archive?\n\nEverything stored for them is erased and can NOT be restored.")) return;
+    setArchiveStatus("Deleting…", false);
+    PQFirebase.deleteArchivedStudent(s.uid).then(function(){
+      return loadArchiveList().then(function(){ renderArchive(); setArchiveStatus("Permanently deleted " + (s.name || "student") + ".", false); });
+    }).catch(function(err){ setArchiveStatus(archiveError(err, "delete this student"), true); });
+  }
+
+  document.getElementById("btn-archive-profile").addEventListener("click", function(){
+    if(!profileGroup) return;
+    var withUid = profileGroup.attempts.filter(function(a){ return a.uid; })[0];
+    archiveStudentFlow(withUid && withUid.uid, profileGroup.name, profileGroup.className, this, "byStudent");
+  });
+  document.getElementById("btn-archive-examdetail").addEventListener("click", function(){
+    if(!examDetailAttempt) return;
+    archiveStudentFlow(examDetailAttempt.uid, examDetailAttempt.name, examDetailAttempt.className, this, "examPractice");
   });
 
   function populateClassFilter(sel){
@@ -990,7 +1126,10 @@
     });
   }
 
+  var profileGroup = null;
   function openStudentProfile(group){
+    profileGroup = group;
+    document.getElementById("profile-archive-status").textContent = "";
     var container = document.getElementById("profile-body");
     container.innerHTML = "";
 
