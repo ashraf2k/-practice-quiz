@@ -14,7 +14,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Topical Exam Practice</title>
-<link rel="stylesheet" href="shared.css?v=20261005u" />
+<link rel="stylesheet" href="shared.css?v=20261008a" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -129,12 +129,13 @@
 
 </div>
 
-<!-- ?v=20261005u -- cache-busting; see the longer comment above this same
+<!-- ?v=20261008a -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="exam-data.js?v=20261005u"></script>
-<script src="firebase-config.js?v=20261005u"></script>
-<script type="module" src="firebase-init.js?v=20261005u"></script>
+<script src="exam-data.js?v=20261008a"></script>
+<script src="scratchpad.js?v=20261008a"></script>
+<script src="firebase-config.js?v=20261008a"></script>
+<script type="module" src="firebase-init.js?v=20261008a"></script>
 <script type="module">
 (function(){
 
@@ -313,6 +314,7 @@
   // Pen "Draw your answer" panel (experiment, see initPenPanel()). null on
   // every paper except the one it is switched on for.
   var penDraw = null;
+  var scratchPad = null; // pen/stylus working-out area, only on calc:true questions
   var btnCheck = document.getElementById("btn-check");
   var checkArea = document.getElementById("check-area");
   var checkScoreBanner = document.getElementById("check-score-banner");
@@ -349,6 +351,8 @@
     qMeta.appendChild(marksNote);
 
     qPrompt.textContent = q.prompt;
+    if(!scratchPad && window.ScratchPad) scratchPad = ScratchPad.mount(qPrompt.parentNode, answerField);
+    if(scratchPad) scratchPad.show(!!q.calc);
     answerTextarea.value = "";
     if(penDraw) penDraw.reset();
     answerField.classList.remove("invalid");
