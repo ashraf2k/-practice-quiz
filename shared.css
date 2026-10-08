@@ -1721,4 +1721,3 @@
     min-height: 32px;
   }
   .remember-label input[type="checkbox"]{ width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
-  .remember-hint{ margin: 2px 0 0 30px; font-size: 13px; line-height: 1.45; color: var(--muted, #5b6472); }
