@@ -80,7 +80,7 @@
       objective:"Program development life cycle; decomposition and abstraction; structure diagrams, flowcharts and pseudocode; standard algorithms; validation and verification; test data; trace tables; finding and fixing errors.",
       revise:["7.1 PDLC: analysis, design, coding, testing","7.2 Decomposition (inputs, processes, outputs, storage); structure diagrams, flowcharts, pseudocode","7.4 Linear search, bubble sort, totalling, counting, max/min/average","7.5 Validation (range, length, type, presence, format, check digit) vs verification (visual check, double entry)","7.6 Test data: normal, abnormal, extreme, boundary","7.7-7.8 Trace tables and identifying errors in algorithms"],
       tip:"Trace tables: one column per variable and output, update one row per executed line, and never skip a loop iteration. For validation say what is checked (e.g. 'range check' checks the value is between limits), not just 'it checks the data'.",
-      redo:["algo","igcse"] },
+      redo:["algo","validation","igcse"] },
     { id:"8.1", sec:8, secTitle:"Programming", title:"Programming concepts",
       objective:"Variables, constants and data types; input and output; sequence, selection (IF, CASE) and iteration; totalling and counting; string handling; arithmetic, relational and logical operators.",
       revise:["8.1.2 Data types: integer, real, char, string, Boolean","8.1.4 Selection (IF, CASE), iteration (count-controlled, pre- and post-condition loops)","8.1.4 String handling: length, substring, upper, lower","8.1.4 Operators: + - * / ^ MOD DIV; = < <= > >= <>; AND OR NOT"],
@@ -106,6 +106,7 @@
     if(examKey === "igcse"){
       return /IF Statement|Relational|Nested IF|CASE|Logical Operators/i.test(t) ? "8.1" : "7";
     }
+    if(examKey === "validation") return "7";
     if(examKey === "algo"){
       if(/Array/i.test(t)) return "8.2";
       if(/Pseudocode Syntax|Data Types|Loop|String Handling|Modular Division/i.test(t)) return "8.1";
