@@ -1712,3 +1712,13 @@
     header.top{ margin-bottom: 14px; }
     .wrap{ max-width: 100%; }
   }
+
+  /* "Remember me" row on the student login form */
+  .remember-row{ margin: 4px 0 14px; }
+  .remember-label{
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 600; color: var(--ink); cursor: pointer;
+    min-height: 32px;
+  }
+  .remember-label input[type="checkbox"]{ width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
+  .remember-hint{ margin: 2px 0 0 30px; font-size: 13px; line-height: 1.45; color: var(--muted, #5b6472); }

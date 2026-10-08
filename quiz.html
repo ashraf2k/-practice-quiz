@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261008b" />
+<link rel="stylesheet" href="shared.css?v=20261008c" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -75,6 +75,14 @@
       <input type="password" id="input-password" autocomplete="current-password" />
       <div class="hint hidden" id="password-hint">At least 6 characters.</div>
       <div class="err">Please enter your password.</div>
+    </div>
+
+    <div class="remember-row" id="field-remember">
+      <label class="remember-label" for="input-remember">
+        <input type="checkbox" id="input-remember" />
+        <span>Remember me on this device</span>
+      </label>
+      <p class="remember-hint">Keeps you logged in so you don't have to type your details again. Only tick this on your own phone or computer, not a shared one.</p>
     </div>
 
     <div class="btn-row">
@@ -243,7 +251,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261008b -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261008c -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -256,12 +264,12 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261008b"></script>
-<script src="exam-data.js?v=20261008b"></script>
-<script src="report-lib.js?v=20261008b"></script>
-<script src="scratchpad.js?v=20261008b"></script>
-<script src="firebase-config.js?v=20261008b"></script>
-<script type="module" src="firebase-init.js?v=20261008b"></script>
+<script src="quiz-data.js?v=20261008c"></script>
+<script src="exam-data.js?v=20261008c"></script>
+<script src="report-lib.js?v=20261008c"></script>
+<script src="scratchpad.js?v=20261008c"></script>
+<script src="firebase-config.js?v=20261008c"></script>
+<script type="module" src="firebase-init.js?v=20261008c"></script>
 <script type="module">
 (function(){
 
@@ -310,6 +318,7 @@
   var inputSignupClass = document.getElementById("input-signup-class");
   var inputEmail = document.getElementById("input-email");
   var inputPassword = document.getElementById("input-password");
+  var inputRemember = document.getElementById("input-remember");
   var passwordHint = document.getElementById("password-hint");
 
   var authMode = "login";
@@ -375,8 +384,8 @@
     authStatus.textContent = authMode === "signup" ? "Creating your account…" : "Logging in…";
 
     var action = authMode === "signup"
-      ? PQFirebase.signUp(email, password, name, cls)
-      : PQFirebase.logIn(email, password);
+      ? PQFirebase.signUp(email, password, name, cls, inputRemember.checked)
+      : PQFirebase.logIn(email, password, inputRemember.checked);
 
     action.then(function(){
       // onAuthChange (below) picks up the new signed-in state and

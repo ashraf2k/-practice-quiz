@@ -13,6 +13,7 @@ import {
   getAuth,
   setPersistence,
   browserSessionPersistence,
+  browserLocalPersistence,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -44,13 +45,36 @@ var app = initializeApp(firebaseConfig);
 var auth = getAuth(app);
 var db = getFirestore(app);
 
-// Classroom computers are often shared between students. Session
-// persistence ties the login to this browser TAB: closing the tab (or
-// the browser) signs the student out automatically, so the next student
-// to sit down doesn't inherit the previous one's account. Signing out
-// explicitly always works too. (Reload / navigating within the same tab
-// keeps the session, so mid-quiz page transitions are unaffected.)
-var authReady = setPersistence(auth, browserSessionPersistence);
+// Classroom computers are often shared between students, so by default the
+// login is tied to this browser TAB: closing the tab (or the browser) signs
+// the student out automatically, so the next student to sit down doesn't
+// inherit the previous one's account. A student on their OWN device can tick
+// "Remember me" at login: the login is then kept on this device (local
+// persistence) until they log out. A small flag in localStorage records that
+// choice so the right persistence is used when the page next loads.
+// (Reload / navigating within the same tab keeps the session either way.)
+var REMEMBER_KEY = "ilearncs_remember_me";
+function getRemembered(){
+  try { return window.localStorage.getItem(REMEMBER_KEY) === "1"; } catch(e){ return false; }
+}
+function setRemembered(on){
+  try {
+    if(on) window.localStorage.setItem(REMEMBER_KEY, "1");
+    else window.localStorage.removeItem(REMEMBER_KEY);
+  } catch(e){}
+}
+var authReady = setPersistence(auth, getRemembered() ? browserLocalPersistence : browserSessionPersistence);
+
+// Picks where the login that is about to happen is stored. Always called
+// before a sign-in / sign-up so each login decides for itself.
+function applyPersistence(remember){
+  return setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence)
+    .catch(function(){
+      // Local storage unavailable (private mode, blocked): fall back to session.
+      return setPersistence(auth, browserSessionPersistence);
+    })
+    .then(function(){ setRemembered(!!remember); });
+}
 
 function friendlyAuthError(err){
   var code = err && err.code;
@@ -69,8 +93,9 @@ function friendlyAuthError(err){
 
 // ---------- Auth ----------
 
-function signUp(email, password, name, cls){
+function signUp(email, password, name, cls, remember){
   return authReady
+    .then(function(){ return applyPersistence(remember); })
     .then(function(){ return createUserWithEmailAndPassword(auth, email, password); })
     .then(function(cred){
       var uid = cred.user.uid;
@@ -84,12 +109,14 @@ function signUp(email, password, name, cls){
     .catch(function(err){ throw new Error(friendlyAuthError(err)); });
 }
 
-function logIn(email, password){
+function logIn(email, password, remember){
   return authReady
+    .then(function(){ return applyPersistence(remember); })
     .then(function(){ return signInWithEmailAndPassword(auth, email, password); })
     .then(function(cred){
       return isArchived(cred.user.uid).then(function(archived){
         if(archived){
+          setRemembered(false);
           return signOut(auth).then(function(){ throw new Error(ARCHIVED_MESSAGE); });
         }
         return getMyProfile(cred.user.uid);
@@ -99,6 +126,8 @@ function logIn(email, password){
 }
 
 function logOut(){
+  // Logging out also forgets "Remember me", so the next sign-in starts fresh.
+  setRemembered(false);
   return signOut(auth);
 }
 
@@ -113,7 +142,7 @@ function onAuthChange(callback){
   return onAuthStateChanged(auth, function(user){
     if(!user){ callback(null); return; }
     isArchived(user.uid).then(function(archived){
-      if(archived){ return signOut(auth).then(function(){ callback(null); }); }
+      if(archived){ setRemembered(false); return signOut(auth).then(function(){ callback(null); }); }
       return getMyProfile(user.uid).then(function(profile){
         callback(profile || { uid: user.uid, email: user.email, name: "", class: "" });
       });
