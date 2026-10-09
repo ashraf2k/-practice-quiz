@@ -165,25 +165,19 @@
   }
 
   .admin-link{
-    flex: 0 0 auto;
-    font-size: 12.5px;
-    font-weight: 600;
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 500;
     color: var(--muted);
     text-decoration: none;
-    padding: 7px 13px;
+    padding: 3px 10px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    white-space: nowrap;
-    display: inline-block;
-    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+    opacity: 0.75;
+    transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
   }
-  .admin-link:hover{
-    color: var(--accent);
-    border-color: var(--card-1-line);
-    background: var(--accent-tint);
-    transform: translateY(-1px);
-  }
-  .admin-link:active{ transform: translateY(0); }
+  .admin-link:hover, .admin-link:focus-visible{ color: var(--accent); border-color: var(--card-1-line); opacity: 1; }
 
   .hero{
     padding: 6px 6px 28px;
@@ -458,7 +452,6 @@
       <h1 class="logo-wrap"><img class="logo-img" src="logo.png" alt="iLearnCS — Learn, Practice, Master Computer Science"></h1>
       <p>Computer Science Learn & Practice Hub</p>
     </div>
-    <a class="admin-link" href="admin.html">Teacher login</a>
   </header>
 
   <section class="hero">
@@ -485,14 +478,16 @@
   </div>
   <noscript><p class="topics-empty">Enable JavaScript to see the list of available practice topics, or go straight to the <a href="quiz.html">practice quiz</a>.</p></noscript>
 
-  <footer class="foot">iLearnCS — shared by Mr. Ashraf Elbialy for exam practice</footer>
+  <footer class="foot">iLearnCS — shared by Mr. Ashraf Elbialy for exam practice
+    <div><a class="admin-link" href="admin.html">Teacher login</a></div>
+  </footer>
 
 </div>
 
-<!-- ?v=20261009a -- cache-busting; see the longer comment above this same
+<!-- ?v=20261009b -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever this
      file changes. -->
-<script src="quiz-data.js?v=20261009a"></script>
+<script src="quiz-data.js?v=20261009b"></script>
 <script>
 (function(){
   // Curated heading/colour/icon per exam key, so the cards look
