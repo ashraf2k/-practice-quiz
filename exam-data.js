@@ -29,7 +29,7 @@
 
         // ============== EASY TIER (5 questions, 6 marks) ==============
         {
-          id: "Q1", calc: true, marks: 1, difficulty: "easy",
+          id: "Q1", syl: ["1.1.2"], calc: true, marks: 1, difficulty: "easy",
           topic: "Binary ↔ Denary Conversion",
           prompt: "Convert the positive denary integer 156 into an 8-bit binary integer.",
           markPoints: [
@@ -42,7 +42,7 @@
           explanation: "Place values for an 8-bit byte are 128 64 32 16 8 4 2 1. 156 − 128 = 28 → 28 − 16 = 12 → 12 − 8 = 4 → 4 − 4 = 0. Placing 1s under 128, 16, 8, 4 and 0s elsewhere gives 10011100."
         },
         {
-          id: "Q2", marks: 2, difficulty: "easy",
+          id: "Q2", syl: ["1.1.2","1.1.3"], marks: 2, difficulty: "easy",
           topic: "Hexadecimal Basics",
           prompt: "State the base of the hexadecimal number system, and identify how many binary bits are represented by a single hexadecimal digit.",
           markPoints: [
@@ -52,7 +52,7 @@
           explanation: "Hexadecimal is a base-16 number system using digits 0–9 and letters A–F (A=10 to F=15). Because 2^4 = 16, exactly 4 binary bits (one nibble) correspond to one hexadecimal digit."
         },
         {
-          id: "Q3", marks: 1, difficulty: "easy",
+          id: "Q3", syl: ["1.2.3"], marks: 1, difficulty: "easy",
           topic: "Pixels & Bitmap Images",
           prompt: "Define the term pixel.",
           markPoints: [
@@ -65,7 +65,7 @@
           explanation: "The word “pixel” stands for picture element. It is the fundamental building block of a grid-based bitmap image."
         },
         {
-          id: "Q4", calc: true, marks: 1, difficulty: "easy",
+          id: "Q4", syl: ["1.3.1"], calc: true, marks: 1, difficulty: "easy",
           topic: "Storage Units (bits/Bytes)",
           prompt: "Convert 32 bits into Bytes.",
           markPoints: [
@@ -74,7 +74,7 @@
           explanation: "There are 8 bits in 1 Byte. Dividing 32 bits by 8 yields 4 Bytes."
         },
         {
-          id: "Q5", marks: 1, difficulty: "easy",
+          id: "Q5", syl: ["1.3.3"], marks: 1, difficulty: "easy",
           topic: "Why Compress Data",
           prompt: "State one reason why a video file is compressed before being transmitted over the Internet.",
           markPoints: [
@@ -93,7 +93,7 @@
 
         // ============== INTERMEDIATE TIER (10 questions, 23 marks) ==============
         {
-          id: "Q6", calc: true, marks: 2, difficulty: "intermediate",
+          id: "Q6", syl: ["1.1.2"], calc: true, marks: 2, difficulty: "intermediate",
           topic: "Hexadecimal Conversion",
           prompt: "A network router displays an error code in hexadecimal as 3E.\n(a) Convert 3E into an 8-bit binary number.\n(b) Convert 3E into a denary integer.",
           markPoints: [
@@ -103,7 +103,7 @@
           explanation: "Binary: 3 = 0011 and E (14) = 1110. Joining nibbles gives 00111110. Denary: (3 × 16) + (14 × 1) = 48 + 14 = 62."
         },
         {
-          id: "Q7", calc: true, marks: 3, difficulty: "intermediate",
+          id: "Q7", syl: ["1.1.4"], calc: true, marks: 3, difficulty: "intermediate",
           topic: "Binary Addition",
           prompt: "Add the following two 8-bit binary integers. Show all your working (carries).\n  0110 0101\n+ 0011 1100",
           markPoints: [
@@ -114,7 +114,7 @@
           explanation: "Denary check: 01100101 = 101, 00111100 = 60. 101 + 60 = 161. Converting 161 to binary: 128 + 32 + 1 = 10100001."
         },
         {
-          id: "Q8", calc: true, marks: 2, difficulty: "intermediate",
+          id: "Q8", syl: ["1.1.5"], calc: true, marks: 2, difficulty: "intermediate",
           topic: "Logical Shifts",
           prompt: "A register contains the 8-bit binary integer 00110100 (denary 52).\n(a) Perform a logical shift 2 places to the left. Give the resulting binary number.\n(b) Perform a logical shift 1 place to the right on the ORIGINAL binary number. State the denary result.",
           markPoints: [
@@ -124,7 +124,7 @@
           explanation: "Left shift by 2: move all bits left 2 places, fill with 0s on the right → 11010000 (52 × 2² = 208). Right shift by 1: move all bits right 1 place → 00011010 (52 / 2 = 26)."
         },
         {
-          id: "Q9", calc: true, marks: 2, difficulty: "intermediate",
+          id: "Q9", syl: ["1.1.6"], calc: true, marks: 2, difficulty: "intermediate",
           topic: "Two's Complement",
           prompt: "Convert the negative denary integer −35 into an 8-bit two's complement binary integer. Show your working.",
           markPoints: [
@@ -134,7 +134,7 @@
           explanation: "1. Positive +35 in 8-bit binary: 00100011. 2. Invert all bits: 11011100. 3. Add 1: 11011101. Check: −128+64+16+8+4+1 = −35."
         },
         {
-          id: "Q10", marks: 2, difficulty: "intermediate",
+          id: "Q10", syl: ["1.2.1"], marks: 2, difficulty: "intermediate",
           topic: "ASCII vs Unicode",
           prompt: "Describe two reasons why the Unicode character set was developed to replace standard ASCII.",
           markPoints: [
@@ -157,7 +157,7 @@
           explanation: "ASCII's 8-bit limit (256 codes) cannot accommodate non-Latin alphabets and symbols. Unicode expands bit depth per character to encode global scripts."
         },
         {
-          id: "Q11", marks: 3, difficulty: "intermediate",
+          id: "Q11", syl: ["1.2.2"], marks: 3, difficulty: "intermediate",
           topic: "Sound Sampling",
           prompt: "A microphone records audio that is converted from analogue to digital form.\n(a) Define sample rate.\n(b) Define sample resolution.\n(c) State the effect of increasing the sample resolution on the quality and file size of the audio.",
           markPoints: [
@@ -168,7 +168,7 @@
           explanation: "Sampling measures wave height at fixed time intervals. More bits per sample (resolution) allow finer distinctions in amplitude, yielding a digital wave closer to the analogue original at the cost of higher storage requirements."
         },
         {
-          id: "Q12", calc: true, marks: 2, difficulty: "intermediate",
+          id: "Q12", syl: ["1.2.3"], calc: true, marks: 2, difficulty: "intermediate",
           topic: "Colour Depth",
           prompt: "A digital graphic uses a colour depth of 6 bits per pixel.\n(a) Calculate the maximum number of unique colours that can be represented.\n(b) Explain why increasing the colour depth increases the overall file size of the image.",
           markPoints: [
@@ -178,7 +178,7 @@
           explanation: "Colour capacity is 2^(colour depth). With 6 bits, 2^6 = 64 unique colours. Because every pixel holds 6 bits instead of fewer, the file footprint grows proportionally."
         },
         {
-          id: "Q13", calc: true, marks: 2, difficulty: "intermediate",
+          id: "Q13", syl: ["1.3.1"], calc: true, marks: 2, difficulty: "intermediate",
           topic: "IEC Storage Units",
           prompt: "(a) Calculate how many Mebibytes (MiB) are contained in 3 Gibibytes (GiB).\n(b) State the correct IEC unit abbreviation for 2^40 bytes.",
           markPoints: [
@@ -188,7 +188,7 @@
           explanation: "The 0478 syllabus uses IEC binary prefixes (1024 = 2^10 multiplier). 1 GiB = 1024 MiB, so 3 GiB = 3072 MiB. 2^10=KiB, 2^20=MiB, 2^30=GiB, 2^40=TiB."
         },
         {
-          id: "Q14", marks: 3, difficulty: "intermediate",
+          id: "Q14", syl: ["1.3.4"], marks: 3, difficulty: "intermediate",
           topic: "Lossy vs Lossless Compression",
           prompt: "A website designer compresses image and text files before publishing them online. Explain why lossy compression is suitable for high-resolution photograph files, but completely unsuitable for program source code files.",
           markPoints: [
@@ -199,7 +199,7 @@
           explanation: "Lossy compression discards imperceptible data permanently (e.g. subtle colour variations in photos). Software code requires exact, byte-for-byte precision; deleting characters introduces syntax errors."
         },
         {
-          id: "Q15", calc: true, marks: 2, difficulty: "intermediate",
+          id: "Q15", syl: ["1.3.4"], calc: true, marks: 2, difficulty: "intermediate",
           topic: "Run-Length Encoding (RLE)",
           prompt: "The following sequence of colour character codes represents a row of pixels: B B B B B W W R R R R\n(a) Encode this pixel sequence using Run-Length Encoding (RLE).\n(b) Assuming each character code and count each take 1 Byte, calculate the storage saved compared to the uncompressed sequence.",
           markPoints: [
@@ -211,7 +211,7 @@
 
         // ============== HARD TIER (5 questions, 19 marks) ==============
         {
-          id: "Q16", calc: true, marks: 4, difficulty: "hard",
+          id: "Q16", syl: ["1.1.4"], calc: true, marks: 4, difficulty: "hard",
           topic: "Binary Addition & Overflow",
           prompt: "A system uses 8-bit registers. An algorithm adds two positive denary integers: 156 and 118.\n(a) Perform binary addition on 10011100 (156) and 01110110 (118). Show your working.\n(b) Explain why an overflow error occurs and describe its effect on the stored result.",
           markPoints: [
@@ -223,7 +223,7 @@
           explanation: "An 8-bit register stores 0 to 255 (2^8 − 1). 156 + 118 = 274 needs 9 bits. The MSB carry overflows out of the register, leaving an incorrect truncated value (18)."
         },
         {
-          id: "Q17", calc: true, marks: 3, difficulty: "hard",
+          id: "Q17", syl: ["1.1.6"], calc: true, marks: 3, difficulty: "hard",
           topic: "Two's Complement Range & Conversion",
           prompt: "(a) State the smallest (most negative) and largest (most positive) denary integers that can be stored in an 8-bit two's complement register.\n(b) Convert the two's complement binary integer 10101100 into a denary integer. Show your working.",
           markPoints: [
@@ -233,7 +233,7 @@
           explanation: "(a) An 8-bit two's complement system ranges from −2^7 (10000000 = −128) to +2^7−1 (01111111 = +127). (b) (−128×1)+(32×1)+(8×1)+(4×1) = −128+32+8+4 = −84."
         },
         {
-          id: "Q18", calc: true, marks: 4, difficulty: "hard",
+          id: "Q18", syl: ["1.3.2"], calc: true, marks: 4, difficulty: "hard",
           topic: "Image File Size Calculation",
           prompt: "A digital camera captures an uncompressed bitmap image: Resolution 1024 × 768 pixels, Colour Depth 16 bits per pixel. Calculate the file size of the uncompressed image in Mebibytes (MiB). Show all steps.",
           markPoints: [
@@ -245,7 +245,7 @@
           explanation: "File size (MiB) = (Width × Height × Colour Depth bits) / (8 × 1024 × 1024) = (1024×768×16) / 8,388,608 = 12,582,912 / 8,388,608 = 1.5 MiB."
         },
         {
-          id: "Q19", calc: true, marks: 4, difficulty: "hard",
+          id: "Q19", syl: ["1.3.2"], calc: true, marks: 4, difficulty: "hard",
           topic: "Audio File Size Calculation",
           prompt: "A mono voice recording: Sample Rate 44,100 Hz, Sample Resolution 16 bits, Duration 80 seconds. Calculate the estimated file size of the uncompressed recording in MiB. Show your working and round to 2 decimal places.",
           markPoints: [
@@ -257,7 +257,7 @@
           explanation: "Size (Bytes) = (Sample Rate × Resolution × Length) / 8 = (44,100×16×80)/8 = 7,056,000 Bytes. Dividing by 1,048,576 gives 6.7291... MiB, which rounds to 6.73 MiB."
         },
         {
-          id: "Q20", calc: true, marks: 4, difficulty: "hard",
+          id: "Q20", syl: ["1.3.4"], calc: true, marks: 4, difficulty: "hard",
           topic: "RLE Efficiency Analysis",
           prompt: "A bitmap image grid is 8 pixels wide by 8 pixels high (64 pixels total), monochrome (1 bit per pixel).\n(a) Calculate the uncompressed image file size in Bytes (excluding metadata).\n(b) The first row is alternating pixels: W B W B W B W B. Explain why applying RLE to this specific row INCREASES the data size compared to the uncompressed data.",
           markPoints: [
@@ -297,7 +297,7 @@
 
         // ============== EASY TIER ==============
         {
-          id: "Q1", marks: 3, difficulty: "easy",
+          id: "Q1", syl: ["2.1.1"], marks: 3, difficulty: "easy",
           topic: "Data Packet Structure",
           prompt: "Data is transmitted across the Internet using packet switching. A data packet is divided into three distinct sections. State the name of each of the three sections.",
           markPoints: [
@@ -308,7 +308,7 @@
           explanation: "Every packet has a header at the front, the payload (the actual data being sent) in the middle, and a trailer at the end."
         },
         {
-          id: "Q2", marks: 3, difficulty: "easy",
+          id: "Q2", syl: ["2.1.1"], marks: 3, difficulty: "easy",
           topic: "Data Packet Structure",
           prompt: "A data packet has a header, a payload and a trailer. For EACH of the three sections, identify one item of data that is stored in it.",
           markPoints: [
@@ -319,7 +319,7 @@
           explanation: "Header: routing information such as the destination IP address, the originator's IP address, the packet sequence number and packet size. Payload: the actual data (part of the file) being sent. Trailer: error-checking data such as a CRC or checksum, and an end-of-packet marker."
         },
         {
-          id: "Q3", marks: 4, difficulty: "easy",
+          id: "Q3", syl: ["2.1.2"], marks: 4, difficulty: "easy",
           topic: "Serial, Parallel & Duplex Transmission",
           prompt: "Describe each of the following data transmission terms.\n(a) Serial transmission\n(b) Parallel transmission\n(c) Simplex transmission\n(d) Full-duplex transmission",
           markPoints: [
@@ -331,7 +331,7 @@
           explanation: "Serial sends one bit at a time down a single wire/channel. Parallel sends several bits at once down multiple wires. Simplex is one direction only (e.g. computer to printer). Full-duplex is both directions at the same time (e.g. a telephone call or fibre broadband)."
         },
         {
-          id: "Q4", marks: 3, difficulty: "easy",
+          id: "Q4", syl: ["2.1.3"], marks: 3, difficulty: "easy",
           topic: "USB Interface",
           prompt: "A computer keyboard and mouse are connected to a desktop computer using USB cables. State three benefits of using a USB interface to connect peripheral devices to a computer.",
           markPoints: [
@@ -356,7 +356,7 @@
           explanation: "Any three of: the device is automatically detected and its drivers installed (plug and play); USB is a standard/universal connection; the connector cannot easily be inserted incorrectly and newer ports are backwards compatible; USB can supply power to the device; it supports several high-speed data transfer rates; the USB protocol automatically requests re-transmission if an error is detected. (Writing just “it is fast” earns no marks.)"
         },
         {
-          id: "Q5", marks: 1, difficulty: "easy",
+          id: "Q5", syl: ["2.1.3"], marks: 1, difficulty: "easy",
           topic: "USB Interface",
           prompt: "State one drawback of using a USB connection.",
           markPoints: [
@@ -365,7 +365,7 @@
           explanation: "Drawbacks include: the maximum cable length is restricted (about 5 metres) without hubs; the data transfer speed is slower than internal bus connections or fibre optics; and very early USB standards may not be supported by modern systems."
         },
         {
-          id: "Q6", marks: 2, difficulty: "easy",
+          id: "Q6", syl: ["2.2.4"], marks: 2, difficulty: "easy",
           topic: "Error Detection in Data Transmission",
           prompt: "An Automatic Repeat Request (ARQ) system is used to control errors during data transmission. Identify two operational features used by an ARQ system.",
           markPoints: [
@@ -383,7 +383,7 @@
           explanation: "ARQ uses a positive acknowledgement (ACK) to say a packet arrived correctly, a negative acknowledgement (NACK) to say it arrived with an error, and a timeout so the sender re-sends if no acknowledgement arrives in time."
         },
         {
-          id: "Q7", marks: 2, difficulty: "easy",
+          id: "Q7", syl: ["2.2.3"], marks: 2, difficulty: "easy",
           topic: "Check Digits",
           prompt: "A barcode on a supermarket product includes a check digit. Identify two types of human error that a check digit is designed to detect when a code is entered manually or scanned.",
           markPoints: [
@@ -401,7 +401,7 @@
           explanation: "A check digit catches common human data-entry errors: an incorrect digit (e.g. 5 typed instead of 8), a transposition error (e.g. 52 typed instead of 25), an omitted digit, an extra digit, or a phonetic error (e.g. 13 entered instead of 30)."
         },
         {
-          id: "Q8", marks: 2, difficulty: "easy",
+          id: "Q8", syl: ["2.3.2"], marks: 2, difficulty: "easy",
           topic: "Encryption Concepts",
           prompt: "Data sent across public networks can be encrypted to keep it confidential. State the meaning of the terms plaintext and ciphertext.",
           markPoints: [
@@ -411,7 +411,7 @@
           explanation: "Plaintext is the original, readable data before encryption. Ciphertext is the scrambled, unreadable data produced by encryption, which only someone with the correct key can turn back into plaintext."
         },
         {
-          id: "Q9", marks: 1, difficulty: "easy",
+          id: "Q9", syl: ["2.3.2"], marks: 1, difficulty: "easy",
           topic: "Encryption Concepts",
           prompt: "State the major security weakness of symmetric encryption when data is sent across an insecure network.",
           markPoints: [
@@ -422,7 +422,7 @@
 
         // ============== INTERMEDIATE TIER ==============
         {
-          id: "Q10", marks: 4, difficulty: "hard",
+          id: "Q10", syl: ["2.1.1"], marks: 4, difficulty: "hard",
           topic: "Packet Switching",
           prompt: "Describe the process of packet switching, from the moment data is prepared for transmission on the sending device until it is put back together on the receiving device.",
           markPoints: [
@@ -449,7 +449,7 @@
           explanation: "The data is split into packets. Each packet gets a header (destination IP address, packet number). The packets are sent independently; routers read each packet's destination address and pick the most efficient route, so packets may take different routes and arrive out of order. The receiving device uses the packet numbers to reorder them into the original data, and asks for any missing or corrupted packet to be re-sent."
         },
         {
-          id: "Q11", marks: 3, difficulty: "intermediate",
+          id: "Q11", syl: ["2.1.2"], marks: 3, difficulty: "intermediate",
           topic: "Serial, Parallel & Duplex Transmission",
           prompt: "A smart security camera sends HD video to a central server 50 metres away.\nState whether serial or parallel transmission is more suitable, and justify your choice with two reasons.",
           markPoints: [
@@ -468,7 +468,7 @@
           explanation: "Serial. Over 50 m, serial suffers less signal attenuation/interference, there is no risk of bit skew (bits arriving out of alignment) and little crosstalk because there is only one data wire, and the cable is cheaper because it needs fewer wires."
         },
         {
-          id: "Q12", marks: 2, difficulty: "intermediate",
+          id: "Q12", syl: ["2.1.3"], marks: 2, difficulty: "intermediate",
           topic: "USB Interface",
           prompt: "Explain why USB-C is considered an improvement over older USB-A connectors.",
           markPoints: [
@@ -486,7 +486,7 @@
           explanation: "USB-C is reversible (symmetrical, so it plugs in either way up), supports much higher data transfer rates (about 10–40 Gbps), can deliver more power (up to 100 W, enough for laptops), and has a smaller, thinner connector suited to modern thin devices."
         },
         {
-          id: "Q13", calc: true, marks: 3, difficulty: "intermediate",
+          id: "Q13", syl: ["2.2.2"], calc: true, marks: 3, difficulty: "intermediate",
           topic: "Parity Checks",
           prompt: "An even parity check is used during data transmission. A device receives these four bytes:\n  1 0 1 1 0 1 0 0\n  0 1 1 1 1 1 0 1\n  1 1 1 0 0 0 0 0\n  0 0 0 0 0 0 0 0\n(a) Identify the byte in which an error has been detected. [1 mark]\n(b) Explain how you know. [2 marks]",
           markPoints: [
@@ -497,7 +497,7 @@
           explanation: "With even parity every byte must contain an even number of 1s. Byte 1 has four 1s, byte 2 has six, byte 4 has none — all even, so no error. Byte 3 (1 1 1 0 0 0 0 0) has three 1s, which is odd, so an error has been detected."
         },
         {
-          id: "Q14", marks: 2, difficulty: "intermediate",
+          id: "Q14", syl: ["2.2.2"], marks: 2, difficulty: "intermediate",
           topic: "Parity Checks",
           prompt: "Explain why a standard parity check on a transmitted byte may fail to detect an error.",
           markPoints: [
@@ -515,7 +515,7 @@
           explanation: "Parity only counts the 1s. If an even number of bits flip (e.g. two), or bits swap places, the total number of 1s still has the expected parity, so the corrupted byte passes the check."
         },
         {
-          id: "Q15", marks: 2, difficulty: "intermediate",
+          id: "Q15", syl: ["2.2.2"], marks: 2, difficulty: "intermediate",
           topic: "Parity Checks",
           prompt: "A parity block check is used. Describe how the receiving system locates a corrupted bit.",
           markPoints: [
@@ -525,7 +525,7 @@
           explanation: "The receiver recalculates the parity of each row (byte) and each column (bit position). The one row and the one column that fail the check cross at the corrupted bit — its intersection."
         },
         {
-          id: "Q16", marks: 3, difficulty: "intermediate",
+          id: "Q16", syl: ["2.2.2"], marks: 3, difficulty: "intermediate",
           topic: "Checksums",
           prompt: "Describe how a checksum is used to detect errors during data transmission.",
           markPoints: [
@@ -549,7 +549,7 @@
           explanation: "The sender calculates a checksum from the block of data using an agreed algorithm and sends it with the data (in the trailer). The receiver recalculates the checksum from the data it received and compares it with the one received. If they match, no error is assumed; if they differ, an error has been detected."
         },
         {
-          id: "Q17", marks: 2, difficulty: "intermediate",
+          id: "Q17", syl: ["2.2.2"], marks: 2, difficulty: "intermediate",
           topic: "Echo Check",
           prompt: "Explain why an echo check is not a completely reliable method of error detection.",
           markPoints: [
@@ -567,7 +567,7 @@
           explanation: "In an echo check the receiver sends the data back and the sender compares it with the original. If they differ, the sender cannot tell whether the error occurred on the way there or on the way back. If it only happened on the return trip, the original data was fine and re-sending is wasted effort. Every block also has to be transmitted twice, using double the bandwidth."
         },
         {
-          id: "Q18", marks: 2, difficulty: "intermediate",
+          id: "Q18", syl: ["2.2.2","2.2.3"], marks: 2, difficulty: "intermediate",
           topic: "Check Digits",
           prompt: "Explain the difference between error detection during data transmission and a check digit check.",
           markPoints: [
@@ -577,7 +577,7 @@
           explanation: "Transmission error detection (parity, checksum, echo check, ARQ) checks whether bits were corrupted by interference while data travelled over a network. A check digit is a validation method that detects human mistakes made when data is entered manually or scanned — it is not used to check network transmission."
         },
         {
-          id: "Q19", marks: 3, difficulty: "intermediate",
+          id: "Q19", syl: ["2.3.2"], marks: 3, difficulty: "intermediate",
           topic: "Encryption Concepts",
           prompt: "Describe how symmetric encryption operates.",
           markPoints: [
@@ -595,7 +595,7 @@
           explanation: "The plaintext is passed through an encryption algorithm using a single secret key to produce ciphertext. The ciphertext is sent across the network, and the receiver uses the same secret key to decrypt it back into plaintext."
         },
         {
-          id: "Q20", marks: 2, difficulty: "intermediate",
+          id: "Q20", syl: ["2.3.2"], marks: 2, difficulty: "intermediate",
           topic: "Asymmetric Encryption",
           prompt: "An e-commerce website uses asymmetric encryption to protect customers' payment details. State two reasons why asymmetric encryption is more secure than symmetric encryption for online shopping.",
           markPoints: [
@@ -615,7 +615,7 @@
 
         // ============== HARD TIER ==============
         {
-          id: "Q21", calc: true, marks: 3, difficulty: "hard",
+          id: "Q21", syl: ["2.2.2"], calc: true, marks: 3, difficulty: "hard",
           topic: "Parity Block Check",
           prompt: "A block of data was transmitted using odd parity, with a parity block check. Rows 1–4 are the data bytes (Parity Bit first); the last row is the parity byte used for the columns. One bit was corrupted during transmission.\n\n                  Parity   Bit2  Bit3  Bit4  Bit5  Bit6  Bit7  Bit8\nByte 1:            0         1       1       0       1       0       0       0\nByte 2:            1         0       1       1       0       1       1       0\nByte 3:            1         1       0       0       0       1       1       0\nByte 4:            1         1       0       1       0       0       1       1\nParity Byte:     0         0       1       0       0       1       0       0\n\n(a) Identify the Byte number and the Bit number of the corrupted bit. [2 marks]\n(b) State the correct value that the corrupted bit should be changed to. [1 mark]",
           markPoints: [
@@ -626,7 +626,7 @@
           explanation: "Check every row and column for ODD parity. Byte 3 (1 1 0 0 0 1 1 0) has four 1s — even, so wrong. Column Bit 4 (0, 1, 0, 1 and parity byte 0) has two 1s — even, so wrong. All other rows and columns are odd. The faulty bit is where Byte 3 and Bit 4 meet. It reads 0 but must be 1 to make both that row and that column odd again."
         },
         {
-          id: "Q22", marks: 4, difficulty: "hard",
+          id: "Q22", syl: ["2.2.4"], marks: 4, difficulty: "hard",
           topic: "ARQ (Automatic Repeat Request)",
           prompt: "A mobile phone downloads a firmware update across a wireless network, using ARQ for error control. Describe, step by step, how ARQ operates when a data packet is corrupted in transit.",
           markPoints: [
@@ -652,7 +652,7 @@
           explanation: "The sender transmits a packet and starts a timeout timer. The receiver runs an error check (checksum/CRC) on what it received and detects the error. It sends a negative acknowledgement (or simply does not send a positive one). When the sender gets the NACK, or the timer runs out before an ACK arrives, it automatically re-transmits the same packet. This repeats until the packet arrives error-free or a retry limit is reached."
         },
         {
-          id: "Q23", marks: 4, difficulty: "hard",
+          id: "Q23", syl: ["2.3.2"], marks: 4, difficulty: "hard",
           topic: "Asymmetric Encryption",
           prompt: "An e-commerce website uses asymmetric encryption to secure customer payment transactions. Explain how a public key and a private key work together to send a secure message from a customer to the website's server.",
           markPoints: [
@@ -702,7 +702,7 @@
 
         // ============== EASY TIER ==============
         {
-          id: "Q1", marks: 3, difficulty: "easy",
+          id: "Q1", syl: ["3.1.2"], marks: 3, difficulty: "easy",
           topic: "CPU Registers",
           prompt: "The CPU in a Von Neumann computer contains several registers. Name the register described in each case.\n(a) It holds the address in memory that is currently being read from or written to. [1 mark]\n(b) It stores the result of calculations performed by the ALU. [1 mark]\n(c) It holds the actual data or instruction that has been fetched from memory, or is waiting to be written to memory. [1 mark]",
           markPoints: [
@@ -713,7 +713,7 @@
           explanation: "(a) The Memory Address Register (MAR) holds the address being accessed in memory. (b) The Accumulator (ACC) stores the results of ALU calculations. (c) The Memory Data Register (MDR) holds the data or instruction fetched from, or about to be written to, memory."
         },
         {
-          id: "Q2", marks: 2, difficulty: "easy",
+          id: "Q2", syl: ["3.1.3"], marks: 2, difficulty: "easy",
           topic: "CPU Performance Factors",
           prompt: "Explain how the clock speed of a CPU affects its performance.",
           markPoints: [
@@ -723,7 +723,7 @@
           explanation: "Clock speed is the number of clock cycles (and so FDE cycles) the CPU can carry out each second. A higher clock speed means more instructions can be processed per second, so the CPU performs faster."
         },
         {
-          id: "Q3", marks: 2, difficulty: "easy",
+          id: "Q3", syl: ["3.1.3"], marks: 2, difficulty: "easy",
           topic: "CPU Performance Factors",
           prompt: "Explain how the cache size of a CPU affects its performance.",
           markPoints: [
@@ -733,7 +733,7 @@
           explanation: "Cache is high-speed memory inside or near the CPU that stores frequently used data and instructions. A larger cache holds more of them, so the CPU has to fetch from the slower RAM less often, which increases processing speed."
         },
         {
-          id: "Q4", marks: 2, difficulty: "easy",
+          id: "Q4", syl: ["3.1.3"], marks: 2, difficulty: "easy",
           topic: "CPU Performance Factors",
           prompt: "Explain how the number of cores in a CPU affects its performance.",
           markPoints: [
@@ -743,7 +743,7 @@
           explanation: "A core is an independent processing unit containing its own ALU, control unit and registers. With more cores, several instructions (FDE cycles) can be processed at the same time, which speeds up work that can be run in parallel."
         },
         {
-          id: "Q5", marks: 2, difficulty: "easy",
+          id: "Q5", syl: ["3.1.5"], marks: 2, difficulty: "easy",
           topic: "Embedded Systems",
           prompt: "Define the term embedded system.",
           markPoints: [
@@ -753,7 +753,7 @@
           explanation: "An embedded system is a combination of hardware and software designed to carry out a dedicated, specific function, and which is built into a larger mechanical or electrical device (for example a washing machine or a car)."
         },
         {
-          id: "Q6", marks: 2, difficulty: "easy",
+          id: "Q6", syl: ["3.1.5"], marks: 2, difficulty: "easy",
           topic: "Embedded Systems",
           prompt: "Identify two domestic appliances (devices found in a home) that contain an embedded system.",
           markPoints: [
@@ -771,7 +771,7 @@
           explanation: "Any two domestic appliances with a dedicated microprocessor, for example a washing machine, microwave oven, dishwasher, smart TV, central heating thermostat or robot vacuum cleaner."
         },
         {
-          id: "Q7", marks: 3, difficulty: "easy",
+          id: "Q7", syl: ["3.2.3"], marks: 3, difficulty: "easy",
           topic: "Sensors & Control Systems",
           prompt: "A smart aquarium system monitors the water conditions for tropical fish. Identify three different sensors that could be used to monitor the aquarium.",
           markPoints: [
@@ -789,16 +789,16 @@
           explanation: "Suitable sensors include a temperature sensor, a pH sensor, a level sensor, a light sensor, a flow sensor and a moisture / water-clarity sensor. A vague 'water sensor' is not specific enough."
         },
         {
-          id: "Q8", marks: 1, difficulty: "easy",
+          id: "Q8", syl: ["3.3.4"], marks: 1, difficulty: "easy",
           topic: "Virtual Memory",
-          prompt: "Define the term thrashing, in relation to virtual memory.",
+          prompt: "State what is meant by virtual memory.",
           markPoints: [
-            { text: "The CPU spends more time swapping pages between RAM and virtual memory than executing instructions, so performance slows badly", marks: 1, match: { type: "keywords", groups: [["swapping","swap","moving pages","transferring pages","paging"],["more time","most of its time","constantly","continuously","slow","than executing","instead of executing"]], needCount: 2 } }
+            { text: "Part of secondary storage (e.g. the hard drive or SSD) used as an extension of RAM, with pages of data transferred between RAM and virtual memory when needed", marks: 1, match: {"type":"keywords","groups":[["secondary","hard drive","hard disk","hdd","ssd","storage"],["ram","pages","swap","extension","extra memory","transfer","when ram is full"]],"needCount":2} }
           ],
-          explanation: "Thrashing is when the CPU spends more time swapping data pages back and forth between RAM and virtual memory than executing instructions, which severely slows down performance."
+          explanation: "Virtual memory is part of secondary storage that is used as an extension of RAM. Pages of data are transferred between RAM and virtual memory when they are needed, for example when RAM is full."
         },
         {
-          id: "Q9", marks: 3, difficulty: "easy",
+          id: "Q9", syl: ["3.3.3"], marks: 3, difficulty: "easy",
           topic: "Secondary Storage",
           prompt: "Secondary storage devices are classified as magnetic, optical or solid-state. State the category of each of the following.\n(a) Hard disk drive (HDD) [1 mark]\n(b) Blu-ray disc [1 mark]\n(c) SD card [1 mark]",
           markPoints: [
@@ -809,7 +809,7 @@
           explanation: "(a) A hard disk drive is magnetic storage. (b) A Blu-ray disc is optical storage. (c) An SD card is solid-state (flash memory) storage."
         },
         {
-          id: "Q10", marks: 2, difficulty: "easy",
+          id: "Q10", syl: ["3.3.5"], marks: 2, difficulty: "easy",
           topic: "Cloud Storage",
           prompt: "Define the term cloud storage.",
           markPoints: [
@@ -819,7 +819,7 @@
           explanation: "Cloud storage keeps data remotely on physical servers that are owned and managed by a third-party hosting company, and the data is accessed through the Internet."
         },
         {
-          id: "Q11", marks: 3, difficulty: "easy",
+          id: "Q11", syl: ["3.4.2"], marks: 3, difficulty: "easy",
           topic: "MAC & IP Addresses",
           prompt: "State three characteristics of a MAC address.",
           markPoints: [
@@ -839,7 +839,7 @@
 
         // ============== INTERMEDIATE TIER ==============
         {
-          id: "Q12", marks: 2, difficulty: "intermediate",
+          id: "Q12", syl: ["3.1.3"], marks: 2, difficulty: "intermediate",
           topic: "CPU Performance Factors",
           prompt: "A student compares two computers for video editing.\nComputer A: quad-core 2.8 GHz CPU with 8 MiB of cache.\nComputer B: dual-core 3.6 GHz CPU with 2 MiB of cache.\nState which computer is likely to run multi-threaded rendering software more efficiently, and justify your answer.",
           markPoints: [
@@ -849,7 +849,7 @@
           explanation: "Computer A. Multi-threaded software can use several cores at once, and A has four cores compared with B's two, so four tasks or threads can be processed simultaneously."
         },
         {
-          id: "Q13", marks: 3, difficulty: "intermediate",
+          id: "Q13", syl: ["3.1.5"], marks: 3, difficulty: "intermediate",
           topic: "Embedded Systems",
           prompt: "An automated espresso machine contains a microcontroller that manages water heating, pump pressure and bean grinding. State three characteristics of an embedded system, as shown by the coffee machine.",
           markPoints: [
@@ -867,7 +867,7 @@
           explanation: "Characteristics of an embedded system: it has one dedicated function; its program (firmware) is stored permanently in ROM or other non-volatile memory; it uses a microprocessor or microcontroller rather than a general-purpose CPU; the hardware cannot easily be upgraded; it uses little power; and it has a simple user interface such as buttons or knobs."
         },
         {
-          id: "Q14", marks: 2, difficulty: "intermediate",
+          id: "Q14", syl: ["3.2.1"], marks: 2, difficulty: "intermediate",
           topic: "Touchscreens",
           prompt: "Touchscreens can use capacitive, resistive or infra-red technology. State which TWO of these three technologies allow multi-touch gestures, such as pinching to zoom.",
           markPoints: [
@@ -877,7 +877,7 @@
           explanation: "Capacitive screens detect electrostatic changes at several points, and infra-red grids can detect several broken beams, so both support multi-touch. A standard resistive screen registers only a single pressure point at a time."
         },
         {
-          id: "Q15", marks: 4, difficulty: "intermediate",
+          id: "Q15", syl: ["3.2.1"], marks: 4, difficulty: "intermediate",
           topic: "Touchscreens",
           prompt: "A worker wants to use a touchscreen while wearing thick cotton gloves.\n(a) State which two of the technologies (capacitive, resistive, infra-red) will work with gloves. [2 marks]\n(b) Explain why a capacitive touchscreen does not work with gloves. [1 mark]\n(c) Explain why a resistive touchscreen does work with gloves. [1 mark]",
           markPoints: [
@@ -889,7 +889,7 @@
           explanation: "(a) Resistive and infra-red screens work with gloves. (b) Capacitive screens rely on the electrical conductivity of a bare finger, which a glove blocks. (c) Resistive screens respond to physical pressure pushing two layers together, which a gloved finger or stylus can provide. (Infra-red works because a gloved finger still breaks the light beams.)"
         },
         {
-          id: "Q16", marks: 4, difficulty: "intermediate",
+          id: "Q16", syl: ["3.2.2"], marks: 4, difficulty: "intermediate",
           topic: "Output Devices",
           prompt: "(a) State which type of printer, inkjet or laser, is best suited to high-volume, high-speed office printing, and give one reason. [2 marks]\n(b) State which type of printer is best suited to low-volume, high-quality photo printing, and give one reason. [2 marks]",
           markPoints: [
@@ -901,7 +901,7 @@
           explanation: "(a) A laser printer: it uses dry toner, a rotating drum and a heated fuser, which gives fast printing and a low cost per page at high volumes. (b) An inkjet printer: it squirts liquid ink through micro-nozzles, giving high-quality, smoothly blended colour output that suits photos in low volumes."
         },
         {
-          id: "Q17", marks: 3, difficulty: "intermediate",
+          id: "Q17", syl: ["3.2.2"], marks: 3, difficulty: "intermediate",
           topic: "Output Devices",
           prompt: "Describe the operation of a 3D printer.",
           markPoints: [
@@ -919,7 +919,7 @@
           explanation: "A 3D model is designed with CAD software and sliced into thin horizontal layers. The printer then builds the object additively, layer by layer, depositing material such as molten plastic, resin or metal powder on to the print bed, and each layer is bonded or cured with heat or UV light before the next is added."
         },
         {
-          id: "Q18", marks: 3, difficulty: "intermediate",
+          id: "Q18", syl: ["3.3.1"], marks: 3, difficulty: "intermediate",
           topic: "Primary Storage",
           prompt: "State three differences between RAM and ROM.",
           markPoints: [
@@ -937,7 +937,7 @@
           explanation: "RAM is volatile (contents lost when the power is off) whereas ROM is non-volatile; RAM is read/write whereas ROM is read-only; RAM holds the programs and data currently in use whereas ROM holds start-up routines such as the BIOS; and RAM usually has a much larger capacity than ROM."
         },
         {
-          id: "Q19", marks: 3, difficulty: "intermediate",
+          id: "Q19", syl: ["3.3.4"], marks: 3, difficulty: "intermediate",
           topic: "Virtual Memory",
           prompt: "Explain why a computer needs virtual memory when it is running several large software applications.",
           markPoints: [
@@ -955,7 +955,7 @@
           explanation: "When RAM is full, the operating system uses part of secondary storage (HDD/SSD) as virtual memory. Inactive pages are moved out of RAM into this swap space, which stops the system running out of memory and crashing, and they are moved back into RAM when the CPU needs them."
         },
         {
-          id: "Q20", marks: 4, difficulty: "hard",
+          id: "Q20", syl: ["3.3.6"], marks: 4, difficulty: "hard",
           topic: "Cloud Storage",
           prompt: "A graphic design agency is considering moving its project files from local server hard drives to cloud storage. Give two advantages and two disadvantages of cloud storage compared with local storage.",
           markPoints: [
@@ -983,7 +983,7 @@
           explanation: "Advantages: files can be reached from any device or location with an Internet connection; automatic off-site backup and disaster recovery; capacity can be scaled up without buying hardware; designers can collaborate in real time. Disadvantages: a stable, fast Internet connection is needed; large files transfer slowly on weak connections; security and privacy depend on the provider's safeguards; subscription costs continue over time."
         },
         {
-          id: "Q21", marks: 2, difficulty: "intermediate",
+          id: "Q21", syl: ["3.4.3"], marks: 2, difficulty: "intermediate",
           topic: "MAC & IP Addresses",
           prompt: "Differentiate between a static IP address and a dynamic IP address.",
           markPoints: [
@@ -993,7 +993,7 @@
           explanation: "A static IP address is permanently assigned to a device and stays the same every time it connects. A dynamic IP address is assigned temporarily by a DHCP server and can be different each time the device connects to the network."
         },
         {
-          id: "Q22", marks: 2, difficulty: "intermediate",
+          id: "Q22", syl: ["3.4.4"], marks: 2, difficulty: "intermediate",
           topic: "Network Hardware",
           prompt: "Describe two functions performed by a router on a network.",
           markPoints: [
@@ -1013,7 +1013,7 @@
 
         // ============== HARD TIER ==============
         {
-          id: "Q23", marks: 4, difficulty: "hard",
+          id: "Q23", syl: ["3.1.2"], marks: 4, difficulty: "hard",
           topic: "FDE Cycle",
           prompt: "Describe the step-by-step process of the FETCH stage of the Fetch-Decode-Execute cycle, referring to the registers and buses involved.",
           markPoints: [
@@ -1031,7 +1031,7 @@
           explanation: "The address in the Program Counter (PC) is copied to the Memory Address Register (MAR). The PC is incremented. The address is sent from the MAR along the address bus to RAM, and the instruction at that address is fetched along the data bus into the Memory Data Register (MDR). The instruction is then copied from the MDR to the Current Instruction Register (CIR)."
         },
         {
-          id: "Q24", marks: 4, difficulty: "hard",
+          id: "Q24", syl: ["3.2.3"], marks: 4, difficulty: "hard",
           topic: "Sensors & Control Systems",
           prompt: "A smart aquarium keeps the water at a constant 25 °C. Describe how the microprocessor uses data from a temperature sensor to maintain this temperature.",
           markPoints: [
@@ -1049,7 +1049,7 @@
           explanation: "The temperature sensor continuously reads the water temperature and sends an analogue signal. An ADC converts it to digital, and the microprocessor compares it with the stored value (25 °C). If it is below 25 °C the microprocessor sends a signal (through a DAC) to the actuator to switch the heater on; if it is at or above 25 °C it switches the heater off. This monitoring loop repeats continuously. (The sensor only reads data — it never decides or controls anything.)"
         },
         {
-          id: "Q25", marks: 4, difficulty: "hard",
+          id: "Q25", syl: ["3.3.3"], marks: 4, difficulty: "hard",
           topic: "Solid-State Storage",
           prompt: "Explain how data is stored and read on a solid-state drive (SSD) that uses flash memory technology.",
           markPoints: [
@@ -1089,7 +1089,7 @@
 
         // ============== EASY TIER ==============
         {
-          id: "Q1", marks: 2, difficulty: "easy",
+          id: "Q1", syl: ["4.1.1"], marks: 2, difficulty: "easy",
           topic: "System vs Application Software",
           prompt: "Define the term system software, and give one example of it.",
           markPoints: [
@@ -1099,7 +1099,7 @@
           explanation: "System software is the set of programs that manage and control the computer's hardware and provide a platform for application software to run. Examples: an operating system (Windows, Linux, macOS), device drivers, compilers, and utility software such as antivirus or a disk defragmenter."
         },
         {
-          id: "Q2", marks: 2, difficulty: "easy",
+          id: "Q2", syl: ["4.1.1"], marks: 2, difficulty: "easy",
           topic: "System vs Application Software",
           prompt: "Define the term application software, and give one example of it.",
           markPoints: [
@@ -1109,17 +1109,16 @@
           explanation: "Application software is a program that lets the user carry out a specific, user-oriented task. Examples: a word processor, spreadsheet, web browser, database management system or graphics editor."
         },
         {
-          id: "Q3", marks: 2, difficulty: "easy",
-          topic: "Utility Software",
-          prompt: "Name the type of utility software that:\n(a) reorganises file blocks on a magnetic hard drive so each file is stored in contiguous sectors. [1 mark]\n(b) scans secondary storage for malicious code and removes or quarantines the threats it finds. [1 mark]",
+          id: "Q3", syl: ["4.1.2"], marks: 2, difficulty: "easy",
+          topic: "Operating Systems",
+          prompt: "State two functions of an operating system.",
           markPoints: [
-            { text: "(a) Disk defragmenter / defragmentation utility", marks: 1, match: { type: "keywords", groups: [["defrag"]], needCount: 1 } },
-            { text: "(b) Antivirus / anti-malware software", marks: 1, match: { type: "keywords", groups: [["antivirus","anti-virus","anti virus","anti-malware","anti malware","malware"]], needCount: 1 } }
+            { text: "Any two of: managing files; handling interrupts; providing an interface; managing peripherals and drivers; managing memory; managing multitasking; providing a platform for running applications; providing system security; managing user accounts", marks: 2, match: {"type":"keywords","groups":[["file","files"],["interrupt"],["interface","gui","command line"],["peripheral","driver"],["memory","ram"],["multitask","multi-task","several programs","more than one program"],["platform","run application","running application","run programs","runs programs"],["security","password","virus","malware","firewall"],["user account","accounts","log in","login","log-in"]],"needCount":2,"marksPerGroup":1} }
           ],
-          explanation: "(a) A disk defragmenter. (b) Antivirus (anti-malware) software."
+          explanation: "Any two of: managing files, handling interrupts, providing an interface, managing peripherals and drivers, managing memory, managing multitasking, providing a platform for running applications, providing system security, managing user accounts."
         },
         {
-          id: "Q4", marks: 2, difficulty: "easy",
+          id: "Q4", syl: ["4.1.4"], marks: 2, difficulty: "easy",
           topic: "Interrupts",
           prompt: "Define the term hardware interrupt, and give one example.",
           markPoints: [
@@ -1129,7 +1128,7 @@
           explanation: "A hardware interrupt is a signal produced by a physical hardware device (for example a keyboard, mouse or printer) to request the CPU's attention. Examples: a printer running out of paper, a key being pressed, a mouse movement or a hard drive error."
         },
         {
-          id: "Q5", marks: 2, difficulty: "easy",
+          id: "Q5", syl: ["4.1.4"], marks: 2, difficulty: "easy",
           topic: "Interrupts",
           prompt: "Define the term software interrupt, and give one example.",
           markPoints: [
@@ -1139,7 +1138,7 @@
           explanation: "A software interrupt is generated by a running program or operating-system routine, for example when a program attempts a division by zero, an array index goes out of bounds, the stack overflows, or the program makes a system call."
         },
         {
-          id: "Q6", marks: 1, difficulty: "easy",
+          id: "Q6", syl: ["4.2.2"], marks: 1, difficulty: "easy",
           topic: "Assembly Language",
           prompt: "Name the translator used to convert assembly language code into binary machine code.",
           markPoints: [
@@ -1148,17 +1147,17 @@
           explanation: "An assembler converts assembly language mnemonics into machine code."
         },
         {
-          id: "Q7", marks: 2, difficulty: "easy",
+          id: "Q7", syl: ["4.2.2"], marks: 2, difficulty: "easy",
           topic: "Assembly Language",
-          prompt: "Look at this line of assembly language:\n02  ADD  Num2\nDefine the terms opcode and operand, using this line as an example.",
+          prompt: "Look at this line of assembly language:\n02  ADD  Num2\n(a) State what is meant by a mnemonic. [1 mark]\n(b) State one reason why assembly language uses mnemonics instead of binary machine code. [1 mark]",
           markPoints: [
-            { text: "Opcode: the operation / instruction the CPU performs (here ADD)", marks: 1, match: { type: "keywords", groups: [["operation","instruction","action","what to do","mnemonic","command","add"]], needCount: 1 } },
-            { text: "Operand: the data value or memory address the opcode acts on (here Num2)", marks: 1, match: { type: "keywords", groups: [["data","address","value","variable","num2","memory location","acts on","operated on"]], needCount: 1 } }
+            { text: "(a) A short word or abbreviation (code) that represents an instruction, e.g. ADD", marks: 1, match: {"type":"keywords","groups":[["short","abbreviat","word","code","symbol","name","represent","stands for","instruction"]],"needCount":1} },
+            { text: "(b) Mnemonics are easier for humans to read, understand and remember than binary", marks: 1, match: {"type":"keywords","groups":[["easier","easy","readab","remember","understand","human","simpler","simple","memorable"]],"needCount":1} }
           ],
-          explanation: "The opcode (operation code) is the instruction that tells the CPU what to do — here ADD. The operand is the data value or memory address that the opcode works on — here Num2."
+          explanation: "(a) A mnemonic is a short word or abbreviation that represents an instruction, such as ADD. (b) Mnemonics are easier for people to read, understand and remember than strings of 0s and 1s. An assembler is then needed to translate them into machine code."
         },
         {
-          id: "Q8", marks: 2, difficulty: "easy",
+          id: "Q8", syl: ["4.2.5"], marks: 2, difficulty: "easy",
           topic: "IDEs",
           prompt: "Identify two editing features of an IDE's code editor that help to prevent syntax errors while the programmer is typing.",
           markPoints: [
@@ -1176,7 +1175,7 @@
           explanation: "Any two of: syntax highlighting (colour-coding keywords), auto-completion / suggested keywords, auto-indentation, bracket matching, and real-time error alerts such as squiggly underlines."
         },
         {
-          id: "Q9", marks: 1, difficulty: "easy",
+          id: "Q9", syl: ["4.2.4"], marks: 1, difficulty: "easy",
           topic: "Translators",
           prompt: "A software company is testing and debugging an internal prototype written in Python every day. State which translator, compiler or interpreter, is the most suitable.",
           markPoints: [
@@ -1187,7 +1186,7 @@
 
         // ============== INTERMEDIATE TIER ==============
         {
-          id: "Q10", marks: 2, difficulty: "intermediate",
+          id: "Q10", syl: ["4.2.1"], marks: 2, difficulty: "intermediate",
           topic: "High-Level vs Low-Level Languages",
           prompt: "State two advantages of writing a program in a high-level language compared with a low-level language.",
           markPoints: [
@@ -1205,7 +1204,7 @@
           explanation: "High-level languages are easier for humans to read, write and understand; they are easier to debug and maintain; they are portable (machine-independent) and can run on different processors; they offer built-in functions and data structures; and they need fewer lines of code for complex tasks."
         },
         {
-          id: "Q11", marks: 2, difficulty: "intermediate",
+          id: "Q11", syl: ["4.2.1"], marks: 2, difficulty: "intermediate",
           topic: "High-Level vs Low-Level Languages",
           prompt: "State two advantages of writing a program in a low-level language, such as assembly language, compared with a high-level language.",
           markPoints: [
@@ -1223,7 +1222,7 @@
           explanation: "Low-level languages can directly manipulate hardware registers and memory addresses; they execute faster and can be highly optimised; they need less memory; and they are ideal for device drivers, operating-system kernels and embedded systems."
         },
         {
-          id: "Q12", marks: 1, difficulty: "intermediate",
+          id: "Q12", syl: ["4.2.2"], marks: 1, difficulty: "intermediate",
           topic: "Assembly Language",
           prompt: "Explain what is meant by the statement: \"Assembly language has a one-to-one relationship with machine code.\"",
           markPoints: [
@@ -1232,7 +1231,7 @@
           explanation: "Each individual assembly language instruction (mnemonic) is translated directly into exactly one machine code instruction."
         },
         {
-          id: "Q13", marks: 1, difficulty: "intermediate",
+          id: "Q13", syl: ["4.2.1"], marks: 1, difficulty: "intermediate",
           topic: "Assembly Language",
           prompt: "State one reason why a software engineer might write a device driver in assembly language instead of Python.",
           markPoints: [
@@ -1241,7 +1240,7 @@
           explanation: "Assembly language gives direct control over hardware registers and memory locations, runs with maximum speed and almost no overhead, and takes up minimal memory — all useful for device drivers."
         },
         {
-          id: "Q14", marks: 2, difficulty: "intermediate",
+          id: "Q14", syl: ["4.2.3"], marks: 2, difficulty: "intermediate",
           topic: "Compilers & Interpreters",
           prompt: "Describe how each of the following translators translates high-level source code:\n(a) a compiler [1 mark]\n(b) an interpreter [1 mark]",
           markPoints: [
@@ -1251,7 +1250,7 @@
           explanation: "(a) A compiler translates the entire source code file in one go into machine code. (b) An interpreter translates and executes the source code line by line, every time the program is run."
         },
         {
-          id: "Q15", marks: 2, difficulty: "intermediate",
+          id: "Q15", syl: ["4.2.3"], marks: 2, difficulty: "intermediate",
           topic: "Compilers & Interpreters",
           prompt: "Describe how each of the following reports syntax errors:\n(a) a compiler [1 mark]\n(b) an interpreter [1 mark]",
           markPoints: [
@@ -1261,7 +1260,7 @@
           explanation: "(a) A compiler translates the whole program and then gives a report listing all the syntax errors. (b) An interpreter halts immediately at the first error it meets."
         },
         {
-          id: "Q16", marks: 2, difficulty: "intermediate",
+          id: "Q16", syl: ["4.2.4"], marks: 2, difficulty: "intermediate",
           topic: "Compilers & Interpreters",
           prompt: "(a) State which translator generates an independent executable (.exe) file that runs without the translator. [1 mark]\n(b) State which translator is preferred during the iterative development and debugging stage of a project. [1 mark]",
           markPoints: [
@@ -1271,7 +1270,7 @@
           explanation: "(a) A compiler produces the standalone executable. (b) An interpreter is preferred during development and debugging, because it stops line by line at errors."
         },
         {
-          id: "Q17", marks: 3, difficulty: "intermediate",
+          id: "Q17", syl: ["4.2.4"], marks: 3, difficulty: "intermediate",
           topic: "Compilers & Interpreters",
           prompt: "A company is developing a commercial web browser that will be distributed to millions of end users. State which translator, compiler or interpreter, is the most suitable, and justify your choice with two reasons.",
           markPoints: [
@@ -1290,47 +1289,39 @@
           explanation: "A compiler. It produces an independent executable file, so end users do not need a translator installed; it protects the company's intellectual property because the source code is not distributed; and the executable code runs faster."
         },
         {
-          id: "Q18", marks: 2, difficulty: "intermediate",
-          topic: "Utility Software",
-          prompt: "Describe the purpose and operation of a disk defragmenter.",
+          id: "Q18", syl: ["4.1.3"], marks: 2, difficulty: "intermediate",
+          topic: "Operating Systems",
+          prompt: "Describe the role of the bootloader (firmware) when a computer is switched on.",
           markPoints: [
-            { text: "Reorganises file fragments scattered across non-contiguous sectors on a magnetic hard disk drive", marks: 1, match: { type: "keywords", groups: [["fragment","scattered","non-contiguous","split","pieces","reorganis","reorganiz","rearrang"]], needCount: 1 } },
-            { text: "Groups each file's contents into contiguous sectors, reducing head movement and speeding up file access", marks: 1, match: { type: "keywords", groups: [["contiguous","together","side by side","next to each other","same place","one place"],["faster","speed","quicker","less movement","head movement","access time","performance","improve"]], needCount: 2 } }
+            { text: "The bootloader is firmware that is run on the hardware when the computer starts", marks: 1, match: {"type":"keywords","groups":[["firmware","rom","start","switched on","turned on","boot","power"]],"needCount":1} },
+            { text: "It loads the operating system, which then provides the platform to run application software", marks: 1, match: {"type":"keywords","groups":[["load","loads","loading","start up","starts the operating system","runs the operating system","operating system","os"]],"needCount":1} }
           ],
-          explanation: "A disk defragmenter reorganises the file fragments that have become scattered across non-contiguous sectors of a magnetic hard disk drive. It groups each file's contents into contiguous sectors, which reduces the movement of the read/write head and speeds up file access."
+          explanation: "The bootloader is firmware that is run on the hardware when the computer is switched on. It loads the operating system, which then allows application software to be run."
         },
         {
-          id: "Q19", marks: 2, difficulty: "intermediate",
-          topic: "Utility Software",
-          prompt: "Describe the purpose and operation of a file compression utility.",
+          id: "Q19", syl: ["4.1.3"], marks: 2, difficulty: "intermediate",
+          topic: "Operating Systems",
+          prompt: "Explain why an operating system is needed for application software to run on a computer.",
           markPoints: [
-            { text: "Reduces the size of files using compression algorithms (lossy or lossless)", marks: 1, match: { type: "keywords", groups: [["reduce","smaller","decrease","shrink","compress"],["size","algorithm","lossy","lossless"]], needCount: 2 } },
-            { text: "Saves storage space and reduces transmission time over networks / the Internet", marks: 1, match: { type: "keywords", groups: [["storage","space","disk"],["transmi","send","upload","download","faster","bandwidth","email","internet","network"]], needCount: 1 } }
+            { text: "The operating system provides a platform on which application software runs", marks: 1, match: {"type":"keywords","groups":[["platform","runs the application","run application","run the application","runs applications","allows applications","allows application","allows programs","run programs","runs programs"]],"needCount":1} },
+            { text: "It manages the hardware (e.g. memory, peripherals) so the application can use it", marks: 1, match: {"type":"keywords","groups":[["manage","manages","controls","control","hardware","memory","peripheral","resources","between"]],"needCount":1} }
           ],
-          explanation: "A file compression utility reduces the size of files using compression algorithms (lossy or lossless). This saves space on secondary storage and reduces the time needed to transmit the files across a network or the Internet."
+          explanation: "The operating system provides the platform on which application software runs. It also manages the hardware, such as memory and peripherals, so that the application can use the computer's resources."
         },
         {
-          id: "Q20", marks: 2, difficulty: "intermediate",
-          topic: "Linkers",
-          prompt: "A student's Python program is converted into an executable. Describe the role of the linker during this process.",
+          id: "Q20", syl: ["4.2.5"], marks: 2, difficulty: "intermediate",
+          topic: "IDEs",
+          prompt: "A programmer is using an IDE. Describe the purpose of each of the following IDE functions.\n(a) Translators [1 mark]\n(b) Run-time environment [1 mark]",
           markPoints: [
-            {
-              text: "Any two of: combines separately compiled object code modules; links external pre-compiled library routines into the main program; produces a single unified executable file",
-              marks: 2,
-              match: {
-                type: "keywords",
-                groups: [["combine","joins","join","merge","put together","brings together","bring together","object code","modules"],["librar","external","pre-compiled","precompiled","routines"],["single","one executable","unified","executable file",".exe","one file","complete program"]],
-                needCount: 2,
-                marksPerGroup: 1
-              }
-            }
+            { text: "(a) Translators convert the program code into machine code (by compiling or interpreting it)", marks: 1, match: {"type":"keywords","groups":[["translat","convert","machine code","compile","interpret","binary"]],"needCount":1} },
+            { text: "(b) The run-time environment lets the program be run / executed and tested inside the IDE", marks: 1, match: {"type":"keywords","groups":[["run","execute","test","output","inside","within","try"]],"needCount":1} }
           ],
-          explanation: "The linker combines the separately compiled object code modules, links in external pre-compiled library routines, and produces a single unified executable (.exe) file."
+          explanation: "(a) The translator (compiler or interpreter) converts the program code into machine code that the computer can run. (b) The run-time environment allows the programmer to run and test the program inside the IDE."
         },
 
         // ============== HARD TIER ==============
         {
-          id: "Q21", marks: 6, difficulty: "hard",
+          id: "Q21", syl: ["4.1.2"], marks: 6, difficulty: "hard",
           topic: "Functions of an Operating System",
           prompt: "An operating system manages the computer's resources. Identify three core management functions performed by an operating system, and describe each one. [6 marks]",
           markPoints: [
@@ -1358,7 +1349,7 @@
           explanation: "Any three functions, each named and described. File management: creates, deletes, renames, copies and moves files, manages folders and access permissions. Memory management: allocates RAM to active applications, stops processes overwriting each other's memory, manages virtual memory. Multitasking / process management: shares CPU time slices between running applications. Peripheral / device management: communicates with hardware using device drivers and manages buffers and print queues. User interface: provides a GUI or CLI. Security / user accounts: manages log-ins, passwords and access levels. Interrupt handling: detects, prioritises and services interrupt signals."
         },
         {
-          id: "Q22", marks: 4, difficulty: "hard",
+          id: "Q22", syl: ["4.1.4"], marks: 4, difficulty: "hard",
           topic: "Interrupts",
           prompt: "Describe the step-by-step process carried out by the CPU and the operating system when an interrupt signal is received during program execution.",
           markPoints: [
@@ -1376,18 +1367,18 @@
           explanation: "The CPU completes its current fetch-decode-execute cycle and checks the priority of the interrupt. If it has a higher priority than the running task, the contents of the registers (PC, ACC, CIR etc.) are saved on a stack. The source of the interrupt is identified and the relevant Interrupt Service Routine (ISR) is loaded and executed. When it has finished, the saved registers are restored from the stack and the CPU resumes the original program where it left off."
         },
         {
-          id: "Q23", marks: 3, difficulty: "hard",
-          topic: "IDE Debugging Tools",
-          prompt: "An IDE provides debugging tools. Describe the purpose of each of the following.\n(a) Breakpoints [1 mark]\n(b) Single-stepping [1 mark]\n(c) Watch window (variable watch) [1 mark]",
+          id: "Q23", syl: ["4.2.5"], marks: 3, difficulty: "hard",
+          topic: "IDE Functions",
+          prompt: "An IDE provides functions to help a programmer. Describe the purpose of each of the following.\n(a) Error diagnostics [1 mark]\n(b) Auto-completion [1 mark]\n(c) Prettyprint [1 mark]",
           markPoints: [
-            { text: "(a) Breakpoints: deliberately halt / pause the program at a chosen line so the system state can be inspected", marks: 1, match: { type: "keywords", groups: [["halt","pause","stop"]], needCount: 1 } },
-            { text: "(b) Single-stepping: executes the code one line / instruction at a time to trace the execution path", marks: 1, match: { type: "keywords", groups: [["one line","one instruction","line by line","line-by-line","step by step","step-by-step","one statement","each line","at a time"]], needCount: 1 } },
-            { text: "(c) Watch window: displays / monitors the changing values of chosen variables as the program runs", marks: 1, match: { type: "keywords", groups: [["variable","values","value"],["monitor","display","show","watch","track","follow","changing","change"]], needCount: 2 } }
+            { text: "(a) Error diagnostics: find and report errors in the code so that they can be corrected", marks: 1, match: {"type":"keywords","groups":[["error","errors","mistake","bug","fault"],["find","finds","identif","report","highlight","show","locate","detect","point","tell"]],"needCount":2} },
+            { text: "(b) Auto-completion: suggests or completes keywords / variable names as the programmer types", marks: 1, match: {"type":"keywords","groups":[["suggest","complet","finish","predict","fill","offer","automatic"]],"needCount":1} },
+            { text: "(c) Prettyprint: displays the code with colours / indentation / formatting so that it is easier to read", marks: 1, match: {"type":"keywords","groups":[["colour","color","indent","format","layout","readab","easier to read","easy to read","highlight","lay","different fonts"]],"needCount":1} }
           ],
-          explanation: "(a) A breakpoint intentionally halts the program at a chosen line so the programmer can inspect the current state. (b) Single-stepping executes the code one line (instruction) at a time so the exact execution path can be traced. (c) A watch window displays and monitors the live, changing values of selected variables during line-by-line execution."
+          explanation: "(a) Error diagnostics find and report errors in the code so the programmer can correct them. (b) Auto-completion suggests or completes keywords and names as they are typed. (c) Prettyprint displays the code with colours, indentation and layout so it is easier to read."
         },
         {
-          id: "Q24", marks: 3, difficulty: "hard",
+          id: "Q24", syl: ["4.1.2"], marks: 3, difficulty: "hard",
           topic: "Operating Systems & Executing a Program",
           prompt: "A user double-clicks the icon of a compiled program. Describe how the operating system's memory manager and the CPU registers are used to run the program.",
           markPoints: [
@@ -1427,7 +1418,7 @@
       totalMarks: 35,
       questions: [
         {
-          id: "Q1", marks: 2, difficulty: "easy",
+          id: "Q1", syl: ["8.1.2"], marks: 2, difficulty: "easy",
           topic: "Identifiers & Data Types",
           prompt: "A library computer system stores book details and calculates late return fees.\nFor each item below, state a suitable meaningful identifier name and the most appropriate basic data type:\n(a) The title of a book, for example \"Computer Science Principles\" [1 mark]\n(b) The number of pages in the book, for example 342 [1 mark]",
           markPoints: [
@@ -1437,7 +1428,7 @@
           explanation: "(a) BookTitle : STRING, because a title is text. (b) PageCount : INTEGER, because a number of pages is always a whole number. A good identifier describes what the variable holds, so any sensible name such as Title or NumberOfPages is accepted."
         },
         {
-          id: "Q2", marks: 2, difficulty: "easy",
+          id: "Q2", syl: ["8.1.2"], marks: 2, difficulty: "easy",
           topic: "Identifiers & Data Types",
           prompt: "The same library system also stores the following items. For each item, state a suitable meaningful identifier name and the most appropriate basic data type:\n(a) The daily overdue fine rate in dollars, for example $0.50 [1 mark]\n(b) Whether the book is currently checked out (TRUE or FALSE) [1 mark]",
           markPoints: [
@@ -1447,7 +1438,7 @@
           explanation: "(a) DailyFineRate : REAL, because money such as $0.50 has a decimal part. (b) IsCheckedOut : BOOLEAN, because the item can only be TRUE or FALSE."
         },
         {
-          id: "Q3", marks: 1, difficulty: "easy",
+          id: "Q3", syl: ["8.1.8"], marks: 1, difficulty: "easy",
           topic: "Maintainability: Identifiers & Comments",
           prompt: "Explain why choosing meaningful identifier names is important when creating a maintainable program.",
           markPoints: [
@@ -1456,19 +1447,19 @@
           explanation: "Meaningful identifiers make the code self-documenting. Other programmers (or the same programmer months later) can understand, debug and update it without relying heavily on extra documentation."
         },
         {
-          id: "Q4", calc: true, marks: 4, difficulty: "intermediate",
+          id: "Q4", syl: ["7.7"], calc: true, marks: 4, difficulty: "intermediate",
           topic: "Trace Tables & String Handling",
-          prompt: "An algorithm processes usernames to generate standardised security codes.\n\n01 INPUT RawUsername\n02 CleanName ← UCASE(RawUsername)\n03 Code1 ← SUBSTRING(CleanName, 1, 3)\n04 Num ← LENGTH(CleanName)\n05 Code2 ← MOD(Num, 7) + 1\n06 FinalCode ← Code1 & STRING(Code2)\n07 OUTPUT FinalCode\n\nThe user enters \"algorithm\". After line 04, CleanName is \"ALGORITHM\", Code1 is \"ALG\" and Num is 9.\nComplete the trace by stating:\n(i) the value of MOD(Num, 7)\n(ii) the value of Code2 after line 05\n(iii) the value of FinalCode after line 06\n(iv) the output produced by line 07\nGive your answers as (i), (ii), (iii) and (iv).\n[4 marks]",
+          prompt: "An algorithm processes usernames to generate standardised security codes.\n\n01 INPUT RawUsername\n02 CleanName ← UCASE(RawUsername)\n03 Code1 ← SUBSTRING(CleanName, 1, 3)\n04 Num ← LENGTH(CleanName)\n05 Code2 ← MOD(Num, 7) + 1\n06 OUTPUT Code1\n07 OUTPUT Code2\n\nThe user enters \"algorithm\".\nComplete the trace by stating:\n(i) the value of Num after line 04\n(ii) the value of MOD(Num, 7)\n(iii) the value of Code2 after line 05\n(iv) the value of Code1 output by line 06\nGive your answers as (i), (ii), (iii) and (iv).\n[4 marks]",
           markPoints: [
-            { text: "MOD(9, 7) = 2", marks: 1, match: { type: "keywords", groups: [["(i) 2","(i)2","(i) = 2","(i)=2","= 2","=2","is 2","remainder 2","remainder is 2"]], needCount: 1 } },
-            { text: "Code2 = 3 (2 + 1)", marks: 1, match: { type: "keywords", groups: [["(ii) 3","(ii)3","(ii) = 3","(ii)=3","code2 = 3","code2=3","code2 ← 3","code2 <- 3","= 3","=3","is 3"]], needCount: 1 } },
-            { text: "FinalCode = \"ALG3\"", marks: 1, match: { type: "keywords", groups: [["alg3"]], needCount: 1 } },
-            { text: "Output = ALG3", marks: 1, match: { type: "keywords", groups: [["alg3"]], needCount: 1 } }
+            { text: "Num = 9", marks: 1, match: {"type":"keywords","groups":[["(i) 9","(i)9","(i) = 9","(i)=9","num = 9","num=9","num ← 9","num <- 9"]],"needCount":1} },
+            { text: "MOD(9, 7) = 2", marks: 1, match: {"type":"keywords","groups":[["(ii) 2","(ii)2","(ii) = 2","(ii)=2","remainder 2","remainder is 2"]],"needCount":1} },
+            { text: "Code2 = 3 (2 + 1)", marks: 1, match: {"type":"keywords","groups":[["(iii) 3","(iii)3","(iii) = 3","(iii)=3","code2 = 3","code2=3","code2 ← 3","code2 <- 3"]],"needCount":1} },
+            { text: "Code1 = \"ALG\"", marks: 1, match: {"type":"keywords","groups":[["(iv) alg","(iv)alg","(iv) \"alg\"","(iv)\"alg\"","(iv) = alg","(iv)=alg","code1 = alg","code1 = \"alg\"","code1 ← alg","code1 ← \"alg\"","code1 <- \"alg\""]],"needCount":1} }
           ],
-          explanation: "Num = LENGTH(\"ALGORITHM\") = 9. MOD(9, 7) = 2 because 9 = 1 × 7 + 2. Code2 = 2 + 1 = 3. FinalCode = Code1 & STRING(Code2) = \"ALG\" & \"3\" = \"ALG3\". Line 07 outputs ALG3."
+          explanation: "LENGTH(\"ALGORITHM\") = 9, so Num = 9. MOD(9, 7) = 2 because 9 = 1 × 7 + 2. Code2 = 2 + 1 = 3. SUBSTRING(\"ALGORITHM\", 1, 3) = \"ALG\", so line 06 outputs ALG and line 07 outputs 3."
         },
         {
-          id: "Q5", marks: 1, difficulty: "easy",
+          id: "Q5", syl: ["8.1.7"], marks: 1, difficulty: "easy",
           topic: "Library Routines: DIV & MOD",
           prompt: "State the function of the arithmetic operator MOD.",
           markPoints: [
@@ -1477,7 +1468,7 @@
           explanation: "MOD returns the integer remainder after a division. For example 9 MOD 7 = 2, because 9 = 1 × 7 + 2."
         },
         {
-          id: "Q6", marks: 1, difficulty: "easy",
+          id: "Q6", syl: ["8.1.4e"], marks: 1, difficulty: "easy",
           topic: "String Handling",
           prompt: "State the function of the string handling routine UCASE.",
           markPoints: [
@@ -1486,7 +1477,7 @@
           explanation: "UCASE converts every alphabetic character in a string to upper case, so UCASE(\"algorithm\") gives \"ALGORITHM\"."
         },
         {
-          id: "Q7", marks: 7, difficulty: "hard",
+          id: "Q7", syl: ["7.4","8.2.3"], marks: 7, difficulty: "hard",
           topic: "1D Arrays: Totalling, Counting & Maximum",
           prompt: "A temperature monitoring system records the temperature on each day of a 30-day month in a 1D array:\nDECLARE TempData : ARRAY[1:30] OF REAL\n\nWrite an algorithm in pseudocode to:\n• set up a totalling variable and a counter for freezing days (a freezing day is 0.0 degrees C or below)\n• use a FOR loop to go through the array\n• add up all the temperatures\n• count how many days were 0.0 degrees C or below\n• find the highest temperature in the array\n• output the average monthly temperature, the number of freezing days and the highest temperature\n[7 marks]",
           markPoints: [
@@ -1501,7 +1492,7 @@
           explanation: "Model answer:\nDECLARE TotalTemp, AverageTemp, MaxTemp : REAL\nDECLARE FreezingCount, i : INTEGER\nTotalTemp ← 0.0\nFreezingCount ← 0\nMaxTemp ← TempData[1]\nFOR i ← 1 TO 30\n    TotalTemp ← TotalTemp + TempData[i]\n    IF TempData[i] <= 0.0 THEN\n        FreezingCount ← FreezingCount + 1\n    ENDIF\n    IF TempData[i] > MaxTemp THEN\n        MaxTemp ← TempData[i]\n    ENDIF\nNEXT i\nAverageTemp ← TotalTemp / 30\nOUTPUT \"Average Temperature: \", AverageTemp\nOUTPUT \"Freezing Days: \", FreezingCount\nOUTPUT \"Maximum Temperature: \", MaxTemp\n\nNote: the maximum must start from a real value in the array (TempData[1]), not from the whole array name. Totalling and counting variables must be set to 0 before the loop."
         },
         {
-          id: "Q8", marks: 3, difficulty: "hard",
+          id: "Q8", syl: ["8.1.6b"], marks: 3, difficulty: "hard",
           topic: "Functions",
           prompt: "A software application calculates sales tax and discounts for an online checkout.\nWrite a function named CalculateTax that takes one REAL parameter, Amount, and returns a REAL value equal to 15% of the amount (Amount * 0.15). Write the complete function in pseudocode.\n[3 marks]",
           markPoints: [
@@ -1512,18 +1503,18 @@
           explanation: "FUNCTION CalculateTax(Amount : REAL) RETURNS REAL\n    RETURN Amount * 0.15\nENDFUNCTION\n\nA function must state the data type it returns and must contain a RETURN statement."
         },
         {
-          id: "Q9", marks: 3, difficulty: "hard",
-          topic: "Procedures & Parameters (By Reference)",
-          prompt: "Write a procedure named ApplyDiscount that has two parameters:\n• Price (REAL), passed by reference\n• DiscountRate (REAL)\n\nThe procedure sets Price to Price * (1.0 - DiscountRate), then outputs the message \"New Discounted Price: $\" followed by the new price. Write the complete procedure in pseudocode.\n[3 marks]",
+          id: "Q9", syl: ["8.1.6b"], marks: 3, difficulty: "hard",
+          topic: "Procedures & Parameters",
+          prompt: "Write a procedure named ApplyDiscount that has two parameters:\n• Price (REAL)\n• DiscountRate (REAL)\n\nThe procedure calculates NewPrice as Price * (1.0 - DiscountRate), then outputs the message \"New Discounted Price: $\" followed by NewPrice. Write the complete procedure in pseudocode.\n[3 marks]",
           markPoints: [
-            { text: "Correct header: PROCEDURE ApplyDiscount with Price passed BYREF and DiscountRate as a second parameter", marks: 1, match: { type: "keywords", groups: [["procedure applydiscount"],["byref","var"]], needCount: 2 } },
-            { text: "Updates Price: Price ← Price * (1.0 - DiscountRate)", marks: 1, match: { type: "keywords", groups: [["price ← price *","price <- price *","price = price *","price←price*","price<-price*"],["1.0 -","1 -","1.0-","1-"]], needCount: 2 } },
-            { text: "OUTPUT of the message and the price, ending with ENDPROCEDURE", marks: 1, match: { type: "keywords", groups: [["output","print","display"],["endprocedure"]], needCount: 2 } }
+            { text: "Correct header: PROCEDURE ApplyDiscount with Price and DiscountRate as parameters", marks: 1, match: {"type":"keywords","groups":[["procedure applydiscount"],["price"],["discountrate"]],"needCount":3} },
+            { text: "Calculates the new price: NewPrice ← Price * (1.0 - DiscountRate)", marks: 1, match: {"type":"keywords","groups":[["price *","price*"],["1.0 -","1 -","1.0-","1-"]],"needCount":2} },
+            { text: "OUTPUT of the message and the new price, ending with ENDPROCEDURE", marks: 1, match: {"type":"keywords","groups":[["output","print","display"],["endprocedure"]],"needCount":2} }
           ],
-          explanation: "PROCEDURE ApplyDiscount(BYREF Price : REAL, BYVAL DiscountRate : REAL)\n    Price ← Price * (1.0 - DiscountRate)\n    OUTPUT \"New Discounted Price: $\", Price\nENDPROCEDURE\n\nPrice is passed by reference so the change made inside the procedure also changes the original variable in the calling program. A procedure does not return a value."
+          explanation: "PROCEDURE ApplyDiscount(Price : REAL, DiscountRate : REAL)\n    DECLARE NewPrice : REAL\n    NewPrice ← Price * (1.0 - DiscountRate)\n    OUTPUT \"New Discounted Price: $\", NewPrice\nENDPROCEDURE\n\nThe values of Price and DiscountRate are passed to the procedure as parameters. A procedure does not return a value."
         },
         {
-          id: "Q10", marks: 2, difficulty: "intermediate",
+          id: "Q10", syl: ["8.1.6c"], marks: 2, difficulty: "intermediate",
           topic: "Scope: Local vs Global",
           prompt: "Explain the difference between local variables and global variables in terms of scope and possible side effects in a modular program.\n[2 marks]",
           markPoints: [
@@ -1533,7 +1524,7 @@
           explanation: "Local variables are declared inside a procedure or function. They can only be used inside it and are released when it ends, so they cannot be changed by other parts of the program. Global variables are declared in the main program and can be used anywhere. Any subroutine might change them unexpectedly, which causes side effects and makes errors harder to find."
         },
         {
-          id: "Q11", marks: 3, difficulty: "intermediate",
+          id: "Q11", syl: ["8.2.3"], marks: 3, difficulty: "intermediate",
           topic: "2D Arrays",
           prompt: "A school sports day records the points scored by 4 houses in 5 events. The scores are stored in a 2D array declared as:\nDECLARE Scores : ARRAY[1:4, 1:5] OF INTEGER\n\nWrite pseudocode using nested FOR loops to set every element of the array Scores to 0.\n[3 marks]",
           markPoints: [
@@ -1544,7 +1535,7 @@
           explanation: "DECLARE HouseIndex, EventIndex : INTEGER\nFOR HouseIndex ← 1 TO 4\n    FOR EventIndex ← 1 TO 5\n        Scores[HouseIndex, EventIndex] ← 0\n    NEXT EventIndex\nNEXT HouseIndex\n\nThe outer loop steps through the 4 houses and the inner loop through the 5 events. The inner NEXT must come before the outer NEXT."
         },
         {
-          id: "Q12", marks: 4, difficulty: "hard",
+          id: "Q12", syl: ["8.3.2"], marks: 4, difficulty: "hard",
           topic: "File Handling",
           prompt: "At the end of the sports day the final scores in the 2D array Scores[1:4, 1:5] must be saved to a text file named \"FinalScores.txt\".\nWrite a pseudocode algorithm to:\n• open \"FinalScores.txt\" for writing\n• use nested loops to write each score to the file, one per line\n• close the file\n[4 marks]",
           markPoints: [
@@ -1556,7 +1547,7 @@
           explanation: "OPENFILE \"FinalScores.txt\" FOR WRITE\nFOR HouseIndex ← 1 TO 4\n    FOR EventIndex ← 1 TO 5\n        WRITEFILE \"FinalScores.txt\", Scores[HouseIndex, EventIndex]\n    NEXT EventIndex\nNEXT HouseIndex\nCLOSEFILE \"FinalScores.txt\"\n\nThe file is opened once before the loops and closed once after them, not inside the loop."
         },
         {
-          id: "Q13", marks: 2, difficulty: "easy",
+          id: "Q13", syl: ["8.3.1"], marks: 2, difficulty: "easy",
           topic: "File Handling",
           prompt: "State two reasons why data is stored in external text files by computer programs.\n[2 marks]",
           markPoints: [

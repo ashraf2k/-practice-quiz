@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261009d" />
+<link rel="stylesheet" href="shared.css?v=20261009f" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -186,6 +186,7 @@
     </div>
 
     <div class="question-meta" id="question-meta"></div>
+    <div class="syl-ref-area hidden" id="syl-ref-area"></div>
     <p class="question-text" id="question-text"></p>
     <pre class="code-block hidden" id="question-code"></pre>
 
@@ -254,7 +255,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261009d -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261009f -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -267,12 +268,13 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261009d"></script>
-<script src="exam-data.js?v=20261009d"></script>
-<script src="report-lib.js?v=20261009d"></script>
-<script src="scratchpad.js?v=20261009d"></script>
-<script src="firebase-config.js?v=20261009d"></script>
-<script type="module" src="firebase-init.js?v=20261009d"></script>
+<script src="quiz-data.js?v=20261009f"></script>
+<script src="exam-data.js?v=20261009f"></script>
+<script src="syllabus-objectives.js?v=20261009f"></script>
+<script src="report-lib.js?v=20261009f"></script>
+<script src="scratchpad.js?v=20261009f"></script>
+<script src="firebase-config.js?v=20261009f"></script>
+<script type="module" src="firebase-init.js?v=20261009f"></script>
 <script type="module">
 (function(){
 
@@ -867,6 +869,15 @@
   var streakStarLayer = document.getElementById("streak-star-layer");
 
   // ---------- Difficulty badge ----------
+  // Syllabus reference (topic number + learning objective) beside the question.
+  var sylArea = document.getElementById("syl-ref-area");
+  function renderSylRef(q){
+    sylArea.innerHTML = "";
+    var el = window.SYLLABUS_OBJECTIVES ? SYLLABUS_OBJECTIVES.render(q.syl) : null;
+    if(el){ sylArea.appendChild(el); sylArea.classList.remove("hidden"); }
+    else sylArea.classList.add("hidden");
+  }
+
   function renderQuestionMeta(q){
     questionMeta.innerHTML = "";
     if(!q.difficulty){ questionMeta.classList.add("hidden"); return; }
@@ -1299,6 +1310,7 @@
     progressFill.style.width = ((state.index) / total * 100) + "%";
 
     renderQuestionMeta(q);
+    renderSylRef(q);
     questionText.textContent = q.q;
     // Pen/stylus scratch area, only on questions flagged calc:true.
     if(!scratchPad && window.ScratchPad) scratchPad = ScratchPad.mount(optionsWrap.parentNode, optionsWrap);

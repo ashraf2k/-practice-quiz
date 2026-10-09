@@ -18,7 +18,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Topical Exam Practice</title>
-<link rel="stylesheet" href="shared.css?v=20261009d" />
+<link rel="stylesheet" href="shared.css?v=20261009f" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -85,6 +85,7 @@
     </div>
 
     <div class="question-meta" id="q-meta"></div>
+    <div class="syl-ref-area hidden" id="syl-ref-area"></div>
     <p class="question-text" id="q-prompt" style="white-space:pre-wrap;"></p>
 
     <div class="field" style="margin-top:14px;">
@@ -133,13 +134,14 @@
 
 </div>
 
-<!-- ?v=20261009d -- cache-busting; see the longer comment above this same
+<!-- ?v=20261009f -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="exam-data.js?v=20261009d"></script>
-<script src="scratchpad.js?v=20261009d"></script>
-<script src="firebase-config.js?v=20261009d"></script>
-<script type="module" src="firebase-init.js?v=20261009d"></script>
+<script src="exam-data.js?v=20261009f"></script>
+<script src="syllabus-objectives.js?v=20261009f"></script>
+<script src="scratchpad.js?v=20261009f"></script>
+<script src="firebase-config.js?v=20261009f"></script>
+<script type="module" src="firebase-init.js?v=20261009f"></script>
 <script type="module">
 (function(){
 
@@ -354,6 +356,10 @@
     marksNote.textContent = "Worth " + q.marks + (q.marks === 1 ? " mark" : " marks");
     qMeta.appendChild(marksNote);
 
+    var sylArea = document.getElementById("syl-ref-area");
+    sylArea.innerHTML = "";
+    var sylEl = window.SYLLABUS_OBJECTIVES ? SYLLABUS_OBJECTIVES.render(q.syl) : null;
+    if(sylEl){ sylArea.appendChild(sylEl); sylArea.classList.remove("hidden"); } else sylArea.classList.add("hidden");
     qPrompt.textContent = q.prompt;
     if(!scratchPad && window.ScratchPad) scratchPad = ScratchPad.mount(qPrompt.parentNode, answerField);
     if(scratchPad) scratchPad.show(!!q.calc);
@@ -902,6 +908,10 @@
       markBadge.textContent = r.earned + " / " + r.total;
       rq.appendChild(markBadge);
       item.appendChild(rq);
+      if(q && window.SYLLABUS_OBJECTIVES){
+        var sylRev = SYLLABUS_OBJECTIVES.render(q.syl, "syl-review");
+        if(sylRev) item.appendChild(sylRev);
+      }
 
       var ansClass = r.earned === r.total ? "answer-correct" : (r.earned > 0 ? "answer-partial" : "answer-wrong");
       var yourAnswer = document.createElement("p");

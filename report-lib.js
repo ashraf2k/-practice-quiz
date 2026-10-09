@@ -257,6 +257,10 @@
       badge.textContent = a && a.correct ? "Correct" : "Incorrect";
       rq.appendChild(badge);
       item.appendChild(rq);
+      if(window.SYLLABUS_OBJECTIVES){
+        var sylRef = SYLLABUS_OBJECTIVES.render(q.syl, "syl-review");
+        if(sylRef) item.appendChild(sylRef);
+      }
 
       if(q.code){
         var pre = document.createElement("pre"); pre.className = "code-block"; pre.textContent = q.code;
@@ -582,6 +586,9 @@
         var diffColors = PDF_DIFF_COLORS[q.difficulty] || PDF_DIFF_COLORS.easy;
         var diffLabel = difficultyLabel(q.difficulty) + (q.difficulty === "hard" ? "  ·  2 marks" : "");
         blocks.push({ text: measure(diffLabel, { size: 7, bold: true, width: innerW, lineHeightFactor: 1.35 }), size: 7, bold: true, color: diffColors.text, bg: diffColors.bg, gapAfter: 3, highlightBg: true });
+      }
+      if(window.SYLLABUS_OBJECTIVES && q.syl && q.syl.length){
+        blocks.push({ text: measure(SYLLABUS_OBJECTIVES.plain(q.syl), { size: 7, width: innerW, lineHeightFactor: 1.25 }), size: 7, color: PDF_MUTED, gapAfter: 3 });
       }
       var yourAnswerText = (isCorrect ? "Correct — " : "Incorrect — ") + "Your answer: " + (a ? q.options[a.selected] : "(no answer)");
       blocks.push({ text: measure(yourAnswerText, { size: 8, bold: true, width: innerW, lineHeightFactor: 1.22 }), size: 8, bold: true, color: PDF_INK, gapAfter: isCorrect ? 3 : 1.5 });
