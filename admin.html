@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261008d" />
+<link rel="stylesheet" href="shared.css?v=20261009a" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -336,6 +336,8 @@
       <div class="admin-panel" id="panel-profile">
         <div class="admin-toolbar no-print">
           <button class="btn btn-secondary admin-detail-back" id="btn-back-profile">← Back to by-student list</button>
+          <select id="sel-class-profile" aria-label="New class for this student"><option value="">Move to class…</option><option>10AM1</option><option>10AM2</option><option>10AM3</option><option>10AM4</option><option>10AM5</option><option>10AM6</option><option>10BR1</option><option>10BR2</option><option>10BR3</option><option>12BR</option></select>
+          <button class="btn btn-secondary" id="btn-class-profile" disabled>Change class</button>
           <button class="btn btn-danger" id="btn-archive-profile">Archive student</button>
         </div>
         <p class="admin-status no-print" id="profile-archive-status"></p>
@@ -425,6 +427,8 @@
           <button class="btn btn-secondary admin-detail-back" id="btn-back-examdetail">← Back to Exam Practice list</button>
           <button class="btn btn-primary" id="btn-examdetail-save" disabled>Save regrade</button>
           <button class="btn btn-danger" id="btn-examdetail-reset">Reset this attempt</button>
+          <select id="sel-class-examdetail" aria-label="New class for this student"><option value="">Move to class…</option><option>10AM1</option><option>10AM2</option><option>10AM3</option><option>10AM4</option><option>10AM5</option><option>10AM6</option><option>10BR1</option><option>10BR2</option><option>10BR3</option><option>12BR</option></select>
+          <button class="btn btn-secondary" id="btn-class-examdetail" disabled>Change class</button>
           <button class="btn btn-danger" id="btn-archive-examdetail">Archive student</button>
         </div>
         <p class="regrade-note no-print">Change a question's mark below if the student's answer deserves a different score, then save.</p>
@@ -438,16 +442,16 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261008d -- cache-busting; see the longer comment above this same
+<!-- ?v=20261009a -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261008d"></script>
-<script src="exam-data.js?v=20261008d"></script>
-<script src="report-lib.js?v=20261008d"></script>
-<script src="syllabus-data.js?v=20261008d"></script>
-<script src="syllabus-report.js?v=20261008d"></script>
-<script src="firebase-config.js?v=20261008d"></script>
-<script type="module" src="firebase-init.js?v=20261008d"></script>
+<script src="quiz-data.js?v=20261009a"></script>
+<script src="exam-data.js?v=20261009a"></script>
+<script src="report-lib.js?v=20261009a"></script>
+<script src="syllabus-data.js?v=20261009a"></script>
+<script src="syllabus-report.js?v=20261009a"></script>
+<script src="firebase-config.js?v=20261009a"></script>
+<script type="module" src="firebase-init.js?v=20261009a"></script>
 <script type="module">
 (function(){
 
@@ -934,6 +938,43 @@
     if(!examDetailAttempt) return;
     archiveStudentFlow(examDetailAttempt.uid, examDetailAttempt.name, examDetailAttempt.className, this, "examPractice");
   });
+
+  // Admin: move a student to a different class (profile + every record).
+  function changeClassFlow(uid, name, oldCls, newCls, btn, selEl){
+    if(typeof PQFirebase.changeStudentClass !== "function"){ window.alert("This browser has an older cached script -- hard refresh (Ctrl/Cmd+Shift+R) and try again."); return; }
+    if(!uid){ window.alert("Can't change this student's class -- their records have no account id."); return; }
+    if(!newCls || newCls === oldCls) return;
+    if(!window.confirm("Move " + (name || "this student") + " from " + (oldCls || "(no class)") + " to " + newCls + "?\n\nTheir profile and all of their results move to " + newCls + ", and they will see " + newCls + "'s quizzes next time they sign in.")) return;
+    btn.disabled = true; selEl.disabled = true;
+    setArchiveStatus("Moving " + (name || "student") + " to " + newCls + "…", false);
+    PQFirebase.changeStudentClass(uid, newCls).then(function(res){
+      attempts.forEach(function(a){ if(a.uid === uid) a.className = newCls; });
+      examAttempts.forEach(function(a){ if(a.uid === uid) a.className = newCls; });
+      renderAll();
+      setArchiveStatus("Moved " + (name || "student") + " to " + newCls + " (" + res.updated + " records updated).", false);
+      showTab(profileTab === "examDetail" ? "examPractice" : "byStudent");
+    }).catch(function(err){
+      setArchiveStatus(archiveError(err, "change this student's class"), true);
+    }).then(function(){ selEl.value = ""; selEl.disabled = false; btn.disabled = true; });
+  }
+  var profileTab = "byStudent";
+  function wireClassChange(selId, btnId, getStudent, tab){
+    var selEl = document.getElementById(selId), btn = document.getElementById(btnId);
+    selEl.addEventListener("change", function(){ btn.disabled = !selEl.value; });
+    btn.addEventListener("click", function(){
+      var st = getStudent(); if(!st) return;
+      profileTab = tab;
+      changeClassFlow(st.uid, st.name, st.className, selEl.value, btn, selEl);
+    });
+  }
+  wireClassChange("sel-class-profile", "btn-class-profile", function(){
+    if(!profileGroup) return null;
+    var w = profileGroup.attempts.filter(function(x){ return x.uid; })[0];
+    return w ? { uid: w.uid, name: profileGroup.name, className: profileGroup.className } : null;
+  }, "byStudent");
+  wireClassChange("sel-class-examdetail", "btn-class-examdetail", function(){
+    return examDetailAttempt ? { uid: examDetailAttempt.uid, name: examDetailAttempt.name, className: examDetailAttempt.className } : null;
+  }, "examDetail");
 
   function populateClassFilter(sel){
     var current = sel.value;

@@ -425,6 +425,38 @@ function isArchived(uid){
     .catch(function(){ return false; });
 }
 
+// Admin: move a student to another class. The class is stored on the
+// profile (users/{uid}) AND copied onto every result / progress document
+// (the admin dashboard groups by the copy), so all of them are updated
+// together. Profile is written first so the student's next login already
+// sees the new class even if a later batch fails (safe to simply retry).
+function changeStudentClass(uid, newClass){
+  newClass = String(newClass || "").trim();
+  if(!uid || !newClass) return Promise.reject(new Error("Missing student or class."));
+  var refs = [];
+  return Promise.all(ARCHIVE_COLLECTIONS.map(function(col){
+    return getDocs(query(collection(db, col), where("uid", "==", uid))).then(function(qs){
+      qs.forEach(function(d){ refs.push(d.ref); });
+    });
+  })).then(function(){
+    return getDoc(doc(db, "users", uid));
+  }).then(function(snap){
+    if(snap.exists()) return setDoc(doc(db, "users", uid), { class: newClass }, { merge: true });
+  }).then(function(){
+    var chain = Promise.resolve();
+    for(var i = 0; i < refs.length; i += 400){
+      (function(chunk){
+        chain = chain.then(function(){
+          var b = writeBatch(db);
+          chunk.forEach(function(r){ b.update(r, { class: newClass }); });
+          return b.commit();
+        });
+      })(refs.slice(i, i + 400));
+    }
+    return chain;
+  }).then(function(){ return { uid: uid, class: newClass, updated: refs.length }; });
+}
+
 function archiveStudent(uid, adminEmail){
   var items = [];
   var profile = null;
@@ -557,6 +589,7 @@ window.PQFirebase = {
   getMyExamProgress: getMyExamProgress,
   saveExamProgress: saveExamProgress,
   deleteExamProgress: deleteExamProgress,
+  changeStudentClass: changeStudentClass,
   archiveStudent: archiveStudent,
   listArchivedStudents: listArchivedStudents,
   restoreStudent: restoreStudent,
