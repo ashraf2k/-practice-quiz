@@ -82,16 +82,20 @@
       tip:"Trace tables: one column per variable and output, update one row per executed line, and never skip a loop iteration. For validation say what is checked (e.g. 'range check' checks the value is between limits), not just 'it checks the data'.",
       redo:["algo","validation","igcse"] },
     { id:"8.1", sec:8, secTitle:"Programming", title:"Programming concepts",
-      objective:"Variables, constants and data types; input and output; sequence, selection (IF, CASE) and iteration; totalling and counting; string handling; arithmetic, relational and logical operators.",
-      revise:["8.1.2 Data types: integer, real, char, string, Boolean","8.1.4 Selection (IF, CASE), iteration (count-controlled, pre- and post-condition loops)","8.1.4 String handling: length, substring, upper, lower","8.1.4 Operators: + - * / ^ MOD DIV; = < <= > >= <>; AND OR NOT"],
-      tip:"Write the pseudocode out by hand and trace it with a small example. Check boundaries (< vs <=) and brackets in AND/OR conditions.",
-      redo:["igcse","algo"] },
+      objective:"Variables, constants and data types; input and output; sequence, selection (IF, CASE) and iteration; totalling and counting; string handling; arithmetic, relational and logical operators; procedures, functions, parameters and scope; library routines (DIV, MOD).",
+      revise:["8.1.2 Data types: integer, real, char, string, Boolean","8.1.4 Selection (IF, CASE), iteration (count-controlled, pre- and post-condition loops)","8.1.4 String handling: length, substring, upper, lower","8.1.4 Operators: + - * / ^ MOD DIV; = < <= > >= <>; AND OR NOT","8.1.6 Procedures vs functions, parameters (by value / by reference), local vs global variables","8.1.7 Library routines: DIV, MOD, ROUND, RANDOM"],
+      tip:"Write the pseudocode out by hand and trace it with a small example. Check boundaries (< vs <=) and brackets in AND/OR conditions. A function RETURNS a value; a procedure does not.",
+      redo:["programming","programming_exam","igcse","algo"] },
     { id:"8.2", sec:8, secTitle:"Programming", title:"Arrays",
       objective:"Declare and use one- and two-dimensional arrays, including indexes and loops that stay within the array bounds.",
-      revise:["8.2.1 One-dimensional and two-dimensional arrays","8.2.1 Index of the first element (0 or 1) and keeping loops within bounds"],
-      tip:"Draw the array as a grid with its index numbers, and check the first and last index of every loop.",
-      redo:["algo"] },
-    { id:"8.3", sec:8, secTitle:"Programming", title:"File handling", assessed:false },
+      revise:["8.2.1 One-dimensional and two-dimensional arrays","8.2.1 Index of the first element (0 or 1) and keeping loops within bounds","8.2.2 Nested loops to go through a 2D array (row by row)","Totalling, counting and finding the maximum in an array"],
+      tip:"Draw the array as a grid with its index numbers, and check the first and last index of every loop. Start a maximum from the first array element, not from 0.",
+      redo:["programming","programming_exam","algo"] },
+    { id:"8.3", sec:8, secTitle:"Programming", title:"File handling",
+      objective:"Store data in and retrieve data from a text file: open a file in READ, WRITE or APPEND mode, read and write lines, test for the end of the file, and close the file.",
+      revise:["8.3.1 OPENFILE ... FOR READ / WRITE / APPEND (WRITE erases old content, APPEND keeps it)","8.3.2 READFILE, WRITEFILE and CLOSEFILE; always close the file after use","8.3.2 Reading until EOF with a loop, reading one line each repetition","Why files are used: data stays after the power is off and can be reused or shared"],
+      tip:"Learn the file routine as a fixed order: OPEN, loop (READ or WRITE), CLOSE. Say which mode you use and why.",
+      redo:["programming","programming_exam"] },
     { id:"5", sec:5, secTitle:"The internet and its uses", title:"The internet and its uses", assessed:false },
     { id:"6", sec:6, secTitle:"Automated and emerging technologies", title:"Automated and emerging technologies", assessed:false },
     { id:"9", sec:9, secTitle:"Databases", title:"Databases", assessed:false },
@@ -107,6 +111,11 @@
       return /IF Statement|Relational|Nested IF|CASE|Logical Operators/i.test(t) ? "8.1" : "7";
     }
     if(examKey === "validation") return "7";
+    if(examKey === "programming" || examKey === "programming_exam"){
+      if(/File|EOF/i.test(t)) return "8.3";
+      if(/Array/i.test(t)) return "8.2";
+      return "8.1";
+    }
     if(examKey === "algo"){
       if(/Array/i.test(t)) return "8.2";
       if(/Pseudocode Syntax|Data Types|Loop|String Handling|Modular Division/i.test(t)) return "8.1";

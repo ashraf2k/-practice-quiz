@@ -1419,6 +1419,154 @@
     // retake is offered once a student submits, enforced both in the UI
     // and, like quiz-data.js's comm9618's maxAttempts:1, server-side in
     // firestore.rules.
+    programming_exam: {
+      key: "programming_exam",
+      title: "Topic 8: Programming — IGCSE exam style",
+      subtitle: "13 exam-style questions · Identifiers & data types, string handling, arrays, totalling & counting, functions & procedures, scope, file handling · 35 marks total",
+      classes: ["10BR1","10BR2","10BR3"],
+      totalMarks: 35,
+      questions: [
+        {
+          id: "Q1", marks: 2, difficulty: "easy",
+          topic: "Identifiers & Data Types",
+          prompt: "A library computer system stores book details and calculates late return fees.\nFor each item below, state a suitable meaningful identifier name and the most appropriate basic data type:\n(a) The title of a book, for example \"Computer Science Principles\" [1 mark]\n(b) The number of pages in the book, for example 342 [1 mark]",
+          markPoints: [
+            { text: "(a) A meaningful identifier such as BookTitle / Title, with data type STRING", marks: 1, match: { type: "keywords", groups: [["string"],["title","name"]], needCount: 2 } },
+            { text: "(b) A meaningful identifier such as PageCount / NumberOfPages, with data type INTEGER", marks: 1, match: { type: "keywords", groups: [["integer"],["page"]], needCount: 2 } }
+          ],
+          explanation: "(a) BookTitle : STRING, because a title is text. (b) PageCount : INTEGER, because a number of pages is always a whole number. A good identifier describes what the variable holds, so any sensible name such as Title or NumberOfPages is accepted."
+        },
+        {
+          id: "Q2", marks: 2, difficulty: "easy",
+          topic: "Identifiers & Data Types",
+          prompt: "The same library system also stores the following items. For each item, state a suitable meaningful identifier name and the most appropriate basic data type:\n(a) The daily overdue fine rate in dollars, for example $0.50 [1 mark]\n(b) Whether the book is currently checked out (TRUE or FALSE) [1 mark]",
+          markPoints: [
+            { text: "(a) A meaningful identifier such as DailyFineRate / FineRate, with data type REAL", marks: 1, match: { type: "keywords", groups: [["real"],["fine","rate","overdue","charge","fee"]], needCount: 2 } },
+            { text: "(b) A meaningful identifier such as IsCheckedOut / CheckedOut, with data type BOOLEAN", marks: 1, match: { type: "keywords", groups: [["boolean"],["check","out","loan","borrow","issued"]], needCount: 2 } }
+          ],
+          explanation: "(a) DailyFineRate : REAL, because money such as $0.50 has a decimal part. (b) IsCheckedOut : BOOLEAN, because the item can only be TRUE or FALSE."
+        },
+        {
+          id: "Q3", marks: 1, difficulty: "easy",
+          topic: "Maintainability: Identifiers & Comments",
+          prompt: "Explain why choosing meaningful identifier names is important when creating a maintainable program.",
+          markPoints: [
+            { text: "Meaningful names make the code self-documenting / easier for other programmers to understand, debug and update", marks: 1, match: { type: "keywords", groups: [["understand","readable","read","clear","self-document","meaning","purpose","debug","maintain","update","modify","other programmer","another programmer"]], needCount: 1 } }
+          ],
+          explanation: "Meaningful identifiers make the code self-documenting. Other programmers (or the same programmer months later) can understand, debug and update it without relying heavily on extra documentation."
+        },
+        {
+          id: "Q4", calc: true, marks: 4, difficulty: "intermediate",
+          topic: "Trace Tables & String Handling",
+          prompt: "An algorithm processes usernames to generate standardised security codes.\n\n01 INPUT RawUsername\n02 CleanName ← UCASE(RawUsername)\n03 Code1 ← SUBSTRING(CleanName, 1, 3)\n04 Num ← LENGTH(CleanName)\n05 Code2 ← MOD(Num, 7) + 1\n06 FinalCode ← Code1 & STRING(Code2)\n07 OUTPUT FinalCode\n\nThe user enters \"algorithm\". After line 04, CleanName is \"ALGORITHM\", Code1 is \"ALG\" and Num is 9.\nComplete the trace by stating:\n(i) the value of MOD(Num, 7)\n(ii) the value of Code2 after line 05\n(iii) the value of FinalCode after line 06\n(iv) the output produced by line 07\nGive your answers as (i), (ii), (iii) and (iv).\n[4 marks]",
+          markPoints: [
+            { text: "MOD(9, 7) = 2", marks: 1, match: { type: "keywords", groups: [["(i) 2","(i)2","(i) = 2","(i)=2","= 2","=2","is 2","remainder 2","remainder is 2"]], needCount: 1 } },
+            { text: "Code2 = 3 (2 + 1)", marks: 1, match: { type: "keywords", groups: [["(ii) 3","(ii)3","(ii) = 3","(ii)=3","code2 = 3","code2=3","code2 ← 3","code2 <- 3","= 3","=3","is 3"]], needCount: 1 } },
+            { text: "FinalCode = \"ALG3\"", marks: 1, match: { type: "keywords", groups: [["alg3"]], needCount: 1 } },
+            { text: "Output = ALG3", marks: 1, match: { type: "keywords", groups: [["alg3"]], needCount: 1 } }
+          ],
+          explanation: "Num = LENGTH(\"ALGORITHM\") = 9. MOD(9, 7) = 2 because 9 = 1 × 7 + 2. Code2 = 2 + 1 = 3. FinalCode = Code1 & STRING(Code2) = \"ALG\" & \"3\" = \"ALG3\". Line 07 outputs ALG3."
+        },
+        {
+          id: "Q5", marks: 1, difficulty: "easy",
+          topic: "Library Routines: DIV & MOD",
+          prompt: "State the function of the arithmetic operator MOD.",
+          markPoints: [
+            { text: "Returns the remainder of an integer division (for example 9 MOD 7 = 2)", marks: 1, match: { type: "keywords", groups: [["remainder","left over","leftover","left-over"]], needCount: 1 } }
+          ],
+          explanation: "MOD returns the integer remainder after a division. For example 9 MOD 7 = 2, because 9 = 1 × 7 + 2."
+        },
+        {
+          id: "Q6", marks: 1, difficulty: "easy",
+          topic: "String Handling",
+          prompt: "State the function of the string handling routine UCASE.",
+          markPoints: [
+            { text: "Converts all the letters in a string to upper case / capital letters", marks: 1, match: { type: "keywords", groups: [["upper","capital"]], needCount: 1 } }
+          ],
+          explanation: "UCASE converts every alphabetic character in a string to upper case, so UCASE(\"algorithm\") gives \"ALGORITHM\"."
+        },
+        {
+          id: "Q7", marks: 7, difficulty: "hard",
+          topic: "1D Arrays: Totalling, Counting & Maximum",
+          prompt: "A temperature monitoring system records the temperature on each day of a 30-day month in a 1D array:\nDECLARE TempData : ARRAY[1:30] OF REAL\n\nWrite an algorithm in pseudocode to:\n• set up a totalling variable and a counter for freezing days (a freezing day is 0.0 degrees C or below)\n• use a FOR loop to go through the array\n• add up all the temperatures\n• count how many days were 0.0 degrees C or below\n• find the highest temperature in the array\n• output the average monthly temperature, the number of freezing days and the highest temperature\n[7 marks]",
+          markPoints: [
+            { text: "Total and freezing counter both initialised to 0 before the loop", marks: 1, match: { type: "keywords", groups: [["total","sum"],["← 0","<- 0","= 0","←0","<-0","=0"]], needCount: 2 } },
+            { text: "Correct FOR loop: FOR i ← 1 TO 30 ... NEXT i", marks: 1, match: { type: "keywords", groups: [["for"],["to 30"],["next"]], needCount: 3 } },
+            { text: "Running total: Total ← Total + TempData[i]", marks: 1, match: { type: "keywords", groups: [["+ tempdata[","+tempdata[","+ temp[","+temp[","+ temps[","+ data["]], needCount: 1 } },
+            { text: "Counts freezing days: IF TempData[i] <= 0 THEN Count ← Count + 1", marks: 1, match: { type: "keywords", groups: [["<= 0","<=0","≤ 0","≤0"],["+ 1","+1"]], needCount: 2 } },
+            { text: "Finds the maximum: starts from TempData[1] and updates when TempData[i] > Max", marks: 1, match: { type: "keywords", groups: [["> max","> highest","> largest","> maximum","> high",">max",">highest",">largest",">maximum"]], needCount: 1 } },
+            { text: "Average calculated after the loop (Total / 30)", marks: 1, match: { type: "keywords", groups: [["/ 30","/30","÷ 30","÷30"]], needCount: 1 } },
+            { text: "OUTPUT statements for the average, freezing day count and maximum, with descriptive text", marks: 1, match: { type: "keywords", groups: [["output","print","display"],["average","mean"],["freez"],["max","highest"]], needCount: 3 } }
+          ],
+          explanation: "Model answer:\nDECLARE TotalTemp, AverageTemp, MaxTemp : REAL\nDECLARE FreezingCount, i : INTEGER\nTotalTemp ← 0.0\nFreezingCount ← 0\nMaxTemp ← TempData[1]\nFOR i ← 1 TO 30\n    TotalTemp ← TotalTemp + TempData[i]\n    IF TempData[i] <= 0.0 THEN\n        FreezingCount ← FreezingCount + 1\n    ENDIF\n    IF TempData[i] > MaxTemp THEN\n        MaxTemp ← TempData[i]\n    ENDIF\nNEXT i\nAverageTemp ← TotalTemp / 30\nOUTPUT \"Average Temperature: \", AverageTemp\nOUTPUT \"Freezing Days: \", FreezingCount\nOUTPUT \"Maximum Temperature: \", MaxTemp\n\nNote: the maximum must start from a real value in the array (TempData[1]), not from the whole array name. Totalling and counting variables must be set to 0 before the loop."
+        },
+        {
+          id: "Q8", marks: 3, difficulty: "hard",
+          topic: "Functions",
+          prompt: "A software application calculates sales tax and discounts for an online checkout.\nWrite a function named CalculateTax that takes one REAL parameter, Amount, and returns a REAL value equal to 15% of the amount (Amount * 0.15). Write the complete function in pseudocode.\n[3 marks]",
+          markPoints: [
+            { text: "Correct header: FUNCTION CalculateTax(Amount : REAL) RETURNS REAL", marks: 1, match: { type: "keywords", groups: [["function calculatetax"],["returns real"]], needCount: 2 } },
+            { text: "Returns Amount * 0.15", marks: 1, match: { type: "keywords", groups: [["return"],["* 0.15","*0.15","0.15 *","0.15*"]], needCount: 2 } },
+            { text: "Ends with ENDFUNCTION", marks: 1, match: { type: "keywords", groups: [["endfunction"]], needCount: 1 } }
+          ],
+          explanation: "FUNCTION CalculateTax(Amount : REAL) RETURNS REAL\n    RETURN Amount * 0.15\nENDFUNCTION\n\nA function must state the data type it returns and must contain a RETURN statement."
+        },
+        {
+          id: "Q9", marks: 3, difficulty: "hard",
+          topic: "Procedures & Parameters (By Reference)",
+          prompt: "Write a procedure named ApplyDiscount that has two parameters:\n• Price (REAL), passed by reference\n• DiscountRate (REAL)\n\nThe procedure sets Price to Price * (1.0 - DiscountRate), then outputs the message \"New Discounted Price: $\" followed by the new price. Write the complete procedure in pseudocode.\n[3 marks]",
+          markPoints: [
+            { text: "Correct header: PROCEDURE ApplyDiscount with Price passed BYREF and DiscountRate as a second parameter", marks: 1, match: { type: "keywords", groups: [["procedure applydiscount"],["byref","var"]], needCount: 2 } },
+            { text: "Updates Price: Price ← Price * (1.0 - DiscountRate)", marks: 1, match: { type: "keywords", groups: [["price ← price *","price <- price *","price = price *","price←price*","price<-price*"],["1.0 -","1 -","1.0-","1-"]], needCount: 2 } },
+            { text: "OUTPUT of the message and the price, ending with ENDPROCEDURE", marks: 1, match: { type: "keywords", groups: [["output","print","display"],["endprocedure"]], needCount: 2 } }
+          ],
+          explanation: "PROCEDURE ApplyDiscount(BYREF Price : REAL, BYVAL DiscountRate : REAL)\n    Price ← Price * (1.0 - DiscountRate)\n    OUTPUT \"New Discounted Price: $\", Price\nENDPROCEDURE\n\nPrice is passed by reference so the change made inside the procedure also changes the original variable in the calling program. A procedure does not return a value."
+        },
+        {
+          id: "Q10", marks: 2, difficulty: "intermediate",
+          topic: "Scope: Local vs Global",
+          prompt: "Explain the difference between local variables and global variables in terms of scope and possible side effects in a modular program.\n[2 marks]",
+          markPoints: [
+            { text: "Local: declared inside a procedure / function, can only be used there and is released when it ends", marks: 1, match: { type: "keywords", groups: [["local"],["only within","only inside","only accessible","within the","inside the","only in","destroyed","freed","deleted","lost"]], needCount: 2 } },
+            { text: "Global: declared in the main program, can be used anywhere, and any subroutine could change it by accident (side effects)", marks: 1, match: { type: "keywords", groups: [["global"],["whole program","entire program","any part","anywhere","throughout","all parts","everywhere","side effect","unexpected","accident","overwritten","modified","changed"]], needCount: 2 } }
+          ],
+          explanation: "Local variables are declared inside a procedure or function. They can only be used inside it and are released when it ends, so they cannot be changed by other parts of the program. Global variables are declared in the main program and can be used anywhere. Any subroutine might change them unexpectedly, which causes side effects and makes errors harder to find."
+        },
+        {
+          id: "Q11", marks: 3, difficulty: "intermediate",
+          topic: "2D Arrays",
+          prompt: "A school sports day records the points scored by 4 houses in 5 events. The scores are stored in a 2D array declared as:\nDECLARE Scores : ARRAY[1:4, 1:5] OF INTEGER\n\nWrite pseudocode using nested FOR loops to set every element of the array Scores to 0.\n[3 marks]",
+          markPoints: [
+            { text: "Nested FOR loop headers with the correct limits (1 TO 4 and 1 TO 5)", marks: 1, match: { type: "keywords", groups: [["to 4"],["to 5"]], needCount: 2 } },
+            { text: "Assigns 0 to Scores[row, column]", marks: 1, match: { type: "keywords", groups: [["scores["],["← 0","<- 0","= 0","←0","<-0","=0"]], needCount: 2 } },
+            { text: "Matching NEXT statements in the correct order", marks: 1, match: { type: "keywords", groups: [["next"]], needCount: 1 } }
+          ],
+          explanation: "DECLARE HouseIndex, EventIndex : INTEGER\nFOR HouseIndex ← 1 TO 4\n    FOR EventIndex ← 1 TO 5\n        Scores[HouseIndex, EventIndex] ← 0\n    NEXT EventIndex\nNEXT HouseIndex\n\nThe outer loop steps through the 4 houses and the inner loop through the 5 events. The inner NEXT must come before the outer NEXT."
+        },
+        {
+          id: "Q12", marks: 4, difficulty: "hard",
+          topic: "File Handling",
+          prompt: "At the end of the sports day the final scores in the 2D array Scores[1:4, 1:5] must be saved to a text file named \"FinalScores.txt\".\nWrite a pseudocode algorithm to:\n• open \"FinalScores.txt\" for writing\n• use nested loops to write each score to the file, one per line\n• close the file\n[4 marks]",
+          markPoints: [
+            { text: "OPENFILE \"FinalScores.txt\" FOR WRITE", marks: 1, match: { type: "keywords", groups: [["openfile"],["for write"]], needCount: 2 } },
+            { text: "Nested loops covering 4 houses and 5 events", marks: 1, match: { type: "keywords", groups: [["to 4"],["to 5"]], needCount: 2 } },
+            { text: "WRITEFILE of Scores[row, column] inside the inner loop", marks: 1, match: { type: "keywords", groups: [["writefile"],["scores["]], needCount: 2 } },
+            { text: "CLOSEFILE after the loops have finished", marks: 1, match: { type: "keywords", groups: [["closefile"]], needCount: 1 } }
+          ],
+          explanation: "OPENFILE \"FinalScores.txt\" FOR WRITE\nFOR HouseIndex ← 1 TO 4\n    FOR EventIndex ← 1 TO 5\n        WRITEFILE \"FinalScores.txt\", Scores[HouseIndex, EventIndex]\n    NEXT EventIndex\nNEXT HouseIndex\nCLOSEFILE \"FinalScores.txt\"\n\nThe file is opened once before the loops and closed once after them, not inside the loop."
+        },
+        {
+          id: "Q13", marks: 2, difficulty: "easy",
+          topic: "File Handling",
+          prompt: "State two reasons why data is stored in external text files by computer programs.\n[2 marks]",
+          markPoints: [
+            { text: "Data is kept permanently (non-volatile): RAM is emptied when the power is off, but a file on secondary storage is kept", marks: 1, match: { type: "keywords", groups: [["permanent","persist","non-volatile","nonvolatile","lost when","power","switched off","turned off","retain","keep","remain","after the program"]], needCount: 1 } },
+            { text: "Data can be reused later or shared / loaded by other programs", marks: 1, match: { type: "keywords", groups: [["share","transfer","reuse","re-use","later","another program","different program","other program","different software","load","next time","back up","backup","used again"]], needCount: 1 } }
+          ],
+          explanation: "1) Persistence: data held in RAM is lost when the power is switched off, whereas a file on secondary storage keeps the data permanently. 2) Reuse and sharing: data saved by one run of a program can be loaded again later, or opened by other programs and users."
+        }
+      ]
+    },
     comm9618_exam: {
       key: "comm9618_exam",
       title: "Topic 14: Communication & Internet Technologies — Exam Practice",
@@ -1583,7 +1731,8 @@
       { key: "datarep_exam", label: "Topic 1: Data Representation — IGCSE exam style" },
       { key: "datatrans_exam", label: "Topic 2: Data transmission - IGCSE exam style" },
       { key: "hardware_exam", label: "Topic 3: Hardware - IGCSE exam style" },
-      { key: "software_exam", label: "Topic 4: Software - IGCSE exam style" }
+      { key: "software_exam", label: "Topic 4: Software - IGCSE exam style" },
+      { key: "programming_exam", label: "Topic 8: Programming - IGCSE exam style" }
     ] },
     { test: /^12br/i, choices: [
       { key: "comm9618_exam", label: "Topic 14: Communication & Internet Technologies — A Level exam style" }
