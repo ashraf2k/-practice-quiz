@@ -8,7 +8,7 @@
   "use strict";
   var TOPICS = {
     1: "Data representation", 2: "Data transmission", 3: "Hardware", 4: "Software",
-    7: "Algorithm design and problem-solving", 8: "Programming", 9: "Databases"
+    5: "The internet and its uses", 6: "Automated and emerging technologies", 7: "Algorithm design and problem-solving", 8: "Programming", 9: "Databases", 10: "Boolean logic"
   };
   var O = {
     // ---- 1 Data representation
@@ -64,6 +64,26 @@
     "4.2.3": ["4.2 Programming languages, translators and IDEs", "Describe the operation of a compiler and an interpreter, including how errors are reported"],
     "4.2.4": ["4.2 Programming languages, translators and IDEs", "Explain the advantages and disadvantages of a compiler and an interpreter"],
     "4.2.5": ["4.2 Programming languages, translators and IDEs", "Explain the role of an IDE in writing program code and the common functions IDEs provide"],
+    // ---- 5 The internet and its uses
+    "5.1.1": ["5.1 The internet and the world wide web", "Understand the difference between the internet and the world wide web"],
+    "5.1.2": ["5.1 The internet and the world wide web", "Understand what is meant by a uniform resource locator (URL)"],
+    "5.1.3": ["5.1 The internet and the world wide web", "Describe the purpose and operation of hypertext transfer protocol (HTTP) and hypertext transfer protocol secure (HTTPS)"],
+    "5.1.4": ["5.1 The internet and the world wide web", "Explain the purpose and functions of a web browser"],
+    "5.1.5": ["5.1 The internet and the world wide web", "Describe how web pages are located, retrieved and displayed on a device when a user enters a URL"],
+    "5.1.6": ["5.1 The internet and the world wide web", "Explain what is meant by cookies and how they are used, including session cookies and persistent cookies"],
+    "5.2.1": ["5.2 Digital currency", "Understand the concept of a digital currency and how digital currencies are used"],
+    "5.2.2": ["5.2 Digital currency", "Understand the process of blockchain and how it is used to track digital currency transactions"],
+    "5.3.1": ["5.3 Cyber security", "Describe the processes involved in, and the aim of carrying out, a range of cyber security threats"],
+    "5.3.2": ["5.3 Cyber security", "Explain how a range of solutions are used to help keep data safe from security threats"],
+    // ---- 6 Automated and emerging technologies
+    "6.1.1": ["6.1 Automated systems", "Describe how sensors, microprocessors and actuators can be used in collaboration to create automated systems"],
+    "6.1.2": ["6.1 Automated systems", "Describe the advantages and disadvantages of an automated system used for a given scenario"],
+    "6.2.1": ["6.2 Robotics", "Understand what is meant by robotics"],
+    "6.2.2": ["6.2 Robotics", "Describe the characteristics of a robot"],
+    "6.2.3": ["6.2 Robotics", "Understand the roles that robots can perform and describe the advantages and disadvantages of their use"],
+    "6.3.1": ["6.3 Artificial intelligence", "Understand what is meant by artificial intelligence (AI)"],
+    "6.3.2": ["6.3 Artificial intelligence", "Describe the main characteristics of AI as the collection of data and the rules for using that data, the ability to reason, and it can include the ability to learn and adapt"],
+    "6.3.3": ["6.3 Artificial intelligence", "Explain the basic operation and components of AI systems to simulate intelligent behaviour (expert systems and machine learning)"],
     // ---- 7 Algorithm design and problem-solving
     "7.1": ["7 Algorithm design and problem-solving", "Understand the program development life cycle, limited to: analysis, design, coding and testing"],
     "7.2": ["7 Algorithm design and problem-solving", "Understand sub-systems and decomposition (inputs, processes, outputs, storage), and use structure diagrams, flowcharts and pseudocode to design a solution"],
@@ -100,7 +120,13 @@
     "9.1": ["9 Databases", "Define a single-table database from given data storage requirements (fields, records, validation)"],
     "9.2": ["9 Databases", "Suggest suitable basic data types (text/alphanumeric, character, Boolean, integer, real, date/time)"],
     "9.3": ["9 Databases", "Understand the purpose of a primary key and identify a suitable primary key for a given database table"],
-    "9.4": ["9 Databases", "Read, understand and complete structured query language (SQL) scripts to query data stored in a single database table (SELECT, FROM, WHERE, ORDER BY, SUM, COUNT, AND, OR)"]
+    "9.4": ["9 Databases", "Read, understand and complete structured query language (SQL) scripts to query data stored in a single database table (SELECT, FROM, WHERE, ORDER BY, SUM, COUNT, AND, OR)"],
+    // ---- 10 Boolean logic
+    "10.1": ["10 Boolean logic", "Identify and use the standard symbols for logic gates"],
+    "10.2": ["10 Boolean logic", "Define and understand the functions of logic gates (NOT, AND, OR, NAND, NOR, XOR (EOR)), including the binary output produced from all the possible binary inputs"],
+    "10.3a": ["10 Boolean logic", "Use logic gates to create given logic circuits from a problem statement, logic expression or truth table (maximum of three inputs and one output)"],
+    "10.3b": ["10 Boolean logic", "Complete a truth table from a problem statement, logic expression or logic circuit"],
+    "10.3c": ["10 Boolean logic", "Write a logic expression from a problem statement, logic circuit or truth table"]
   };
   function parse(code){ return String(code).match(/^(\d+)/)[1]; }
   // Display form "8.1.4(c)" for codes that end in a letter.

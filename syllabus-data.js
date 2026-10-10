@@ -80,7 +80,7 @@
       objective:"Program development life cycle; decomposition and abstraction; structure diagrams, flowcharts and pseudocode; standard algorithms; validation and verification; test data; trace tables; finding and fixing errors.",
       revise:["7.1 PDLC: analysis, design, coding, testing","7.2 Decomposition (inputs, processes, outputs, storage); structure diagrams, flowcharts, pseudocode","7.4 Linear search, bubble sort, totalling, counting, max/min/average","7.5 Validation (range, length, type, presence, format, check digit) vs verification (visual check, double entry)","7.6 Test data: normal, abnormal, extreme, boundary","7.7-7.8 Trace tables and identifying errors in algorithms"],
       tip:"Trace tables: one column per variable and output, update one row per executed line, and never skip a loop iteration. For validation say what is checked (e.g. 'range check' checks the value is between limits), not just 'it checks the data'.",
-      redo:["algo","validation","igcse"] },
+      redo:["algo","algo_exam","validation","igcse"] },
     { id:"8.1", sec:8, secTitle:"Programming", title:"Programming concepts",
       objective:"Variables, constants and data types; input and output; sequence, selection (IF, CASE) and iteration; totalling and counting; string handling; arithmetic, relational and logical operators; procedures, functions, parameters and scope; library routines (DIV, MOD).",
       revise:["8.1.2 Data types: integer, real, char, string, Boolean","8.1.4 Selection (IF, CASE), iteration (count-controlled, pre- and post-condition loops)","8.1.4 String handling: length, substring, upper, lower","8.1.4 Operators: + - * / ^ MOD DIV; = < <= > >= <>; AND OR NOT","8.1.6 Procedures vs functions, parameters (by value / by reference), local vs global variables","8.1.7 Library routines: DIV, MOD, ROUND, RANDOM"],
@@ -96,14 +96,26 @@
       revise:["8.3.1 OPENFILE ... FOR READ / WRITE / APPEND (WRITE erases old content, APPEND keeps it)","8.3.2 READFILE, WRITEFILE and CLOSEFILE; always close the file after use","8.3.2 Reading until EOF with a loop, reading one line each repetition","Why files are used: data stays after the power is off and can be reused or shared"],
       tip:"Learn the file routine as a fixed order: OPEN, loop (READ or WRITE), CLOSE. Say which mode you use and why.",
       redo:["programming","programming_exam"] },
-    { id:"5", sec:5, secTitle:"The internet and its uses", title:"The internet and its uses", assessed:false },
-    { id:"6", sec:6, secTitle:"Automated and emerging technologies", title:"Automated and emerging technologies", assessed:false },
+    { id:"5", sec:5, secTitle:"The internet and its uses", title:"The internet and its uses",
+      objective:"Know the difference between the internet and the web, how URLs, HTTP/HTTPS, browsers, DNS and cookies work, what digital currency and blockchain are, and the main cyber security threats and solutions.",
+      revise:["5.1 The internet is the infrastructure; the world wide web is the collection of web pages accessed using it","5.1 URL = protocol + domain name + web page/file name; HTTPS encrypts the data (SSL)","5.1 Locating a page: browser, DNS (domain name to IP address), web server, HTML rendered by the browser","5.1 Session cookies are deleted when the browser closes; persistent cookies stay until they expire","5.2 Digital currency exists only electronically; blockchain is a time-stamped ledger that cannot be altered","5.3 Threats: brute-force, data interception, DDoS, hacking, malware (virus, worm, Trojan horse, spyware, adware, ransomware), pharming, phishing, social engineering","5.3 Solutions: access levels, anti-malware, authentication, automatic updates, checking links and messages, firewalls, privacy settings, proxy servers, SSL"],
+      tip:"Learn each threat with a one-line definition and the solution that stops it. For the page-retrieval question, write the steps in order: DNS, IP address, web server, HTML, display.",
+      redo:["internet","internet_exam"] },
+    { id:"6", sec:6, secTitle:"Automated and emerging technologies", title:"Automated and emerging technologies",
+      objective:"Describe how sensors, microprocessors and actuators form automated systems, the characteristics, roles, advantages and disadvantages of robots, and the basics of AI (expert systems and machine learning).",
+      revise:["6.1 Sensor measures, microprocessor processes and compares with a stored value, actuator carries out the action","6.1 Give an advantage AND a disadvantage for the scenario given (industry, transport, agriculture, weather, gaming, lighting, science)","6.2 A robot has a mechanical structure, electrical components (sensors, microprocessors, actuators) and is programmable","6.3 AI: data and rules, reasoning, and the ability to learn and adapt","6.3 Expert system: knowledge base, rule base, inference engine, interface","6.3 Machine learning: a program automatically adapts its own processes and/or data"],
+      tip:"For a scenario question, name the sensor, what the microprocessor decides, and what the actuator does. Always apply the advantage or disadvantage to the scenario, not to robots in general.",
+      redo:["automated","automated_exam"] },
     { id:"9", sec:9, secTitle:"Databases", title:"Databases",
       objective:"Define a single-table database (fields, records, validation), choose data types, identify a primary key, and read, write and correct SQL queries on one table.",
       revise:["9.1 Fields (columns) and records (rows); validation of the data entered","9.2 Data types: text/alphanumeric, character, Boolean, integer, real, date/time","9.3 A primary key is unique for every record (e.g. an ID code, not a name)","9.4 SQL: SELECT fields FROM table WHERE criteria ORDER BY field ASCENDING/DESCENDING","9.4 SUM adds the values in a field; COUNT counts the matching records; AND / OR combine conditions"],
       tip:"Read an SQL query in the order SELECT, FROM, WHERE: first find the matching records, then sort them, then show only the fields listed after SELECT. Telephone numbers and codes are text, not integers.",
       redo:["databases","databases_exam"] },
-    { id:"10", sec:10, secTitle:"Boolean logic", title:"Boolean logic", assessed:false }
+    { id:"10", sec:10, secTitle:"Boolean logic", title:"Boolean logic",
+      objective:"Know the symbols and functions of the NOT, AND, OR, NAND, NOR and XOR gates, and create circuits, complete truth tables and write logic expressions (maximum three inputs and one output).",
+      revise:["10.1 Gate symbols: a small circle at the output means the output is inverted (NAND, NOR, NOT)","10.2 NOT has one input; every other gate has two. AND: 1 only if both are 1. OR: 1 if either is 1. XOR: 1 only if the inputs differ","10.2 NAND, NOR are the opposites of AND, OR","10.3 A 3-input truth table has 8 rows (000 to 111). Work out the bracket values first, in working columns","10.3 Write expressions with NOT, AND, OR, NAND, NOR, XOR in capitals and use brackets"],
+      tip:"Add a working column for every gate in the circuit and fill the table one column at a time. Write a condition such as L = 0 as NOT L.",
+      redo:["boolean","boolean_exam"] }
   ];
   var SUB_BY_ID = {};
   SUBTOPICS.forEach(function(s){ SUB_BY_ID[s.id] = s; });
@@ -116,6 +128,10 @@
     }
     if(examKey === "validation") return "7";
     if(examKey === "databases" || examKey === "databases_exam") return "9";
+    if(examKey === "boolean" || examKey === "boolean_exam") return "10";
+    if(examKey === "algo_exam") return "7";
+    if(examKey === "internet" || examKey === "internet_exam") return "5";
+    if(examKey === "automated" || examKey === "automated_exam") return "6";
     if(examKey === "programming" || examKey === "programming_exam"){
       if(/File|EOF/i.test(t)) return "8.3";
       if(/Array/i.test(t)) return "8.2";
@@ -133,9 +149,9 @@
     if(/Parity|Checksum|Echo|Check Digit|Error Detection|ARQ|Transmission Errors/i.test(t)) return "2.2";
     if(/Packet|Serial|Parallel|Transmission Mode|USB|Duplex/i.test(t)) return "2.1";
     if(/Sensor|Actuator|Touchscreen|Output Device|Control System/i.test(t)) return "3.2";
-    if(/CPU|Register|Bus|FDE|Embedded/i.test(t)) return "3.1";
+    if(/CPU|Register|Bus|FDE|Embedded|Instruction Set/i.test(t)) return "3.1";
     if(/Primary|Secondary|Optical|Solid-State|Virtual Memory|Cloud|\bRAM\b/i.test(t)) return "3.3";
-    if(/MAC|IP Address|Network Hardware|Router/i.test(t)) return "3.4";
+    if(/MAC|IP Address|Network Hardware|Router|Network Interface/i.test(t)) return "3.4";
     if(/Types of Software|System vs|Operating System|Utility|Interrupt|User Interface|Functions of an Operating/i.test(t)) return "4.1";
     if(/Programming Language|Translator|Compiler|Assembly|\bIDEs?\b|Linker|High-Level|Low-Level/i.test(t)) return "4.2";
     return null;
