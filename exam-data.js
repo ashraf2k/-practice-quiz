@@ -1567,7 +1567,7 @@
       totalMarks: 25,
       questions: [
         {
-          id: "Q1", syl: ["10.2","10.3b"], marks: 2, difficulty: "easy",
+          id: "Q1", syl: ["10.2","10.3b"], calc: true, marks: 2, difficulty: "easy",
           topic: "Truth Tables",
           prompt: "Complete the truth tables for these two logic gates. The input rows are 00, 01, 10 and 11, in that order (A first, then B). Write each output column from the top row to the bottom row. Give your answers as (i) and (ii). [2 marks]\n(i) A 2-input NAND gate: write the output X column.\n(ii) A 2-input XOR gate: write the output Y column.",
           markPoints: [
@@ -1659,7 +1659,7 @@
           explanation: "The NOT gate takes L and gives NOT L. AND gate 1 has inputs T and P. AND gate 2 has inputs T and the output of the NOT gate. The outputs of the two AND gates are the inputs of an OR gate, and its output is X."
         },
         {
-          id: "Q10", syl: ["10.3b","10.3c"], marks: 4, difficulty: "hard",
+          id: "Q10", syl: ["10.3b","10.3c"], calc: true, marks: 4, difficulty: "hard",
           topic: "Problem Statement to Expression",
           prompt: "An elevator door D must open (D = 1) if EITHER of these is true:\n• the elevator has stopped at a floor (S = 1) AND an obstacle is detected (O = 1)\n• the elevator has stopped at a floor (S = 1) AND the open-door button is pressed (B = 1)\n\nA student writes this expression: D = (S OR O) AND (S OR B)\n\n(a) Work out the value of D when the elevator is moving (S = 0), an obstacle is detected (O = 1) and the button is pressed (B = 1). [1 mark]\n(b) Explain why the student's expression is wrong. [1 mark]\n(c) Write down the correct logic expression for D. [2 marks]",
           markPoints: [
