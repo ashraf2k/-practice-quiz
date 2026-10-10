@@ -98,7 +98,11 @@
       redo:["programming","programming_exam"] },
     { id:"5", sec:5, secTitle:"The internet and its uses", title:"The internet and its uses", assessed:false },
     { id:"6", sec:6, secTitle:"Automated and emerging technologies", title:"Automated and emerging technologies", assessed:false },
-    { id:"9", sec:9, secTitle:"Databases", title:"Databases", assessed:false },
+    { id:"9", sec:9, secTitle:"Databases", title:"Databases",
+      objective:"Define a single-table database (fields, records, validation), choose data types, identify a primary key, and read, write and correct SQL queries on one table.",
+      revise:["9.1 Fields (columns) and records (rows); validation of the data entered","9.2 Data types: text/alphanumeric, character, Boolean, integer, real, date/time","9.3 A primary key is unique for every record (e.g. an ID code, not a name)","9.4 SQL: SELECT fields FROM table WHERE criteria ORDER BY field ASCENDING/DESCENDING","9.4 SUM adds the values in a field; COUNT counts the matching records; AND / OR combine conditions"],
+      tip:"Read an SQL query in the order SELECT, FROM, WHERE: first find the matching records, then sort them, then show only the fields listed after SELECT. Telephone numbers and codes are text, not integers.",
+      redo:["databases","databases_exam"] },
     { id:"10", sec:10, secTitle:"Boolean logic", title:"Boolean logic", assessed:false }
   ];
   var SUB_BY_ID = {};
@@ -111,6 +115,7 @@
       return /IF Statement|Relational|Nested IF|CASE|Logical Operators/i.test(t) ? "8.1" : "7";
     }
     if(examKey === "validation") return "7";
+    if(examKey === "databases" || examKey === "databases_exam") return "9";
     if(examKey === "programming" || examKey === "programming_exam"){
       if(/File|EOF/i.test(t)) return "8.3";
       if(/Array/i.test(t)) return "8.2";

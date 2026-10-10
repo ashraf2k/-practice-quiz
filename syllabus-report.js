@@ -81,7 +81,7 @@
     });
     h += "</tbody></table></div>";
     var legend = assessed.map(function(a){ return a.id + " " + a.title; }).join(" &middot; ");
-    h += '<p class="sy-note">' + legend + ". Not yet assessed (no quiz or paper): 5, 6, 9, 10.</p>";
+    h += '<p class="sy-note">' + legend + ". Not yet assessed (no quiz or paper): 5, 6, 10.</p>";
     container.innerHTML = h;
     container.querySelectorAll("#sy-list tbody tr").forEach(function(tr){
       tr.addEventListener("click", function(){ onOpen(students[Number(tr.getAttribute("data-i"))]); });
@@ -130,7 +130,7 @@
       h += '<div class="sy-card"><h4>Also</h4><ul>' + s.extras.map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("") +
         (s.missing.length ? "<li>Not yet attempted: " + s.missing.map(esc).join("; ") + ".</li>" : "") + "</ul></div>";
     }
-    h += '<p class="sy-note" style="margin-top:14px">Based on each student\'s best attempt at every quiz and paper. For a quiz that was retaken, the per-topic breakdown comes from the stored (latest) attempt while the headline score is the higher of the two. Sections 5, 6, 9 and 10 have no quizzes or papers yet, so they are shown as Not yet assessed rather than weak.</p>';
+    h += '<p class="sy-note" style="margin-top:14px">Based on each student\'s best attempt at every quiz and paper. For a quiz that was retaken, the per-topic breakdown comes from the stored (latest) attempt while the headline score is the higher of the two. Sections 5, 6 and 10 have no quizzes or papers yet, so they are shown as Not yet assessed rather than weak.</p>';
     container.innerHTML = h;
   }
 
@@ -259,7 +259,7 @@
       if(s.missing.length) p.text("-  Not yet attempted: " + s.missing.join("; ") + ".", { size:9.5, x:M + 6, gap:2 });
     }
     p.y += 6;
-    p.text("Based on each student's best attempt at every quiz and paper. For a retaken quiz the per-topic breakdown uses the stored (latest) attempt; the headline score is the higher of the two. Sections 5, 6, 9 and 10 have no quizzes or papers yet and are shown as Not yet assessed, not as weak. Ratings: Secure >= " + SD.THRESH_SECURE + "%, Developing " + SD.THRESH_DEVELOPING + "-" + (SD.THRESH_SECURE - 1) + "%, Needs work < " + SD.THRESH_DEVELOPING + "%, Limited evidence = fewer than " + SD.MIN_QUESTIONS + " questions.", { size:8, color:[130, 138, 150] });
+    p.text("Based on each student's best attempt at every quiz and paper. For a retaken quiz the per-topic breakdown uses the stored (latest) attempt; the headline score is the higher of the two. Sections 5, 6 and 10 have no quizzes or papers yet and are shown as Not yet assessed, not as weak. Ratings: Secure >= " + SD.THRESH_SECURE + "%, Developing " + SD.THRESH_DEVELOPING + "-" + (SD.THRESH_SECURE - 1) + "%, Needs work < " + SD.THRESH_DEVELOPING + "%, Limited evidence = fewer than " + SD.MIN_QUESTIONS + " questions.", { size:8, color:[130, 138, 150] });
   }
 
   function pdfClassSummary(p, students, label){

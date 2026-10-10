@@ -310,13 +310,11 @@
         {
           id: "Q2", syl: ["2.1.1"], marks: 3, difficulty: "easy",
           topic: "Data Packet Structure",
-          prompt: "A data packet has a header, a payload and a trailer. For EACH of the three sections, identify one item of data that is stored in it.",
+          prompt: "Data is sent across a network in packets. Each packet contains a packet header, a payload and a trailer.\nState three items of data that are stored in the packet header. [3 marks]",
           markPoints: [
-            { text: "Header: destination IP address // sender's/originator's IP address // packet sequence number // packet size // hop count / TTL", marks: 1, match: { type: "keywords", groups: [["destination","ip address","sequence","packet number","packet size","originator","sender","ttl","time to live","hop"]], needCount: 1 } },
-            { text: "Payload: the actual data / body of the file being sent", marks: 1, match: { type: "keywords", groups: [["actual data","the data","data being sent","file being sent","body","content","part of the file","part of the message"]], needCount: 1 } },
-            { text: "Trailer: CRC // checksum // error-checking bits // end-of-packet marker", marks: 1, match: { type: "keywords", groups: [["crc","cyclic","checksum","error check","error-check","error detect","end of packet","end-of-packet","end marker"]], needCount: 1 } }
+            { text: "Any three of: the destination address; the packet number; the originator's (sender's) address", marks: 3, match: {"type":"keywords","groups":[["destination"],["packet number","sequence","number of the packet","packet no"],["originator","sender","source"]],"needCount":3,"marksPerGroup":1} }
           ],
-          explanation: "Header: routing information such as the destination IP address, the originator's IP address, the packet sequence number and packet size. Payload: the actual data (part of the file) being sent. Trailer: error-checking data such as a CRC or checksum, and an end-of-packet marker."
+          explanation: "The packet header includes the destination address, the packet number and the originator's address. The payload is the data being sent."
         },
         {
           id: "Q3", syl: ["2.1.2"], marks: 4, difficulty: "easy",
@@ -385,30 +383,22 @@
         {
           id: "Q7", syl: ["2.2.3"], marks: 2, difficulty: "easy",
           topic: "Check Digits",
-          prompt: "A barcode on a supermarket product includes a check digit. Identify two types of human error that a check digit is designed to detect when a code is entered manually or scanned.",
+          prompt: "A product barcode includes a check digit.\nState the purpose of a check digit, and give one example of where a check digit is used. [2 marks]",
           markPoints: [
-            {
-              text: "Any two of: incorrect digit entered; transposition (two adjacent digits swapped); omitted digit; extra digit; phonetic error (e.g. 13 for 30)",
-              marks: 2,
-              match: {
-                type: "keywords",
-                groups: [["incorrect digit","wrong digit","wrong number","incorrect number","mistyped","typing error","typo"],["transpos","swapped","swap","wrong order","switched","adjacent digits"],["omit","missing","left out","forgot","leave out","too few"],["extra digit","additional digit","added digit","too many","extra number"],["phonetic","sounds like","sound"]],
-                needCount: 2,
-                marksPerGroup: 1
-              }
-            }
+            { text: "A check digit is used to detect errors made when data is entered", marks: 1, match: {"type":"keywords","groups":[["detect","check","find","identif","spot","error","mistake","incorrect","wrong"]],"needCount":1} },
+            { text: "Example: an ISBN (book number) or a barcode", marks: 1, match: {"type":"keywords","groups":[["isbn","barcode","bar code","book number"]],"needCount":1} }
           ],
-          explanation: "A check digit catches common human data-entry errors: an incorrect digit (e.g. 5 typed instead of 8), a transposition error (e.g. 52 typed instead of 25), an omitted digit, an extra digit, or a phonetic error (e.g. 13 entered instead of 30)."
+          explanation: "A check digit is used to detect errors in data entry. It is used with ISBNs on books and with barcodes on products."
         },
         {
-          id: "Q8", syl: ["2.3.2"], marks: 2, difficulty: "easy",
+          id: "Q8", syl: ["2.3.1"], marks: 2, difficulty: "easy",
           topic: "Encryption Concepts",
-          prompt: "Data sent across public networks can be encrypted to keep it confidential. State the meaning of the terms plaintext and ciphertext.",
+          prompt: "Data sent across public networks can be encrypted to keep it confidential.\nDescribe what happens to the data when it is encrypted. [2 marks]",
           markPoints: [
-            { text: "Plaintext: the original, unencrypted data/text that is human-readable", marks: 1, match: { type: "keywords", groups: [["original","unencrypted","not encrypted","before encrypt","readable","normal text","un-encrypted"]], needCount: 1 } },
-            { text: "Ciphertext: encrypted / scrambled data that is unreadable without the decryption key", marks: 1, match: { type: "keywords", groups: [["encrypted","scrambled","unreadable","not readable","after encrypt","cannot be read","can't be read","meaningless","coded"]], needCount: 1 } }
+            { text: "The data is scrambled so that it cannot be understood / read by anyone who intercepts it", marks: 1, match: {"type":"keywords","groups":[["scrambl","unreadable","cannot be read","can't be read","not readable","meaningless","jumbled","cannot understand","can't understand","coded","cipher","cannot be understood"]],"needCount":1} },
+            { text: "Only someone with the correct key can turn it back into the original data", marks: 1, match: {"type":"keywords","groups":[["key","decrypt","original","unscramble"]],"needCount":1} }
           ],
-          explanation: "Plaintext is the original, readable data before encryption. Ciphertext is the scrambled, unreadable data produced by encryption, which only someone with the correct key can turn back into plaintext."
+          explanation: "Encryption scrambles the data so that it cannot be understood if it is intercepted. Only a person who has the correct key can decrypt it and turn it back into the original data."
         },
         {
           id: "Q9", syl: ["2.3.2"], marks: 1, difficulty: "easy",
@@ -470,20 +460,11 @@
         {
           id: "Q12", syl: ["2.1.3"], marks: 2, difficulty: "intermediate",
           topic: "USB Interface",
-          prompt: "Explain why USB-C is considered an improvement over older USB-A connectors.",
+          prompt: "State two benefits of using the universal serial bus (USB) interface to connect a device to a computer. [2 marks]",
           markPoints: [
-            {
-              text: "Any two of: symmetrical / reversible design (can be plugged in either way up); higher data transfer rates; higher power delivery (e.g. up to 100 W); smaller / thinner connector",
-              marks: 2,
-              match: {
-                type: "keywords",
-                groups: [["either way","both ways","any way up","reversible","symmetrical","symmetric","wrong way","upside down"],["faster","higher data","transfer rate","higher speed","gbps","speed"],["power","100w","100 w","charge laptop","charging"],["smaller","thinner","compact","slim","footprint"]],
-                needCount: 2,
-                marksPerGroup: 1
-              }
-            }
+            { text: "Any two of: a standard connection that can be used for many different devices; it can supply power to the device; data is transferred quickly; the device is recognised easily when it is plugged in", marks: 2, match: {"type":"keywords","groups":[["standard","same connector","one type","universal","many devices","variety of devices","different devices","lots of devices","any device"],["power","charge","charging"],["fast","speed","quick","high data"],["plug and play","automatically","detects","recognis","easy to connect","simple to connect","easy to use"]],"needCount":2,"marksPerGroup":1} }
           ],
-          explanation: "USB-C is reversible (symmetrical, so it plugs in either way up), supports much higher data transfer rates (about 10–40 Gbps), can deliver more power (up to 100 W, enough for laptops), and has a smaller, thinner connector suited to modern thin devices."
+          explanation: "Any two of: USB is a standard connection that can be used for many different devices; it can supply power to the device; data can be transferred quickly; and devices are recognised easily when they are plugged in."
         },
         {
           id: "Q13", syl: ["2.2.2"], calc: true, marks: 3, difficulty: "intermediate",
@@ -579,20 +560,11 @@
         {
           id: "Q19", syl: ["2.3.2"], marks: 3, difficulty: "intermediate",
           topic: "Encryption Concepts",
-          prompt: "Describe how symmetric encryption operates.",
+          prompt: "Describe how symmetric encryption operates. [3 marks]",
           markPoints: [
-            {
-              text: "Any three of: plaintext is put through an encryption algorithm / cipher; one secret key encrypts the plaintext into ciphertext; the ciphertext is transmitted; the receiver uses the same secret key to decrypt it back into plaintext",
-              marks: 3,
-              match: {
-                type: "keywords",
-                groups: [["algorithm","cipher","plaintext","plain text"],["one key","single key","secret key","same key","a key","one secret"],["transmitted","sent","send","travels","across the network","ciphertext"],["decrypt","same key","same secret key","back into plaintext","turn it back","unscramble"]],
-                needCount: 3,
-                marksPerGroup: 1
-              }
-            }
+            { text: "Any three of: the data is scrambled using an encryption algorithm; one secret key is used to do this; the scrambled data is transmitted; the receiver uses the same secret key to decrypt it back into the original data", marks: 3, match: {"type":"keywords","groups":[["algorithm","cipher","scrambl","coded","jumbled"],["one key","single key","secret key","same key","a key","one secret"],["transmitted","sent","send","travels","across the network","encrypted data"],["decrypt","same key","same secret key","original","turn it back","unscramble"]],"needCount":3,"marksPerGroup":1} }
           ],
-          explanation: "The plaintext is passed through an encryption algorithm using a single secret key to produce ciphertext. The ciphertext is sent across the network, and the receiver uses the same secret key to decrypt it back into plaintext."
+          explanation: "The data is scrambled by an encryption algorithm using one secret key. The encrypted data is sent across the network, and the receiver uses the same secret key to decrypt it back into the original data."
         },
         {
           id: "Q20", syl: ["2.3.2"], marks: 2, difficulty: "intermediate",
@@ -841,100 +813,75 @@
         {
           id: "Q12", syl: ["3.1.3"], marks: 2, difficulty: "intermediate",
           topic: "CPU Performance Factors",
-          prompt: "A student compares two computers for video editing.\nComputer A: quad-core 2.8 GHz CPU with 8 MiB of cache.\nComputer B: dual-core 3.6 GHz CPU with 2 MiB of cache.\nState which computer is likely to run multi-threaded rendering software more efficiently, and justify your answer.",
+          prompt: "A student compares two computers for video editing.\nComputer A: quad-core 2.8 GHz CPU with 8 MiB of cache.\nComputer B: dual-core 3.6 GHz CPU with 2 MiB of cache.\nState which computer is likely to give the better performance for video editing, and justify your answer. [2 marks]",
           markPoints: [
-            { text: "Computer A", marks: 1, match: { type: "keywords", groups: [["computer a","a)","quad","answer a","computer a."]], needCount: 1 } },
-            { text: "It has four cores (quad-core) compared with two, so more tasks / threads can be processed at the same time", marks: 1, match: { type: "keywords", groups: [["4 core","four core","quad","more cores","4 cores","four cores"],["same time","simultaneous","parallel","at once","threads","more tasks","more instructions"]], needCount: 2 } }
+            { text: "Computer A", marks: 1, match: {"type":"keywords","groups":[["computer a","a)","quad","answer a","computer a."]],"needCount":1} },
+            { text: "It has four cores (quad-core) compared with two, so more instructions can be processed at the same time / it has a larger cache", marks: 1, match: {"type":"keywords","groups":[["4 core","four core","quad","more cores","4 cores","four cores","larger cache","bigger cache","more cache","8 mib"],["same time","simultaneous","parallel","at once","more tasks","more instructions","faster access","quicker access","more data"]],"needCount":2} }
           ],
-          explanation: "Computer A. Multi-threaded software can use several cores at once, and A has four cores compared with B's two, so four tasks or threads can be processed simultaneously."
+          explanation: "Computer A. It has four cores compared with two, so more instructions can be processed at the same time, and its larger cache lets the CPU reach frequently used data more quickly. Computer B has a faster clock, but the extra cores and cache are likely to matter more for video editing."
         },
         {
           id: "Q13", syl: ["3.1.5"], marks: 3, difficulty: "intermediate",
           topic: "Embedded Systems",
-          prompt: "An automated espresso machine contains a microcontroller that manages water heating, pump pressure and bean grinding. State three characteristics of an embedded system, as shown by the coffee machine.",
+          prompt: "An automated espresso machine contains an embedded system that controls the water heating, the pump and the bean grinding.\n(a) State what is meant by an embedded system. [2 marks]\n(b) State one other device that contains an embedded system. [1 mark]",
           markPoints: [
-            {
-              text: "Any three of: dedicated single purpose; program (firmware) stored permanently in ROM / non-volatile memory; uses a microprocessor / microcontroller; hardware dedicated and not easily upgraded; low power consumption; simple user interface (buttons / knobs)",
-              marks: 3,
-              match: {
-                type: "keywords",
-                groups: [["dedicated","single purpose","one purpose","single function","one function","specific function","specific task","one task"],["rom","firmware","non-volatile","non volatile","stored permanently","permanently stored"],["microprocessor","microcontroller"],["cannot be upgraded","can't be upgraded","not upgraded","not easily","cannot be expanded","fixed hardware","cannot be changed"],["low power","low electrical","little power","low energy","consumes low"],["simple","buttons","knobs","limited interface","basic interface"]],
-                needCount: 3,
-                marksPerGroup: 1
-              }
-            }
+            { text: "(a) It performs a dedicated (single / specific) function", marks: 1, match: {"type":"keywords","groups":[["dedicated","single purpose","one purpose","single function","one function","specific function","specific task","one task","particular function","particular task"]],"needCount":1} },
+            { text: "(a) It is built into a device, unlike a general purpose computer that performs many different functions", marks: 1, match: {"type":"keywords","groups":[["built into","part of","inside","within","controls the","not a general","general purpose","many different functions","only one","just one"]],"needCount":1} },
+            { text: "(b) e.g. a domestic appliance, car, security system, lighting system or vending machine", marks: 1, match: {"type":"keywords","groups":[["washing machine","domestic appliance","appliance","car","security system","lighting system","vending machine","microwave","fridge","dishwasher","central heating","alarm","traffic light","air conditioner","thermostat","television","tv"]],"needCount":1} }
           ],
-          explanation: "Characteristics of an embedded system: it has one dedicated function; its program (firmware) is stored permanently in ROM or other non-volatile memory; it uses a microprocessor or microcontroller rather than a general-purpose CPU; the hardware cannot easily be upgraded; it uses little power; and it has a simple user interface such as buttons or knobs."
+          explanation: "(a) An embedded system is used to perform a dedicated function inside a device, which makes it different from a general purpose computer such as a PC or laptop that performs many different functions. (b) Examples: domestic appliances, cars, security systems, lighting systems and vending machines."
         },
         {
-          id: "Q14", syl: ["3.2.1"], marks: 2, difficulty: "intermediate",
+          id: "Q14", syl: ["3.2.1"], marks: 2, difficulty: "easy",
           topic: "Touchscreens",
-          prompt: "Touchscreens can use capacitive, resistive or infra-red technology. State which TWO of these three technologies allow multi-touch gestures, such as pinching to zoom.",
+          prompt: "A touch screen is an input device.\nName two types of touch screen. [2 marks]",
           markPoints: [
-            { text: "Capacitive", marks: 1, match: { type: "keywords", groups: [["capacitive"]], needCount: 1 } },
-            { text: "Infra-red", marks: 1, match: { type: "keywords", groups: [["infra-red","infrared","infra red","ir "," ir","ir."]], needCount: 1 } }
+            { text: "Any two of: resistive; capacitive; infra-red", marks: 2, match: {"type":"keywords","groups":[["resistive"],["capacitive"],["infra-red","infrared","infra red"]],"needCount":2,"marksPerGroup":1} }
           ],
-          explanation: "Capacitive screens detect electrostatic changes at several points, and infra-red grids can detect several broken beams, so both support multi-touch. A standard resistive screen registers only a single pressure point at a time."
+          explanation: "The three types of touch screen are resistive, capacitive and infra-red. Any two are correct."
         },
         {
-          id: "Q15", syl: ["3.2.1"], marks: 4, difficulty: "intermediate",
-          topic: "Touchscreens",
-          prompt: "A worker wants to use a touchscreen while wearing thick cotton gloves.\n(a) State which two of the technologies (capacitive, resistive, infra-red) will work with gloves. [2 marks]\n(b) Explain why a capacitive touchscreen does not work with gloves. [1 mark]\n(c) Explain why a resistive touchscreen does work with gloves. [1 mark]",
+          id: "Q15", syl: ["3.2.1","3.2.2"], marks: 4, difficulty: "intermediate",
+          topic: "Input & Output Devices",
+          prompt: "A self-service ticket machine has a touch screen, a barcode scanner and a speaker.\n(a) State which TWO of these three devices are input devices. [2 marks]\n(b) State what is meant by an input device. [2 marks]",
           markPoints: [
-            { text: "(a) Resistive", marks: 1, match: { type: "keywords", groups: [["resistive"]], needCount: 1 } },
-            { text: "(a) Infra-red", marks: 1, match: { type: "keywords", groups: [["infra-red","infrared","infra red"]], needCount: 1 } },
-            { text: "(b) The gloves block the electrical conductivity / electrostatic charge of the finger that a capacitive screen needs", marks: 1, match: { type: "keywords", groups: [["conduct","electrical","electrostatic","charge","insulat","block"]], needCount: 1 } },
-            { text: "(c) A resistive screen works by mechanical pressure, which a gloved finger (or stylus) can still apply", marks: 1, match: { type: "keywords", groups: [["pressure","press","mechanical","push","physical"]], needCount: 1 } }
+            { text: "(a) Touch screen", marks: 1, match: {"type":"keywords","groups":[["touch screen","touchscreen","touch-screen"]],"needCount":1} },
+            { text: "(a) Barcode scanner", marks: 1, match: {"type":"keywords","groups":[["barcode","bar code","scanner"]],"needCount":1} },
+            { text: "(b) A device that is used to enter data / instructions into a computer", marks: 1, match: {"type":"keywords","groups":[["enter","send","put","feed","give","provide","supply"],["data","instruction","information","commands","signals"]],"needCount":2} },
+            { text: "(b) so that the computer can process (or store) the data", marks: 1, match: {"type":"keywords","groups":[["process","processed","processing","use","used","store","act on","respond"]],"needCount":1} }
           ],
-          explanation: "(a) Resistive and infra-red screens work with gloves. (b) Capacitive screens rely on the electrical conductivity of a bare finger, which a glove blocks. (c) Resistive screens respond to physical pressure pushing two layers together, which a gloved finger or stylus can provide. (Infra-red works because a gloved finger still breaks the light beams.)"
+          explanation: "(a) The touch screen and the barcode scanner are input devices; the speaker is an output device. (b) An input device is used to enter data or instructions into a computer so that the computer can process them."
         },
         {
-          id: "Q16", syl: ["3.2.2"], marks: 4, difficulty: "intermediate",
-          topic: "Output Devices",
-          prompt: "(a) State which type of printer, inkjet or laser, is best suited to high-volume, high-speed office printing, and give one reason. [2 marks]\n(b) State which type of printer is best suited to low-volume, high-quality photo printing, and give one reason. [2 marks]",
+          id: "Q16", syl: ["3.2.3"], marks: 4, difficulty: "intermediate",
+          topic: "Sensors",
+          prompt: "State the most suitable sensor for each of these uses. Give your answers as (i), (ii), (iii) and (iv). [4 marks]\n(i) Switching on a light when a person walks into a room\n(ii) Monitoring how full a water tank is\n(iii) Checking the acidity of the water in a fish tank\n(iv) Detecting a leak of cooking gas in a kitchen",
           markPoints: [
-            { text: "(a) Laser printer", marks: 1, match: { type: "keywords", groups: [["laser"]], needCount: 1 } },
-            { text: "(a) Reason: fast printing and / or a lower cost per page for high volumes (toner, rotating drum and fuser)", marks: 1, match: { type: "keywords", groups: [["fast","speed","quick","cost per page","cheaper per page","cheap","toner","drum","fuser","volume","large"]], needCount: 1 } },
-            { text: "(b) Inkjet printer", marks: 1, match: { type: "keywords", groups: [["inkjet","ink jet","ink-jet"]], needCount: 1 } },
-            { text: "(b) Reason: liquid ink gives high-quality, smoothly blended colour prints", marks: 1, match: { type: "keywords", groups: [["quality","detail","colour","color","photo","blend","smooth","liquid ink","resolution","nozzle"]], needCount: 1 } }
+            { text: "(i) Infra-red (or proximity) sensor", marks: 1, match: {"type":"keywords","groups":[["infra-red","infrared","infra red","proximity","motion"]],"needCount":1} },
+            { text: "(ii) Level sensor", marks: 1, match: {"type":"keywords","groups":[["level"]],"needCount":1} },
+            { text: "(iii) pH sensor", marks: 1, match: {"type":"keywords","groups":[["ph sensor","(iii) ph","(iii)ph","iii) ph","iii. ph","iii ph","iii: ph","iii- ph","acidity sensor","ph probe"]],"needCount":1} },
+            { text: "(iv) Gas sensor", marks: 1, match: {"type":"keywords","groups":[["gas"]],"needCount":1} }
           ],
-          explanation: "(a) A laser printer: it uses dry toner, a rotating drum and a heated fuser, which gives fast printing and a low cost per page at high volumes. (b) An inkjet printer: it squirts liquid ink through micro-nozzles, giving high-quality, smoothly blended colour output that suits photos in low volumes."
+          explanation: "(i) An infra-red (or proximity) sensor detects a person. (ii) A level sensor measures how full a tank is. (iii) A pH sensor measures acidity. (iv) A gas sensor detects a gas leak."
         },
         {
           id: "Q17", syl: ["3.2.2"], marks: 3, difficulty: "intermediate",
           topic: "Output Devices",
-          prompt: "Describe the operation of a 3D printer.",
+          prompt: "(a) State what is meant by an output device. [1 mark]\n(b) A 3D printer is an output device. State two other output devices. [2 marks]",
           markPoints: [
-            {
-              text: "Any three of: a 3D model is designed using CAD software; the model is sliced into thin horizontal 2D layers; the printer builds the object additively, layer by layer; material (molten plastic filament / resin / metal powder) is extruded or deposited on to the print bed; each layer is bonded / cured (heat or UV light) before the next is added",
-              marks: 3,
-              match: {
-                type: "keywords",
-                groups: [["cad","computer-aided design","computer aided design","3d model","digital model","design"],["slice","sliced","layers","cross-section","cross section"],["layer by layer","layer-by-layer","additive","one layer at a time","builds up","built up"],["filament","resin","powder","extrude","deposit","molten","plastic","material"],["cure","cured","bond","fuse","solidif","harden","uv","heat"]],
-                needCount: 3,
-                marksPerGroup: 1
-              }
-            }
+            { text: "(a) A device that receives data from a computer and presents the result to the user", marks: 1, match: {"type":"keywords","groups":[["from the computer","from a computer","computer sends","receives data","receives","presents","displays","shows","produces","results","information to the user","to the user","gives out"]],"needCount":1} },
+            { text: "(b) Any two of: actuator; DLP projector; inkjet printer; laser printer; LED screen; LCD projector; LCD screen; speaker", marks: 2, match: {"type":"keywords","groups":[["actuator"],["dlp","projector"],["inkjet","ink jet"],["laser printer","laser"],["led"],["lcd"],["speaker"]],"needCount":2,"marksPerGroup":1} }
           ],
-          explanation: "A 3D model is designed with CAD software and sliced into thin horizontal layers. The printer then builds the object additively, layer by layer, depositing material such as molten plastic, resin or metal powder on to the print bed, and each layer is bonded or cured with heat or UV light before the next is added."
+          explanation: "(a) An output device receives data from a computer and presents the result to the user, for example as a picture, a printout or a sound. (b) Any two of: actuator, DLP projector, inkjet printer, laser printer, LED screen, LCD projector, LCD screen, speaker."
         },
         {
           id: "Q18", syl: ["3.3.1"], marks: 3, difficulty: "intermediate",
           topic: "Primary Storage",
-          prompt: "State three differences between RAM and ROM.",
+          prompt: "State three differences between RAM and ROM. [3 marks]",
           markPoints: [
-            {
-              text: "Any three of: RAM is volatile, ROM is non-volatile; RAM is read/write, ROM is read-only; RAM stores programs and data in use, ROM stores start-up routines (BIOS / firmware); RAM is usually much larger in capacity than ROM",
-              marks: 3,
-              match: {
-                type: "keywords",
-                groups: [["volatile","lost when","loses","power off","power is off","switched off"],["read only","read-only","read/write","read and write","can be written","cannot be written","can't be written","can be changed","cannot be changed"],["in use","currently","running","being used","start-up","startup","bios","boot","firmware"],["larger","bigger","capacity","size","more storage","smaller"]],
-                needCount: 3,
-                marksPerGroup: 1
-              }
-            }
+            { text: "Any three of: RAM loses its contents when the power is off, ROM keeps its contents; RAM can be read from and written to, ROM is read-only; RAM holds the programs and data currently in use, ROM holds the start-up instructions (bootloader)", marks: 3, match: {"type":"keywords","groups":[["volatile","lost when","loses","power off","power is off","switched off","keeps","retains","permanent","even when"],["read only","read-only","read/write","read and write","can be written","cannot be written","can't be written","can be changed","cannot be changed"],["in use","currently","running","being used","start-up","startup","boot","firmware"]],"needCount":3,"marksPerGroup":1} }
           ],
-          explanation: "RAM is volatile (contents lost when the power is off) whereas ROM is non-volatile; RAM is read/write whereas ROM is read-only; RAM holds the programs and data currently in use whereas ROM holds start-up routines such as the BIOS; and RAM usually has a much larger capacity than ROM."
+          explanation: "RAM loses its contents when the power is off whereas ROM keeps its contents; RAM can be read and written to whereas ROM is read-only; and RAM holds the programs and data currently in use whereas ROM holds the start-up instructions (the bootloader)."
         },
         {
           id: "Q19", syl: ["3.3.4"], marks: 3, difficulty: "intermediate",
@@ -1015,56 +962,31 @@
         {
           id: "Q23", syl: ["3.1.2"], marks: 4, difficulty: "hard",
           topic: "FDE Cycle",
-          prompt: "Describe the step-by-step process of the FETCH stage of the Fetch-Decode-Execute cycle, referring to the registers and buses involved.",
+          prompt: "Describe the step-by-step process of the FETCH stage of the Fetch-Decode-Execute cycle, referring to the registers and buses involved. [4 marks]",
           markPoints: [
-            {
-              text: "Any four of: the address of the next instruction is copied from the PC to the MAR; the PC is incremented; the address is sent from the MAR along the address bus to RAM; the instruction at that address is fetched along the data bus; the instruction is stored in the MDR; the instruction is copied from the MDR to the CIR",
-              marks: 4,
-              match: {
-                type: "keywords",
-                groups: [["pc to the mar","pc to mar","program counter to the mar","program counter to mar","copied from the pc","copied from the program counter","pc is copied","address in the pc","from the pc"],["incremented","increased by 1","increase by 1","incremented by 1","adds 1","add 1","plus 1"],["address bus"],["data bus"],["mdr","memory data register"],["cir","current instruction register"]],
-                needCount: 4,
-                marksPerGroup: 1
-              }
-            }
+            { text: "Any four of: the address of the next instruction is copied from the PC to the MAR; the address is sent from the MAR along the address bus to RAM; the instruction at that address is fetched along the data bus; the instruction is stored in the MDR; the instruction is copied from the MDR to the CIR", marks: 4, match: {"type":"keywords","groups":[["pc to the mar","pc to mar","program counter to the mar","program counter to mar","copied from the pc","copied from the program counter","pc is copied","address in the pc","from the pc"],["address bus"],["data bus"],["mdr","memory data register"],["cir","current instruction register"]],"needCount":4,"marksPerGroup":1} }
           ],
-          explanation: "The address in the Program Counter (PC) is copied to the Memory Address Register (MAR). The PC is incremented. The address is sent from the MAR along the address bus to RAM, and the instruction at that address is fetched along the data bus into the Memory Data Register (MDR). The instruction is then copied from the MDR to the Current Instruction Register (CIR)."
+          explanation: "The address in the Program Counter (PC) is copied to the Memory Address Register (MAR). The address is sent from the MAR along the address bus to RAM, and the instruction at that address is fetched along the data bus into the Memory Data Register (MDR). The instruction is then copied from the MDR to the Current Instruction Register (CIR)."
         },
         {
           id: "Q24", syl: ["3.2.3"], marks: 4, difficulty: "hard",
           topic: "Sensors & Control Systems",
-          prompt: "A smart aquarium keeps the water at a constant 25 °C. Describe how the microprocessor uses data from a temperature sensor to maintain this temperature.",
+          prompt: "A smart aquarium keeps the water at a constant 25 °C. Describe how the microprocessor uses data from a temperature sensor to maintain this temperature. [4 marks]",
           markPoints: [
-            {
-              text: "Any four of: the sensor continuously reads the temperature and sends an analogue signal; an ADC converts it to digital; the microprocessor receives the digital value; it compares the value with the stored preset value (25 °C); if below 25 °C it signals (via a DAC) the actuator to switch the heater ON; if at / above 25 °C it signals the heater OFF; the loop repeats continuously",
-              marks: 4,
-              match: {
-                type: "keywords",
-                groups: [["analogue","analog","continuously","sends the temperature","reads the temperature"],["adc","analogue to digital","analog to digital","analogue-to-digital","analog-to-digital"],["compare","compares","comparison","checks it against","checked against"],["stored","preset","pre-set","target","threshold","25"],["below","lower than","less than","too cold","too low","heater on","switch on","switches on","turns on","turn on"],["above","higher than","too hot","too high","heater off","switch off","switches off","turns off","turn off"],["dac","digital to analogue","digital to analog","actuator"],["repeat","continuous","loop","constantly","again"]],
-                needCount: 4,
-                marksPerGroup: 1
-              }
-            }
+            { text: "Any four of: the sensor continuously reads the temperature; it sends the data to the microprocessor; the microprocessor compares the value with the stored (preset) value of 25 °C; if it is below 25 °C it signals the actuator to switch the heater on; if it is at or above 25 °C it signals the heater to switch off; this repeats continuously", marks: 4, match: {"type":"keywords","groups":[["reads","measures","detects","senses","continuously"],["sends","passes","transmits","signal","data to the microprocessor"],["compare","compares","comparison","checks it against","checked against"],["stored","preset","pre-set","target","threshold","25"],["below","lower than","less than","too cold","too low","heater on","switch on","switches on","turns on","turn on"],["above","higher than","too hot","too high","heater off","switch off","switches off","turns off","turn off"],["repeat","continuous","loop","constantly","again"]],"needCount":4,"marksPerGroup":1} }
           ],
-          explanation: "The temperature sensor continuously reads the water temperature and sends an analogue signal. An ADC converts it to digital, and the microprocessor compares it with the stored value (25 °C). If it is below 25 °C the microprocessor sends a signal (through a DAC) to the actuator to switch the heater on; if it is at or above 25 °C it switches the heater off. This monitoring loop repeats continuously. (The sensor only reads data — it never decides or controls anything.)"
+          explanation: "The temperature sensor continuously reads the water temperature and sends the data to the microprocessor. The microprocessor compares it with the stored value (25 °C). If it is below 25 °C it signals the actuator to switch the heater on; if it is at or above 25 °C it switches the heater off. This repeats continuously. (The sensor only reads data; it never decides or controls anything.)"
         },
         {
           id: "Q25", syl: ["3.3.3"], marks: 4, difficulty: "hard",
           topic: "Solid-State Storage",
-          prompt: "Explain how data is stored and read on a solid-state drive (SSD) that uses flash memory technology.",
+          prompt: "Describe solid-state (flash memory) storage. Include the technology it uses and give two examples of solid-state storage. [4 marks]",
           markPoints: [
-            {
-              text: "Any four of: flash memory is made of semiconductor microchips; millions of floating-gate and control-gate transistors; NAND (or NOR) logic gates; data is stored as electrical charge; a voltage makes electrons tunnel through an insulator and become trapped on the floating gate; the trapped electrons change the voltage threshold, representing 0 or 1; no moving parts, so fast access and durable",
-              marks: 4,
-              match: {
-                type: "keywords",
-                groups: [["semiconductor","microchip","chips","transistor","flash memory"],["floating gate","floating-gate","control gate","control-gate"],["nand","nor"],["electrical charge","electric charge","charge","charged"],["tunnel","trapped","trap","insulat","electrons"],["threshold","voltage","0 and 1","0s and 1s","binary"],["no moving parts","not moving","fast","durable","electronic"]],
-                needCount: 4,
-                marksPerGroup: 1
-              }
-            }
+            { text: "It uses NAND or NOR technology", marks: 1, match: {"type":"keywords","groups":[["nand","nor"]],"needCount":1} },
+            { text: "Transistors are used as control gates and floating gates", marks: 1, match: {"type":"keywords","groups":[["transistor","control gate","floating gate","gates"]],"needCount":1} },
+            { text: "Any two examples: SSD (solid-state drive), SD card, USB drive (memory stick / flash drive)", marks: 2, match: {"type":"keywords","groups":[["ssd","solid-state drive","solid state drive"],["sd card"],["usb","memory stick","flash drive","pen drive"]],"needCount":2,"marksPerGroup":1} }
           ],
-          explanation: "An SSD's flash memory is made of semiconductor microchips containing millions of floating-gate and control-gate transistors arranged using NAND (or NOR) gates. Data is stored as electrical charge: a voltage makes electrons tunnel through an insulating layer and become trapped on the floating gate, which changes the transistor's threshold voltage so it represents a 0 or a 1. There are no moving parts, so access is fast and the drive is durable."
+          explanation: "Solid-state (flash memory) storage uses NAND or NOR technology, where transistors are used as control gates and floating gates. Examples are a solid-state drive (SSD), an SD card and a USB drive."
         }
       ]
     },
@@ -1159,20 +1081,11 @@
         {
           id: "Q8", syl: ["4.2.5"], marks: 2, difficulty: "easy",
           topic: "IDEs",
-          prompt: "Identify two editing features of an IDE's code editor that help to prevent syntax errors while the programmer is typing.",
+          prompt: "State two functions of an integrated development environment (IDE) that help a programmer to write program code. [2 marks]",
           markPoints: [
-            {
-              text: "Any two of: syntax highlighting / colour-coding; auto-completion / suggested keywords; auto-indentation; bracket matching; real-time error alerts / squiggly underlines",
-              marks: 2,
-              match: {
-                type: "keywords",
-                groups: [["highlight","colour","color"],["auto-complet","autocomplet","auto complet","intellisense","suggest","prediction","predict"],["indent"],["bracket","parenthes"],["underline","squiggly","real-time error","real time error","error alert","error highlight","error check"]],
-                needCount: 2,
-                marksPerGroup: 1
-              }
-            }
+            { text: "Any two of: code editor; run-time environment; translators; error diagnostics; auto-completion; auto-correction; prettyprint", marks: 2, match: {"type":"keywords","groups":[["code editor","editor"],["run-time","run time","runtime"],["translator","compiler","interpreter"],["error diagnostic","diagnostic","error"],["auto-complet","autocomplet","auto complet","suggest","predict"],["auto-correct","autocorrect","auto correct","correction"],["prettyprint","pretty print","pretty-print","colour","color","indent","layout","format"]],"needCount":2,"marksPerGroup":1} }
           ],
-          explanation: "Any two of: syntax highlighting (colour-coding keywords), auto-completion / suggested keywords, auto-indentation, bracket matching, and real-time error alerts such as squiggly underlines."
+          explanation: "Any two of: code editor, run-time environment, translators, error diagnostics, auto-completion, auto-correction and prettyprint."
         },
         {
           id: "Q9", syl: ["4.2.4"], marks: 1, difficulty: "easy",
@@ -1206,29 +1119,21 @@
         {
           id: "Q11", syl: ["4.2.1"], marks: 2, difficulty: "intermediate",
           topic: "High-Level vs Low-Level Languages",
-          prompt: "State two advantages of writing a program in a low-level language, such as assembly language, compared with a high-level language.",
+          prompt: "State one advantage and one disadvantage of writing a program in a low-level language compared with a high-level language. [2 marks]",
           markPoints: [
-            {
-              text: "Any two of: can directly access and manipulate CPU registers and memory addresses; executes faster / optimised for speed; needs less memory; ideal for device drivers, operating-system kernels and embedded systems",
-              marks: 2,
-              match: {
-                type: "keywords",
-                groups: [["register","directly","hardware","memory address","direct control","direct access"],["faster","speed","quick","efficient","optimi","performance"],["less memory","smaller","memory footprint","less ram","less storage","less space","small file","compact"],["device driver","drivers","embedded","kernel","operating system"]],
-                needCount: 2,
-                marksPerGroup: 1
-              }
-            }
+            { text: "Advantage: direct manipulation of the hardware", marks: 1, match: {"type":"keywords","groups":[["hardware","directly","direct","control the"]],"needCount":1} },
+            { text: "Disadvantage: harder to read, write or debug / machine dependent", marks: 1, match: {"type":"keywords","groups":[["hard to read","difficult to read","hard to write","difficult to write","hard to debug","difficult to debug","machine dependent","machine-dependent","not portable","only runs on","one type of processor","harder to","difficult","hard to understand"]],"needCount":1} }
           ],
-          explanation: "Low-level languages can directly manipulate hardware registers and memory addresses; they execute faster and can be highly optimised; they need less memory; and they are ideal for device drivers, operating-system kernels and embedded systems."
+          explanation: "Advantage: a low-level language allows direct manipulation of the hardware. Disadvantage: it is harder to read, write and debug, and it is machine dependent, so a program usually runs on one type of processor only."
         },
         {
           id: "Q12", syl: ["4.2.2"], marks: 1, difficulty: "intermediate",
           topic: "Assembly Language",
-          prompt: "Explain what is meant by the statement: \"Assembly language has a one-to-one relationship with machine code.\"",
+          prompt: "Explain why an assembler is needed to run a program that has been written in assembly language. [1 mark]",
           markPoints: [
-            { text: "Each assembly language instruction (mnemonic) translates into exactly one machine code instruction", marks: 1, match: { type: "keywords", groups: [["one assembly","each assembly","each instruction","every instruction","each mnemonic","every mnemonic","one instruction","single instruction","one machine","exactly one","one-to-one","one to one"],["machine code","machine instruction","binary"]], needCount: 2 } }
+            { text: "The assembler translates (converts) the assembly language program into machine code, which the CPU can run", marks: 1, match: {"type":"keywords","groups":[["translat","convert","change"],["machine code","binary","machine language"]],"needCount":2} }
           ],
-          explanation: "Each individual assembly language instruction (mnemonic) is translated directly into exactly one machine code instruction."
+          explanation: "Assembly language is written using mnemonics, which the CPU cannot run directly. An assembler translates the assembly language program into machine code."
         },
         {
           id: "Q13", syl: ["4.2.1"], marks: 1, difficulty: "intermediate",
@@ -1291,12 +1196,12 @@
         {
           id: "Q18", syl: ["4.1.3"], marks: 2, difficulty: "intermediate",
           topic: "Operating Systems",
-          prompt: "Describe the role of the bootloader (firmware) when a computer is switched on.",
+          prompt: "Describe how the hardware, the firmware, the operating system and an application are related when an application is run on a computer. [2 marks]",
           markPoints: [
-            { text: "The bootloader is firmware that is run on the hardware when the computer starts", marks: 1, match: {"type":"keywords","groups":[["firmware","rom","start","switched on","turned on","boot","power"]],"needCount":1} },
-            { text: "It loads the operating system, which then provides the platform to run application software", marks: 1, match: {"type":"keywords","groups":[["load","loads","loading","start up","starts the operating system","runs the operating system","operating system","os"]],"needCount":1} }
+            { text: "The bootloader (firmware) is run on the hardware", marks: 1, match: {"type":"keywords","groups":[["bootloader","boot loader","firmware"],["hardware"]],"needCount":2} },
+            { text: "The operating system is run on the firmware, and the application is run on the operating system", marks: 1, match: {"type":"keywords","groups":[["operating system","os"],["application","app","program"]],"needCount":2} }
           ],
-          explanation: "The bootloader is firmware that is run on the hardware when the computer is switched on. It loads the operating system, which then allows application software to be run."
+          explanation: "The bootloader (firmware) is run on the hardware. The operating system is run on the firmware, and applications are run on the operating system."
         },
         {
           id: "Q19", syl: ["4.1.3"], marks: 2, difficulty: "intermediate",
@@ -1351,20 +1256,11 @@
         {
           id: "Q22", syl: ["4.1.4"], marks: 4, difficulty: "hard",
           topic: "Interrupts",
-          prompt: "Describe the step-by-step process carried out by the CPU and the operating system when an interrupt signal is received during program execution.",
+          prompt: "Describe how an interrupt is generated and how it is handled using an interrupt service routine. [4 marks]",
           markPoints: [
-            {
-              text: "Any four of: the CPU completes its current fetch-decode-execute cycle; the CPU checks the priority of the interrupt; (if higher priority) the register contents are saved on a stack; the source is identified and the relevant interrupt service routine (ISR) is loaded; the ISR is executed; the saved registers are restored from the stack; the CPU resumes the original program",
-              marks: 4,
-              match: {
-                type: "keywords",
-                groups: [["finish","completes","complete","current fde","current fetch","fetch-decode-execute","fetch decode execute","current cycle","current instruction"],["priority","prioritis","prioritiz"],["stack","saved","save the","registers are saved","store the contents","stores the contents"],["isr","interrupt service routine","service routine","identif","source of the interrupt"],["executed","run","runs","handle","service the interrupt","services the interrupt","deals with"],["restore","restored","reload","put back","popped","retrieve"],["resume","continues","continue","carries on","carry on","returns to","go back","goes back"]],
-                needCount: 4,
-                marksPerGroup: 1
-              }
-            }
+            { text: "Any four of: an interrupt signal is generated by hardware (e.g. a key press) or by software (e.g. division by zero); the signal is sent to the CPU; the CPU pauses the task it is running; the interrupt service routine (ISR) is run to handle the interrupt; the CPU resumes the original task", marks: 4, match: {"type":"keywords","groups":[["signal","generated","hardware","software","key","mouse","division by zero"],["sent to the cpu","sent to the processor","cpu receives","cpu is told","tells the cpu","notifies the cpu","received by the cpu"],["pause","stops","stop","suspend","halt"],["isr","interrupt service routine","service routine"],["resume","continues","continue","carries on","carry on","returns to","go back","goes back"]],"needCount":4,"marksPerGroup":1} }
           ],
-          explanation: "The CPU completes its current fetch-decode-execute cycle and checks the priority of the interrupt. If it has a higher priority than the running task, the contents of the registers (PC, ACC, CIR etc.) are saved on a stack. The source of the interrupt is identified and the relevant Interrupt Service Routine (ISR) is loaded and executed. When it has finished, the saved registers are restored from the stack and the CPU resumes the original program where it left off."
+          explanation: "An interrupt signal is generated by hardware (for example a key press or moving the mouse) or by software (for example division by zero) and is sent to the CPU. The CPU pauses the task it is running and runs the interrupt service routine (ISR) to handle the interrupt. When this has finished, the CPU resumes the original task."
         },
         {
           id: "Q23", syl: ["4.2.5"], marks: 3, difficulty: "hard",
@@ -1379,21 +1275,14 @@
         },
         {
           id: "Q24", syl: ["4.1.2"], marks: 3, difficulty: "hard",
-          topic: "Operating Systems & Executing a Program",
-          prompt: "A user double-clicks the icon of a compiled program. Describe how the operating system's memory manager and the CPU registers are used to run the program.",
+          topic: "Operating Systems",
+          prompt: "A school computer is shared by many students. Each student logs in with their own password, opens several programs at the same time and saves their work in files.\nState the three operating system functions that are being used. [3 marks]",
           markPoints: [
-            {
-              text: "Any three of: the OS allocates RAM space for the program; the OS loads the machine code from secondary storage into RAM; the OS sets the Program Counter (PC) to the address of the first instruction; the CPU begins the fetch-decode-execute cycle; the memory manager protects the allocation from being overwritten by other processes",
-              marks: 3,
-              match: {
-                type: "keywords",
-                groups: [["allocate","allocates","reserve","space in ram","set aside"],["loads","load","copies","copied","secondary storage","from the hard","from the disk","from the ssd"],["program counter","pc"],["fetch-decode-execute","fetch decode execute","fde","fetch","begins to execute","starts to execute","start executing"],["overwrit","protect","other processes","other programs","other applications","boundary","boundaries"]],
-                needCount: 3,
-                marksPerGroup: 1
-              }
-            }
+            { text: "Managing user accounts (and system security)", marks: 1, match: {"type":"keywords","groups":[["user account","accounts","log in","login","log-in","password","security"]],"needCount":1} },
+            { text: "Managing multitasking", marks: 1, match: {"type":"keywords","groups":[["multitask","several programs","more than one","at the same time","multiple programs","multi-task"]],"needCount":1} },
+            { text: "Managing files", marks: 1, match: {"type":"keywords","groups":[["file management","managing files","manages files","files","file"]],"needCount":1} }
           ],
-          explanation: "The OS memory manager allocates RAM for the program and loads the compiled machine code from secondary storage into it. The Program Counter (PC) is set to the address of the first instruction, and the CPU begins the fetch-decode-execute cycle. The memory manager also protects this allocation so that other active processes cannot overwrite it."
+          explanation: "The operating system manages user accounts and system security (the login and password), manages multitasking (several programs at the same time) and manages files (saving each student's work)."
         }
       ]
     },
@@ -1516,12 +1405,12 @@
         {
           id: "Q10", syl: ["8.1.6c"], marks: 2, difficulty: "intermediate",
           topic: "Scope: Local vs Global",
-          prompt: "Explain the difference between local variables and global variables in terms of scope and possible side effects in a modular program.\n[2 marks]",
+          prompt: "State where a local variable and where a global variable can be used in a program. [2 marks]",
           markPoints: [
-            { text: "Local: declared inside a procedure / function, can only be used there and is released when it ends", marks: 1, match: { type: "keywords", groups: [["local"],["only within","only inside","only accessible","within the","inside the","only in","destroyed","freed","deleted","lost"]], needCount: 2 } },
-            { text: "Global: declared in the main program, can be used anywhere, and any subroutine could change it by accident (side effects)", marks: 1, match: { type: "keywords", groups: [["global"],["whole program","entire program","any part","anywhere","throughout","all parts","everywhere","side effect","unexpected","accident","overwritten","modified","changed"]], needCount: 2 } }
+            { text: "Local: declared inside a procedure / function, so it can only be used inside that procedure / function", marks: 1, match: {"type":"keywords","groups":[["local"],["only within","only inside","only accessible","within the","inside the","only in","destroyed","freed","deleted","lost","that procedure","that function","the procedure","the function"]],"needCount":2} },
+            { text: "Global: declared in the main program, so it can be used anywhere in the program", marks: 1, match: {"type":"keywords","groups":[["global"],["whole program","entire program","any part","anywhere","throughout","all parts","everywhere","every part","whole of the program"]],"needCount":2} }
           ],
-          explanation: "Local variables are declared inside a procedure or function. They can only be used inside it and are released when it ends, so they cannot be changed by other parts of the program. Global variables are declared in the main program and can be used anywhere. Any subroutine might change them unexpectedly, which causes side effects and makes errors harder to find."
+          explanation: "A local variable is declared inside a procedure or function and can only be used inside it. A global variable is declared in the main program and can be used anywhere in the program."
         },
         {
           id: "Q11", syl: ["8.2.3"], marks: 3, difficulty: "intermediate",
@@ -1555,6 +1444,118 @@
             { text: "Data can be reused later or shared / loaded by other programs", marks: 1, match: { type: "keywords", groups: [["share","transfer","reuse","re-use","later","another program","different program","other program","different software","load","next time","back up","backup","used again"]], needCount: 1 } }
           ],
           explanation: "1) Persistence: data held in RAM is lost when the power is switched off, whereas a file on secondary storage keeps the data permanently. 2) Reuse and sharing: data saved by one run of a program can be loaded again later, or opened by other programs and users."
+        }
+      ]
+    },
+    databases_exam: {
+      key: "databases_exam",
+      title: "Topic 9: Databases — IGCSE exam style",
+      subtitle: "10 exam-style questions · Primary keys & data types, validation, SQL output tracing, writing and correcting SQL · 25 marks total",
+      classes: ["10BR1","10BR2","10BR3"],
+      totalMarks: 25,
+      questions: [
+        {
+          id: "Q1", syl: ["9.3"], marks: 2, difficulty: "easy",
+          topic: "Primary Keys",
+          prompt: "A plant nursery uses a single-table database called PlantSale. The table contains these fields for each plant:\n• PlantID: a unique code, for example PL101\n• PlantName: the common name, for example \"Hydrangea\"\n• Price: the cost in dollars, for example 14.99\n• InStock: whether the plant is available for collection (TRUE or FALSE)\n• DateReceived: the date the plant was delivered, for example 12/04/2026\n• Quantity: the number of plants in stock, for example 25\n\nIdentify the field that should be used as the primary key, and explain why this field is suitable. [2 marks]",
+          markPoints: [
+            { text: "PlantID", marks: 1, match: {"type":"keywords","groups":[["plantid","plant id"]],"needCount":1} },
+            { text: "Each plant has a different / unique code, so no two records share the same value", marks: 1, match: {"type":"keywords","groups":[["unique","uniquely","different","no two","no duplicate","not repeated","identif","only one"]],"needCount":1} }
+          ],
+          explanation: "PlantID is the primary key. It is a unique code for every plant, so no two records can have the same value and each record can be identified."
+        },
+        {
+          id: "Q2", syl: ["9.2"], marks: 3, difficulty: "easy",
+          topic: "Data Types",
+          prompt: "A plant nursery uses a single-table database called PlantSale. The table contains these fields for each plant:\n• PlantID: a unique code, for example PL101\n• PlantName: the common name, for example \"Hydrangea\"\n• Price: the cost in dollars, for example 14.99\n• InStock: whether the plant is available for collection (TRUE or FALSE)\n• DateReceived: the date the plant was delivered, for example 12/04/2026\n• Quantity: the number of plants in stock, for example 25\n\nState the most appropriate data type for each field below. Give your answers as (i), (ii) and (iii). [3 marks]\n(i) Price\n(ii) InStock\n(iii) DateReceived",
+          markPoints: [
+            { text: "(i) Price: Real (or Decimal / Currency)", marks: 1, match: {"type":"keywords","groups":[["real","decimal","currency","float","double"]],"needCount":1} },
+            { text: "(ii) InStock: Boolean", marks: 1, match: {"type":"keywords","groups":[["boolean","bool"]],"needCount":1} },
+            { text: "(iii) DateReceived: Date/Time (or Date)", marks: 1, match: {"type":"keywords","groups":[["date"]],"needCount":1} }
+          ],
+          explanation: "(i) Real, because the price has a decimal part. (ii) Boolean, because there are only two values, TRUE and FALSE. (iii) Date/Time, because it holds a date."
+        },
+        {
+          id: "Q3", syl: ["9.4"], calc: true, marks: 3, difficulty: "intermediate",
+          topic: "SQL Output Tracing",
+          prompt: "A bookstore uses a database table called BookInventory:\n\nBookID | Title                | Genre       | Price | StockQuantity\nB01    | Nebula Dreams        | Sci-Fi      | 12.50 | 8\nB02    | History of Computing | Non-Fiction | 22.00 | 3\nB03    | Cyber City           | Sci-Fi      | 9.99  | 15\nB04    | Deep Ocean           | Documentary | 14.50 | 0\nB05    | Galactic Quest       | Sci-Fi      | 18.00 | 4\nB06    | Coding Logic         | Education   | 8.50  | 12\n\nWrite down the output that is produced by this SQL query. [3 marks]\n\nSELECT Title, Price\nFROM BookInventory\nWHERE Genre = 'Sci-Fi' AND StockQuantity > 0\nORDER BY Price DESCENDING;",
+          markPoints: [
+            { text: "The two fields Title and Price are shown", marks: 1, match: {"type":"keywords","groups":[["title","galactic quest"],["price","18.00"]],"needCount":2} },
+            { text: "The correct three records: Galactic Quest, Nebula Dreams and Cyber City (B01, B03 and B05)", marks: 1, match: {"type":"keywords","groups":[["galactic quest"],["nebula dreams"],["cyber city"]],"needCount":3} },
+            { text: "In descending order of price: 18.00, 12.50, 9.99", marks: 1, match: {"type":"numeric","values":["galacticquest18.00nebuladreams12.50cybercity9.99","galacticquest|18.00|nebuladreams|12.50|cybercity|9.99","galacticquest|18.00nebuladreams|12.50cybercity|9.99","|galacticquest|18.00||nebuladreams|12.50||cybercity|9.99|","galacticquest18nebuladreams12.5cybercity9.99","galacticquest-18.00nebuladreams-12.50cybercity-9.99","galacticquest:18.00nebuladreams:12.50cybercity:9.99"]} }
+          ],
+          explanation: "Title | Price\nGalactic Quest | 18.00\nNebula Dreams | 12.50\nCyber City | 9.99\n\nOnly the Sci-Fi books that are in stock are selected (B01, B03 and B05). Deep Ocean is not Sci-Fi and has no stock. They are sorted from the highest price to the lowest."
+        },
+        {
+          id: "Q4", syl: ["9.4"], calc: true, marks: 2, difficulty: "intermediate",
+          topic: "SQL COUNT",
+          prompt: "A bookstore uses a database table called BookInventory:\n\nBookID | Title                | Genre       | Price | StockQuantity\nB01    | Nebula Dreams        | Sci-Fi      | 12.50 | 8\nB02    | History of Computing | Non-Fiction | 22.00 | 3\nB03    | Cyber City           | Sci-Fi      | 9.99  | 15\nB04    | Deep Ocean           | Documentary | 14.50 | 0\nB05    | Galactic Quest       | Sci-Fi      | 18.00 | 4\nB06    | Coding Logic         | Education   | 8.50  | 12\n\nWrite down the single value that is returned by this SQL statement. [2 marks]\n\nSELECT COUNT(BookID)\nFROM BookInventory\nWHERE Price < 15.00;",
+          markPoints: [
+            { text: "4", marks: 2, match: {"type":"numeric","values":["4"]} }
+          ],
+          explanation: "The books that cost less than 15.00 are B01 (12.50), B03 (9.99), B04 (14.50) and B06 (8.50). COUNT returns 4."
+        },
+        {
+          id: "Q5", syl: ["9.4"], marks: 3, difficulty: "hard",
+          topic: "Writing SQL",
+          prompt: "A health club uses a database table called MemberData. The fields are:\n• MemberID (Text)\n• LastName (Text)\n• Age (Integer)\n• MembershipType (Text: \"Junior\", \"Standard\" or \"Senior\")\n• FeePaid (Boolean: TRUE or FALSE)\n\nWrite an SQL script to display the LastName and Age of all the members whose MembershipType is \"Junior\" and whose FeePaid is FALSE. The output must be sorted by Age in ascending order. [3 marks]",
+          markPoints: [
+            { text: "SELECT LastName, Age FROM MemberData", marks: 1, match: {"type":"keywords","groups":[["lastname, age","lastname,age"],["memberdata"],["select"]],"needCount":3} },
+            { text: "WHERE MembershipType = \"Junior\" AND FeePaid = FALSE", marks: 1, match: {"type":"keywords","groups":[["membershiptype = 'junior'","membershiptype='junior'","membershiptype = \"junior\"","membershiptype=\"junior\""],["feepaid = false","feepaid=false"],["and"]],"needCount":3} },
+            { text: "ORDER BY Age ASCENDING", marks: 1, match: {"type":"keywords","groups":[["order by age ascending","order by age\nascending","order by age  ascending"]],"needCount":1} }
+          ],
+          explanation: "SELECT LastName, Age\nFROM MemberData\nWHERE MembershipType = 'Junior' AND FeePaid = FALSE\nORDER BY Age ASCENDING;"
+        },
+        {
+          id: "Q6", syl: ["9.4"], marks: 2, difficulty: "intermediate",
+          topic: "Writing SQL",
+          prompt: "A health club uses a database table called MemberData. The fields are:\n• MemberID (Text)\n• LastName (Text)\n• Age (Integer)\n• MembershipType (Text: \"Junior\", \"Standard\" or \"Senior\")\n• FeePaid (Boolean: TRUE or FALSE)\n\nWrite an SQL script, using COUNT, to display the total number of members who have FeePaid = TRUE. [2 marks]",
+          markPoints: [
+            { text: "SELECT COUNT(MemberID) FROM MemberData", marks: 1, match: {"type":"keywords","groups":[["count("],["memberdata"]],"needCount":2} },
+            { text: "WHERE FeePaid = TRUE", marks: 1, match: {"type":"keywords","groups":[["feepaid = true","feepaid=true"]],"needCount":1} }
+          ],
+          explanation: "SELECT COUNT(MemberID)\nFROM MemberData\nWHERE FeePaid = TRUE;"
+        },
+        {
+          id: "Q7", syl: ["9.2"], marks: 2, difficulty: "intermediate",
+          topic: "Data Types",
+          prompt: "A hospital database table called PatientRecord contains the fields PatientID, FullName, DateAdmitted, ContactNumber and EmergencyContact.\n\nExplain why storing ContactNumber as an Integer data type is not appropriate. Give two different reasons. [2 marks]",
+          markPoints: [
+            { text: "Any two of: an Integer removes a leading zero; an Integer cannot store spaces, brackets or a + sign; a telephone number is never used in calculations", marks: 2, match: {"type":"keywords","groups":[["leading zero","leading 0","zeros","zero is","zero will","the zero","the 0","0 is removed","0 is lost","0 would be"],["space","hyphen","bracket","dash","plus","+","symbol","character","letter"],["calculation","calculate","arithmetic","add them","added","maths","mathematical"]],"needCount":2,"marksPerGroup":1} }
+          ],
+          explanation: "Any two of: an Integer would remove a leading zero (01223 would become 1223); an Integer cannot store spaces, brackets or a + sign; a telephone number is never used in a calculation, so it is better stored as Text/Alphanumeric."
+        },
+        {
+          id: "Q8", syl: ["9.1"], marks: 2, difficulty: "intermediate",
+          topic: "Validation",
+          prompt: "A hospital database table called PatientRecord contains the fields PatientID, FullName, DateAdmitted, ContactNumber and EmergencyContact.\n\nPatientID must be the letter P followed by 5 digits, for example P10452.\nDescribe a suitable validation check for PatientID. [2 marks]",
+          markPoints: [
+            { text: "A format check (or a length check)", marks: 1, match: {"type":"keywords","groups":[["format","length","pattern","picture"]],"needCount":1} },
+            { text: "It checks that the entry is exactly 6 characters: the letter P followed by 5 digits", marks: 1, match: {"type":"keywords","groups":[["6 characters","six characters","exactly 6","length of 6","5 digits","five digits","5 numbers","five numbers","5 numeric"],["letter p","'p'","\"p\"","starts with p","begins with p","first character is p","first character must be p","capital p","uppercase p","p followed","p and"]],"needCount":1} }
+          ],
+          explanation: "A format check (or length check). It checks that the entry is exactly 6 characters long: the letter P followed by 5 digits. Any entry that does not follow this pattern is rejected."
+        },
+        {
+          id: "Q9", syl: ["9.1"], marks: 1, difficulty: "easy",
+          topic: "Fields & Records",
+          prompt: "A hospital database table called PatientRecord contains the fields PatientID, FullName, DateAdmitted, ContactNumber and EmergencyContact.\n\nDefine what is meant by a record in a database. [1 mark]",
+          markPoints: [
+            { text: "A collection of related fields / data about one item, person or event (one row of the table)", marks: 1, match: {"type":"keywords","groups":[["row","fields","collection of","set of","group of","related data","related information","all the data","all the information","data about one","information about one"]],"needCount":1} }
+          ],
+          explanation: "A record is a collection of related fields about one item, person or event. It is shown as one row of the table."
+        },
+        {
+          id: "Q10", syl: ["9.4"], marks: 5, difficulty: "hard",
+          topic: "SQL Debugging",
+          prompt: "A student writes an SQL script to display the ItemName and StockQty of all the electronic items in the table StoreStock that cost more than $50.00, from the highest price to the lowest price. The table has the fields ItemName, Category, StockQty and Price.\n\nThe student's script contains four errors:\n01 SELECT ItemName AND StockQty\n02 FROM StoreStock\n03 WHERE Category = 'Electronic' AND Price => 50.00\n04 SORT BY Price DOWN;\n\nIdentify the four errors and write the corrected SQL script. [5 marks]",
+          markPoints: [
+            { text: "Line 01: AND should be a comma between the field names", marks: 1, match: {"type":"keywords","groups":[["comma","itemname, stockqty","itemname,stockqty"]],"needCount":1} },
+            { text: "Line 03: => is not a valid operator; it should be > (more than)", marks: 1, match: {"type":"keywords","groups":[["price > 50","price>50","should be >","should be a >","instead of =>","not =>","greater than"]],"needCount":1} },
+            { text: "Line 04: SORT BY should be ORDER BY", marks: 1, match: {"type":"keywords","groups":[["order by"]],"needCount":1} },
+            { text: "Line 04: DOWN should be DESCENDING", marks: 1, match: {"type":"keywords","groups":[["descending","desc"]],"needCount":1} },
+            { text: "Fully correct script", marks: 1, match: {"type":"keywords","groups":[["itemname, stockqty","itemname,stockqty"],["price > 50","price>50"],["order by price descending"]],"needCount":3} }
+          ],
+          explanation: "Errors: (1) AND instead of a comma in line 01; (2) the operator => in line 03 should be >; (3) SORT BY in line 04 should be ORDER BY; (4) DOWN in line 04 should be DESCENDING.\n\nCorrected script:\nSELECT ItemName, StockQty\nFROM StoreStock\nWHERE Category = 'Electronic' AND Price > 50.00\nORDER BY Price DESCENDING;"
         }
       ]
     },
@@ -1723,7 +1724,8 @@
       { key: "datatrans_exam", label: "Topic 2: Data transmission - IGCSE exam style" },
       { key: "hardware_exam", label: "Topic 3: Hardware - IGCSE exam style" },
       { key: "software_exam", label: "Topic 4: Software - IGCSE exam style" },
-      { key: "programming_exam", label: "Topic 8: Programming - IGCSE exam style" }
+      { key: "programming_exam", label: "Topic 8: Programming - IGCSE exam style" },
+      { key: "databases_exam", label: "Topic 9: Databases - IGCSE exam style" }
     ] },
     { test: /^12br/i, choices: [
       { key: "comm9618_exam", label: "Topic 14: Communication & Internet Technologies — A Level exam style" }

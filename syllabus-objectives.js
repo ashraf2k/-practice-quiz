@@ -1,5 +1,5 @@
 // Cambridge IGCSE Computer Science 0478 (2026-2028) -- learning objectives
-// for the topics the 10BR practice covers (1-4, 7, 8). Wording is taken from
+// for the topics the 10BR practice covers (1-4, 7, 8, 9). Wording is taken from
 // the "Candidates should be able to" column of the syllabus document. Each
 // question in quiz-data.js / exam-data.js carries a `syl` array of codes
 // from this table, and the quiz screens show the code, topic and objective
@@ -8,7 +8,7 @@
   "use strict";
   var TOPICS = {
     1: "Data representation", 2: "Data transmission", 3: "Hardware", 4: "Software",
-    7: "Algorithm design and problem-solving", 8: "Programming"
+    7: "Algorithm design and problem-solving", 8: "Programming", 9: "Databases"
   };
   var O = {
     // ---- 1 Data representation
@@ -95,7 +95,12 @@
     "8.2.2": ["8.2 Arrays", "Understand the use of arrays, including the use of variables as indexes"],
     "8.2.3": ["8.2 Arrays", "Write values into, and read values from, an array using iteration (including nested iteration)"],
     "8.3.1": ["8.3 File handling", "Understand the purpose of storing data in a file to be used by a program"],
-    "8.3.2": ["8.3 File handling", "Open, close and use a file for reading and writing"]
+    "8.3.2": ["8.3 File handling", "Open, close and use a file for reading and writing"],
+    // ---- 9 Databases
+    "9.1": ["9 Databases", "Define a single-table database from given data storage requirements (fields, records, validation)"],
+    "9.2": ["9 Databases", "Suggest suitable basic data types (text/alphanumeric, character, Boolean, integer, real, date/time)"],
+    "9.3": ["9 Databases", "Understand the purpose of a primary key and identify a suitable primary key for a given database table"],
+    "9.4": ["9 Databases", "Read, understand and complete structured query language (SQL) scripts to query data stored in a single database table (SELECT, FROM, WHERE, ORDER BY, SUM, COUNT, AND, OR)"]
   };
   function parse(code){ return String(code).match(/^(\d+)/)[1]; }
   // Display form "8.1.4(c)" for codes that end in a letter.
