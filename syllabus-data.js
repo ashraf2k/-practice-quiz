@@ -110,7 +110,7 @@
       objective:"Define a single-table database (fields, records, validation), choose data types, identify a primary key, and read, write and correct SQL queries on one table.",
       revise:["9.1 Fields (columns) and records (rows); validation of the data entered","9.2 Data types: text/alphanumeric, character, Boolean, integer, real, date/time","9.3 A primary key is unique for every record (e.g. an ID code, not a name)","9.4 SQL: SELECT fields FROM table WHERE criteria ORDER BY field ASCENDING/DESCENDING","9.4 SUM adds the values in a field; COUNT counts the matching records; AND / OR combine conditions"],
       tip:"Read an SQL query in the order SELECT, FROM, WHERE: first find the matching records, then sort them, then show only the fields listed after SELECT. Telephone numbers and codes are text, not integers.",
-      redo:["databases","databases_exam"] },
+      redo:["databases","databases_exam","databases_exam2"] },
     { id:"10", sec:10, secTitle:"Boolean logic", title:"Boolean logic",
       objective:"Know the symbols and functions of the NOT, AND, OR, NAND, NOR and XOR gates, and create circuits, complete truth tables and write logic expressions (maximum three inputs and one output).",
       revise:["10.1 Gate symbols: a small circle at the output means the output is inverted (NAND, NOR, NOT)","10.2 NOT has one input; every other gate has two. AND: 1 only if both are 1. OR: 1 if either is 1. XOR: 1 only if the inputs differ","10.2 NAND, NOR are the opposites of AND, OR","10.3 A 3-input truth table has 8 rows (000 to 111). Work out the bracket values first, in working columns","10.3 Write expressions with NOT, AND, OR, NAND, NOR, XOR in capitals and use brackets"],
@@ -127,7 +127,7 @@
       return /IF Statement|Relational|Nested IF|CASE|Logical Operators/i.test(t) ? "8.1" : "7";
     }
     if(examKey === "validation") return "7";
-    if(examKey === "databases" || examKey === "databases_exam") return "9";
+    if(examKey === "databases" || examKey === "databases_exam" || examKey === "databases_exam2") return "9";
     if(examKey === "boolean" || examKey === "boolean_exam") return "10";
     if(examKey === "algo_exam") return "7";
     if(examKey === "p2core") return /Variables|Constants|Data Types/i.test(t) ? "8.1" : "7";

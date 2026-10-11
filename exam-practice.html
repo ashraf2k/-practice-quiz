@@ -18,7 +18,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Topical Exam Practice</title>
-<link rel="stylesheet" href="shared.css?v=20261011c" />
+<link rel="stylesheet" href="shared.css?v=20261012a" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -110,6 +110,8 @@
         <p id="q-explanation"></p>
       </div>
 
+      <div id="exam-videos" class="exam-videos hidden"></div>
+
       <div id="level-banner"></div>
     </div>
 
@@ -134,14 +136,14 @@
 
 </div>
 
-<!-- ?v=20261011c -- cache-busting; see the longer comment above this same
+<!-- ?v=20261012a -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="exam-data.js?v=20261011c"></script>
-<script src="syllabus-objectives.js?v=20261011c"></script>
-<script src="scratchpad.js?v=20261011c"></script>
-<script src="firebase-config.js?v=20261011c"></script>
-<script type="module" src="firebase-init.js?v=20261011c"></script>
+<script src="exam-data.js?v=20261012a"></script>
+<script src="syllabus-objectives.js?v=20261012a"></script>
+<script src="scratchpad.js?v=20261012a"></script>
+<script src="firebase-config.js?v=20261012a"></script>
+<script type="module" src="firebase-init.js?v=20261012a"></script>
 <script type="module">
 (function(){
 
@@ -635,9 +637,59 @@
     };
   }
 
+  // Missed or partly-missed mark points that carry a lesson video: show up
+  // to two (de-duplicated) clips, starting at the right second. The iframes
+  // only load once marks are missed, and are rebuilt only when the set of
+  // clips changes, so ticking boxes doesn't restart a playing video.
+  var examVideosEl = document.getElementById("exam-videos");
+  var examVideosKey = "";
+  function renderExamVideos(q, missed){
+    var list = [];
+    missed.forEach(function(mp){
+      var v = mp.video; if(!v) return;
+      // one clip per spot: skip a clip that starts within 40s of one already shown
+      var dup = list.some(function(o){ return o.id === v.id && Math.abs(o.start - v.start) < 40; });
+      if(!dup) list.push(v);
+    });
+    list = list.slice(0, 2);
+    var key = q.id + "|" + list.map(function(v){ return v.id + "@" + v.start; }).join(",");
+    if(key === examVideosKey) return;
+    examVideosKey = key;
+    examVideosEl.innerHTML = "";
+    if(!list.length){ examVideosEl.classList.add("hidden"); return; }
+    var h = document.createElement("p");
+    h.className = "section-label";
+    h.textContent = "Watch the lesson on what you missed";
+    examVideosEl.appendChild(h);
+    var grid = document.createElement("div");
+    grid.className = "exam-videos-grid";
+    list.forEach(function(v){
+      var box = document.createElement("div");
+      box.className = "exam-video";
+      var lab = document.createElement("div");
+      lab.className = "exam-video-label";
+      lab.textContent = v.label;
+      var fr = document.createElement("iframe");
+      fr.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(v.id) + "?start=" + (v.start|0) + "&rel=0";
+      fr.title = "Lesson video: " + v.label;
+      fr.loading = "lazy";
+      fr.allow = "accelerometer; encrypted-media; picture-in-picture; fullscreen";
+      fr.referrerPolicy = "strict-origin-when-cross-origin";
+      fr.allowFullscreen = true;
+      var a = document.createElement("a");
+      a.href = "https://www.youtube.com/watch?v=" + encodeURIComponent(v.id) + "&t=" + (v.start|0) + "s";
+      a.target = "_blank"; a.rel = "noopener"; a.textContent = "Open on YouTube";
+      box.appendChild(lab); box.appendChild(fr); box.appendChild(a);
+      grid.appendChild(box);
+    });
+    examVideosEl.appendChild(grid);
+    examVideosEl.classList.remove("hidden");
+  }
+
   function recomputeLiveScore(){
     var q = currentQuestion();
     var earned = currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0);
+    renderExamVideos(q, q.markPoints.filter(function(mp, i){ return currentControls[i] && currentControls[i].get() < mp.marks; }));
     checkScoreBanner.className = "check-score-banner " + (earned === q.marks ? "full" : (earned > 0 ? "partial" : "none"));
     // "Ticked" describes the normal markpoints-list checkboxes/selects
     // below this banner -- on a single-attempt paper those aren't shown
