@@ -80,12 +80,12 @@
       objective:"Program development life cycle; decomposition and abstraction; structure diagrams, flowcharts and pseudocode; standard algorithms; validation and verification; test data; trace tables; finding and fixing errors.",
       revise:["7.1 PDLC: analysis, design, coding, testing","7.2 Decomposition (inputs, processes, outputs, storage); structure diagrams, flowcharts, pseudocode","7.4 Linear search, bubble sort, totalling, counting, max/min/average","7.5 Validation (range, length, type, presence, format, check digit) vs verification (visual check, double entry)","7.6 Test data: normal, abnormal, extreme, boundary","7.7-7.8 Trace tables and identifying errors in algorithms"],
       tip:"Trace tables: one column per variable and output, update one row per executed line, and never skip a loop iteration. For validation say what is checked (e.g. 'range check' checks the value is between limits), not just 'it checks the data'.",
-      redo:["algo","algo_exam","validation","igcse"] },
+      redo:["algo","algo_exam","validation","p2core","igcse"] },
     { id:"8.1", sec:8, secTitle:"Programming", title:"Programming concepts",
       objective:"Variables, constants and data types; input and output; sequence, selection (IF, CASE) and iteration; totalling and counting; string handling; arithmetic, relational and logical operators; procedures, functions, parameters and scope; library routines (DIV, MOD).",
       revise:["8.1.2 Data types: integer, real, char, string, Boolean","8.1.4 Selection (IF, CASE), iteration (count-controlled, pre- and post-condition loops)","8.1.4 String handling: length, substring, upper, lower","8.1.4 Operators: + - * / ^ MOD DIV; = < <= > >= <>; AND OR NOT","8.1.6 Procedures vs functions, parameters (by value / by reference), local vs global variables","8.1.7 Library routines: DIV, MOD, ROUND, RANDOM"],
       tip:"Write the pseudocode out by hand and trace it with a small example. Check boundaries (< vs <=) and brackets in AND/OR conditions. A function RETURNS a value; a procedure does not.",
-      redo:["programming","programming_exam","igcse","algo"] },
+      redo:["programming","programming_exam","igcse","algo","p2core"] },
     { id:"8.2", sec:8, secTitle:"Programming", title:"Arrays",
       objective:"Declare and use one- and two-dimensional arrays, including indexes and loops that stay within the array bounds.",
       revise:["8.2.1 One-dimensional and two-dimensional arrays","8.2.1 Index of the first element (0 or 1) and keeping loops within bounds","8.2.2 Nested loops to go through a 2D array (row by row)","Totalling, counting and finding the maximum in an array"],
@@ -130,6 +130,7 @@
     if(examKey === "databases" || examKey === "databases_exam") return "9";
     if(examKey === "boolean" || examKey === "boolean_exam") return "10";
     if(examKey === "algo_exam") return "7";
+    if(examKey === "p2core") return /Variables|Constants|Data Types/i.test(t) ? "8.1" : "7";
     if(examKey === "internet" || examKey === "internet_exam") return "5";
     if(examKey === "automated" || examKey === "automated_exam") return "6";
     if(examKey === "programming" || examKey === "programming_exam"){
