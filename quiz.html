@@ -1355,7 +1355,7 @@
     });
 
     feedbackEl.className = "feedback";
-    feedbackEl.classList.remove("show");
+    feedbackEl.classList.remove("show"); renderVideo(true, null);
     btnNext.classList.add("hidden");
 
     var already = state.answers[canonicalIdx];
@@ -1417,12 +1417,42 @@
     });
   }
 
+  // Wrong answer on a question with q.video: show the matching lesson clip
+  // (youtube-nocookie, starting at the right chapter) beside the explanation.
+  function renderVideo(isCorrect, q){
+    var old = feedbackEl.querySelector(".fb-video");
+    if(old) old.remove();
+    feedbackEl.classList.remove("has-video");
+    if(isCorrect || !q || !q.video) return;
+    var v = q.video;
+    var box = document.createElement("div");
+    box.className = "fb-video";
+    var lab = document.createElement("div");
+    lab.className = "fb-inline-label";
+    lab.textContent = "Watch: " + v.label;
+    var fr = document.createElement("iframe");
+    fr.src = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(v.id) + "?start=" + (v.start|0) + "&rel=0";
+    fr.title = "Lesson video: " + v.label;
+    fr.loading = "lazy";
+    fr.allow = "accelerometer; encrypted-media; picture-in-picture; fullscreen";
+    fr.referrerPolicy = "strict-origin-when-cross-origin";
+    fr.allowFullscreen = true;
+    var a = document.createElement("a");
+    a.href = "https://www.youtube.com/watch?v=" + encodeURIComponent(v.id) + "&t=" + (v.start|0) + "s";
+    a.target = "_blank"; a.rel = "noopener";
+    a.textContent = "Open on YouTube";
+    box.appendChild(lab); box.appendChild(fr); box.appendChild(a);
+    feedbackEl.appendChild(box);
+    feedbackEl.classList.add("has-video");
+  }
+
   function showFeedback(isCorrect, explainText, q, hintUsed, streakHit, levelUpHit){
     feedbackEl.classList.remove("correct","incorrect");
     feedbackEl.classList.add(isCorrect ? "correct" : "incorrect");
     feedbackEl.classList.add("show");
     feedbackVerdict.textContent = isCorrect ? "Correct" : "Not quite";
     feedbackExplain.textContent = explainText;
+    renderVideo(isCorrect, q);
 
     var existingNote = feedbackEl.querySelector(".hint-used-inline");
     if(existingNote) existingNote.remove();

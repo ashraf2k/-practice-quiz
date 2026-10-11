@@ -1721,3 +1721,14 @@
     min-height: 32px;
   }
   .remember-label input[type="checkbox"]{ width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
+
+/* Wrong-answer lesson video beside the explanation */
+.feedback.show.has-video{ display:grid; grid-template-columns: 1fr 1fr; gap:6px 18px; align-items:start; }
+.feedback.has-video > *{ grid-column:1; }
+.feedback.has-video > .fb-video{ grid-column:2; grid-row:1 / span 6; }
+.feedback .fb-video iframe{ width:100%; aspect-ratio:16/9; border:0; border-radius:8px; background:#000; }
+.feedback .fb-video a{ display:inline-block; margin-top:6px; font-size:.85rem; }
+@media (max-width:760px){
+  .feedback.show.has-video{ display:block; }
+  .feedback .fb-video{ margin-top:12px; }
+}
