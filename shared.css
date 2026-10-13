@@ -1761,3 +1761,12 @@
 .syl-pill.syl-r{ background:var(--incorrect-bg); color:var(--incorrect); border-color:var(--incorrect-line); }
 .syl-pill.syl-n{ background:#E3E6EA; color:#5B6672; border-color:#D0D5DB; }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .syl-pill.syl-n{ background:#2A323E; color:#A5B0BF; border-color:#3A4555; } }
+
+/* My Progress: per-topic study plan */
+.syl-plan{ padding:11px 16px 13px; border-top:1px dashed var(--line); background:var(--bg); font-size:13.5px; }
+.syl-plan p{ margin:0 0 4px; }
+.syl-plan-lead{ font-weight:700; }
+.syl-plan ul{ margin:4px 0 6px 18px; padding:0; }
+.syl-plan li{ margin:3px 0; }
+.syl-plan-pct{ color:var(--muted); font-weight:700; }
+.syl-plan-redo{ color:var(--muted); }

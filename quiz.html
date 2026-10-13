@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261013a" />
+<link rel="stylesheet" href="shared.css?v=20261013b" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -257,7 +257,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261013a -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261013b -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -270,13 +270,13 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261013a"></script>
-<script src="exam-data.js?v=20261013a"></script>
-<script src="syllabus-objectives.js?v=20261013a"></script>
-<script src="report-lib.js?v=20261013a"></script>
-<script src="scratchpad.js?v=20261013a"></script>
-<script src="firebase-config.js?v=20261013a"></script>
-<script type="module" src="firebase-init.js?v=20261013a"></script>
+<script src="quiz-data.js?v=20261013b"></script>
+<script src="exam-data.js?v=20261013b"></script>
+<script src="syllabus-objectives.js?v=20261013b"></script>
+<script src="report-lib.js?v=20261013b"></script>
+<script src="scratchpad.js?v=20261013b"></script>
+<script src="firebase-config.js?v=20261013b"></script>
+<script type="module" src="firebase-init.js?v=20261013b"></script>
 <script type="module">
 (function(){
 
@@ -1941,19 +1941,27 @@
       }
       codeSec[code] = secByName[name];
     });
-    var list = Object.keys(topics).map(Number).sort(function(a, b){ return a - b; }).map(function(n){ return topics[n]; });
+    var list = Object.keys(topics).map(Number).sort(function(a, b){ return a - b; }).map(function(n){ topics[n].codes = {}; topics[n].sources = {}; return topics[n]; });
     return { topics: list, codeSec: codeSec, topicBySec: function(sec){ return topics[parseInt(sec.name, 10)]; } };
   }
 
-  function sylAdd(tree, codes, earned, total){
-    var seen = {};
+  function sylAdd(tree, codes, earned, total, srcLabel){
+    var seen = {}, seenCode = {};
     (codes || []).forEach(function(code){
       var sec = tree.codeSec[code];
-      if(!sec || seen[sec.name]) return;
+      if(!sec) return;
+      var tp = tree.topicBySec(sec);
+      if(!seenCode[code]){
+        seenCode[code] = true;
+        var c = tp.codes[code] || (tp.codes[code] = { code: code, e: 0, t: 0 });
+        c.e += earned; c.t += total;
+      }
+      if(seen[sec.name]) return;
       seen[sec.name] = true;
       sec.e += earned; sec.t += total; sec.q += 1;
-      var tp = tree.topicBySec(sec);
       tp.e += earned; tp.t += total; tp.q += 1;
+      var sc = tp.sources[srcLabel] || (tp.sources[srcLabel] = { label: srcLabel, e: 0, t: 0 });
+      sc.e += earned; sc.t += total;
     });
   }
 
@@ -1968,7 +1976,7 @@
         var m = (q.difficulty === "hard") ? 2 : 1;
         var hint = !!((a.hints || [])[i]);
         var earned = (sel === q.correct) ? Math.max(0, m - (hint ? 1 : 0)) : 0;
-        sylAdd(tree, q.syl, earned, m);
+        sylAdd(tree, q.syl, earned, m, r.label);
       });
     });
     paperRecords.forEach(function(r){
@@ -1978,11 +1986,74 @@
         var total = Number(pq.total) || 0, earned = Number(pq.earned) || 0;
         if(!total) return;
         var q = paper.questions.filter(function(x){ return x.id === pq.id; })[0];
-        if(q) sylAdd(tree, q.syl, earned, total);
+        if(q) sylAdd(tree, q.syl, earned, total, r.label);
       });
     });
     return tree.topics;
   }
+
+  // Which practice quiz / exam paper to start with for a topic: the ones
+  // (for this student's class) that contain the most questions in it.
+  function sylTopicResources(){
+    var user = state.currentUser, tree = sylTree(), out = {};
+    function scan(label, questions){
+      var n = {};
+      questions.forEach(function(q){
+        var seen = {};
+        (q.syl || []).forEach(function(code){
+          var sec = tree.codeSec[code];
+          if(!sec) return;
+          var tn = parseInt(sec.name, 10);
+          if(!seen[tn]){ seen[tn] = 1; n[tn] = (n[tn] || 0) + 1; }
+        });
+      });
+      Object.keys(n).forEach(function(tn){ (out[tn] = out[tn] || []).push({ label: label, n: n[tn] }); });
+    }
+    examChoicesForClass(user.class).forEach(function(c){ if(EXAMS[c.key]) scan(c.label || EXAMS[c.key].title, EXAMS[c.key].questions); });
+    examPaperChoicesForClass(user.class).forEach(function(c){ if(EXAMS_P(c.key)) scan(c.label || EXAM_PAPERS[c.key].title, EXAM_PAPERS[c.key].questions); });
+    Object.keys(out).forEach(function(tn){ out[tn].sort(function(a, b){ return b.n - a.n; }); });
+    return out;
+  }
+  function EXAMS_P(k){ return !!EXAM_PAPERS[k]; }
+
+  function sylShort(text){
+    text = String(text || "").replace(/^Understand and use /i, "").replace(/^Understand /i, "");
+    text = text.charAt(0).toUpperCase() + text.slice(1);
+    return text.length > 150 ? text.slice(0, 147).replace(/\s+\S*$/, "") + "…" : text;
+  }
+
+  // A brief plan for one main topic that is not yet at 100%: the exact
+  // syllabus objectives where marks were lost (weakest first), any
+  // sub-topics not tested yet, and what to redo.
+  function sylPlan(tp, resources){
+    var O = window.SYLLABUS_OBJECTIVES.OBJECTIVES;
+    var items = [];
+    var weak = Object.keys(tp.codes).map(function(k){ return tp.codes[k]; })
+      .filter(function(c){ return c.t > 0 && c.e < c.t; })
+      .sort(function(a, b){ return (a.e / a.t) - (b.e / b.t); }).slice(0, 3);
+    weak.forEach(function(c){
+      items.push("<b>" + escHtml(c.code) + "</b> " + escHtml(sylShort(O[c.code] && O[c.code][1])) + " <span class=\"syl-plan-pct\">(" + Math.round(c.e / c.t * 100) + "%)</span>");
+    });
+    var untested = tp.sections.filter(function(sec){ return !sec.t; });
+    if(tp.t && untested.length){
+      items.push("Not tested yet: " + untested.map(function(sec){ return "<b>" + escHtml(sec.name) + "</b>"; }).join(", ") + ".");
+    }
+    var redo = Object.keys(tp.sources).map(function(k){ return tp.sources[k]; })
+      .filter(function(sc){ return sc.t && sc.e < sc.t; })
+      .sort(function(a, b){ return (a.e / a.t) - (b.e / b.t); }).slice(0, 2).map(function(sc){ return sc.label; });
+    var lead;
+    if(!tp.t){
+      var res = (resources[tp.num] || []).slice(0, 2).map(function(r){ return r.label; });
+      lead = "Start here: learn " + tp.sections.map(function(sec){ return "<b>" + escHtml(sec.name) + "</b>"; }).join(", ") + (res.length ? ", then try " + res.map(escHtml).join(" and ") + "." : ".");
+      return '<p class="syl-plan-lead">' + lead + "</p>";
+    }
+    lead = "To reach 100%, study:";
+    var h = '<p class="syl-plan-lead">' + lead + "</p>";
+    if(items.length) h += "<ul>" + items.map(function(x){ return "<li>" + x + "</li>"; }).join("") + "</ul>";
+    if(redo.length) h += '<p class="syl-plan-redo">Then redo: ' + redo.map(escHtml).join(" and ") + ".</p>";
+    return h;
+  }
+  function escHtml(x){ return String(x == null ? "" : x).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 
   function sylBand(pct){ return pct >= 70 ? "g" : (pct >= 50 ? "a" : "r"); }
 
@@ -2000,6 +2071,7 @@
   }
 
   function renderSyllabusProgress(topics){
+    var resources = sylTopicResources();
     sylProgressEl.innerHTML = "";
     var title = document.createElement("p");
     title.className = "progress-section-title syl-title";
@@ -2043,6 +2115,12 @@
         row.appendChild(sylPill(sec));
         card.appendChild(row);
       });
+      if(!tp.t || tp.e < tp.t){
+        var plan = document.createElement("div");
+        plan.className = "syl-plan";
+        plan.innerHTML = sylPlan(tp, resources);
+        card.appendChild(plan);
+      }
       sylProgressEl.appendChild(card);
     });
     sylProgressEl.classList.remove("hidden");
