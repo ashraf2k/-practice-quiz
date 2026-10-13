@@ -48,8 +48,8 @@
 
   // ---------- progress record ----------
   // st = { learn:{lessonId:{d,f,a,t,rv,rc,pre}}, days:{"YYYY-MM-DD":n}, tests:{topic:{s,t,at}} }
-  function emptyState(){ return { learn:{}, days:{}, tests:{} }; }
-  function pick(rec){ return rec && (rec.learn || rec.days || rec.tests) ? rec : null; }
+  function emptyState(){ return { learn:{}, days:{}, tests:{}, games:{} }; }
+  function pick(rec){ return rec && (rec.learn || rec.days || rec.tests || rec.games) ? rec : null; }
   function mergeState(a, b){
     var out = emptyState();
     [a, b].forEach(function(src){
@@ -66,6 +66,8 @@
       });
       var D = src.days || {};
       Object.keys(D).forEach(function(k){ out.days[k] = Math.max(out.days[k] || 0, D[k] || 0); });
+      var GM = src.games || {};
+      Object.keys(GM).forEach(function(k){ out.games[k] = Math.max(out.games[k] || 0, GM[k] || 0); });
       var T = src.tests || {};
       Object.keys(T).forEach(function(k){
         var x = out.tests[k], y = T[k];
@@ -76,7 +78,7 @@
   }
   function snapshot(st){
     var done = LESSONS.filter(function(l){ return st.learn[l.id] && st.learn[l.id].d; }).length;
-    return { learn: st.learn, days: st.days, tests: st.tests, learnDone: done, learnTotal: LESSONS.length, lastActive: Date.now() };
+    return { learn: st.learn, days: st.days, tests: st.tests, games: st.games || {}, xp: xp(st), learnDone: done, learnTotal: LESSONS.length, lastActive: Date.now() };
   }
 
   // ---------- spaced review ----------
@@ -99,6 +101,23 @@
     return n;
   }
 
+  // ---------- XP, levels and puzzles ----------
+  var GAMES = root.ILEARN_GAMES || (root.ILEARN_GAMES = {});
+  function gameCount(st){ return Object.keys(st.games || {}).filter(function(k){ return st.games[k] > 0; }).length; }
+  function gameStars(st){ return Object.keys(st.games || {}).reduce(function(n, k){ return n + (st.games[k] || 0); }, 0); }
+  function xp(st){
+    var done = 0, mast = 0;
+    LESSONS.forEach(function(l){ var r = st.learn[l.id]; if(r && r.d){ done++; if(r.f) mast++; } });
+    var passed = Object.keys(st.tests || {}).filter(function(k){ var r = st.tests[k]; return r && r.s / r.t >= 0.8; }).length;
+    return done * 10 + mast * 5 + gameStars(st) * 5 + passed * 50;
+  }
+  var LEVELS = [[0, "Rookie"], [100, "Apprentice"], [300, "Coder"], [600, "Hacker"], [1000, "Wizard"], [1500, "Legend"]];
+  function level(x){
+    var cur = LEVELS[0], next = null;
+    LEVELS.forEach(function(l, i){ if(x >= l[0]){ cur = l; next = LEVELS[i + 1] || null; } });
+    return { name: cur[1], from: cur[0], next: next ? next[0] : null, nextName: next ? next[1] : null };
+  }
+
   // ---------- badges ----------
   function badges(st, tree){
     var done = LESSONS.filter(function(l){ return st.learn[l.id] && st.learn[l.id].d; });
@@ -108,7 +127,9 @@
       { icon:"📚", name:"10 lessons", how:"Complete 10 lessons", on: done.length >= 10 },
       { icon:"🌟", name:"10 mastered", how:"Master 10 lessons at the first attempt", on: mast >= 10 },
       { icon:"🔥", name:"3-day streak", how:"Learn on 3 days in a row", on: sk >= 3 || maxStreak(st.days) >= 3 },
-      { icon:"⚡", name:"7-day streak", how:"Learn on 7 days in a row", on: maxStreak(st.days) >= 7 }
+      { icon:"⚡", name:"7-day streak", how:"Learn on 7 days in a row", on: maxStreak(st.days) >= 7 },
+      { icon:"🎮", name:"Puzzle fan", how:"Finish 5 puzzles", on: gameCount(st) >= 5 },
+      { icon:"🧩", name:"Puzzle master", how:"Get 3 stars on 10 puzzles", on: Object.keys(st.games || {}).filter(function(k){ return st.games[k] >= 3; }).length >= 10 }
     ];
     Object.keys(TESTS).forEach(function(tn){
       var r = st.tests[tn];
@@ -133,6 +154,6 @@
   root.ILearnEngine = {
     esc: esc, shuffle: shuffle, today: today, CODES: CODES, LESSONS: LESSONS, LESSON_BY_ID: LESSON_BY_ID, TESTS: TESTS,
     lessonsOf: lessonsOf, topicOf: topicOf, topicTree: topicTree, gradeText: gradeText, emptyState: emptyState,
-    mergeState: mergeState, snapshot: snapshot, dueLessons: dueLessons, streak: streak, maxStreak: maxStreak, badges: badges, keyIdea: keyIdea
+    mergeState: mergeState, snapshot: snapshot, dueLessons: dueLessons, streak: streak, maxStreak: maxStreak, badges: badges, keyIdea: keyIdea, GAMES: GAMES, xp: xp, level: level, gameCount: gameCount, gameStars: gameStars
   };
 })(typeof window !== "undefined" ? window : this);

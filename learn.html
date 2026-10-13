@@ -11,7 +11,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>iLearn</title>
-<link rel="stylesheet" href="shared.css?v=20261014b" />
+<link rel="stylesheet" href="shared.css?v=20261014c" />
 <style>
   .ln-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
   .ln-hero{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
@@ -100,6 +100,11 @@
   .ln-prog{ height:7px; border-radius:4px; background:var(--line); overflow:hidden; margin:6px 0 14px; } .ln-prog i{ display:block; height:100%; background:var(--accent); }
   .ln-tag.p{ background:var(--accent-tint); color:var(--accent-dark); }
   .ln-tag.t{ background:var(--bg); color:var(--muted); border:1px solid var(--line); }
+  .ln-xp{ display:inline-flex; gap:6px; align-items:center; font-weight:800; font-size:13px; padding:3px 11px; border-radius:999px; background:var(--accent-tint); color:var(--accent-dark); margin-left:8px; }
+  .ln-card2.p1{ border-left:5px solid var(--accent); } .ln-card2.p1.lock{ opacity:.8; border-left-color:var(--line); background:var(--bg); }
+  .ln-arc-h{ margin:16px 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--accent-dark); }
+  .ln-arc{ display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; margin:6px 0; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  .ln-arc:hover:not(:disabled){ border-color:var(--accent); } .ln-arc:disabled{ opacity:.5; cursor:not-allowed; } .ln-arc .st{ margin-left:auto; white-space:nowrap; }
   @media (max-width:520px){ .ln-bar-row{ grid-template-columns:1fr; gap:4px; } }
 </style>
 </head>
@@ -129,7 +134,9 @@
     <div class="ln-tools">
       <button class="btn btn-secondary" id="btn-mixed" type="button">🔀 Mixed revision</button>
       <button class="btn btn-secondary" id="btn-gloss" type="button">📖 Glossary</button>
+      <button class="btn btn-secondary" id="btn-arcade" type="button">🎮 Arcade</button>
     </div>
+    <div id="p1card"></div>
     <div class="ln-badges" id="badges"></div>
     <div class="ln-bars" id="bars"></div>
     <div class="ln-tabs" role="tablist" id="tabs"></div>
@@ -169,26 +176,40 @@
     <div class="ln-gl" id="g-list"></div>
   </section>
 
+  <!-- ============ ARCADE ============ -->
+  <section id="view-arcade" class="card hidden">
+    <div class="ln-top">
+      <h2 class="step-title" style="margin:0;">🎮 Arcade</h2>
+      <button class="link-btn" id="a-leave" type="button">← Back to journey</button>
+    </div>
+    <p class="ln-muted">Replay any puzzle from the lessons you have reached. Earn up to 3 stars on each one.</p>
+    <div class="ln-actions" style="margin-top:0"><button class="btn btn-primary" id="a-random" type="button">🎲 Surprise me</button></div>
+    <div id="a-host"></div>
+    <div id="a-list"></div>
+  </section>
+
   <section id="view-wait" class="card"><p class="ln-notice">Loading your journey…</p></section>
 </div>
 
-<script src="syllabus-objectives.js?v=20261014b"></script>
-<script src="learn-helpers.js?v=20261014b"></script>
-<script src="learn-data.js?v=20261014b"></script>
-<script src="learn-t1.js?v=20261014b"></script>
-<script src="learn-t2.js?v=20261014b"></script>
-<script src="learn-t3.js?v=20261014b"></script>
-<script src="learn-t4.js?v=20261014b"></script>
-<script src="learn-t5.js?v=20261014b"></script>
-<script src="learn-t6.js?v=20261014b"></script>
-<script src="learn-t7.js?v=20261014b"></script>
-<script src="learn-t8.js?v=20261014b"></script>
-<script src="learn-t9.js?v=20261014b"></script>
-<script src="learn-t10.js?v=20261014b"></script>
-<script src="learn-glossary.js?v=20261014b"></script>
-<script src="learn-engine.js?v=20261014b"></script>
-<script src="firebase-config.js?v=20261014b"></script>
-<script type="module" src="firebase-init.js?v=20261014b"></script>
+<script src="syllabus-objectives.js?v=20261014c"></script>
+<script src="learn-helpers.js?v=20261014c"></script>
+<script src="learn-data.js?v=20261014c"></script>
+<script src="learn-t1.js?v=20261014c"></script>
+<script src="learn-t2.js?v=20261014c"></script>
+<script src="learn-t3.js?v=20261014c"></script>
+<script src="learn-t4.js?v=20261014c"></script>
+<script src="learn-t5.js?v=20261014c"></script>
+<script src="learn-t6.js?v=20261014c"></script>
+<script src="learn-t7.js?v=20261014c"></script>
+<script src="learn-t8.js?v=20261014c"></script>
+<script src="learn-t9.js?v=20261014c"></script>
+<script src="learn-t10.js?v=20261014c"></script>
+<script src="learn-glossary.js?v=20261014c"></script>
+<script src="learn-games.js?v=20261014c"></script>
+<script src="learn-games-data.js?v=20261014c"></script>
+<script src="learn-engine.js?v=20261014c"></script>
+<script src="firebase-config.js?v=20261014c"></script>
+<script type="module" src="firebase-init.js?v=20261014c"></script>
 <script type="module">
 (function(){
   "use strict";
@@ -198,12 +219,12 @@
     { id:2, title:"Paper 2", sub:"Programming and logic (topics 7–10)", topics:[7,8,9,10] }
   ];
   var PROGRESS_KEY = "ilearn";
-  var user = null, st = { learn:{}, days:{}, tests:{} };
+  var user = null, st = { learn:{}, days:{}, tests:{}, games:{} };
   var activeTab = 1, current = null, sess = null;
 
   function $(id){ return document.getElementById(id); }
   function esc(x){ return E.esc(x); }
-  var VIEWS = ["view-journey","view-lesson","view-quiz","view-gloss","view-wait"];
+  var VIEWS = ["view-journey","view-lesson","view-quiz","view-gloss","view-arcade","view-wait"];
   function show(id){ VIEWS.forEach(function(v){ $(v).classList.toggle("hidden", v !== id); }); window.scrollTo(0, 0); }
 
   var LESSONS = E.LESSONS, LESSON_BY_ID = E.LESSON_BY_ID, CODES = E.CODES;
@@ -274,6 +295,10 @@
   }
 
   // ---------- journey ----------
+  function xpChip(){
+    var x = E.xp(st), lv = E.level(x);
+    return '<span class="ln-xp" title="' + (lv.next ? (lv.next - x) + " XP to " + lv.nextName : "Top level!") + '">⭐ ' + x + " XP · " + esc(lv.name) + "</span>";
+  }
   function pct(a, b){ return b ? Math.round(a / b * 100) : 0; }
   function renderJourney(){
     var tree = E.topicTree();
@@ -282,7 +307,7 @@
     $("ring-pct").textContent = overall + "%";
     $("ring-fill").style.strokeDashoffset = String(226.2 * (1 - overall / 100));
     var cur = currentLesson(), streak = E.streak(st.days);
-    $("hero-title").innerHTML = esc("Hi " + user.name + (doneL ? ", keep going!" : ", let's begin!")) + (streak ? '<span class="ln-streak">🔥 ' + streak + "-day streak</span>" : "");
+    $("hero-title").innerHTML = esc("Hi " + user.name + (doneL ? ", keep going!" : ", let's begin!")) + (streak ? '<span class="ln-streak">🔥 ' + streak + "-day streak</span>" : "") + xpChip();
     $("hero-sub").textContent = doneL + " of " + LESSONS.length + " lessons completed.";
     $("btn-continue").textContent = cur ? (doneL ? "Continue: " : "Start: ") + cur.code + " " + cur.title : "All lessons complete 🎉";
     $("btn-continue").disabled = !cur;
@@ -295,6 +320,7 @@
 
     $("badges").innerHTML = E.badges(st, tree).map(function(b){ return '<span class="ln-badge' + (b.on ? "" : " off") + '" title="' + esc(b.how) + '">' + b.icon + " " + esc(b.name) + "</span>"; }).join("");
 
+    renderP1Card();
     var bars = "";
     PAPERS.forEach(function(p){
       var codes = CODES.filter(function(c){ return p.topics.indexOf(parseInt(O[c][0], 10)) !== -1; });
@@ -341,7 +367,7 @@
                 if(rec.pre) tag = '<span class="ln-tag p">Skipped by test</span>';
                 else tag = rec.f ? '<span class="ln-tag m">Mastered</span>' : '<span class="ln-tag r">↻ Review later</span>';
               } else if(isCur) tag = '<span class="ln-tag m">Up next</span>';
-              h += '<button class="ln-lesson' + (done ? " done" : "") + (isCur ? " cur" : "") + '" data-l="' + l.id + '"' + (ok ? "" : " disabled") + '><span class="ln-dot">' + (done ? "✓" : (ok ? "▶" : "🔒")) + "</span><span>" + esc(l.title) + "</span>" + tag + "</button>";
+              h += '<button class="ln-lesson' + (done ? " done" : "") + (isCur ? " cur" : "") + '" data-l="' + l.id + '"' + (ok ? "" : " disabled") + '><span class="ln-dot">' + (done ? "✓" : (ok ? "▶" : "🔒")) + "</span><span>" + esc(l.title) + (E.GAMES[l.id] ? " <span title=\"Has a puzzle\">🎮</span>" : "") + "</span>" + tag + "</button>";
             });
             h += "</div>";
           }
@@ -355,6 +381,13 @@
     Array.prototype.forEach.call($("topics").querySelectorAll("[data-pre]"), function(b){ b.addEventListener("click", function(){ startTopicTest(Number(b.getAttribute("data-pre")), true); }); });
     Array.prototype.forEach.call($("topics").querySelectorAll("[data-test]"), function(b){ b.addEventListener("click", function(){ startTopicTest(Number(b.getAttribute("data-test")), false); }); });
     show("view-journey");
+  }
+  function p1Lessons(){ return LESSONS.filter(function(l){ return parseInt(O[l.code][0], 10) <= 6; }); }
+  function renderP1Card(){
+    var all = p1Lessons(), left = all.filter(function(l){ return !isDone(l.id); }).length;
+    $("p1card").innerHTML = left === 0
+      ? '<div class="ln-card2 p1"><div><b>📝 Paper 1 mock exam is unlocked!</b><p>You have finished topics 1 to 6. Build a full 75-mark paper in the style of the real 0478 Paper 1, with its mark scheme.</p></div><a class="btn btn-primary" href="paper1.html" style="text-decoration:none">Create my Paper 1</a></div>'
+      : '<div class="ln-card2 p1 lock"><div><b>🔒 Paper 1 mock exam</b><p>Finish all lessons in topics 1 to 6 to unlock a full practice paper. ' + left + " of " + all.length + " lessons to go.</p></div></div>";
   }
   $("btn-continue").addEventListener("click", function(){ var c = currentLesson(); if(c) openLesson(c.id); });
   $("btn-mixed").addEventListener("click", startMixed);
@@ -385,7 +418,7 @@
       h = '<div class="ln-box"><h3>Syllabus objective ' + esc(l.code) + "</h3><div>" + esc(O[l.code][1]) + '</div></div><div class="ln-body">' + l.concept + '</div><div class="ln-actions"><button class="btn btn-primary" id="b-next" type="button">Show me an example →</button></div>';
     } else if(c.step === 1){
       renderSteps(1);
-      h = '<div class="ln-body"><div class="ln-box"><h3>Worked example</h3>' + l.example + '</div></div><div class="ln-actions"><button class="btn btn-secondary" id="b-back" type="button">← Re-read the idea</button><button class="btn btn-primary" id="b-next" type="button">Check my understanding →</button></div>';
+      h = '<div class="ln-body"><div class="ln-box"><h3>Worked example</h3>' + l.example + '</div>' + gameBox(l) + '</div><div class="ln-actions"><button class="btn btn-secondary" id="b-back" type="button">← Re-read the idea</button><button class="btn btn-primary" id="b-next" type="button">Check my understanding →</button></div>';
     } else if(c.step === 2){
       renderSteps(2);
       body.innerHTML = '<p class="ln-crumb">Question ' + (c.ci + 1) + " of " + l.checks.length + '</p><div id="qhost"></div>';
@@ -395,13 +428,14 @@
       renderSteps(3, true);
       var rec = st.learn[l.id], nextL = currentLesson(), mastered = rec && rec.f;
       h = '<div class="ln-done"><div class="big">' + (mastered ? "🌟" : "✅") + "</div><h2>" + (mastered ? "Mastered first time!" : "Lesson complete") + "</h2><p class='ln-muted'>" +
-        (mastered ? "You answered every question correctly at the first attempt. This idea is secure." : "You got there in the end. This idea is marked to <b>review later</b>; it will come back in your warm-up.") + "</p></div>" +
+        (mastered ? "You answered every question correctly at the first attempt. This idea is secure." : "You got there in the end. This idea is marked to <b>review later</b>; it will come back in your warm-up.") + "</p><p><b>+" + (mastered ? 15 : 10) + " XP</b></p></div>" +
         '<div class="ln-box"><h3>Key idea to remember</h3><div class="ln-body">' + E.keyIdea(l) + '</div></div><div class="ln-actions" style="justify-content:center">' +
         (nextL ? '<button class="btn btn-primary" id="b-next" type="button">Next: ' + esc(nextL.code + " " + nextL.title) + " →</button>" : "") +
         '<button class="btn btn-secondary" id="b-journey" type="button">Back to journey</button></div>';
     }
     body.innerHTML = h;
     var bn = $("b-next"), bb = $("b-back"), bj = $("b-journey");
+    if($("b-play")) $("b-play").addEventListener("click", function(){ runGame(l.id, $("game-host")); });
     if(c.step < 2){
       if(bn) bn.addEventListener("click", function(){ c.step++; renderLesson(); window.scrollTo(0, 0); });
       if(bb) bb.addEventListener("click", function(){ c.step--; renderLesson(); window.scrollTo(0, 0); });
@@ -410,6 +444,52 @@
       if(bj) bj.addEventListener("click", function(){ renderJourney(); });
     }
   }
+
+  // ---------- puzzles ----------
+  function gameBox(l){
+    if(!E.GAMES[l.id]) return "";
+    var best = st.games[l.id] || 0;
+    return '<div class="ln-box"><h3>🎮 Puzzle time <small style="text-transform:none;letter-spacing:0;font-weight:600;color:var(--muted)">(optional · ' + (best ? "best: " + "⭐".repeat(best) : "earn up to 3 stars") + ')</small></h3><div id="game-host"><button class="btn btn-secondary" id="b-play" type="button">▶ Play the puzzle</button></div></div>';
+  }
+  function runGame(id, host, after){
+    var spec = E.GAMES[id]; if(!spec) return;
+    window.ILGames.play(host, spec, function(res){
+      if(res.stars > (st.games[id] || 0)) st.games[id] = res.stars;
+      markToday(); save();
+      var again = document.createElement("div"); again.className = "ln-actions"; again.style.justifyContent = "center";
+      again.innerHTML = '<button class="btn btn-secondary" type="button">↻ Play again</button>';
+      again.firstChild.addEventListener("click", function(){ runGame(id, host, after); });
+      host.querySelector(".gm-stage").appendChild(again);
+      if(after) after();
+    });
+  }
+  function arcadeUnlocked(id){ var l = LESSON_BY_ID[id]; return !!l && isUnlocked(l); }
+  function openArcade(){
+    $("a-host").innerHTML = ""; renderArcade(); show("view-arcade");
+  }
+  function renderArcade(){
+    var ids = Object.keys(E.GAMES).filter(function(id){ return LESSON_BY_ID[id]; }).sort(function(a, b){ return LESSONS.indexOf(LESSON_BY_ID[a]) - LESSONS.indexOf(LESSON_BY_ID[b]); });
+    var h = "", last = 0, got = ids.filter(function(id){ return st.games[id]; }).length;
+    h += '<p class="ln-muted">' + got + " of " + ids.length + " puzzles played · " + E.gameStars(st) + " stars collected</p>";
+    ids.forEach(function(id){
+      var l = LESSON_BY_ID[id], tn = parseInt(O[l.code][0], 10), ok = arcadeUnlocked(id), b = st.games[id] || 0;
+      if(tn !== last){ h += '<h4 class="ln-arc-h">Topic ' + tn + "</h4>"; last = tn; }
+      h += '<button class="ln-arc" data-g="' + id + '"' + (ok ? "" : " disabled") + "><span>" + (ok ? "🎮" : "🔒") + "</span><span><b>" + esc(E.GAMES[id].title) + "</b> · " + esc(l.code + " " + l.title) + '</span><span class="st">' + (b ? "⭐".repeat(b) : (ok ? "new" : "")) + "</span></button>";
+    });
+    $("a-list").innerHTML = h;
+    Array.prototype.forEach.call($("a-list").querySelectorAll(".ln-arc"), function(b){
+      b.addEventListener("click", function(){ runGame(b.getAttribute("data-g"), $("a-host"), function(){ renderArcadeList(); }); $("a-host").scrollIntoView({ behavior:"smooth", block:"start" }); });
+    });
+  }
+  function renderArcadeList(){ var keep = $("a-host").innerHTML; renderArcade(); }
+  $("btn-arcade").addEventListener("click", openArcade);
+  $("a-leave").addEventListener("click", function(){ renderJourney(); });
+  $("a-random").addEventListener("click", function(){
+    var ids = Object.keys(E.GAMES).filter(function(id){ return arcadeUnlocked(id); });
+    if(!ids.length) return;
+    var id = ids[Math.floor(Math.random() * ids.length)];
+    runGame(id, $("a-host"), function(){ renderArcadeList(); }); $("a-host").scrollIntoView({ behavior:"smooth", block:"start" });
+  });
 
   function lessonAnswered(ok, fb){
     var c = current, l = c.l, last = c.ci + 1 >= l.checks.length;

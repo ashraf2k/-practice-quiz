@@ -407,7 +407,7 @@
         <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons. Click "Load iLearn progress" to fetch it. Students who have not yet done a practice quiz or exam are not in this list.</p>
         <div id="ilearn-summary"></div>
         <div class="table-scroll"><table class="admin-table" id="ilearn-table" style="display:none">
-          <thead><tr><th>Student</th><th>Class</th><th>Lessons done</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Topic tests</th><th>Last active</th></tr></thead>
+          <thead><tr><th>Student</th><th>Class</th><th>Lessons done</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Last active</th></tr></thead>
           <tbody></tbody></table></div>
         <h3 id="ilearn-struggle-h" style="display:none;margin-top:20px">Lessons students found hardest</h3>
         <div class="table-scroll"><table class="admin-table" id="ilearn-struggle" style="display:none">
@@ -470,19 +470,20 @@
 <script src="quiz-data.js?v=20261014a"></script>
 <script src="exam-data.js?v=20261014a"></script>
 <script src="syllabus-objectives.js?v=20261014a"></script>
-<script src="learn-helpers.js?v=20261014b"></script>
-<script src="learn-data.js?v=20261014b"></script>
-<script src="learn-t1.js?v=20261014b"></script>
-<script src="learn-t2.js?v=20261014b"></script>
-<script src="learn-t3.js?v=20261014b"></script>
-<script src="learn-t4.js?v=20261014b"></script>
-<script src="learn-t5.js?v=20261014b"></script>
-<script src="learn-t6.js?v=20261014b"></script>
-<script src="learn-t7.js?v=20261014b"></script>
-<script src="learn-t8.js?v=20261014b"></script>
-<script src="learn-t9.js?v=20261014b"></script>
-<script src="learn-t10.js?v=20261014b"></script>
-<script src="learn-engine.js?v=20261014b"></script>
+<script src="learn-helpers.js?v=20261014c"></script>
+<script src="learn-data.js?v=20261014c"></script>
+<script src="learn-t1.js?v=20261014c"></script>
+<script src="learn-t2.js?v=20261014c"></script>
+<script src="learn-t3.js?v=20261014c"></script>
+<script src="learn-t4.js?v=20261014c"></script>
+<script src="learn-t5.js?v=20261014c"></script>
+<script src="learn-t6.js?v=20261014c"></script>
+<script src="learn-t7.js?v=20261014c"></script>
+<script src="learn-t8.js?v=20261014c"></script>
+<script src="learn-t9.js?v=20261014c"></script>
+<script src="learn-t10.js?v=20261014c"></script>
+<script src="learn-games-data.js?v=20261014c"></script>
+<script src="learn-engine.js?v=20261014c"></script>
 <script src="report-lib.js?v=20261014a"></script>
 <script src="syllabus-data.js?v=20261014a"></script>
 <script src="syllabus-report.js?v=20261014a"></script>
@@ -891,7 +892,7 @@
       });
       var tests = Object.keys(st.tests).sort(function(a,b){ return a - b; }).map(function(k){ var t = st.tests[k]; return "T" + k + " " + Math.round(100 * t.s / t.t) + "%"; }).join(", ") || "-";
       var tr = document.createElement("tr"); tr.style.cursor = "default";
-      var cells = [r.s.name || "(no name)", r.s.className || "", done + " / " + total + " (" + Math.round(100 * done / total) + "%)", mastered, E.streak(st.days) + " days", E.dueLessons(L).length, tests, ilearnDate(r.lastActive)];
+      var cells = [r.s.name || "(no name)", r.s.className || "", done + " / " + total + " (" + Math.round(100 * done / total) + "%)", mastered, E.streak(st.days) + " days", E.dueLessons(L).length, E.gameCount(st) + " / " + E.xp(st) + " XP", tests, r.p1 ? Math.round(r.p1.best) + "% best (" + r.p1.n + ")" : "-", ilearnDate(r.lastActive)];
       cells.forEach(function(c){ var td = document.createElement("td"); td.textContent = c; tr.appendChild(td); });
       tb.appendChild(tr);
     });
@@ -916,8 +917,9 @@
     if(!roster.length){ status.textContent = "No 10BR students found yet."; return; }
     status.textContent = "Loading " + roster.length + " students…";
     Promise.all(roster.map(function(s){
-      return PQFirebase.getMyProgress(s.uid, "ilearn").catch(function(){ return null; }).then(function(rec){
-        return { s:s, st: window.ILearnEngine.mergeState(null, rec), lastActive: rec && rec.lastActive };
+      return Promise.all([PQFirebase.getMyProgress(s.uid, "ilearn").catch(function(){ return null; }), PQFirebase.getMyProgress(s.uid, "paper1mock").catch(function(){ return null; })]).then(function(rr){
+        var rec = rr[0], p1 = rr[1];
+        return { s:s, st: window.ILearnEngine.mergeState(null, rec), lastActive: Math.max((rec && rec.lastActive) || 0, (p1 && p1.lastActive) || 0) || null, p1: p1 && p1.n ? { best: p1.best, n: p1.n } : null };
       });
     })).then(function(rows){
       ilearnRows = rows;

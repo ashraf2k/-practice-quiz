@@ -2216,7 +2216,7 @@
     meta.textContent = "Start your journey at topic 1.1";
     if(PQFirebase.getMyProgress){
       PQFirebase.getMyProgress(user.uid, "ilearn").then(function(rec){
-        if(rec && typeof rec.learnDone === "number" && rec.learnDone > 0) meta.textContent = rec.learnDone + " of " + rec.learnTotal + " lessons completed — continue your journey";
+        if(rec && typeof rec.learnDone === "number" && rec.learnDone > 0) meta.textContent = rec.learnDone + " of " + rec.learnTotal + " lessons completed" + (rec.xp ? " · " + rec.xp + " XP" : "") + " — continue your journey";
       }).catch(function(){});
     }
     showScreen("hub");

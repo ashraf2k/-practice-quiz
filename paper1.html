@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#146C6A" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<title>Paper 1 Mock Exam</title>
+<link rel="stylesheet" href="shared.css?v=20261014a" />
+<style>
+  .pp-top{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .pp-opts{ display:grid; gap:10px; margin:14px 0; } .pp-opts label{ display:flex; gap:10px; align-items:flex-start; font-size:15px; }
+  .pp-hist{ width:100%; border-collapse:collapse; font-size:14px; margin:8px 0 0; } .pp-hist th,.pp-hist td{ border-bottom:1px solid var(--line); padding:7px 8px; text-align:left; }
+  .pp-lock{ border:1px solid var(--line); border-left:5px solid var(--diff-moderate); background:var(--diff-moderate-bg); border-radius:10px; padding:14px 16px; margin:12px 0; }
+  /* the exam paper itself */
+  .pp-sheet{ background:#fff; color:#111; border:1px solid #bbb; border-radius:6px; padding:28px 30px; margin:14px 0; font-family:Arial,Helvetica,sans-serif; }
+  .pp-cover h1{ font-size:24px; margin:0 0 10px; } .pp-cover .pp-brand{ font-weight:700; color:#555; font-size:13px; margin-bottom:6px; }
+  .pp-cover table{ width:100%; border-collapse:collapse; margin:10px 0; } .pp-cover td{ padding:6px 4px; vertical-align:top; font-size:14px; }
+  .pp-cover .box{ border:1px solid #333; padding:8px 10px; min-height:20px; }
+  .pp-rule{ border:0; border-top:1px solid #333; margin:14px 0; }
+  .pp-cover ul{ margin:6px 0 10px 22px; padding:0; font-size:14px; } .pp-cover h3{ margin:12px 0 4px; font-size:14px; }
+  .pp-q{ margin:26px 0 0; }
+  .pp-qhead{ display:flex; gap:14px; font-weight:700; font-size:16px; } .pp-qhead .n{ flex:0 0 auto; min-width:22px; } .pp-qhead small{ font-weight:400; color:#666; margin-left:auto; font-size:12px; }
+  .pp-part{ margin:14px 0 0 36px; } .pp-part.single{ margin-left:36px; }
+  .pp-row{ display:flex; gap:12px; align-items:flex-start; } .pp-row .l{ flex:0 0 28px; font-weight:700; } .pp-row .t{ flex:1 1 auto; white-space:pre-wrap; font-size:15px; line-height:1.5; } .pp-row .m{ flex:0 0 auto; font-weight:700; padding-left:8px; }
+  .pp-ans{ width:100%; box-sizing:border-box; margin:8px 0 0; padding:8px 10px; border:1px solid #999; border-radius:4px; font:inherit; font-size:15px; line-height:26px; background:repeating-linear-gradient(#fff,#fff 25px,#9aa 25px,#9aa 26px); color:#111; }
+  .pp-bar{ position:sticky; top:0; z-index:5; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:8px 12px; display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin:10px 0; }
+  .pp-timer{ font-weight:800; font-variant-numeric:tabular-nums; font-size:18px; } .pp-timer.low{ color:var(--incorrect); }
+  .pp-score{ font-size:44px; font-weight:800; margin:4px 0; } .pp-sub{ color:var(--muted); font-size:14px; }
+  .pp-ms{ width:100%; border-collapse:collapse; font-size:13.5px; background:#fff; color:#111; } .pp-ms th,.pp-ms td{ border:1px solid #333; padding:6px 8px; vertical-align:top; text-align:left; } .pp-ms th{ background:#f2f2f2; }
+  .pp-ms td.q{ width:70px; text-align:center; font-weight:700; } .pp-ms td.mk{ width:46px; text-align:center; font-weight:700; } .pp-ms td.you{ width:96px; text-align:center; }
+  .pp-ms tr.yours td{ background:#fafaf0; font-size:13px; } .pp-ms .ok{ color:#15803d; font-weight:700; } .pp-ms .no{ color:#b91c1c; font-weight:700; }
+  .pp-ms ul{ margin:0 0 0 18px; padding:0; } .pp-ms .g{ color:#444; font-size:12.5px; }
+  .pp-topic{ width:100%; border-collapse:collapse; font-size:14px; margin:8px 0 0; } .pp-topic th,.pp-topic td{ border-bottom:1px solid var(--line); padding:7px 8px; text-align:left; } .pp-topic .bar{ height:8px; background:var(--line); border-radius:4px; overflow:hidden; min-width:90px; } .pp-topic .bar i{ display:block; height:100%; background:var(--accent); }
+  @media (max-width:560px){ .pp-sheet{ padding:16px 14px; } .pp-part{ margin-left:8px; } }
+  @media print{
+    body{ background:#fff !important; } .no-print, header.top{ display:none !important; }
+    .wrap{ max-width:none !important; padding:0 !important; } .card{ box-shadow:none !important; border:0 !important; padding:0 !important; }
+    body.print-ms .pp-paper-only{ display:none !important; } body.print-paper .pp-ms-only{ display:none !important; }
+    .pp-sheet{ border:0; padding:0; } .pp-q{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+
+  <header class="top">
+    <a class="logo-link" href="index.html" aria-label="iLearnCS home"><img class="logo-img" src="logo.png" alt="iLearnCS"></a>
+    <div><h1>Paper 1 Mock Exam</h1><p id="header-sub">Computer Systems · topics 1 to 6</p></div>
+  </header>
+
+  <section id="screen-loading" class="card"><p class="cohort-note">Checking your sign-in…</p></section>
+
+  <!-- ============ START ============ -->
+  <section id="screen-start" class="card hidden">
+    <div class="account-banner">
+      <h2 class="step-title" style="margin-bottom:0;">Create your Paper 1</h2>
+      <a class="link-btn" href="learn.html">← Back to iLearn</a>
+    </div>
+    <p class="step-sub" id="start-greeting"></p>
+    <div id="lock-note"></div>
+    <div id="start-main">
+      <p>A full practice paper built from real exam-style questions on topics 1 to 6, laid out like the Cambridge IGCSE 0478 Paper 1: <b>75 marks</b>, written answers, and a mark scheme with an <b>Answer / Marks / Guidance</b> table. Every paper is different, and questions you have already seen are avoided where possible.</p>
+      <div class="pp-opts">
+        <label><input type="checkbox" id="opt-timer" checked> <span><b>Exam conditions:</b> run the 1 hour 45 minute timer. Untick for untimed practice.</span></label>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-create">Create my paper</button>
+      </div>
+      <div class="resume-prompt hidden" id="resume-box" style="margin-top:14px">
+        <p id="resume-text"></p>
+        <div class="btn-row"><button class="btn btn-primary" id="btn-resume">Resume my paper</button><button class="btn btn-secondary" id="btn-discard">Discard it</button></div>
+      </div>
+      <div id="hist"></div>
+    </div>
+  </section>
+
+  <!-- ============ PAPER ============ -->
+  <section id="screen-paper" class="card hidden">
+    <div class="pp-bar no-print">
+      <span class="pp-timer" id="pp-timer">1:45:00</span>
+      <span class="pp-sub" id="pp-answered"></span>
+      <span><button class="btn btn-secondary" id="btn-print-paper" type="button">Print</button> <button class="btn btn-primary" id="pp-submit" type="button">Submit my paper</button></span>
+    </div>
+    <div id="paper-body"></div>
+    <div class="btn-row no-print"><button class="btn btn-primary" id="pp-submit2" type="button">Submit my paper</button></div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section id="screen-results" class="card hidden">
+    <div class="pp-top no-print">
+      <h2 class="step-title" style="margin:0;">Your result</h2>
+      <a class="link-btn" href="learn.html">← Back to iLearn</a>
+    </div>
+    <div class="pp-paper-only">
+      <div class="pp-score"><span id="pp-total">0</span> / <span id="pp-max">75</span></div>
+      <p class="pp-sub" id="pp-pct"></p>
+      <p class="cohort-note">Marks are suggested automatically by looking for the key terms and values in the mark scheme. <b>Check each answer against the mark scheme below and change the ticks to what you really earned</b>; your total updates as you do.</p>
+      <div id="topic-break"></div>
+    </div>
+    <div class="btn-row no-print">
+      <button class="btn btn-primary" id="btn-save" type="button">Save my score</button>
+      <button class="btn btn-secondary" id="btn-print-ms" type="button">Print the mark scheme</button>
+      <button class="btn btn-secondary" id="btn-print-qp" type="button">Print the question paper</button>
+      <button class="btn btn-secondary" id="btn-again" type="button">Create another paper</button>
+    </div>
+    <p class="cohort-note" id="save-status" aria-live="polite"></p>
+    <h3 class="pp-ms-only" style="margin:22px 0 8px">Mark scheme</h3>
+    <div class="pp-ms-only" id="ms-body"></div>
+    <div class="pp-paper-only" id="paper-print" style="display:none"></div>
+  </section>
+
+</div>
+
+<script src="exam-data.js?v=20261014a"></script>
+<script src="syllabus-objectives.js?v=20261014c"></script>
+<script src="learn-helpers.js?v=20261014c"></script>
+<script src="learn-data.js?v=20261014c"></script>
+<script src="learn-t1.js?v=20261014c"></script>
+<script src="learn-t2.js?v=20261014c"></script>
+<script src="learn-t3.js?v=20261014c"></script>
+<script src="learn-t4.js?v=20261014c"></script>
+<script src="learn-t5.js?v=20261014c"></script>
+<script src="learn-t6.js?v=20261014c"></script>
+<script src="learn-t7.js?v=20261014c"></script>
+<script src="learn-t8.js?v=20261014c"></script>
+<script src="learn-t9.js?v=20261014c"></script>
+<script src="learn-t10.js?v=20261014c"></script>
+<script src="learn-engine.js?v=20261014c"></script>
+<script src="paper1-lib.js?v=20261014c"></script>
+<script src="firebase-config.js?v=20261014c"></script>
+<script type="module" src="firebase-init.js?v=20261014c"></script>
+<script type="module">
+(function(){
+  "use strict";
+  var P = window.Paper1Lib, E = window.ILearnEngine;
+  var user = null, cur = null, timerId = null, hist = [], remoteKey = "paper1mock";
+  function $(id){ return document.getElementById(id); }
+  var esc = P.esc;
+  var SCREENS = ["loading","start","paper","results"];
+  function show(n){ SCREENS.forEach(function(s){ $("screen-" + s).classList.toggle("hidden", s !== n); }); window.scrollTo(0, 0); }
+  function lsGet(k){ try { return JSON.parse(localStorage.getItem(k) || "null"); } catch(e){ return null; } }
+  function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+  var curKey = function(){ return "paper1_cur_" + user.uid; }, histKey = function(){ return "paper1_hist_" + user.uid; }, seenKey = function(){ return "paper1_seen_" + user.uid; };
+
+  // ---------- unlock check: all lessons in topics 1-6 finished ----------
+  function topicsDone(state){
+    var left = E.LESSONS.filter(function(l){ return E.topicOf(l) <= 6 && !(state.learn[l.id] && state.learn[l.id].d); }).length;
+    return left;
+  }
+
+  function initForUser(u){
+    user = u;
+    $("start-greeting").textContent = "Hi " + (u.name || "there") + ".";
+    var local = lsGet("ilearn_v1_" + u.uid);
+    var pr = PQFirebase.getMyProgress ? PQFirebase.getMyProgress(u.uid, "ilearn").catch(function(){ return null; }) : Promise.resolve(null);
+    var ph = PQFirebase.getMyProgress ? PQFirebase.getMyProgress(u.uid, remoteKey).catch(function(){ return null; }) : Promise.resolve(null);
+    Promise.all([pr, ph]).then(function(r){
+      var state = E.mergeState(local, r[0]);
+      var left = topicsDone(state);
+      var preview = /[?&]preview=1/.test(location.search);
+      hist = P.mergeHist(lsGet(histKey()) || [], (r[1] && r[1].hist) || []);
+      if(left > 0 && !preview){
+        $("lock-note").innerHTML = '<div class="pp-lock"><b>🔒 Not unlocked yet</b><p style="margin:6px 0 0">Finish every lesson in topics 1 to 6 on your iLearn journey to unlock the Paper 1 mock exam. <b>' + left + "</b> lesson" + (left === 1 ? "" : "s") + ' to go.</p><div class="btn-row"><a class="btn btn-primary" href="learn.html" style="text-decoration:none">Back to my journey</a></div></div>';
+        $("start-main").classList.add("hidden");
+      } else { $("lock-note").innerHTML = ""; $("start-main").classList.remove("hidden"); }
+      renderStart(); show("start");
+    });
+  }
+
+  function renderStart(){
+    var saved = lsGet(curKey());
+    $("resume-box").classList.toggle("hidden", !(saved && saved.ids && !saved.done));
+    if(saved && saved.ids && !saved.done){
+      var n = Object.keys(saved.answers || {}).filter(function(k){ return (saved.answers[k] || "").trim(); }).length;
+      $("resume-text").textContent = "You have a paper in progress (" + n + " part" + (n === 1 ? "" : "s") + " answered)" + (saved.timed ? ", and the timer kept running." : ".");
+    }
+    $("btn-create").classList.toggle("hidden", !!(saved && saved.ids && !saved.done));
+    if(saved && saved.ids && !saved.done) $("btn-create").classList.add("hidden");
+    var h = "";
+    if(hist.length){
+      h += '<h3 style="margin:18px 0 4px">Your previous papers</h3><table class="pp-hist"><tr><th>Date</th><th>Score</th><th>%</th><th>Mode</th></tr>';
+      hist.slice().reverse().slice(0, 8).forEach(function(x){ h += "<tr><td>" + esc(new Date(x.at).toLocaleDateString()) + "</td><td>" + x.score + " / " + x.max + "</td><td>" + Math.round(100 * x.score / x.max) + "%</td><td>" + (x.timed ? "Timed" : "Untimed") + "</td></tr>"; });
+      h += "</table>";
+    }
+    $("hist").innerHTML = h;
+  }
+
+  // ---------- create / resume ----------
+  function newPaper(){
+    var seen = lsGet(seenKey()) || [];
+    var composed = P.compose(window.EXAM_PAPERS, seen);
+    cur = { ids: composed.ids, startedAt: Date.now(), timed: $("opt-timer").checked, answers: {}, done: false };
+    lsSet(curKey(), cur);
+    lsSet(seenKey(), seen.concat(composed.ids).slice(-200));
+    openPaper();
+  }
+  function openPaper(){
+    var paper = P.build(window.EXAM_PAPERS, cur.ids);
+    cur.paper = paper;
+    $("paper-body").innerHTML = P.paperHtml(paper, user, cur.answers);
+    Array.prototype.forEach.call($("paper-body").querySelectorAll(".pp-ans"), function(t){
+      t.addEventListener("input", function(){ cur.answers[t.getAttribute("data-k")] = t.value; lsSet(curKey(), slim()); updateAnswered(); });
+    });
+    updateAnswered(); show("paper");
+    startTimer();
+  }
+  function slim(){ return { ids: cur.ids, startedAt: cur.startedAt, timed: cur.timed, answers: cur.answers, done: cur.done }; }
+  function updateAnswered(){
+    var parts = cur.paper.parts.length, n = cur.paper.parts.filter(function(p){ return (cur.answers[p.key] || "").trim(); }).length;
+    $("pp-answered").textContent = n + " of " + parts + " parts answered";
+  }
+  var LIMIT = 105 * 60 * 1000;
+  function startTimer(){
+    clearInterval(timerId);
+    var el = $("pp-timer");
+    if(!cur.timed){ el.textContent = "Untimed"; el.classList.remove("low"); return; }
+    function tick(){
+      var left = LIMIT - (Date.now() - cur.startedAt);
+      if(left <= 0){ el.textContent = "0:00:00"; clearInterval(timerId); submit(true); return; }
+      var s = Math.floor(left / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+      el.textContent = h + ":" + (m < 10 ? "0" : "") + m + ":" + (sec < 10 ? "0" : "") + sec;
+      el.classList.toggle("low", left < 10 * 60 * 1000);
+    }
+    tick(); timerId = setInterval(tick, 1000);
+  }
+
+  // ---------- submit and mark ----------
+  var marks = null;   // per mark point: {key, i, mp, get()}
+  function submit(auto){
+    var blanks = cur.paper.parts.filter(function(p){ return !(cur.answers[p.key] || "").trim(); }).length;
+    if(!auto && blanks && !window.confirm(blanks + " part" + (blanks === 1 ? " is" : "s are") + " still blank. Submit anyway?")) return;
+    clearInterval(timerId);
+    cur.done = true; cur.finishedAt = Date.now(); lsSet(curKey(), slim());
+    renderResults(); show("results");
+  }
+  function renderResults(){
+    var paper = cur.paper;
+    $("ms-body").innerHTML = P.markSchemeHtml(paper, cur.answers);
+    $("paper-print").innerHTML = P.paperHtml(paper, user, cur.answers, true);
+    marks = [];
+    Array.prototype.forEach.call($("ms-body").querySelectorAll("[data-mp]"), function(c){
+      c.addEventListener("change", recompute);
+    });
+    recompute();
+  }
+  function recompute(){
+    var total = 0, byTopic = {};
+    Array.prototype.forEach.call($("ms-body").querySelectorAll("[data-mp]"), function(c){
+      var v = c.type === "checkbox" ? (c.checked ? Number(c.getAttribute("data-max")) : 0) : (parseInt(c.value, 10) || 0);
+      total += v; var t = c.getAttribute("data-topic"); byTopic[t] = byTopic[t] || { got: 0, max: 0 }; byTopic[t].got += v;
+    });
+    cur.paper.parts.forEach(function(p){ p.q.markPoints.forEach(function(mp){ var t = p.group; byTopic[t] = byTopic[t] || { got: 0, max: 0 }; byTopic[t].max += mp.marks; }); });
+    $("pp-total").textContent = total; $("pp-max").textContent = cur.paper.max;
+    var pc = Math.round(100 * total / cur.paper.max);
+    $("pp-pct").textContent = pc + "% · " + P.band(pc);
+    $("topic-break").innerHTML = P.topicTable(byTopic);
+    cur.score = total; cur.byTopic = byTopic;
+  }
+  function saveScore(){
+    var entry = { at: Date.now(), score: cur.score, max: cur.paper.max, timed: cur.timed, topics: Object.keys(cur.byTopic).map(function(k){ return [k, cur.byTopic[k].got, cur.byTopic[k].max]; }) };
+    hist = hist.filter(function(h){ return h.at !== entry.at; }).concat([entry]);
+    lsSet(histKey(), hist);
+    $("save-status").textContent = "Saving…";
+    var done = function(ok){ $("save-status").textContent = ok ? "Saved to your history." : "Saved on this device. It could not be sent to your teacher right now."; };
+    if(PQFirebase.saveProgress){
+      PQFirebase.saveProgress(user.uid, remoteKey, { hist: hist.slice(-20), best: Math.max.apply(null, hist.map(function(h){ return Math.round(100 * h.score / h.max); })), n: hist.length, lastActive: Date.now() })
+        .then(function(r){ done(!!(r && r.ok !== false)); }).catch(function(){ done(false); });
+    } else done(false);
+    lsSet(curKey(), null);
+  }
+
+  // ---------- events ----------
+  $("btn-create").addEventListener("click", newPaper);
+  $("btn-resume").addEventListener("click", function(){ var s = lsGet(curKey()); if(!s) return; cur = s; openPaper(); });
+  $("btn-discard").addEventListener("click", function(){ if(window.confirm("Discard your unfinished paper?")){ lsSet(curKey(), null); renderStart(); } });
+  $("pp-submit").addEventListener("click", function(){ submit(false); });
+  $("pp-submit2").addEventListener("click", function(){ submit(false); });
+  $("btn-save").addEventListener("click", saveScore);
+  $("btn-again").addEventListener("click", function(){ lsSet(curKey(), null); cur = null; renderStart(); show("start"); });
+  function printMode(m){ document.body.classList.remove("print-ms", "print-paper"); document.body.classList.add(m); if(m === "print-paper") $("paper-print").style.display = ""; window.print(); }
+  $("btn-print-ms").addEventListener("click", function(){ printMode("print-ms"); });
+  $("btn-print-qp").addEventListener("click", function(){ printMode("print-paper"); });
+  $("btn-print-paper").addEventListener("click", function(){ window.print(); });
+
+  PQFirebase.onAuthChange(function(u){
+    if(!u){ window.location.href = "quiz.html"; return; }
+    initForUser(u);
+  });
+})();
+</script>
+</body>
+</html>
