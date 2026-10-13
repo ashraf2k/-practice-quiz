@@ -13,6 +13,7 @@
 
   // ===================== 1.1 Number systems =====================
   { id:"1.1.1", code:"1.1.1", title:"Why computers use binary",
+    video:{ id:"pol5ado7YCc", label:"Video: number systems" },
     concept:
       "<p>A computer is built from billions of tiny electronic switches. A switch has only two states, <b>on</b> or <b>off</b>, so a computer can only work with two values. We write these two values as <b>1</b> (on) and <b>0</b> (off). This is <b>binary</b>.</p>" +
       "<p>Because of this, <b>any form of data</b> (numbers, text, sound, images and even the program instructions) has to be <b>converted to binary</b> before the computer can process it. Inside the computer the binary data is processed using <b>logic gates</b> and is stored in <b>registers</b>.</p>",
@@ -25,6 +26,7 @@
     ] },
 
   { id:"1.1.2a", code:"1.1.2", title:"Denary, binary and hexadecimal",
+    video:{ id:"pol5ado7YCc", label:"Video: number systems" },
     concept:
       "<p>A <b>number system</b> has a <b>base</b>: the number of different digits it uses. Each column is worth the base times more than the column to its right.</p>" +
       "<table class='ln-table'><tr><th>System</th><th>Base</th><th>Digits used</th><th>Column values (right to left)</th></tr>" +
@@ -43,6 +45,7 @@
     ] },
 
   { id:"1.1.2b", code:"1.1.2", title:"Converting between binary and denary",
+    video:{ id:"4ZfqXkptPus", label:"Video: binary numbers" },
     concept:
       "<p>Write the column headings for an 8-bit binary number, from right to left, doubling each time:</p>" +
       "<table class='ln-table'><tr><td>128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td></tr></table>" +

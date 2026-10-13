@@ -11,7 +11,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>iLearn</title>
-<link rel="stylesheet" href="shared.css?v=20261014a" />
+<link rel="stylesheet" href="shared.css?v=20261014b" />
 <style>
   .ln-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
   .ln-hero{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
@@ -80,6 +80,26 @@
   .ln-done .big{ font-size:46px; line-height:1; }
   .ln-done h2{ margin:8px 0 6px; }
   .ln-notice{ text-align:center; color:var(--muted); padding:30px 0; }
+  .ln-streak{ display:inline-flex; gap:6px; align-items:center; font-weight:800; font-size:13px; padding:3px 11px; border-radius:999px; background:var(--diff-moderate-bg); color:var(--diff-moderate); margin-left:8px; }
+  .ln-card2{ border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:12px 0 0; background:var(--surface); display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .ln-card2 p{ margin:0; font-size:14px; } .ln-card2 b{ font-size:15px; }
+  .ln-card2.warm{ border-left:5px solid var(--diff-moderate); background:var(--diff-moderate-bg); }
+  .ln-tools{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 0; }
+  .ln-badges{ display:flex; gap:7px; flex-wrap:wrap; margin:12px 0 0; }
+  .ln-badge{ font-size:12.5px; font-weight:700; padding:4px 11px; border-radius:999px; border:1px solid var(--correct-line); background:var(--correct-bg); color:var(--correct); }
+  .ln-badge.off{ border-color:var(--line); background:var(--bg); color:var(--muted); font-weight:600; filter:grayscale(1); opacity:.75; }
+  .ln-topic-tools{ display:flex; gap:8px; flex-wrap:wrap; padding:10px 16px; border-top:1px solid var(--line); background:var(--bg); align-items:center; font-size:13px; }
+  .ln-topic-tools .sm{ padding:6px 12px; font-size:13px; }
+  .ln-text{ width:100%; box-sizing:border-box; min-height:96px; padding:11px 13px; border:1.5px solid var(--line); border-radius:10px; font:inherit; font-size:15.5px; background:var(--surface); color:var(--ink); resize:vertical; }
+  .ln-video{ margin-top:12px; } .ln-video iframe{ width:100%; aspect-ratio:16/9; border:0; border-radius:10px; background:#000; }
+  .ln-video small{ display:block; color:var(--muted); margin-top:4px; }
+  .ln-gl-search{ width:100%; box-sizing:border-box; padding:11px 13px; border:1.5px solid var(--line); border-radius:10px; font:inherit; font-size:15px; margin:10px 0 6px; background:var(--surface); color:var(--ink); }
+  .ln-gl h4{ margin:16px 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--accent-dark); }
+  .ln-gl dl{ margin:0; } .ln-gl dt{ font-weight:800; margin-top:8px; } .ln-gl dd{ margin:2px 0 0; color:var(--ink); font-size:14.5px; line-height:1.5; }
+  .ln-score{ font-size:38px; font-weight:800; margin:6px 0; }
+  .ln-prog{ height:7px; border-radius:4px; background:var(--line); overflow:hidden; margin:6px 0 14px; } .ln-prog i{ display:block; height:100%; background:var(--accent); }
+  .ln-tag.p{ background:var(--accent-tint); color:var(--accent-dark); }
+  .ln-tag.t{ background:var(--bg); color:var(--muted); border:1px solid var(--line); }
   @media (max-width:520px){ .ln-bar-row{ grid-template-columns:1fr; gap:4px; } }
 </style>
 </head>
@@ -105,6 +125,12 @@
         <button class="btn btn-primary" id="btn-continue" type="button">Continue learning</button>
       </div>
     </div>
+    <div id="warm"></div>
+    <div class="ln-tools">
+      <button class="btn btn-secondary" id="btn-mixed" type="button">🔀 Mixed revision</button>
+      <button class="btn btn-secondary" id="btn-gloss" type="button">📖 Glossary</button>
+    </div>
+    <div class="ln-badges" id="badges"></div>
     <div class="ln-bars" id="bars"></div>
     <div class="ln-tabs" role="tablist" id="tabs"></div>
     <div id="topics"></div>
@@ -121,96 +147,153 @@
     <div id="lesson-body"></div>
   </section>
 
+  <!-- ============ QUIZ SESSION (warm-up, mixed revision, topic tests) ============ -->
+  <section id="view-quiz" class="card hidden">
+    <div class="ln-top">
+      <p class="ln-crumb" id="q-crumb"></p>
+      <button class="link-btn" id="q-leave" type="button">← Back to journey</button>
+    </div>
+    <h2 class="step-title" id="q-title" style="margin-top:0;"></h2>
+    <div class="ln-prog"><i id="q-bar" style="width:0%"></i></div>
+    <div id="q-body"></div>
+  </section>
+
+  <!-- ============ GLOSSARY ============ -->
+  <section id="view-gloss" class="card hidden">
+    <div class="ln-top">
+      <h2 class="step-title" style="margin:0;">Keyword glossary</h2>
+      <button class="link-btn" id="g-leave" type="button">← Back to journey</button>
+    </div>
+    <p class="ln-muted">The exact words examiners look for. Learn each one, then use it in your answers.</p>
+    <input type="search" class="ln-gl-search" id="g-search" placeholder="Search a keyword…" />
+    <div class="ln-gl" id="g-list"></div>
+  </section>
+
   <section id="view-wait" class="card"><p class="ln-notice">Loading your journey…</p></section>
 </div>
 
-<script src="syllabus-objectives.js?v=20261014a"></script>
-<script src="learn-data.js?v=20261014a"></script>
-<script src="firebase-config.js?v=20261014a"></script>
-<script type="module" src="firebase-init.js?v=20261014a"></script>
+<script src="syllabus-objectives.js?v=20261014b"></script>
+<script src="learn-helpers.js?v=20261014b"></script>
+<script src="learn-data.js?v=20261014b"></script>
+<script src="learn-t1.js?v=20261014b"></script>
+<script src="learn-t2.js?v=20261014b"></script>
+<script src="learn-t3.js?v=20261014b"></script>
+<script src="learn-t4.js?v=20261014b"></script>
+<script src="learn-t5.js?v=20261014b"></script>
+<script src="learn-t6.js?v=20261014b"></script>
+<script src="learn-t7.js?v=20261014b"></script>
+<script src="learn-t8.js?v=20261014b"></script>
+<script src="learn-t9.js?v=20261014b"></script>
+<script src="learn-t10.js?v=20261014b"></script>
+<script src="learn-glossary.js?v=20261014b"></script>
+<script src="learn-engine.js?v=20261014b"></script>
+<script src="firebase-config.js?v=20261014b"></script>
+<script type="module" src="firebase-init.js?v=20261014b"></script>
 <script type="module">
 (function(){
   "use strict";
-  var S = window.SYLLABUS_OBJECTIVES, O = S.OBJECTIVES;
+  var E = window.ILearnEngine, S = window.SYLLABUS_OBJECTIVES, O = S.OBJECTIVES;
   var PAPERS = [
     { id:1, title:"Paper 1", sub:"Theory · Computer systems (topics 1–6)", topics:[1,2,3,4,5,6] },
     { id:2, title:"Paper 2", sub:"Programming and logic (topics 7–10)", topics:[7,8,9,10] }
   ];
   var PROGRESS_KEY = "ilearn";
-  var user = null, progress = {};      // progress[lessonId] = { d:1, f:1|0, a:attempts }
-  var activeTab = 1, current = null;   // current lesson run state
+  var user = null, st = { learn:{}, days:{}, tests:{} };
+  var activeTab = 1, current = null, sess = null;
 
   function $(id){ return document.getElementById(id); }
-  function esc(x){ return String(x == null ? "" : x).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
-  function show(id){ ["view-journey","view-lesson","view-wait"].forEach(function(v){ $(v).classList.toggle("hidden", v !== id); }); window.scrollTo(0, 0); }
+  function esc(x){ return E.esc(x); }
+  var VIEWS = ["view-journey","view-lesson","view-quiz","view-gloss","view-wait"];
+  function show(id){ VIEWS.forEach(function(v){ $(v).classList.toggle("hidden", v !== id); }); window.scrollTo(0, 0); }
 
-  // ---------- syllabus order ----------
-  var CODES = Object.keys(O);                          // objective codes, in syllabus order
-  var CODE_INDEX = {}; CODES.forEach(function(c, i){ CODE_INDEX[c] = i; });
-  var LESSONS = window.ILEARN_LESSONS.map(function(l, i){ return { l: l, i: i }; })
-    .sort(function(a, b){ var d = (CODE_INDEX[a.l.code] || 0) - (CODE_INDEX[b.l.code] || 0); return d || (a.i - b.i); })
-    .map(function(x){ return x.l; });
-  var LESSON_BY_ID = {}; LESSONS.forEach(function(l){ LESSON_BY_ID[l.id] = l; });
-  function lessonsOf(code){ return LESSONS.filter(function(l){ return l.code === code; }); }
-
-  function isDone(id){ return !!(progress[id] && progress[id].d); }
+  var LESSONS = E.LESSONS, LESSON_BY_ID = E.LESSON_BY_ID, CODES = E.CODES;
+  function lessonsOf(code){ return E.lessonsOf(code); }
+  function progress(){ return st.learn; }
+  function isDone(id){ return !!(st.learn[id] && st.learn[id].d); }
   function currentLesson(){ for(var i = 0; i < LESSONS.length; i++){ if(!isDone(LESSONS[i].id)) return LESSONS[i]; } return null; }
-  function isUnlocked(l){
-    if(isDone(l.id)) return true;
-    var cur = currentLesson();
-    return !!cur && cur.id === l.id;
-  }
+  function isUnlocked(l){ if(isDone(l.id)) return true; var c = currentLesson(); return !!c && c.id === l.id; }
   function codeCovered(code){ var ls = lessonsOf(code); return ls.length > 0 && ls.every(function(l){ return isDone(l.id); }); }
 
-  // ---------- persistence (Firestore via practiceProgress, with a local copy) ----------
+  // ---------- persistence ----------
   function localKey(){ return "ilearn_v1_" + (user && user.uid); }
-  function loadProgress(){
-    var local = {};
-    try { local = JSON.parse(localStorage.getItem(localKey()) || "{}").learn || {}; } catch(e){}
+  function loadState(){
+    var local = null;
+    try { local = JSON.parse(localStorage.getItem(localKey()) || "null"); } catch(e){}
     var p = (PQFirebase.getMyProgress ? PQFirebase.getMyProgress(user.uid, PROGRESS_KEY) : Promise.resolve(null));
-    return p.then(function(rec){ return (rec && rec.learn) || {}; }).catch(function(){ return {}; })
-      .then(function(remote){
-        var merged = {};
-        [local, remote].forEach(function(src){ Object.keys(src).forEach(function(k){
-          var a = merged[k], b = src[k];
-          if(!a || (b.d && !a.d) || (b.d && a.d && (b.f || 0) > (a.f || 0))) merged[k] = b;
-        }); });
-        return merged;
-      });
+    return p.catch(function(){ return null; }).then(function(remote){ return E.mergeState(local, remote); });
   }
-  function saveProgress(){
-    var done = LESSONS.filter(function(l){ return isDone(l.id); }).length;
-    var snap = { learn: progress, learnDone: done, learnTotal: LESSONS.length };
+  function save(){
+    var snap = E.snapshot(st);
     try { localStorage.setItem(localKey(), JSON.stringify(snap)); } catch(e){}
     if(PQFirebase.saveProgress) PQFirebase.saveProgress(user.uid, PROGRESS_KEY, snap);
+  }
+  function markToday(){ var d = E.today(); st.days[d] = (st.days[d] || 0) + 1; }
+
+  // ---------- question renderer (multiple choice or typed answer) ----------
+  // done(ok, fbEl, info) is called once the student has answered.
+  function renderQ(host, q, video, done){
+    var h = '<p class="ln-q">' + q.q + "</p>";   // question text is trusted authored HTML (may contain code tags)
+    var fbHtml = '<div id="fb"></div>';
+    if(q.type === "text"){
+      host.innerHTML = h + '<textarea class="ln-text" id="tx" placeholder="Type your answer here…"></textarea><div class="ln-actions"><button class="btn btn-primary" id="tx-go" type="button">Check my answer</button></div>' + fbHtml;
+      $("tx-go").addEventListener("click", function(){
+        var txt = $("tx").value;
+        if(!txt.trim()){ $("tx").focus(); return; }
+        var r = E.gradeText(q, txt);
+        $("tx").disabled = true; $("tx-go").remove();
+        var fb = $("fb");
+        fb.innerHTML = r.ok
+          ? '<div class="ln-fb ok"><b>Correct.</b> ' + (q.explain ? esc(q.explain) : "") + "</div>"
+          : '<div class="ln-fb no"><b>Not quite</b> (you covered ' + r.matched + " of the " + r.need + " key points needed).<br><b>A full-mark answer:</b> " + esc(q.model || "") + "</div>" + videoHtml(video);
+        done(r.ok, fb, r);
+      });
+      return;
+    }
+    var order = E.shuffle(q.options.map(function(o, i){ return i; }));
+    host.innerHTML = h + '<div class="ln-opts" id="opts">' + order.map(function(oi, k){
+      return '<button class="ln-opt" data-o="' + oi + '" type="button"><span class="l">' + "ABCD".charAt(k) + "</span><span>" + esc(q.options[oi]) + "</span></button>";
+    }).join("") + "</div>" + fbHtml;
+    Array.prototype.forEach.call($("opts").querySelectorAll(".ln-opt"), function(b){
+      b.addEventListener("click", function(){
+        var oi = Number(b.getAttribute("data-o")), ok = oi === q.correct;
+        Array.prototype.forEach.call($("opts").querySelectorAll(".ln-opt"), function(x){
+          x.disabled = true; var o = Number(x.getAttribute("data-o"));
+          if(o === oi) x.classList.add(ok ? "right" : "wrong");
+          if(ok && o === q.correct) x.classList.add("right");
+        });
+        var fb = $("fb");
+        fb.innerHTML = ok ? '<div class="ln-fb ok"><b>Correct.</b> ' + esc(q.explain || "") + "</div>"
+          : '<div class="ln-fb no"><b>Not quite.</b> ' + (sess ? esc(q.explain || "") : "Think about it again, then have another go.") + "</div>" + videoHtml(video);
+        done(ok, fb, null);
+      });
+    });
+  }
+  function videoHtml(v){
+    if(!v || !v.id) return "";
+    return '<div class="ln-video"><iframe loading="lazy" allowfullscreen title="' + esc(v.label || "Video") + '" src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(v.id) + "?rel=0" + (v.start ? "&start=" + Number(v.start) : "") + '"></iframe><small>' + esc(v.label || "Watch this explanation") + "</small></div>";
   }
 
   // ---------- journey ----------
   function pct(a, b){ return b ? Math.round(a / b * 100) : 0; }
-
-  function topicTree(){
-    var topics = {};
-    CODES.forEach(function(code){
-      var name = O[code][0], tn = parseInt(name, 10);
-      var t = topics[tn] || (topics[tn] = { num: tn, title: S.TOPICS[tn], secs: [], secBy: {} });
-      var sec = t.secBy[name];
-      if(!sec){ sec = t.secBy[name] = { name: name, units: [] }; t.secs.push(sec); }
-      sec.units.push({ code: code, text: O[code][1] });
-    });
-    return topics;
-  }
-
   function renderJourney(){
-    var tree = topicTree();
+    var tree = E.topicTree();
     var doneL = LESSONS.filter(function(l){ return isDone(l.id); }).length;
     var overall = pct(doneL, LESSONS.length);
     $("ring-pct").textContent = overall + "%";
     $("ring-fill").style.strokeDashoffset = String(226.2 * (1 - overall / 100));
-    var cur = currentLesson();
-    $("hero-title").textContent = "Hi " + user.name + (doneL ? ", keep going!" : ", let's begin!");
-    $("hero-sub").textContent = doneL + " of " + LESSONS.length + " lessons completed so far. New lessons are added topic by topic, following the syllabus order.";
-    $("btn-continue").textContent = cur ? (doneL ? "Continue: " : "Start: ") + cur.code + " " + cur.title : "All current lessons complete 🎉";
+    var cur = currentLesson(), streak = E.streak(st.days);
+    $("hero-title").innerHTML = esc("Hi " + user.name + (doneL ? ", keep going!" : ", let's begin!")) + (streak ? '<span class="ln-streak">🔥 ' + streak + "-day streak</span>" : "");
+    $("hero-sub").textContent = doneL + " of " + LESSONS.length + " lessons completed.";
+    $("btn-continue").textContent = cur ? (doneL ? "Continue: " : "Start: ") + cur.code + " " + cur.title : "All lessons complete 🎉";
     $("btn-continue").disabled = !cur;
+
+    var due = E.dueLessons(st.learn);
+    $("warm").innerHTML = due.length
+      ? '<div class="ln-card2 warm"><div><b>☀️ Warm-up: ' + due.length + " idea" + (due.length === 1 ? "" : "s") + ' due for review</b><p>Spaced review keeps ideas in your memory. It takes about 3 minutes.</p></div><button class="btn btn-primary" id="btn-warm" type="button">Start warm-up</button></div>' : "";
+    if($("btn-warm")) $("btn-warm").addEventListener("click", startWarmup);
+    $("btn-mixed").disabled = doneL < 2;
+
+    $("badges").innerHTML = E.badges(st, tree).map(function(b){ return '<span class="ln-badge' + (b.on ? "" : " off") + '" title="' + esc(b.how) + '">' + b.icon + " " + esc(b.name) + "</span>"; }).join("");
 
     var bars = "";
     PAPERS.forEach(function(p){
@@ -232,7 +315,18 @@
       var codes = []; t.secs.forEach(function(s){ s.units.forEach(function(u){ codes.push(u.code); }); });
       var cov = codes.filter(codeCovered).length;
       var hasCur = cur && codes.indexOf(cur.code) !== -1;
+      var tl = LESSONS.filter(function(l){ return parseInt(O[l.code][0], 10) === tn; });
+      var undone = tl.filter(function(l){ return !isDone(l.id); }).length;
+      var bank = E.TESTS[tn], res = st.tests[tn];
       h += '<details class="ln-topic"' + (hasCur ? " open" : "") + "><summary><span>" + tn + " " + esc(t.title) + '</span><span class="cnt">' + cov + " / " + codes.length + " objectives</span></summary>";
+      if(bank){
+        h += '<div class="ln-topic-tools">';
+        if(undone) h += '<button class="btn btn-secondary sm" data-pre="' + tn + '" type="button">⏩ Already know this? Take the skip test</button>';
+        else h += '<button class="btn btn-primary sm" data-test="' + tn + '" type="button">📝 Topic ' + tn + " test</button>";
+        if(res) h += "<span>Best: <b>" + res.s + " / " + res.t + "</b> (" + pct(res.s, res.t) + "%)</span>";
+        else if(!undone) h += "<span>Not taken yet</span>";
+        h += "</div>";
+      }
       t.secs.forEach(function(sec){
         h += '<div class="ln-sec">' + esc(sec.name) + "</div>";
         sec.units.forEach(function(u){
@@ -241,10 +335,13 @@
           if(ls.length){
             h += '<div class="ln-lessons">';
             ls.forEach(function(l){
-              var done = isDone(l.id), ok = isUnlocked(l), isCur = cur && cur.id === l.id;
-              var rec = progress[l.id];
-              h += '<button class="ln-lesson' + (done ? " done" : "") + (isCur ? " cur" : "") + '" data-l="' + l.id + '"' + (ok ? "" : " disabled") + '><span class="ln-dot">' + (done ? "✓" : (ok ? "▶" : "🔒")) + "</span><span>" + esc(l.title) + "</span>" +
-                (done ? (rec.f ? '<span class="ln-tag m">Mastered</span>' : '<span class="ln-tag r">↻ Review later</span>') : (isCur ? '<span class="ln-tag m">Up next</span>' : "")) + "</button>";
+              var done = isDone(l.id), ok = isUnlocked(l), isCur = cur && cur.id === l.id, rec = st.learn[l.id];
+              var tag = "";
+              if(done){
+                if(rec.pre) tag = '<span class="ln-tag p">Skipped by test</span>';
+                else tag = rec.f ? '<span class="ln-tag m">Mastered</span>' : '<span class="ln-tag r">↻ Review later</span>';
+              } else if(isCur) tag = '<span class="ln-tag m">Up next</span>';
+              h += '<button class="ln-lesson' + (done ? " done" : "") + (isCur ? " cur" : "") + '" data-l="' + l.id + '"' + (ok ? "" : " disabled") + '><span class="ln-dot">' + (done ? "✓" : (ok ? "▶" : "🔒")) + "</span><span>" + esc(l.title) + "</span>" + tag + "</button>";
             });
             h += "</div>";
           }
@@ -255,11 +352,13 @@
     });
     $("topics").innerHTML = h;
     Array.prototype.forEach.call($("topics").querySelectorAll(".ln-lesson"), function(b){ b.addEventListener("click", function(){ openLesson(b.getAttribute("data-l")); }); });
-    $("header-sub").textContent = "Your step-by-step learning journey";
+    Array.prototype.forEach.call($("topics").querySelectorAll("[data-pre]"), function(b){ b.addEventListener("click", function(){ startTopicTest(Number(b.getAttribute("data-pre")), true); }); });
+    Array.prototype.forEach.call($("topics").querySelectorAll("[data-test]"), function(b){ b.addEventListener("click", function(){ startTopicTest(Number(b.getAttribute("data-test")), false); }); });
     show("view-journey");
   }
-
   $("btn-continue").addEventListener("click", function(){ var c = currentLesson(); if(c) openLesson(c.id); });
+  $("btn-mixed").addEventListener("click", startMixed);
+  $("btn-gloss").addEventListener("click", openGlossary);
 
   // ---------- lesson ----------
   var STEPS = ["Learn", "Example", "Check", "Done"];
@@ -271,16 +370,13 @@
   }
   function openLesson(id){
     var l = LESSON_BY_ID[id]; if(!l) return;
-    current = { l: l, step: 0, ci: 0, wrongs: 0, wrongTotal: 0, order: null };
+    current = { l: l, step: 0, ci: 0, wrongs: 0, wrongTotal: 0 };
     $("crumb").textContent = O[l.code][0] + "  ›  " + l.code;
     $("lesson-title").textContent = l.title;
     renderLesson();
     show("view-lesson");
   }
-  function leave(){ renderJourney(); }
-  $("btn-leave").addEventListener("click", leave);
-
-  function shuffle(a){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  $("btn-leave").addEventListener("click", function(){ renderJourney(); });
 
   function renderLesson(){
     var c = current, l = c.l, body = $("lesson-body"), h = "";
@@ -292,63 +388,166 @@
       h = '<div class="ln-body"><div class="ln-box"><h3>Worked example</h3>' + l.example + '</div></div><div class="ln-actions"><button class="btn btn-secondary" id="b-back" type="button">← Re-read the idea</button><button class="btn btn-primary" id="b-next" type="button">Check my understanding →</button></div>';
     } else if(c.step === 2){
       renderSteps(2);
-      var q = l.checks[c.ci];
-      if(!c.order) c.order = shuffle(q.options.map(function(o, i){ return i; }));
-      h = '<p class="ln-crumb">Question ' + (c.ci + 1) + " of " + l.checks.length + '</p><p class="ln-q">' + esc(q.q) + '</p><div class="ln-opts" id="opts">' +
-        c.order.map(function(oi, k){ return '<button class="ln-opt" data-o="' + oi + '" type="button"><span class="l">' + "ABCD".charAt(k) + "</span><span>" + esc(q.options[oi]) + "</span></button>"; }).join("") + '</div><div id="fb"></div>';
+      body.innerHTML = '<p class="ln-crumb">Question ' + (c.ci + 1) + " of " + l.checks.length + '</p><div id="qhost"></div>';
+      renderQ($("qhost"), l.checks[c.ci], l.video, function(ok, fb){ lessonAnswered(ok, fb); });
+      return;
     } else {
       renderSteps(3, true);
-      var rec = progress[l.id], nextL = currentLesson();
-      var mastered = rec && rec.f;
+      var rec = st.learn[l.id], nextL = currentLesson(), mastered = rec && rec.f;
       h = '<div class="ln-done"><div class="big">' + (mastered ? "🌟" : "✅") + "</div><h2>" + (mastered ? "Mastered first time!" : "Lesson complete") + "</h2><p class='ln-muted'>" +
-        (mastered ? "You answered every question correctly at the first attempt. This idea is secure." : "You got there in the end. This idea is marked to <b>review later</b>, so come back to it before your exam.") + "</p></div>" +
-        '<div class="ln-box"><h3>Key idea to remember</h3><div class="ln-body">' + keyIdea(l) + '</div></div><div class="ln-actions" style="justify-content:center">' +
+        (mastered ? "You answered every question correctly at the first attempt. This idea is secure." : "You got there in the end. This idea is marked to <b>review later</b>; it will come back in your warm-up.") + "</p></div>" +
+        '<div class="ln-box"><h3>Key idea to remember</h3><div class="ln-body">' + E.keyIdea(l) + '</div></div><div class="ln-actions" style="justify-content:center">' +
         (nextL ? '<button class="btn btn-primary" id="b-next" type="button">Next: ' + esc(nextL.code + " " + nextL.title) + " →</button>" : "") +
         '<button class="btn btn-secondary" id="b-journey" type="button">Back to journey</button></div>';
     }
     body.innerHTML = h;
     var bn = $("b-next"), bb = $("b-back"), bj = $("b-journey");
     if(c.step < 2){
-      if(bn) bn.addEventListener("click", function(){ c.step++; c.order = null; renderLesson(); window.scrollTo(0, 0); });
+      if(bn) bn.addEventListener("click", function(){ c.step++; renderLesson(); window.scrollTo(0, 0); });
       if(bb) bb.addEventListener("click", function(){ c.step--; renderLesson(); window.scrollTo(0, 0); });
-    }
-    if(c.step === 2){
-      Array.prototype.forEach.call($("opts").querySelectorAll(".ln-opt"), function(b){ b.addEventListener("click", function(){ answer(Number(b.getAttribute("data-o"))); }); });
-    }
-    if(c.step === 3){
+    } else if(c.step === 3){
       if(bn) bn.addEventListener("click", function(){ var n = currentLesson(); if(n) openLesson(n.id); });
-      if(bj) bj.addEventListener("click", leave);
+      if(bj) bj.addEventListener("click", function(){ renderJourney(); });
     }
   }
-  function keyIdea(l){ var q = l.checks[l.checks.length - 1]; return esc(q.explain); }
 
-  function answer(oi){
-    var c = current, q = c.l.checks[c.ci], opts = $("opts"), fb = $("fb");
-    var ok = (oi === q.correct);
-    Array.prototype.forEach.call(opts.querySelectorAll(".ln-opt"), function(b){
-      b.disabled = true;
-      var o = Number(b.getAttribute("data-o"));
-      if(o === oi) b.classList.add(ok ? "right" : "wrong");
-      if(ok && o === q.correct) b.classList.add("right");
-    });
+  function lessonAnswered(ok, fb){
+    var c = current, l = c.l, last = c.ci + 1 >= l.checks.length;
+    var actions = document.createElement("div"); actions.className = "ln-actions"; fb.appendChild(actions);
     if(ok){
-      fb.innerHTML = '<div class="ln-fb ok"><b>Correct.</b> ' + esc(q.explain) + '</div><div class="ln-actions"><button class="btn btn-primary" id="b-cont" type="button">' + (c.ci + 1 < c.l.checks.length ? "Next question →" : "Finish lesson →") + "</button></div>";
+      c.wrongs = 0;
+      actions.innerHTML = '<button class="btn btn-primary" id="b-cont" type="button">' + (last ? "Finish lesson →" : "Next question →") + "</button>";
       $("b-cont").addEventListener("click", function(){
-        c.wrongs = 0; c.order = null;
-        if(c.ci + 1 < c.l.checks.length){ c.ci++; renderLesson(); return; }
-        progress[c.l.id] = { d: 1, f: c.wrongTotal === 0 ? 1 : 0, a: c.wrongTotal + 1 };
-        saveProgress(); c.step = 3; renderLesson(); window.scrollTo(0, 0);
+        if(!last){ c.ci++; renderLesson(); return; }
+        var prev = st.learn[l.id];
+        st.learn[l.id] = { d: 1, f: c.wrongTotal === 0 ? 1 : 0, a: c.wrongTotal + 1, t: Date.now(), rc: 0 };
+        if(prev && prev.d){ st.learn[l.id].f = Math.max(prev.f || 0, st.learn[l.id].f); }
+        markToday(); save(); c.step = 3; renderLesson(); window.scrollTo(0, 0);
       });
     } else {
       c.wrongs++; c.wrongTotal++;
-      var again = c.wrongs >= 2
-        ? '<p>Let\'s go back and read the idea again before the next try.</p><div class="ln-actions"><button class="btn btn-primary" id="b-review" type="button">Re-read the idea</button></div>'
-        : '<div class="ln-actions"><button class="btn btn-primary" id="b-retry" type="button">Try again</button></div>';
-      fb.innerHTML = '<div class="ln-fb no"><b>Not quite.</b> Think about it again, then have another go.</div>' + again;
-      if($("b-retry")) $("b-retry").addEventListener("click", function(){ c.order = null; renderLesson(); });
-      if($("b-review")) $("b-review").addEventListener("click", function(){ c.step = 0; c.order = null; c.wrongs = 0; c.reviewReturn = true; renderLesson(); window.scrollTo(0, 0); });
+      if(c.wrongs >= 2){
+        actions.innerHTML = '<p>Let\'s go back and read the idea again before the next try.</p><button class="btn btn-primary" id="b-review" type="button">Re-read the idea</button>';
+        $("b-review").addEventListener("click", function(){ c.step = 0; c.wrongs = 0; renderLesson(); window.scrollTo(0, 0); });
+      } else {
+        actions.innerHTML = '<button class="btn btn-primary" id="b-retry" type="button">Try again</button>';
+        $("b-retry").addEventListener("click", function(){ renderLesson(); });
+      }
     }
   }
+
+  // ---------- quiz sessions: warm-up, mixed revision, topic tests, skip tests ----------
+  // cfg = { title, crumb, items:[{q, lid, topic}], onItem(item, ok), finish(score, total, results) -> html }
+  function startSession(cfg){
+    sess = { cfg: cfg, i: 0, score: 0, total: 0, wrong: [] };
+    $("q-crumb").textContent = cfg.crumb || "";
+    $("q-title").textContent = cfg.title;
+    renderSessionQ();
+    show("view-quiz");
+  }
+  function marksOf(q){ return q.type === "text" ? (q.need || (q.groups || []).length || 1) : 1; }
+  function renderSessionQ(){
+    var s = sess, cfg = s.cfg;
+    if(s.i >= cfg.items.length){ return finishSession(); }
+    var item = cfg.items[s.i];
+    $("q-bar").style.width = Math.round(s.i / cfg.items.length * 100) + "%";
+    $("q-body").innerHTML = '<p class="ln-crumb">Question ' + (s.i + 1) + " of " + cfg.items.length + (item.lid ? " · " + esc(LESSON_BY_ID[item.lid].code + " " + LESSON_BY_ID[item.lid].title) : "") + '</p><div id="qhost"></div>';
+    renderQ($("qhost"), item.q, item.video, function(ok, fb, info){
+      var got = ok ? marksOf(item.q) : (info ? Math.min(info.matched, marksOf(item.q)) : 0);
+      s.score += got; s.total += marksOf(item.q);
+      if(!ok) s.wrong.push(item);
+      if(cfg.onItem) cfg.onItem(item, ok);
+      var a = document.createElement("div"); a.className = "ln-actions"; fb.appendChild(a);
+      a.innerHTML = '<button class="btn btn-primary" id="b-qn" type="button">' + (s.i + 1 >= cfg.items.length ? "See my result →" : "Next question →") + "</button>";
+      $("b-qn").addEventListener("click", function(){ s.i++; renderSessionQ(); window.scrollTo(0, 0); });
+    });
+  }
+  function finishSession(){
+    var s = sess, cfg = s.cfg;
+    $("q-bar").style.width = "100%";
+    var p = pct(s.score, s.total);
+    var extra = cfg.finish ? cfg.finish(s.score, s.total) : "";
+    $("q-body").innerHTML = '<div class="ln-done"><div class="big">' + (p >= 80 ? "🌟" : p >= 50 ? "👍" : "💪") + '</div><div class="ln-score">' + s.score + " / " + s.total + " · " + p + "%</div></div>" + extra +
+      '<div class="ln-actions" style="justify-content:center"><button class="btn btn-primary" id="b-end" type="button">Back to journey</button></div>';
+    $("b-end").addEventListener("click", function(){ sess = null; renderJourney(); });
+    sess.finished = true;
+    save();
+  }
+  $("q-leave").addEventListener("click", function(){ var wasRunning = sess && !sess.finished; sess = null; if(wasRunning) save(); renderJourney(); });
+
+  function reviewOutcome(lid, ok){
+    var r = st.learn[lid]; if(!r) return;
+    r.rv = Date.now();
+    if(ok){ r.rc = (r.rc || 0) + 1; if(r.rc >= 2 && !r.f) r.f = 1; }
+    else { r.rc = 0; r.f = 0; r.pre = 0; }
+  }
+  function pickCheck(l){ return l.checks[Math.floor(Math.random() * l.checks.length)]; }
+
+  function startWarmup(){
+    var due = E.dueLessons(st.learn).slice(0, 6);
+    if(!due.length) return;
+    startSession({
+      title: "Daily warm-up", crumb: "Spaced review",
+      items: due.map(function(l){ return { q: pickCheck(l), lid: l.id, video: l.video }; }),
+      onItem: function(item, ok){ reviewOutcome(item.lid, ok); markToday(); },
+      finish: function(score, total){ return '<p class="ln-muted" style="text-align:center">Ideas you got right come back later; ones you missed come back tomorrow.</p>'; }
+    });
+  }
+  function startMixed(){
+    var done = LESSONS.filter(function(l){ return isDone(l.id); });
+    if(done.length < 2) return;
+    done = E.shuffle(done).sort(function(a, b){ return (st.learn[a.id].f || 0) - (st.learn[b.id].f || 0); }).slice(0, 10);
+    startSession({
+      title: "Mixed revision", crumb: "Questions from topics you have completed",
+      items: E.shuffle(done).map(function(l){ return { q: pickCheck(l), lid: l.id, video: l.video }; }),
+      onItem: function(item, ok){ reviewOutcome(item.lid, ok); markToday(); },
+      finish: function(){ return '<p class="ln-muted" style="text-align:center">Lessons you missed are marked to review again soon.</p>'; }
+    });
+  }
+  function startTopicTest(tn, isSkip){
+    var bank = E.TESTS[tn]; if(!bank) return;
+    var items = E.shuffle(bank.mcq.slice()).map(function(q){ return { q: q, topic: tn }; }).concat((bank.typed || []).map(function(q){ return { q: Object.assign({ type: "text" }, q), topic: tn }; }));
+    startSession({
+      title: isSkip ? "Skip test: Topic " + tn : "Topic " + tn + " test", crumb: isSkip ? "Score at least 80% to skip the lessons you have not done yet" : "End-of-topic check",
+      items: items,
+      finish: function(score, total){
+        var p = score / total, out = "";
+        if(!isSkip){
+          var old = st.tests[tn];
+          if(!old || score / total > old.s / old.t) st.tests[tn] = { s: score, t: total, at: Date.now() };
+          markToday();
+          out = p >= 0.8 ? '<p style="text-align:center"><b>Topic badge earned! 🏅</b></p>' : '<p class="ln-muted" style="text-align:center">Score 80% or more to earn this topic\'s badge. Revisit the lessons marked “Review later” and try again.</p>';
+        } else if(p >= 0.8){
+          var n = 0;
+          LESSONS.forEach(function(l){ if(parseInt(O[l.code][0], 10) === tn && !isDone(l.id)){ st.learn[l.id] = { d: 1, f: 0, a: 0, t: Date.now(), rc: 0, pre: 1 }; n++; } });
+          markToday();
+          out = '<p style="text-align:center"><b>Passed! ' + n + " lesson" + (n === 1 ? "" : "s") + " marked as skipped.</b><br>They will come back in your warm-up so you keep them fresh.</p>";
+        } else {
+          out = '<p class="ln-muted" style="text-align:center">Not quite 80% yet, so the lessons stay open. Work through them step by step; you can try the skip test again any time.</p>';
+        }
+        return out;
+      }
+    });
+  }
+
+  // ---------- glossary ----------
+  function openGlossary(){
+    $("g-search").value = ""; renderGloss(); show("view-gloss");
+  }
+  function renderGloss(){
+    var q = $("g-search").value.trim().toLowerCase(), by = {};
+    (window.ILEARN_GLOSSARY || []).forEach(function(g){
+      if(q && g[0].toLowerCase().indexOf(q) === -1 && g[1].toLowerCase().indexOf(q) === -1) return;
+      (by[g[2]] = by[g[2]] || []).push(g);
+    });
+    var h = "";
+    Object.keys(by).sort(function(a, b){ return a - b; }).forEach(function(tn){
+      h += "<h4>Topic " + tn + " · " + esc(S.TOPICS[tn] || "") + "</h4><dl>" + by[tn].sort(function(a, b){ return a[0].localeCompare(b[0]); }).map(function(g){ return "<dt>" + esc(g[0]) + "</dt><dd>" + esc(g[1]) + "</dd>"; }).join("") + "</dl>";
+    });
+    $("g-list").innerHTML = h || '<p class="ln-muted">No keyword matches your search.</p>';
+  }
+  $("g-search").addEventListener("input", renderGloss);
+  $("g-leave").addEventListener("click", function(){ renderJourney(); });
 
   // ---------- start ----------
   PQFirebase.onAuthChange(function(u){
@@ -356,7 +555,7 @@
     user = u;
     var cls = String(u.class || "");
     if(!/^10BR/i.test(cls)){ $("view-wait").innerHTML = '<p class="ln-notice">iLearn is opening for your class soon.</p><p style="text-align:center"><a class="link-btn" href="quiz.html">← Back to practice</a></p>'; show("view-wait"); return; }
-    loadProgress().then(function(p){ progress = p; renderJourney(); });
+    loadState().then(function(s){ st = s; renderJourney(); });
   });
 })();
 </script>
