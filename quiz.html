@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261012a" />
+<link rel="stylesheet" href="shared.css?v=20261013a" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -239,6 +239,8 @@
       <button class="link-btn" id="btn-back-progress" type="button">← Back to start</button>
     </div>
     <p class="step-sub">Your results across every practice topic for your class.</p>
+    <div id="syl-progress" class="hidden"></div>
+    <p class="progress-section-title hidden" id="quiz-progress-title">Practice quizzes</p>
     <div id="progress-list"></div>
 
     <div id="exam-progress-section" class="hidden">
@@ -255,7 +257,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261012a -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261013a -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -268,13 +270,13 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261012a"></script>
-<script src="exam-data.js?v=20261012a"></script>
-<script src="syllabus-objectives.js?v=20261012a"></script>
-<script src="report-lib.js?v=20261012a"></script>
-<script src="scratchpad.js?v=20261012a"></script>
-<script src="firebase-config.js?v=20261012a"></script>
-<script type="module" src="firebase-init.js?v=20261012a"></script>
+<script src="quiz-data.js?v=20261013a"></script>
+<script src="exam-data.js?v=20261013a"></script>
+<script src="syllabus-objectives.js?v=20261013a"></script>
+<script src="report-lib.js?v=20261013a"></script>
+<script src="scratchpad.js?v=20261013a"></script>
+<script src="firebase-config.js?v=20261013a"></script>
+<script type="module" src="firebase-init.js?v=20261013a"></script>
 <script type="module">
 (function(){
 
@@ -1915,13 +1917,154 @@
     });
   }
 
+  // ---------- Syllabus progress (10BR) ----------
+  // Every syllabus topic and sub-topic, in syllabus order, each with a
+  // 0-100% score and a colour, or a grey "Not tested yet!". The score for a
+  // sub-topic is marks earned / marks available on every question the
+  // student has answered whose syllabus code (q.syl) falls in that sub-topic,
+  // across both the practice quizzes and the exam-style papers. A main
+  // topic's score is the same sum over all of its sub-topics.
+  // Colours match the teacher's syllabus report: 70%+ green, 50-69% amber,
+  // under 50% red.
+  var sylProgressEl = document.getElementById("syl-progress");
+  var quizProgressTitleEl = document.getElementById("quiz-progress-title");
+
+  function sylTree(){
+    var S = window.SYLLABUS_OBJECTIVES, O = S.OBJECTIVES, topics = {}, secByName = {}, codeSec = {};
+    Object.keys(O).forEach(function(code){
+      var name = O[code][0];
+      var tn = parseInt(name, 10);
+      if(!topics[tn]) topics[tn] = { num: tn, title: S.TOPICS[tn], sections: [], e: 0, t: 0, q: 0 };
+      if(!secByName[name]){
+        secByName[name] = { name: name, e: 0, t: 0, q: 0 };
+        topics[tn].sections.push(secByName[name]);
+      }
+      codeSec[code] = secByName[name];
+    });
+    var list = Object.keys(topics).map(Number).sort(function(a, b){ return a - b; }).map(function(n){ return topics[n]; });
+    return { topics: list, codeSec: codeSec, topicBySec: function(sec){ return topics[parseInt(sec.name, 10)]; } };
+  }
+
+  function sylAdd(tree, codes, earned, total){
+    var seen = {};
+    (codes || []).forEach(function(code){
+      var sec = tree.codeSec[code];
+      if(!sec || seen[sec.name]) return;
+      seen[sec.name] = true;
+      sec.e += earned; sec.t += total; sec.q += 1;
+      var tp = tree.topicBySec(sec);
+      tp.e += earned; tp.t += total; tp.q += 1;
+    });
+  }
+
+  function computeSyllabusProgress(quizRecords, paperRecords){
+    var tree = sylTree();
+    quizRecords.forEach(function(r){
+      var a = r.existing, exam = EXAMS[r.key];
+      if(!a || !exam) return;
+      exam.questions.forEach(function(q, i){
+        var sel = (a.answers || [])[i];
+        if(sel === undefined || sel === null || sel < 0) return;       // never answered
+        var m = (q.difficulty === "hard") ? 2 : 1;
+        var hint = !!((a.hints || [])[i]);
+        var earned = (sel === q.correct) ? Math.max(0, m - (hint ? 1 : 0)) : 0;
+        sylAdd(tree, q.syl, earned, m);
+      });
+    });
+    paperRecords.forEach(function(r){
+      var a = r.existing, paper = EXAM_PAPERS[r.key];
+      if(!a || !paper) return;
+      (a.perQuestion || []).forEach(function(pq){
+        var total = Number(pq.total) || 0, earned = Number(pq.earned) || 0;
+        if(!total) return;
+        var q = paper.questions.filter(function(x){ return x.id === pq.id; })[0];
+        if(q) sylAdd(tree, q.syl, earned, total);
+      });
+    });
+    return tree.topics;
+  }
+
+  function sylBand(pct){ return pct >= 70 ? "g" : (pct >= 50 ? "a" : "r"); }
+
+  function sylPill(x, big){
+    var el = document.createElement("span");
+    if(!x.t){
+      el.className = "syl-pill syl-n";
+      el.textContent = "Not tested yet!";
+    } else {
+      var pct = Math.round(x.e / x.t * 100);
+      el.className = "syl-pill syl-" + sylBand(pct);
+      el.textContent = pct + "%";
+    }
+    return el;
+  }
+
+  function renderSyllabusProgress(topics){
+    sylProgressEl.innerHTML = "";
+    var title = document.createElement("p");
+    title.className = "progress-section-title syl-title";
+    title.textContent = "Syllabus progress";
+    sylProgressEl.appendChild(title);
+    var legend = document.createElement("p");
+    legend.className = "cohort-note syl-legend";
+    legend.innerHTML = '<span class="syl-pill syl-g">70–100%</span> <span class="syl-pill syl-a">50–69%</span> <span class="syl-pill syl-r">0–49%</span> <span class="syl-pill syl-n">Not tested yet!</span>';
+    sylProgressEl.appendChild(legend);
+    topics.forEach(function(tp){
+      var card = document.createElement("div");
+      card.className = "syl-topic";
+      var head = document.createElement("div");
+      head.className = "syl-topic-head";
+      var nm = document.createElement("span");
+      nm.className = "syl-topic-name";
+      nm.textContent = tp.num + " " + tp.title;
+      head.appendChild(nm);
+      head.appendChild(sylPill(tp, true));
+      card.appendChild(head);
+      tp.sections.forEach(function(sec){
+        var row = document.createElement("div");
+        row.className = "syl-sub";
+        var left = document.createElement("div");
+        left.className = "syl-sub-main";
+        var sn = document.createElement("span");
+        sn.className = "syl-sub-name";
+        sn.textContent = sec.name;
+        left.appendChild(sn);
+        if(sec.t){
+          var pct = Math.round(sec.e / sec.t * 100);
+          var bar = document.createElement("span");
+          bar.className = "syl-bar";
+          var fill = document.createElement("i");
+          fill.className = "syl-" + sylBand(pct);
+          fill.style.width = pct + "%";
+          bar.appendChild(fill);
+          left.appendChild(bar);
+        }
+        row.appendChild(left);
+        row.appendChild(sylPill(sec));
+        card.appendChild(row);
+      });
+      sylProgressEl.appendChild(card);
+    });
+    sylProgressEl.classList.remove("hidden");
+  }
+
   function openProgressScreen(){
     progressListEl.innerHTML = '<p class="cohort-note">Loading your progress…</p>';
     examProgressListEl.innerHTML = "";
     examProgressSectionEl.classList.add("hidden");
+    sylProgressEl.classList.add("hidden");
+    sylProgressEl.innerHTML = "";
+    var isBR = /^10BR/i.test(state.currentUser && state.currentUser.class || "");
+    quizProgressTitleEl.classList.toggle("hidden", !isBR);
     showScreen("progress");
-    fetchProgressRecords().then(renderProgressList);
-    fetchExamProgressRecords().then(renderExamProgressList);
+    var pQuiz = fetchProgressRecords(), pPaper = fetchExamProgressRecords();
+    pQuiz.then(renderProgressList);
+    pPaper.then(renderExamProgressList);
+    if(isBR){
+      Promise.all([pQuiz, pPaper]).then(function(res){
+        renderSyllabusProgress(computeSyllabusProgress(res[0], res[1]));
+      });
+    }
   }
 
   document.getElementById("btn-my-progress").addEventListener("click", openProgressScreen);
