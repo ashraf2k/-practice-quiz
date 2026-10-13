@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261013b" />
+<link rel="stylesheet" href="shared.css?v=20261014a" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -97,6 +97,28 @@
   </section>
 
   <!-- ============ START SCREEN (signed in) ============ -->
+  <!-- ============ HOME MENU (10BR): iLearn / iSolve ============ -->
+  <section id="screen-hub" class="card hidden">
+    <h2 class="step-title" id="hub-greeting" style="margin-bottom:4px;">Welcome</h2>
+    <p class="step-sub">What would you like to do today?</p>
+    <div class="hub-grid">
+      <a class="hub-card" id="hub-learn" href="learn.html">
+        <span class="hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l10-5 10 5-10 5L2 8z"/><path d="M6 10.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-5.5"/><path d="M22 8v6"/></svg></span>
+        <span class="hub-title">iLearn</span>
+        <span class="hub-desc">Learn every syllabus topic step by step: one idea, a worked example, then questions to prove you understood.</span>
+        <span class="hub-meta" id="hub-learn-meta">Start your journey at topic 1.1</span>
+      </a>
+      <button class="hub-card" id="hub-solve" type="button">
+        <span class="hub-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg></span>
+        <span class="hub-title">iSolve</span>
+        <span class="hub-desc">Practise with quizzes and real exam-style questions, check your answers and see your progress.</span>
+        <span class="hub-meta">Quizzes · exam questions · My Progress</span>
+      </button>
+    </div>
+    <div style="margin-top:16px;text-align:right;"><button class="link-btn" id="btn-logout-hub" type="button">Not you? Log out</button></div>
+  </section>
+
+  <!-- ============ START SCREEN ============ -->
   <section id="screen-start" class="card hidden">
     <div class="perf-meter" id="perf-meter">
       <div class="ring-wrap">
@@ -118,6 +140,7 @@
 
     <div class="account-banner">
       <h2 class="step-title" style="margin-bottom:0;">Before you begin</h2>
+      <button class="link-btn hidden" id="btn-back-hub" type="button">← iLearn / iSolve menu</button>
       <button class="link-btn" id="btn-logout-start" type="button">Not you? Log out</button>
     </div>
     <p class="step-sub" id="start-greeting"></p>
@@ -257,7 +280,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261013b -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261014a -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -270,13 +293,13 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261013b"></script>
-<script src="exam-data.js?v=20261013b"></script>
-<script src="syllabus-objectives.js?v=20261013b"></script>
-<script src="report-lib.js?v=20261013b"></script>
-<script src="scratchpad.js?v=20261013b"></script>
-<script src="firebase-config.js?v=20261013b"></script>
-<script type="module" src="firebase-init.js?v=20261013b"></script>
+<script src="quiz-data.js?v=20261014a"></script>
+<script src="exam-data.js?v=20261014a"></script>
+<script src="syllabus-objectives.js?v=20261014a"></script>
+<script src="report-lib.js?v=20261014a"></script>
+<script src="scratchpad.js?v=20261014a"></script>
+<script src="firebase-config.js?v=20261014a"></script>
+<script type="module" src="firebase-init.js?v=20261014a"></script>
 <script type="module">
 (function(){
 
@@ -293,7 +316,7 @@
   // ============================================================
   // Screen management
   // ============================================================
-  var SCREEN_IDS = ["screen-auth","screen-start","screen-quiz","screen-results","screen-progress"];
+  var SCREEN_IDS = ["screen-auth","screen-hub","screen-start","screen-quiz","screen-results","screen-progress"];
   function showScreen(name){
     SCREEN_IDS.forEach(function(id){
       var el = document.getElementById(id);
@@ -2163,6 +2186,7 @@
     refreshExamPaperField(user.class);
     checkAttemptStatus();
     loadPerformanceMeter();
+    document.getElementById("btn-back-hub").classList.toggle("hidden", !isBR(user));
     showScreen("start");
   }
 
@@ -2179,8 +2203,27 @@
       return;
     }
     state.currentUser = user;
-    goToStartScreen();
+    if(isBR(user) && !/solve/.test(window.location.hash) && !/[?&]topic=/.test(window.location.search)) showHub(); else goToStartScreen();
   });
+
+  // ---------- 10BR home menu: iLearn / iSolve ----------
+  function isBR(user){ return /^10BR/i.test(String((user && user.class) || "")); }
+  function showHub(){
+    var user = state.currentUser;
+    setHeader("iLearnCS", "Choose how you want to work today.");
+    document.getElementById("hub-greeting").textContent = "Hi " + user.name + " — " + user.class;
+    var meta = document.getElementById("hub-learn-meta");
+    meta.textContent = "Start your journey at topic 1.1";
+    if(PQFirebase.getMyProgress){
+      PQFirebase.getMyProgress(user.uid, "ilearn").then(function(rec){
+        if(rec && typeof rec.learnDone === "number" && rec.learnDone > 0) meta.textContent = rec.learnDone + " of " + rec.learnTotal + " lessons completed — continue your journey";
+      }).catch(function(){});
+    }
+    showScreen("hub");
+  }
+  document.getElementById("hub-solve").addEventListener("click", function(){ goToStartScreen(); });
+  document.getElementById("btn-back-hub").addEventListener("click", function(){ window.location.hash = "#menu"; showHub(); });
+  document.getElementById("btn-logout-hub").addEventListener("click", function(){ doLogout(); });
 
 })();
 </script>

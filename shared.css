@@ -1770,3 +1770,13 @@
 .syl-plan li{ margin:3px 0; }
 .syl-plan-pct{ color:var(--muted); font-weight:700; }
 .syl-plan-redo{ color:var(--muted); }
+
+/* 10BR home menu: iLearn / iSolve */
+.hub-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:12px; }
+.hub-card{ display:flex; flex-direction:column; gap:8px; text-align:left; text-decoration:none; color:var(--ink); background:var(--surface); border:1.5px solid var(--line); border-radius:14px; padding:22px 20px; cursor:pointer; font:inherit; transition:border-color .15s, box-shadow .15s, transform .15s; }
+.hub-card:hover, .hub-card:focus-visible{ border-color:var(--accent); box-shadow:0 4px 18px rgba(20,108,106,.14); transform:translateY(-2px); outline:none; }
+.hub-icon{ width:54px; height:54px; border-radius:14px; background:var(--accent-tint); color:var(--accent-dark); display:flex; align-items:center; justify-content:center; }
+.hub-title{ font-size:24px; font-weight:800; }
+.hub-desc{ font-size:14.5px; color:var(--muted); line-height:1.5; }
+.hub-meta{ margin-top:auto; padding-top:6px; font-size:13px; font-weight:700; color:var(--accent-dark); }
+@media (max-width:620px){ .hub-grid{ grid-template-columns:1fr; } }
