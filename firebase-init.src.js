@@ -21,7 +21,7 @@ import {
   sendPasswordResetEmail
 } from "firebase/auth";
 import {
-  getFirestore,
+  initializeFirestore,
   doc,
   getDoc,
   setDoc,
@@ -43,7 +43,10 @@ var firebaseConfig = window.FIREBASE_CONFIG;
 
 var app = initializeApp(firebaseConfig);
 var auth = getAuth(app);
-var db = getFirestore(app);
+// School networks/proxies often break Firestore's default streaming
+// transport, which shows up as "could not be saved". Auto-detect that and
+// fall back to long-polling (plain HTTPS requests) so saves still work.
+var db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
 
 // Classroom computers are often shared between students, so by default the
 // login is tied to this browser TAB: closing the tab (or the browser) signs
@@ -222,17 +225,25 @@ function recordAttempt(uid, examKey, record){
     recordedAt: serverTimestamp()
   };
   if(record.firstAttempt) payload.firstAttempt = record.firstAttempt;
-  return setDoc(ref, payload, { merge: false })
-  .then(function(){ return { ok: true }; })
-  .catch(function(err){
-    // Blocked by the rules above — a duplicate submit (double click,
-    // retry after a flaky connection), or the student has already used
-    // both attempts. Treat it the same as "already recorded" rather than
-    // surfacing a scary permission error; the student still sees their
-    // just-finished results either way (see finishAttempt() in quiz.html).
-    if(err && err.code === "permission-denied") return { ok: false, alreadyRecorded: true };
-    throw err;
-  });
+  // Retry transient failures (flaky school Wi-Fi: unavailable / timeout /
+  // network) a few times with a short back-off before giving up.
+  function attempt(n){
+    return setDoc(ref, payload, { merge: false })
+      .then(function(){ return { ok: true }; })
+      .catch(function(err){
+        var code = err && err.code;
+        // Blocked by the rules above -- a duplicate submit or both attempts
+        // already used. Not retried; quiz.html re-reads the server copy.
+        if(code === "permission-denied") return { ok: false, alreadyRecorded: true, code: code };
+        var transient = !code || code === "unavailable" || code === "deadline-exceeded" || code === "resource-exhausted" || code === "aborted" || code === "cancelled" || code === "internal";
+        if(transient && n < 3){
+          return new Promise(function(r){ setTimeout(r, 1200 * n); }).then(function(){ return attempt(n + 1); });
+        }
+        if(err && !err.code) err.code = "network";
+        throw err;
+      });
+  }
+  return attempt(1);
 }
 
 // Admin-only (enforced by security rules, not just this check): every

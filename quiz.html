@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-KP/jzRO8scsavLohqTZ/j+kpdPys4v8XJyyq6XKxW3w='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261014d"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-EPP/aFGFEopw0DPDbvRpP/XZTiQZHjrAsKMENfnri4U='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261014e"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -15,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261014d" />
+<link rel="stylesheet" href="shared.css?v=20261014e" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -282,7 +282,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261014d -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261014e -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -295,13 +295,13 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261014d"></script>
-<script src="exam-data.js?v=20261014d"></script>
-<script src="syllabus-objectives.js?v=20261014d"></script>
-<script src="report-lib.js?v=20261014d"></script>
-<script src="scratchpad.js?v=20261014d"></script>
-<script src="firebase-config.js?v=20261014d"></script>
-<script type="module" src="firebase-init.js?v=20261014d"></script>
+<script src="quiz-data.js?v=20261014e"></script>
+<script src="exam-data.js?v=20261014e"></script>
+<script src="syllabus-objectives.js?v=20261014e"></script>
+<script src="report-lib.js?v=20261014e"></script>
+<script src="scratchpad.js?v=20261014e"></script>
+<script src="firebase-config.js?v=20261014e"></script>
+<script type="module" src="firebase-init.js?v=20261014e"></script>
 <script type="module">
 (function(){
 
@@ -1616,12 +1616,13 @@
       }).catch(function(){ state.saveFailed = true; });
     }
 
-    state.saveFailed = false;
+    state.saveFailed = false; state.saveErrorCode = null; state.lastRecord = record;
     PQFirebase.recordAttempt(state.currentUser.uid, state.examKey, record)
       .then(function(result){
+        if(result && result.code) state.saveErrorCode = result.code;
         if(!result || !result.ok) return verifyOrFlagFailure();
       })
-      .catch(function(){ return verifyOrFlagFailure(); })
+      .catch(function(err){ state.saveErrorCode = (err && err.code) || "network"; return verifyOrFlagFailure(); })
       .then(function(){
         // Only clear the resume checkpoint once the attempt is CONFIRMED
         // saved — if it genuinely failed, keeping it around means the
@@ -1663,7 +1664,21 @@
       // alongside it, so it can't be missed or mistaken for success.
       reviewBanner.classList.add("warn");
       reviewBanner.innerHTML = "<strong>Your result could not be saved.</strong> This attempt has NOT been recorded for your teacher. " +
-        "Please check your internet connection and try again — if this keeps happening, tell your teacher so they can check the account setup.";
+        "Please check your internet connection, then press <b>Try saving again</b>. If it keeps happening, tell your teacher" + (state.saveErrorCode ? " (error code: <code>" + String(state.saveErrorCode).replace(/[^a-z-]/gi, "") + "</code>)" : "") + ".<br><button type=\"button\" class=\"btn btn-primary\" id=\"btn-retry-save\" style=\"margin-top:8px\">Try saving again</button>";
+      var rb = document.getElementById("btn-retry-save");
+      if(rb && state.lastRecord){
+        rb.addEventListener("click", function(){
+          rb.disabled = true; rb.textContent = "Saving…";
+          PQFirebase.recordAttempt(state.currentUser.uid, state.examKey, state.lastRecord).then(function(r){
+            if(r && r.code) state.saveErrorCode = r.code;
+            return PQFirebase.getMyAttempt(state.currentUser.uid, state.examKey);
+          }).then(function(ex){
+            state.saveFailed = !(ex && ex.score === state.lastRecord.score && ex.total === state.lastRecord.total && ex.attemptNumber === state.lastRecord.attemptNumber);
+          }).catch(function(e){ state.saveErrorCode = (e && e.code) || "network"; state.saveFailed = true; })
+            .then(function(){ if(!state.saveFailed) return PQFirebase.deleteProgress(state.currentUser.uid, state.examKey); })
+            .then(function(){ renderResults(ctx); });
+        });
+      }
     } else if(state.reviewMode){
       reviewBanner.classList.remove("warn");
       reviewBanner.innerHTML = attemptNumber >= maxAttempts
