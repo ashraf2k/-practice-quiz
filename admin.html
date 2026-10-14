@@ -261,7 +261,7 @@
 
     <div class="field" id="field-admin-email">
       <label for="input-admin-email">Username or email</label>
-      <input type="text" id="input-admin-email" autocomplete="username" placeholder="ashraf2k or your email" />
+      <input type="text" id="input-admin-email" autocomplete="username" placeholder=" or your email" />
       <div class="err">Please enter your username or email address.</div>
     </div>
 
@@ -560,7 +560,7 @@
     loginStatus.textContent = "";
   }
 
-  // A bare username with no "@" (e.g. the teacher's old "ashraf2k") is
+  // A bare username with no "@" (e.g. the teacher's old "2k") is
   // expanded to a real email address so it can go straight to Firebase,
   // which only accepts email-shaped identifiers. This only affects what
   // gets sent to Firebase; firestore.rules still checks the real email.
