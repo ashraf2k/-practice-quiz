@@ -1,74 +1,153 @@
-// Firestore security rules for the Practice Quiz app.
+// Firestore security rules for the Practice Quiz app (HARDENED).
 //
-// This is the REAL enforcement layer for student accounts — the app's
-// JavaScript only makes for a nicer experience, but these rules are what
-// actually decide who can read or write what. Paste this exact text into
-// the Firebase console: Build -> Firestore Database -> Rules -> Publish.
+// These rules are the REAL enforcement layer -- the app's JavaScript is only
+// a convenience. Publish: Firebase console -> Firestore -> Rules -> Publish.
+// READ SECURITY.md FIRST: create the admins/{your-uid} document BEFORE
+// publishing, or the teacher dashboard will lock you out.
 //
-// What this enforces:
-//   - A student can only read/write their OWN profile (users/{uid}).
-//   - A student can only read their OWN attempt records, never anyone
-//     else's, and can never list all attempts.
-//   - A student gets at most TWO attempts per exam: the first write must
-//     be attemptNumber 1 (create, only if no attempt doc exists yet), and
-//     exactly one retake is allowed after that — an update that moves
-//     attemptNumber from 1 to 2, for that same student and exam only.
-//     A third attempt (another update once attemptNumber is already 2)
-//     is rejected outright, and so is anyone trying to touch someone
-//     else's attempt or switch which exam/uid a document belongs to.
-//     EXCEPTION: the "comm9618" exam allows only ONE attempt -- its
-//     retake `update` is blocked outright, so its first write (the
-//     `create`) is the only write that will ever succeed.
-//   - The topical exam-question papers (exam-practice.html's
-//     examAttempts) normally allow UNLIMITED retakes (a plain overwrite,
-//     no attemptNumber at all). EXCEPTION: the "comm9618_exam" paper is
-//     single-attempt -- once its one document is created, any further
-//     write to it is rejected the same way.
-//   - A submitted attempt can never be deleted by the student -- only
-//     the teacher's own account can delete one, to reset a student back
-//     to "no attempt yet" for that exam (e.g. a mistaken test run, or
-//     clearing a used-up retake so they can try again).
-//   - Only the teacher's own account (matched by email below) can list
-//     every attempt across every student, which is what powers the
-//     admin dashboard.
-//   - The teacher's account can also OVERWRITE an existing examAttempts
-//     document's marks (the admin "regrade" feature) regardless of
-//     paperKey, including the single-attempt comm9618_exam paper whose
-//     student-side update rule is otherwise locked shut -- this is the
-//     only way a mis-graded free-response answer gets corrected after
-//     the fact, since the student can't self-correct it.
-//
-//   - The teacher can ARCHIVE a student (copy all of their data into
-//     archive/{uid}, remove it from the live collections, and block that
-//     account from signing in) and later RESTORE or permanently delete
-//     them. See the `archive` match block and the admin-only create/
-//     update/delete clauses on each collection below.
-//
-// To add more teacher/admin accounts later, add another
-// "|| request.auth.token.email == '...'" clause inside isAdmin().
+// Threat -> defence
+//   * Admin identity is no longer an e-mail address written in this file or
+//     in any HTML. An admin is whoever has a document at admins/{uid}; that
+//     collection can be written only from the Firebase console / Admin SDK
+//     (clients are denied), so nobody can promote themselves.
+//   * Users can only create their OWN profile once (no later edits, no
+//     delete), with a whitelisted, length/format-checked set of fields, and
+//     the stored e-mail must equal the account's verified token e-mail
+//     (no impersonation, no identity spoofing).
+//   * Every student write is type-, range- and size-checked: unknown fields
+//     are rejected, scores are integers with score <= total, lists are
+//     capped, strings are length-capped and may not contain < > & (blocks
+//     stored-XSS payloads reaching the teacher dashboard), and timestamps
+//     are server-set (recordedAt == request.time) so they cannot be forged.
+//   * Ownership is taken from request.auth.uid, never from user-supplied
+//     data; document ids must equal uid_key, so one student can never write
+//     into another student's document or enumerate other students.
+//   * The attempt caps (2 attempts; comm9618 and comm9618_exam only one)
+//     are unchanged and still enforced here, not in the browser.
+//   * Students cannot list any collection, delete graded records, or read
+//     other users. Only admins can list/regrade/reset/archive.
+//   * Everything not listed below is denied (default deny + explicit
+//     catch-all).
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+    function signedIn() { return request.auth != null; }
+
     function isAdmin() {
-      return request.auth != null && request.auth.token.email == 'ashraf2k@gmail.com';
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    // Plain text: bounded length, and none of < > & (HTML metacharacters).
+    function safeText(v, minLen, maxLen) {
+      return v is string && v.size() >= minLen && v.size() <= maxLen
+        && v.matches('[^<>&]*');
+    }
+    function isNum(v, lo, hi) { return (v is int || v is float) && v >= lo && v <= hi; }
+    function isCount(v, lo, hi) { return v is int && v >= lo && v <= hi; }
+    function validKey(k) { return k is string && k.matches('[A-Za-z0-9_-]{1,60}'); }
+    function validClass(c) { return c is string && c.matches('[A-Za-z0-9 ._-]{1,20}'); }
+    function validWhen(v) { return v is string && v.size() >= 8 && v.size() <= 40 && v.matches('[0-9TZ:.+ -]*'); }
+    function validMinutes(v) { return v == null || isNum(v, 0, 1440); }
+
+    function validFirstAttempt(f) {
+      return f == null || (f is map
+        && f.keys().hasOnly(['score', 'total', 'completedAt', 'minutesTaken'])
+        && isNum(f.get('score', 0), 0, 500)
+        && isNum(f.get('total', 0), 0, 500)
+        && (f.get('completedAt', null) == null || validWhen(f.get('completedAt', null)))
+        && validMinutes(f.get('minutesTaken', null)));
+    }
+
+    function validAttempt(uid, id) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['uid', 'examKey', 'name', 'class', 'attemptNumber', 'score',
+                               'total', 'answers', 'hints', 'completedAt', 'minutesTaken',
+                               'recordedAt', 'firstAttempt', 'abandoned'])
+        && d.keys().hasAll(['uid', 'examKey', 'name', 'class', 'attemptNumber', 'score',
+                            'total', 'answers', 'completedAt', 'recordedAt'])
+        && d.uid == uid
+        && validKey(d.examKey)
+        && id == uid + '_' + d.examKey
+        && safeText(d.name, 1, 80)
+        && validClass(d['class'])
+        && isCount(d.attemptNumber, 1, 2)
+        && isNum(d.total, 0, 500)
+        && isNum(d.score, 0, 500) && d.score <= d.total
+        && d.answers is list && d.answers.size() <= 500
+        && (!('hints' in d) || (d.hints is list && d.hints.size() <= 500))
+        && validWhen(d.completedAt)
+        && validMinutes(d.get('minutesTaken', null))
+        && d.recordedAt == request.time
+        && validFirstAttempt(d.get('firstAttempt', null))
+        && (!('abandoned' in d) || d.abandoned is bool);
+    }
+
+    function validExamAttempt(uid, id) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['uid', 'paperKey', 'name', 'class', 'perQuestion', 'totalEarned',
+                               'totalMarks', 'pct', 'topicStats', 'completedAt', 'minutesTaken',
+                               'recordedAt'])
+        && d.keys().hasAll(['uid', 'paperKey', 'name', 'class', 'perQuestion', 'totalEarned',
+                            'totalMarks', 'pct', 'completedAt', 'recordedAt'])
+        && d.uid == uid
+        && validKey(d.paperKey)
+        && id == uid + '_' + d.paperKey
+        && safeText(d.name, 1, 80)
+        && validClass(d['class'])
+        && isNum(d.totalMarks, 0, 2000)
+        && isNum(d.totalEarned, 0, 2000) && d.totalEarned <= d.totalMarks
+        && isNum(d.pct, 0, 100)
+        && d.perQuestion is list && d.perQuestion.size() <= 400
+        && (!('topicStats' in d) || (d.topicStats is list && d.topicStats.size() <= 400))
+        && validWhen(d.completedAt)
+        && validMinutes(d.get('minutesTaken', null))
+        && d.recordedAt == request.time;
+    }
+
+    // Resume checkpoints / iLearn state: owner-only, free-shaped but bounded.
+    function validProgress(uid, id, keyField) {
+      let d = request.resource.data;
+      return d.uid == uid
+        && d[keyField] is string
+        && validKey(d[keyField])
+        && id == uid + '_' + d[keyField]
+        && d.keys().size() <= 60
+        && d.updatedAt == request.time;
+    }
+
+    // ---------- admins (read-only marker docs; written from console only) ----------
+    match /admins/{uid} {
+      // A signed-in user may check ONLY whether they themselves are an admin.
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+
+    // ---------- users ----------
     match /users/{uid} {
-      allow get, write: if request.auth != null && request.auth.uid == uid;
-      allow get: if isAdmin();
-      // Archive / restore a student (admin dashboard): the profile is
-      // removed on archive and written back on restore.
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // One-time profile creation by the owner. No later self-edit (so the
+      // class / name / e-mail cannot be tampered with), no self-delete.
+      allow create: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.keys().hasOnly(['name', 'email', 'class', 'createdAt'])
+                    && request.resource.data.keys().hasAll(['name', 'email', 'class', 'createdAt'])
+                    && safeText(request.resource.data.name, 1, 80)
+                    && validClass(request.resource.data['class'])
+                    && request.resource.data.email is string
+                    && request.auth.token.email != null
+                    && request.resource.data.email.lower() == request.auth.token.email.lower()
+                    && request.resource.data.createdAt == request.time;
+      // Archive / restore / change class (teacher).
       allow create, update, delete: if isAdmin();
     }
 
-    // Archived students (admin dashboard "Archive" tab). archive/{uid} is a
-    // small summary (name, class, when/by whom); archive/{uid}/items/* holds
-    // a copy of every document that was removed from the live collections.
-    // Only the teacher can list/write/delete them. A student may read ONLY
-    // their own summary document -- that is how login learns the account
-    // has been archived and turns it away.
+    // ---------- archive (teacher) ----------
     match /archive/{uid} {
-      allow get: if request.auth != null && request.auth.uid == uid;
+      // A student may read ONLY their own summary doc (login uses it to
+      // turn archived accounts away).
+      allow get: if signedIn() && request.auth.uid == uid;
       allow get, list, create, update, delete: if isAdmin();
 
       match /items/{itemId} {
@@ -76,136 +155,64 @@ service cloud.firestore {
       }
     }
 
+    // ---------- MCQ attempts (max 2; comm9618 max 1) ----------
     match /attempts/{attemptId} {
-      // Ownership is checked from the DOCUMENT ID's own uid_examKey shape,
-      // not from resource.data -- a student's very first attempt at an
-      // exam doesn't exist as a document yet, so `resource` is null and
-      // `resource.data.uid` would fail to evaluate, which Firestore
-      // treats as a denial even for the rightful owner. The ID shape is
-      // always available, existing document or not, so checking that
-      // instead means a student can find out "no attempt yet" instead of
-      // getting a permission error.
-      allow get: if request.auth != null
-                  && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
+      allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
       allow list: if isAdmin();
 
-      // First attempt: the document must not already exist, and it must
-      // be written as attemptNumber 1.
-      allow create: if request.auth != null
-                    && request.resource.data.uid == request.auth.uid
-                    && attemptId == request.resource.data.uid + '_' + request.resource.data.examKey
+      allow create: if signedIn()
+                    && validAttempt(request.auth.uid, attemptId)
                     && request.resource.data.attemptNumber == 1
                     && !exists(/databases/$(database)/documents/attempts/$(attemptId));
 
-      // The one allowed retake: resource (the EXISTING doc) is guaranteed
-      // non-null here -- Firestore only classifies a write as "update"
-      // when a document is already there -- so reading resource.data is
-      // always safe in this branch, unlike in the get rule above. Treat a
-      // pre-retake-feature attempt (no attemptNumber field at all) the
-      // same as attemptNumber 1, so older records already in the
-      // database are still eligible for one retake.
-      //
-      // comm9618 is a single-attempt exam (no retake at all, see
-      // quiz-data.js's EXAMS.comm9618.maxAttempts) -- excluded here so its
-      // first (and only) write can only ever be the `create` above, never
-      // this `update`. Every other exam keeps its original 1-retake
-      // behaviour untouched.
-      allow update: if request.auth != null
+      allow update: if signedIn()
+                    && validAttempt(request.auth.uid, attemptId)
                     && resource.data.uid == request.auth.uid
-                    && request.resource.data.uid == request.auth.uid
                     && resource.data.examKey == request.resource.data.examKey
-                    && attemptId == request.resource.data.uid + '_' + request.resource.data.examKey
                     && (resource.data.attemptNumber == 1 || !('attemptNumber' in resource.data))
                     && request.resource.data.attemptNumber == 2
                     && resource.data.examKey != 'comm9618';
 
-      // Only the teacher/admin account can delete an attempt (a student
-      // never can) -- this is the "reset" action in the admin dashboard,
-      // letting that student take the exam fresh again.
-      allow delete: if isAdmin();
-
-      // Restoring an archived student writes their attempt back as-is.
-      allow create, update: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
-    // Topical exam-question practice (exam-practice.html): free-response
-    // questions self-checked against a keyword-assisted grader. Most
-    // papers allow UNLIMITED retakes -- so unlike /attempts there's no
-    // attemptNumber dance, and each document just holds that student's
-    // most recent completed run for that paper, overwritten on every
-    // retake. comm9618_exam is the exception (see exam-data.js's
-    // EXAM_PAPERS.comm9618_exam.singleAttempt): create/update are split
-    // below so its one document, once created, can never be overwritten.
+    // ---------- topical exam papers (unlimited retakes; comm9618_exam once) ----------
     match /examAttempts/{attemptId} {
-      allow get: if request.auth != null
-                  && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
+      allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
       allow list: if isAdmin();
 
-      // The first (and, for a single-attempt paper, only) write -- always
-      // allowed regardless of paperKey, same as /attempts' own `create`.
-      allow create: if request.auth != null
-                    && request.resource.data.uid == request.auth.uid
-                    && attemptId == request.resource.data.uid + '_' + request.resource.data.paperKey;
+      allow create: if signedIn() && validExamAttempt(request.auth.uid, attemptId);
 
-      // A retake overwrite -- allowed for every paper EXCEPT comm9618_exam,
-      // whose one document is locked the moment it exists.
-      allow update: if request.auth != null
-                    && request.resource.data.uid == request.auth.uid
-                    && attemptId == request.resource.data.uid + '_' + request.resource.data.paperKey
+      allow update: if signedIn()
+                    && validExamAttempt(request.auth.uid, attemptId)
+                    && resource.data.uid == request.auth.uid
+                    && resource.data.paperKey == request.resource.data.paperKey
                     && resource.data.paperKey != 'comm9618_exam';
 
-      // Admin regrade -- the teacher correcting a question's mark after
-      // the fact. Deliberately has no paperKey exception (unlike the
-      // student-side update rule above): comm9618_exam is single-attempt
-      // for the STUDENT, not un-correctable by the teacher.
-      allow update: if isAdmin();
-
-      // Restoring an archived student re-creates their documents.
-      allow create: if isAdmin();
-
-      allow delete: if isAdmin();
+      // Teacher regrade / restore / reset (no paperKey exception).
+      allow create, update, delete: if isAdmin();
     }
 
-    // Scratch "resume" checkpoints for an IN-PROGRESS MCQ attempt
-    // (quiz.html) -- NOT a graded record (that's /attempts above). Freely
-    // overwritable/deletable by its owner: whether an unfinished attempt
-    // still "counts" toward the 2-attempt cap is decided entirely by
-    // /attempts' own rules, same as always -- this collection never gates
-    // anything by itself, it just lets a student close the tab and pick
-    // up later from the same checkpoint (same device or a different one).
+    // ---------- resume checkpoints + iLearn state ----------
     match /practiceProgress/{progressId} {
-      allow get: if request.auth != null
-                  && (progressId.split('_')[0] == request.auth.uid || isAdmin());
+      allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid || isAdmin());
       allow list: if isAdmin();
-
-      allow create, update: if request.auth != null
-                    && request.resource.data.uid == request.auth.uid
-                    && progressId == request.resource.data.uid + '_' + request.resource.data.examKey;
-
-      // No request.resource on a delete -- check the EXISTING document's
-      // owner instead (resource, not request.resource), the same pattern
-      // the get rule above uses for the same reason.
-      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
-      // Admin: archive removes these, restore writes them back.
+      allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'examKey');
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
       allow create, update, delete: if isAdmin();
     }
 
-    // Same idea for an in-progress topical exam-question attempt
-    // (exam-practice.html). Unlike practiceProgress above there's no
-    // attempt cap downstream to interact with -- examAttempts already
-    // allows unlimited retakes -- so this is purely a convenience
-    // checkpoint.
     match /examProgress/{progressId} {
-      allow get: if request.auth != null
-                  && (progressId.split('_')[0] == request.auth.uid || isAdmin());
+      allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid || isAdmin());
       allow list: if isAdmin();
-
-      allow create, update: if request.auth != null
-                    && request.resource.data.uid == request.auth.uid
-                    && progressId == request.resource.data.uid + '_' + request.resource.data.paperKey;
-
-      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'paperKey');
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
       allow create, update, delete: if isAdmin();
+    }
+
+    // ---------- default deny ----------
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

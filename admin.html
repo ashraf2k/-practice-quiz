@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-b2i4ZntWAKE2PshASQAomMwp0uPShVzF6fx3pKolMTc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261014d"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -13,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261014a" />
+<link rel="stylesheet" href="shared.css?v=20261014d" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -261,7 +263,7 @@
 
     <div class="field" id="field-admin-email">
       <label for="input-admin-email">Username or email</label>
-      <input type="text" id="input-admin-email" autocomplete="username" placeholder=" or your email" />
+      <input type="text" id="input-admin-email" autocomplete="username" placeholder="Teacher email" />
       <div class="err">Please enter your username or email address.</div>
     </div>
 
@@ -464,31 +466,31 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261014a -- cache-busting; see the longer comment above this same
+<!-- ?v=20261014d -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261014a"></script>
-<script src="exam-data.js?v=20261014a"></script>
-<script src="syllabus-objectives.js?v=20261014a"></script>
-<script src="learn-helpers.js?v=20261014c"></script>
-<script src="learn-data.js?v=20261014c"></script>
-<script src="learn-t1.js?v=20261014c"></script>
-<script src="learn-t2.js?v=20261014c"></script>
-<script src="learn-t3.js?v=20261014c"></script>
-<script src="learn-t4.js?v=20261014c"></script>
-<script src="learn-t5.js?v=20261014c"></script>
-<script src="learn-t6.js?v=20261014c"></script>
-<script src="learn-t7.js?v=20261014c"></script>
-<script src="learn-t8.js?v=20261014c"></script>
-<script src="learn-t9.js?v=20261014c"></script>
-<script src="learn-t10.js?v=20261014c"></script>
-<script src="learn-games-data.js?v=20261014c"></script>
-<script src="learn-engine.js?v=20261014c"></script>
-<script src="report-lib.js?v=20261014a"></script>
-<script src="syllabus-data.js?v=20261014a"></script>
-<script src="syllabus-report.js?v=20261014a"></script>
-<script src="firebase-config.js?v=20261014a"></script>
-<script type="module" src="firebase-init.js?v=20261014a"></script>
+<script src="quiz-data.js?v=20261014d"></script>
+<script src="exam-data.js?v=20261014d"></script>
+<script src="syllabus-objectives.js?v=20261014d"></script>
+<script src="learn-helpers.js?v=20261014d"></script>
+<script src="learn-data.js?v=20261014d"></script>
+<script src="learn-t1.js?v=20261014d"></script>
+<script src="learn-t2.js?v=20261014d"></script>
+<script src="learn-t3.js?v=20261014d"></script>
+<script src="learn-t4.js?v=20261014d"></script>
+<script src="learn-t5.js?v=20261014d"></script>
+<script src="learn-t6.js?v=20261014d"></script>
+<script src="learn-t7.js?v=20261014d"></script>
+<script src="learn-t8.js?v=20261014d"></script>
+<script src="learn-t9.js?v=20261014d"></script>
+<script src="learn-t10.js?v=20261014d"></script>
+<script src="learn-games-data.js?v=20261014d"></script>
+<script src="learn-engine.js?v=20261014d"></script>
+<script src="report-lib.js?v=20261014d"></script>
+<script src="syllabus-data.js?v=20261014d"></script>
+<script src="syllabus-report.js?v=20261014d"></script>
+<script src="firebase-config.js?v=20261014d"></script>
+<script type="module" src="firebase-init.js?v=20261014d"></script>
 <script type="module">
 (function(){
 
@@ -560,14 +562,10 @@
     loginStatus.textContent = "";
   }
 
-  // A bare username with no "@" (e.g. the teacher's old "2k") is
-  // expanded to a real email address so it can go straight to Firebase,
-  // which only accepts email-shaped identifiers. This only affects what
-  // gets sent to Firebase; firestore.rules still checks the real email.
+  // Trim only -- no username expansion and no built-in addresses, so no
+  // account name is hard-coded anywhere in this page.
   function normalizeAdminEmail(input){
-    input = input.trim();
-    if(input && input.indexOf("@") === -1) return input + "@gmail.com";
-    return input;
+    return (input || "").trim();
   }
 
   // Deliberately log-in only: there is no sign-up flow on this page, so
@@ -650,27 +648,25 @@
     loadData();
   }
 
-  // Runs once per sign-in: a signed-in Firebase user isn't necessarily an
-  // allowed admin — the real check is Firestore's isAdmin(), which
-  // listAllAttempts() below will hit. This client-side check against
-  // ADMIN_EMAILS (from firebase-config.js) is only here to give a clear,
-  // friendly message instead of a raw "permission denied" the moment
-  // someone signs in with the wrong email — it grants nothing by itself.
+  // Runs once per sign-in. Admin status is decided by the server: the user
+  // must own an admins/{uid} document (only the Firebase console can create
+  // one) and Firestore's rules re-check it on every read. Nothing about who
+  // the admin is lives in this page.
   PQFirebase.onAuthChange(function(user){
     if(!user){
       currentAdminEmail = null;
       showLoginScreen();
       return;
     }
-    var email = (user.email || "").toLowerCase();
-    var allowed = (window.ADMIN_EMAILS || []).some(function(a){ return a.toLowerCase() === email; });
-    if(!allowed){
-      pendingLoginStatus = "Signed in as " + user.email + ", but that email isn't in the admin list. Please log in with your teacher account instead.";
-      PQFirebase.logOut();
-      return;
-    }
-    currentAdminEmail = user.email || null;
-    showDashboard();
+    PQFirebase.checkIsAdmin(user.uid).then(function(ok){
+      if(!ok){
+        pendingLoginStatus = "That account doesn't have teacher access. Please log in with your teacher account.";
+        PQFirebase.logOut();
+        return;
+      }
+      currentAdminEmail = user.email || null;
+      showDashboard();
+    });
   });
 
   // ============================================================
@@ -706,57 +702,68 @@
   // `class` / `completedAt`; the rendering code below was written against
   // the old Apps-Script shape (`exam` / `className` / `timestamp`). Rather
   // than rename every reference, normalize once here.
+  // ---- Untrusted-data coercion -------------------------------------
+  // Everything read back from Firestore is attacker-controllable (a
+  // student can write to their own documents). Strings are escaped at
+  // render time, but numbers used to be interpolated raw into innerHTML,
+  // so every field is forced to its expected primitive type HERE, once.
+  function N(v){ var n = Number(v); return isFinite(n) ? n : 0; }
+  function S(v, max){ return v == null ? "" : String(v).slice(0, max || 200); }
+  function NL(v){ return v == null ? null : N(v); }
+  function cleanFirst(f){
+    if(!f || typeof f !== "object") return null;
+    return { score: N(f.score), total: N(f.total), completedAt: f.completedAt == null ? null : S(f.completedAt, 40), minutesTaken: NL(f.minutesTaken) };
+  }
+  function cleanList(a, max){ return Array.isArray(a) ? a.slice(0, max || 500) : []; }
+
   function normalizeAttempt(raw){
     return {
-      uid: raw.uid,
-      exam: raw.examKey,
-      name: raw.name,
-      className: raw.class,
-      score: raw.score,
-      total: raw.total,
-      answers: raw.answers || [],
-      hints: raw.hints || [],
-      timestamp: raw.completedAt,
-      minutesTaken: raw.minutesTaken,
+      uid: S(raw.uid, 128),
+      exam: S(raw.examKey, 60),
+      name: S(raw.name, 80),
+      className: S(raw.class, 20),
+      score: N(raw.score),
+      total: N(raw.total),
+      answers: cleanList(raw.answers).map(N),
+      hints: cleanList(raw.hints).map(function(h){ return !!h; }),
+      timestamp: S(raw.completedAt, 40),
+      minutesTaken: NL(raw.minutesTaken),
       // attemptNumber: 1 (only attempt so far) or 2 (used their one
       // retake — this is now their final score). firstAttempt, only
       // present when attemptNumber is 2, is a snapshot of the score
       // before the retake so the teacher can still see both.
-      attemptNumber: raw.attemptNumber || 1,
-      firstAttempt: raw.firstAttempt || null,
+      attemptNumber: N(raw.attemptNumber) === 2 ? 2 : 1,
+      firstAttempt: cleanFirst(raw.firstAttempt),
       // True when the student clicked "Start over" on an unfinished
-      // attempt (quiz.html's resume/restart flow) rather than reaching
-      // the last question normally -- the score reflects only whatever
-      // was answered up to that point, so it's flagged here rather than
-      // shown as an ordinary completed attempt.
+      // attempt rather than reaching the last question normally.
       abandoned: !!raw.abandoned
     };
   }
 
   // Firestore examAttempts docs (exam-practice.html's "Topical Real Exam
-  // Questions") are keyed by uid/paperKey and use `paperKey` / `class` /
-  // `completedAt`, same normalize-once approach as normalizeAttempt()
-  // above -- but note this is a genuinely different shape (marks out of
-  // a paper total + percentage, no attemptNumber/retake concept since
-  // retakes are unlimited there) rather than the same shape renamed.
+  // Questions") -- a genuinely different shape (marks out of a paper total
+  // + percentage, unlimited retakes), coerced the same way.
   function normalizeExamAttempt(raw){
     return {
-      uid: raw.uid,
-      paperKey: raw.paperKey,
-      name: raw.name,
-      className: raw.class,
-      perQuestion: raw.perQuestion || [],
-      totalEarned: raw.totalEarned,
-      totalMarks: raw.totalMarks,
-      pct: raw.pct,
-      topicStats: raw.topicStats || [],
-      timestamp: raw.completedAt,
-      minutesTaken: raw.minutesTaken,
-      // Only present once an admin has used the regrade feature below --
-      // absent on every attempt still showing the student's original
-      // self/auto-graded marks.
-      regradedBy: raw.regradedBy || null,
-      regradedAt: raw.regradedAt || null
+      uid: S(raw.uid, 128),
+      paperKey: S(raw.paperKey, 60),
+      name: S(raw.name, 80),
+      className: S(raw.class, 20),
+      perQuestion: cleanList(raw.perQuestion, 400).map(function(r){
+        r = r || {};
+        return { id: S(r.id, 60), topic: S(r.topic, 120), difficulty: S(r.difficulty, 40), earned: N(r.earned), total: N(r.total), answerText: S(r.answerText, 20000) };
+      }),
+      totalEarned: N(raw.totalEarned),
+      totalMarks: N(raw.totalMarks),
+      pct: N(raw.pct),
+      topicStats: cleanList(raw.topicStats, 400).map(function(r){
+        r = r || {};
+        return { topic: S(r.topic, 120), difficulty: S(r.difficulty, 40), earned: N(r.earned), total: N(r.total) };
+      }),
+      timestamp: S(raw.completedAt, 40),
+      minutesTaken: NL(raw.minutesTaken),
+      regradedBy: raw.regradedBy ? S(raw.regradedBy, 120) : null,
+      regradedAt: raw.regradedAt ? S(raw.regradedAt, 40) : null
     };
   }
 
@@ -1149,9 +1156,9 @@
   function fmtDateTime(iso){
     try{
       var d = new Date(iso);
-      if(isNaN(d.getTime())) return String(iso || "");
+      if(isNaN(d.getTime())) return escapeHtml(String(iso || ""));
       return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit", timeZoneName:"short" });
-    } catch(e){ return String(iso || ""); }
+    } catch(e){ return escapeHtml(String(iso || "")); }
   }
 
   // ============================================================

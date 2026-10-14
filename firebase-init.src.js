@@ -76,12 +76,27 @@ function applyPersistence(remember){
     .then(function(){ setRemembered(!!remember); });
 }
 
+// Names/classes end up in the teacher dashboard and are validated by the
+// Firestore rules (no < > &). Strip those characters up-front so a student
+// with e.g. "&" in their name is never blocked, and no markup can be stored.
+function cleanName(n){
+  return String(n == null ? "" : n).replace(/[<>&]/g, "").replace(/\s+/g, " ").trim().slice(0, 80);
+}
+function cleanClass(c){
+  return String(c == null ? "" : c).replace(/[^A-Za-z0-9 ._-]/g, "").trim().slice(0, 20);
+}
+function num(v, fallback){
+  var n = Number(v);
+  return isFinite(n) ? n : (fallback == null ? 0 : fallback);
+}
+var MIN_PASSWORD = 8;
+
 function friendlyAuthError(err){
   var code = err && err.code;
   var map = {
     "auth/email-already-in-use": "An account with that email already exists. Try logging in instead.",
     "auth/invalid-email": "That doesn't look like a valid email address.",
-    "auth/weak-password": "Please choose a password with at least 6 characters.",
+    "auth/weak-password": "Please choose a stronger password (at least 8 characters).",
     "auth/user-not-found": "No account found with that email. Sign up first.",
     "auth/wrong-password": "Incorrect password.",
     "auth/invalid-credential": "Incorrect email or password.",
@@ -94,6 +109,10 @@ function friendlyAuthError(err){
 // ---------- Auth ----------
 
 function signUp(email, password, name, cls, remember){
+  name = cleanName(name); cls = cleanClass(cls);
+  if(!name) return Promise.reject(new Error("Please enter your name (letters and numbers only, no < > or &)."));
+  if(!cls) return Promise.reject(new Error("Please choose your class."));
+  if(!password || String(password).length < MIN_PASSWORD) return Promise.reject(new Error("Please choose a password with at least " + MIN_PASSWORD + " characters."));
   return authReady
     .then(function(){ return applyPersistence(remember); })
     .then(function(){ return createUserWithEmailAndPassword(auth, email, password); })
@@ -191,11 +210,11 @@ function recordAttempt(uid, examKey, record){
   var payload = {
     uid: uid,
     examKey: examKey,
-    name: record.name,
-    class: record.cls,
+    name: cleanName(record.name),
+    class: cleanClass(record.cls),
     attemptNumber: record.attemptNumber || 1,
-    score: record.score,
-    total: record.total,
+    score: num(record.score),
+    total: num(record.total),
     answers: record.answers,
     hints: record.hints || [],
     completedAt: record.completedAt,
@@ -288,12 +307,12 @@ function recordExamAttempt(uid, paperKey, record){
   var payload = {
     uid: uid,
     paperKey: paperKey,
-    name: record.name,
-    class: record.cls,
+    name: cleanName(record.name),
+    class: cleanClass(record.cls),
     perQuestion: record.perQuestion,
-    totalEarned: record.totalEarned,
-    totalMarks: record.totalMarks,
-    pct: record.pct,
+    totalEarned: num(record.totalEarned),
+    totalMarks: num(record.totalMarks),
+    pct: num(record.pct),
     topicStats: record.topicStats,
     completedAt: record.completedAt,
     minutesTaken: record.minutesTaken != null ? record.minutesTaken : null,
@@ -567,7 +586,15 @@ function deleteArchivedStudent(uid){
     .then(function(){ return { ok: true }; });
 }
 
+// True only if admins/{uid} exists. The rules let a user read ONLY their own
+// admins doc, so this reveals nothing about anyone else.
+function checkIsAdmin(uid){
+  return getDoc(doc(db, "admins", uid)).then(function(snap){ return snap.exists(); })
+    .catch(function(){ return false; });
+}
+
 window.PQFirebase = {
+  checkIsAdmin: checkIsAdmin,
   signUp: signUp,
   logIn: logIn,
   logOut: logOut,

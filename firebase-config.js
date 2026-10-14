@@ -17,8 +17,5 @@ window.FIREBASE_CONFIG = {
   appId: "1:835613816535:web:bf6a211a9599cad479a292"
 };
 
-// The teacher/admin email(s) allowed into the admin dashboard. This is
-// only used for a friendly client-side hint -- the REAL enforcement is
-// in firestore.rules (isAdmin()), so editing this list alone does not
-// grant access; the matching email must also be in firestore.rules.
-window.ADMIN_EMAILS = ["ashraf2k@gmail.com"];
+// NOTE: no admin e-mail is kept here. Admin access is granted server-side by
+// an admins/{uid} document (see SECURITY.md) -- never by a value in the page.
