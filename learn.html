@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-Wo0H1bO/WJOLkfeVMaAAtlJVlVYpM9bWJoAV7NwQkcg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-/0FQMOIbq/DHqt/L/uWhfhYwu0hpwDohxNwgejDyOLo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261014d"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -141,6 +141,7 @@
     <div id="p1card"></div>
     <div class="ln-badges" id="badges"></div>
     <div class="ln-bars" id="bars"></div>
+    <p class="ln-muted" style="margin:14px 0 -8px">You can start with <b>Paper 1</b> or <b>Paper 2</b>. Each paper unlocks lesson by lesson on its own, so you do not have to finish Paper 1 first.</p>
     <div class="ln-tabs" role="tablist" id="tabs"></div>
     <div id="topics"></div>
   </section>
@@ -233,8 +234,17 @@
   function lessonsOf(code){ return E.lessonsOf(code); }
   function progress(){ return st.learn; }
   function isDone(id){ return !!(st.learn[id] && st.learn[id].d); }
-  function currentLesson(){ for(var i = 0; i < LESSONS.length; i++){ if(!isDone(LESSONS[i].id)) return LESSONS[i]; } return null; }
-  function isUnlocked(l){ if(isDone(l.id)) return true; var c = currentLesson(); return !!c && c.id === l.id; }
+  // Paper 1 (topics 1-6) and Paper 2 (topics 7-10) are two independent
+  // tracks: lessons unlock in order WITHIN a paper, and a student may start
+  // either paper first -- finishing Paper 1 is not required for Paper 2.
+  function paperOf(l){ return parseInt(O[l.code][0], 10) <= 6 ? 1 : 2; }
+  function nextInPaper(pid){ for(var i = 0; i < LESSONS.length; i++){ if(paperOf(LESSONS[i]) === pid && !isDone(LESSONS[i].id)) return LESSONS[i]; } return null; }
+  // With no argument: the next lesson in the paper tab being viewed, else the other paper's.
+  function currentLesson(pid){
+    if(pid) return nextInPaper(pid);
+    return nextInPaper(activeTab) || nextInPaper(activeTab === 1 ? 2 : 1);
+  }
+  function isUnlocked(l){ if(isDone(l.id)) return true; var c = nextInPaper(paperOf(l)); return !!c && c.id === l.id; }
   function codeCovered(code){ var ls = lessonsOf(code); return ls.length > 0 && ls.every(function(l){ return isDone(l.id); }); }
 
   // ---------- persistence ----------
@@ -311,7 +321,7 @@
     var cur = currentLesson(), streak = E.streak(st.days);
     $("hero-title").innerHTML = esc("Hi " + user.name + (doneL ? ", keep going!" : ", let's begin!")) + (streak ? '<span class="ln-streak">🔥 ' + streak + "-day streak</span>" : "") + xpChip();
     $("hero-sub").textContent = doneL + " of " + LESSONS.length + " lessons completed.";
-    $("btn-continue").textContent = cur ? (doneL ? "Continue: " : "Start: ") + cur.code + " " + cur.title : "All lessons complete 🎉";
+    $("btn-continue").textContent = cur ? (cur && st.learn && Object.keys(st.learn).some(function(k){ return LESSON_BY_ID[k] && paperOf(LESSON_BY_ID[k]) === paperOf(cur) && isDone(k); }) ? "Continue: " : "Start: ") + "Paper " + paperOf(cur) + " · " + cur.code + " " + cur.title : "All lessons complete 🎉";
     $("btn-continue").disabled = !cur;
 
     var due = E.dueLessons(st.learn);
@@ -391,7 +401,7 @@
       ? '<div class="ln-card2 p1"><div><b>📝 Paper 1 mock exam is unlocked!</b><p>You have finished topics 1 to 6. Build a full 75-mark paper in the style of the real 0478 Paper 1, with its mark scheme.</p></div><a class="btn btn-primary" href="paper1.html" style="text-decoration:none">Create my Paper 1</a></div>'
       : '<div class="ln-card2 p1 lock"><div><b>🔒 Paper 1 mock exam</b><p>Finish all lessons in topics 1 to 6 to unlock a full practice paper. ' + left + " of " + all.length + " lessons to go.</p></div></div>";
   }
-  $("btn-continue").addEventListener("click", function(){ var c = currentLesson(); if(c) openLesson(c.id); });
+  $("btn-continue").addEventListener("click", function(){ var c = currentLesson(); if(c){ activeTab = paperOf(c); openLesson(c.id); } });
   $("btn-mixed").addEventListener("click", startMixed);
   $("btn-gloss").addEventListener("click", openGlossary);
 
@@ -405,6 +415,7 @@
   }
   function openLesson(id){
     var l = LESSON_BY_ID[id]; if(!l) return;
+    activeTab = paperOf(l);
     current = { l: l, step: 0, ci: 0, wrongs: 0, wrongTotal: 0 };
     $("crumb").textContent = O[l.code][0] + "  ›  " + l.code;
     $("lesson-title").textContent = l.title;
@@ -428,7 +439,7 @@
       return;
     } else {
       renderSteps(3, true);
-      var rec = st.learn[l.id], nextL = currentLesson(), mastered = rec && rec.f;
+      var rec = st.learn[l.id], nextL = currentLesson(paperOf(l)), mastered = rec && rec.f;
       h = '<div class="ln-done"><div class="big">' + (mastered ? "🌟" : "✅") + "</div><h2>" + (mastered ? "Mastered first time!" : "Lesson complete") + "</h2><p class='ln-muted'>" +
         (mastered ? "You answered every question correctly at the first attempt. This idea is secure." : "You got there in the end. This idea is marked to <b>review later</b>; it will come back in your warm-up.") + "</p><p><b>+" + (mastered ? 15 : 10) + " XP</b></p></div>" +
         '<div class="ln-box"><h3>Key idea to remember</h3><div class="ln-body">' + E.keyIdea(l) + '</div></div><div class="ln-actions" style="justify-content:center">' +
@@ -442,7 +453,7 @@
       if(bn) bn.addEventListener("click", function(){ c.step++; renderLesson(); window.scrollTo(0, 0); });
       if(bb) bb.addEventListener("click", function(){ c.step--; renderLesson(); window.scrollTo(0, 0); });
     } else if(c.step === 3){
-      if(bn) bn.addEventListener("click", function(){ var n = currentLesson(); if(n) openLesson(n.id); });
+      if(bn) bn.addEventListener("click", function(){ var n = currentLesson(paperOf(l)); if(n) openLesson(n.id); });
       if(bj) bj.addEventListener("click", function(){ renderJourney(); });
     }
   }
