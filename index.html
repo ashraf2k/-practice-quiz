@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-aHcbxi+EC+P7wXpM25tWwKjb8YmZrAGzWywl9ZX7ykc=' 'sha256-uMUkCsD/MXZKHJWpCIUc1pYrvGeVsCtD5hQ30dOgQVU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261014e"></script>
+<script src="framebust.js?v=20261014f"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -181,65 +181,112 @@
   }
   .admin-link:hover, .admin-link:focus-visible{ color: var(--accent); border-color: var(--card-1-line); opacity: 1; }
 
+  /* ---------- Hero: one deep-navy panel, one obvious action ---------- */
   .hero{
-    padding: 6px 6px 28px;
-    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    padding: 44px 36px 36px;
+    margin: 0 0 22px;
+    color: #F2F6FB;
+    background:
+      radial-gradient(120% 90% at 100% 0%, rgba(59,182,175,0.38) 0%, rgba(59,182,175,0) 55%),
+      radial-gradient(90% 80% at 0% 100%, rgba(91,140,246,0.30) 0%, rgba(91,140,246,0) 60%),
+      #0C1A33;
+    box-shadow: 0 24px 48px -24px rgba(12,26,51,0.55);
   }
-
-  .hero .eyebrow{
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--accent);
-    background: var(--accent-tint);
-    border-radius: 999px;
-    padding: 5px 12px;
-    margin-bottom: 16px;
+  /* A faint grid of 0s and 1s' worth of dots: the one quiet nod to the subject */
+  .hero::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.16) 1px, transparent 1.4px);
+    background-size: 22px 22px;
+    -webkit-mask-image: linear-gradient(160deg, #000 0%, transparent 62%);
+            mask-image: linear-gradient(160deg, #000 0%, transparent 62%);
+    pointer-events: none;
   }
+  .hero > *{ position: relative; }
 
   .hero h2{
-    font-size: 29px;
-    line-height: 1.2;
-    margin: 0 0 12px;
-    letter-spacing: -0.02em;
+    font-size: clamp(30px, 6.4vw, 44px);
+    line-height: 1.08;
+    margin: 0 0 14px;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+    max-width: 14em;
   }
 
   .hero .lede{
-    color: var(--muted);
-    font-size: 15px;
+    color: #B9C6DA;
+    font-size: 16px;
     line-height: 1.6;
-    margin: 0 auto 24px;
-    max-width: 460px;
+    margin: 0 0 28px;
+    max-width: 34em;
   }
+
+  .cta-wrap{ display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
 
   .cta{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    color: #fff;
+    gap: 10px;
+    background: #FFFFFF;
+    color: #0C1A33;
     text-decoration: none;
-    font-size: 16px;
-    font-weight: 700;
-    padding: 15px 28px;
-    border-radius: 10px;
-    box-shadow: 0 10px 24px -8px rgba(20,108,106,0.5);
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    padding: 16px 26px;
+    min-height: 52px;
+    border-radius: 14px;
+    box-shadow: 0 14px 30px -10px rgba(0,0,0,0.5), 0 0 0 4px rgba(255,255,255,0.14);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
-
+  .cta .cta-ic{
+    width: 28px; height: 28px; border-radius: 9px;
+    background: var(--accent); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
   .cta svg{ transition: transform 0.15s ease; }
-  .cta:hover{ transform: translateY(-2px); box-shadow: 0 16px 30px -8px rgba(20,108,106,0.55); }
-  .cta:hover svg{ transform: translateX(3px); }
+  .cta:hover{ transform: translateY(-2px); box-shadow: 0 20px 36px -10px rgba(0,0,0,0.55), 0 0 0 5px rgba(255,255,255,0.2); }
+  .cta:hover svg{ transform: translateX(2px); }
   .cta:active{ transform: translateY(0); }
+  .cta:focus-visible, .signup-link:focus-visible{ outline: 3px solid #7FE0DA; outline-offset: 3px; }
 
-  .cta:focus-visible{
-    outline: 2px solid var(--accent-dark);
-    outline-offset: 2px;
+  .signup-link{
+    color: #DCE6F5;
+    font-size: 14.5px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(220,230,245,0.45);
+    padding-bottom: 1px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .signup-link b{ color: #fff; }
+  .signup-link:hover{ color: #fff; border-color: #fff; }
+
+  /* What a student gets: three plain statements, no cards */
+  .perks{
+    list-style: none;
+    margin: 34px 0 0;
+    padding: 22px 0 0;
+    border-top: 1px solid rgba(255,255,255,0.16);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+  }
+  .perks li{ display: grid; gap: 4px; align-content: start; }
+  .perks strong{ font-size: 15px; letter-spacing: -0.01em; color: #fff; }
+  .perks span{ font-size: 13px; line-height: 1.5; color: #AFBDD3; }
+  .perks svg{ color: #7FE0DA; margin-bottom: 4px; }
+
+  @media (max-width: 620px){
+    .hero{ padding: 30px 22px 26px; border-radius: 20px; }
+    .perks{ grid-template-columns: 1fr; gap: 16px; }
+    .perks li{ grid-template-columns: 26px 1fr; column-gap: 12px; }
+    .perks svg{ grid-row: span 2; margin: 2px 0 0; }
+    .cta{ width: 100%; }
   }
 
   .note{
@@ -452,28 +499,39 @@
   <header class="top">
     <div class="brand">
       <h1 class="logo-wrap"><img class="logo-img" src="logo.png" alt="iLearnCS — Learn, Practice, Master Computer Science"></h1>
-      <p>Computer Science Learn & Practice Hub</p>
+      <p>Provided by Mr. Ashraf</p>
     </div>
   </header>
 
-  <section class="hero">
-    <span class="eyebrow">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 1L9.8 5.6L14.5 6L11 9.2L12 14L8 11.5L4 14L5 9.2L1.5 6L6.2 5.6Z" fill="currentColor"/></svg>
-      Practice portal
-    </span>
-    <h2>Practice a little, understand a lot more.</h2>
-    <p class="lede">Short, focused quizzes for exactly what your class is studying right now — instant feedback on every answer, and a report for your teacher at the end.</p>
+  <section class="hero" aria-labelledby="hero-title">
+    <h2 id="hero-title">Learn it. Practise it. Get it right in the exam.</h2>
+    <p class="lede">Step-by-step lessons, topic quizzes and exam-style questions for your Computer Science class, with instant feedback on every answer.</p>
     <div class="cta-wrap">
-      <a class="cta" href="quiz.html">
-        Start the practice quiz
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <a class="cta" href="quiz.html" id="cta-login">
+        <span class="cta-ic" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-7 8-7s8 2.8 8 7"/></svg></span>
+        Log in to your account
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
-      <p class="note">Quick one-time sign-up with your name, class and email — then straight into your quiz. Works on phone, tablet, or computer.</p>
+      <a class="signup-link" href="quiz.html#signup">New student? <b>Create your account</b></a>
     </div>
+    <ul class="perks">
+      <li>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8l10-5 10 5-10 5L2 8z"/><path d="M6 10.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-5.5"/></svg>
+        <strong>Learn</strong><span>Short lessons with a worked example, then questions to prove you understood.</span>
+      </li>
+      <li>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>
+        <strong>Practise</strong><span>Topic quizzes and exam-style questions, marked as you go.</span>
+      </li>
+      <li>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        <strong>Track</strong><span>See your progress and what to revise next. Your teacher sees it too.</span>
+      </li>
+    </ul>
   </section>
 
-  <p class="section-label">Available practice topics</p>
-  <p class="topics-hint">Tap a topic below to jump straight to it once you're logged in.</p>
+  <p class="section-label">Practice topics</p>
+  <p class="topics-hint">Log in first, then you'll go straight to the topic you tap here.</p>
   <div class="topic-groups" id="topics-wrap">
     <!-- Filled in from quiz-data.js by the script at the bottom of the
          page, so this list can never go stale when a topic is added. -->
@@ -486,10 +544,10 @@
 
 </div>
 
-<!-- ?v=20261014e -- cache-busting; see the longer comment above this same
+<!-- ?v=20261014f -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever this
      file changes. -->
-<script src="quiz-data.js?v=20261014e"></script>
+<script src="quiz-data.js?v=20261014f"></script>
 <script>
 (function(){
   // Curated heading/colour/icon per exam key, so the cards look
