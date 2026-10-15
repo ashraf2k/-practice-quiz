@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-RjPs1qB8y642aS78Ey6pFvYVsFBjeVTUz6GjqCjRun8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261014e"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-92UpCjUELFFhv/MyofdtkhDNDy98Tjb6/QaUUO7JJT0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261015a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Paper 1 Mock Exam</title>
-<link rel="stylesheet" href="shared.css?v=20261014e" />
+<link rel="stylesheet" href="shared.css?v=20261015a" />
 <style>
   .pp-top{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
   .pp-opts{ display:grid; gap:10px; margin:14px 0; } .pp-opts label{ display:flex; gap:10px; align-items:flex-start; font-size:15px; }
@@ -119,29 +119,29 @@
 
 </div>
 
-<script src="exam-data.js?v=20261014e"></script>
-<script src="syllabus-objectives.js?v=20261014e"></script>
-<script src="learn-helpers.js?v=20261014e"></script>
-<script src="learn-data.js?v=20261014e"></script>
-<script src="learn-t1.js?v=20261014e"></script>
-<script src="learn-t2.js?v=20261014e"></script>
-<script src="learn-t3.js?v=20261014e"></script>
-<script src="learn-t4.js?v=20261014e"></script>
-<script src="learn-t5.js?v=20261014e"></script>
-<script src="learn-t6.js?v=20261014e"></script>
-<script src="learn-t7.js?v=20261014e"></script>
-<script src="learn-t8.js?v=20261014e"></script>
-<script src="learn-t9.js?v=20261014e"></script>
-<script src="learn-t10.js?v=20261014e"></script>
-<script src="learn-engine.js?v=20261014e"></script>
-<script src="paper1-lib.js?v=20261014e"></script>
-<script src="firebase-config.js?v=20261014e"></script>
-<script type="module" src="firebase-init.js?v=20261014e"></script>
+<script src="exam-data.js?v=20261015a"></script>
+<script src="syllabus-objectives.js?v=20261015a"></script>
+<script src="learn-helpers.js?v=20261015a"></script>
+<script src="learn-data.js?v=20261015a"></script>
+<script src="learn-t1.js?v=20261015a"></script>
+<script src="learn-t2.js?v=20261015a"></script>
+<script src="learn-t3.js?v=20261015a"></script>
+<script src="learn-t4.js?v=20261015a"></script>
+<script src="learn-t5.js?v=20261015a"></script>
+<script src="learn-t6.js?v=20261015a"></script>
+<script src="learn-t7.js?v=20261015a"></script>
+<script src="learn-t8.js?v=20261015a"></script>
+<script src="learn-t9.js?v=20261015a"></script>
+<script src="learn-t10.js?v=20261015a"></script>
+<script src="learn-engine.js?v=20261015a"></script>
+<script src="paper1-lib.js?v=20261015a"></script>
+<script src="firebase-config.js?v=20261015a"></script>
+<script type="module" src="firebase-init.js?v=20261015a"></script>
 <script type="module">
 (function(){
   "use strict";
   var P = window.Paper1Lib, E = window.ILearnEngine;
-  var user = null, cur = null, timerId = null, hist = [], remoteKey = "paper1mock";
+  var user = null, cur = null, timerId = null, hist = [], remoteKey = "paper1mock", remoteResetAt = 0;
   function $(id){ return document.getElementById(id); }
   var esc = P.esc;
   var SCREENS = ["loading","start","paper","results"];
@@ -166,7 +166,8 @@
       var state = E.mergeState(local, r[0]);
       var left = topicsDone(state);
       var preview = /[?&]preview=1/.test(location.search);
-      hist = P.mergeHist(lsGet(histKey()) || [], (r[1] && r[1].hist) || []);
+      remoteResetAt = (r[1] && Number(r[1].resetAt)) || 0;
+      hist = P.mergeHist(lsGet(histKey()) || [], (r[1] && r[1].hist) || []).filter(function(h){ return !remoteResetAt || h.at > remoteResetAt; });
       if(left > 0 && !preview){
         $("lock-note").innerHTML = '<div class="pp-lock"><b>🔒 Not unlocked yet</b><p style="margin:6px 0 0">Finish every lesson in topics 1 to 6 on your iLearn journey to unlock the Paper 1 mock exam. <b>' + left + "</b> lesson" + (left === 1 ? "" : "s") + ' to go.</p><div class="btn-row"><a class="btn btn-primary" href="learn.html" style="text-decoration:none">Back to my journey</a></div></div>';
         $("start-main").classList.add("hidden");
@@ -271,7 +272,7 @@
     $("save-status").textContent = "Saving…";
     var done = function(ok){ $("save-status").textContent = ok ? "Saved to your history." : "Saved on this device. It could not be sent to your teacher right now."; };
     if(PQFirebase.saveProgress){
-      PQFirebase.saveProgress(user.uid, remoteKey, { hist: hist.slice(-20), best: Math.max.apply(null, hist.map(function(h){ return Math.round(100 * h.score / h.max); })), n: hist.length, lastActive: Date.now() })
+      PQFirebase.saveProgress(user.uid, remoteKey, { hist: hist.slice(-20), best: Math.max.apply(null, hist.map(function(h){ return Math.round(100 * h.score / h.max); })), n: hist.length, lastActive: Date.now(), resetAt: remoteResetAt })
         .then(function(r){ done(!!(r && r.ok !== false)); }).catch(function(){ done(false); });
     } else done(false);
     lsSet(curKey(), null);

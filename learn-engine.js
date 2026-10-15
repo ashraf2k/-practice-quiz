@@ -48,16 +48,28 @@
 
   // ---------- progress record ----------
   // st = { learn:{lessonId:{d,f,a,t,rv,rc,pre}}, days:{"YYYY-MM-DD":n}, tests:{topic:{s,t,at}} }
-  function emptyState(){ return { learn:{}, days:{}, tests:{}, games:{} }; }
-  function pick(rec){ return rec && (rec.learn || rec.days || rec.tests || rec.games) ? rec : null; }
+  // resets: { topicNumber: timestamp } is written by the teacher when a
+  // topic is reset. A copy of the progress (e.g. one still sitting in a
+  // student's browser) that has not seen the latest reset for a topic is
+  // stale for that topic, so its lessons, test and puzzle data for it are
+  // ignored instead of bringing the old progress back.
+  function emptyState(){ return { learn:{}, days:{}, tests:{}, games:{}, resets:{} }; }
+  function pick(rec){ return rec && (rec.learn || rec.days || rec.tests || rec.games || rec.resets) ? rec : null; }
   function mergeState(a, b){
     var out = emptyState();
-    [a, b].forEach(function(src){
-      src = pick(src); if(!src) return;
+    var srcs = [pick(a), pick(b)];
+    srcs.forEach(function(src){
+      if(!src) return;
+      Object.keys(src.resets || {}).forEach(function(k){ out.resets[k] = Math.max(out.resets[k] || 0, Number(src.resets[k]) || 0); });
+    });
+    function stale(src, tn){ var r = out.resets[tn]; return !!r && (Number((src.resets || {})[tn]) || 0) < r; }
+    srcs.forEach(function(src){
+      if(!src) return;
       var L = src.learn || {};
       Object.keys(L).forEach(function(k){
         var x = out.learn[k], y = L[k];
         if(!y) return;
+        var les = LESSON_BY_ID[k]; if(les && stale(src, topicOf(les))) return;
         if(!x || (y.d && !x.d)) { out.learn[k] = y; return; }
         if(y.d && x.d){
           var tx = x.rv || x.t || 0, ty = y.rv || y.t || 0;
@@ -67,9 +79,13 @@
       var D = src.days || {};
       Object.keys(D).forEach(function(k){ out.days[k] = Math.max(out.days[k] || 0, D[k] || 0); });
       var GM = src.games || {};
-      Object.keys(GM).forEach(function(k){ out.games[k] = Math.max(out.games[k] || 0, GM[k] || 0); });
+      Object.keys(GM).forEach(function(k){
+        var les = LESSON_BY_ID[k]; if(les && stale(src, topicOf(les))) return;
+        out.games[k] = Math.max(out.games[k] || 0, GM[k] || 0);
+      });
       var T = src.tests || {};
       Object.keys(T).forEach(function(k){
+        if(stale(src, Number(k))) return;
         var x = out.tests[k], y = T[k];
         if(y && (!x || y.s / y.t > x.s / x.t)) out.tests[k] = y;
       });
@@ -78,7 +94,7 @@
   }
   function snapshot(st){
     var done = LESSONS.filter(function(l){ return st.learn[l.id] && st.learn[l.id].d; }).length;
-    return { learn: st.learn, days: st.days, tests: st.tests, games: st.games || {}, xp: xp(st), learnDone: done, learnTotal: LESSONS.length, lastActive: Date.now() };
+    return { learn: st.learn, days: st.days, tests: st.tests, games: st.games || {}, xp: xp(st), learnDone: done, learnTotal: LESSONS.length, lastActive: Date.now(), resets: st.resets || {} };
   }
 
   // ---------- spaced review ----------

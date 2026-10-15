@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-Lx28wyRK4wDsur3EQXeyS5cXg772xFKlWAerk1SRE+o='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261014e"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-M/t/zJS+7c4OUd7VW5QUmSkfWmCTLewgnSdNxuY4Kg0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261015a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -15,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261014e" />
+<link rel="stylesheet" href="shared.css?v=20261015a" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -358,6 +358,18 @@
   #ilearn-table th{ white-space: normal; line-height: 1.3; vertical-align: bottom; }
   #ilearn-table th, #ilearn-table td{ padding-left: 10px; padding-right: 10px; }
   details.ij-topic td.wrap-cell{ min-width: 220px; }
+  .ij-danger{ border-color: var(--incorrect-line); }
+  .ij-danger h4{ color: var(--incorrect); }
+  .rs-quick{ display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  .rs-quick button{ appearance: none; font: inherit; font-size: 12px; font-weight: 600; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+  .rs-quick button:hover{ border-color: var(--accent); color: var(--accent); }
+  .rs-list{ display: grid; gap: 4px; margin: 0 0 10px; }
+  .rs-list label{ display: flex; align-items: center; gap: 9px; font-size: 13px; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+  .rs-list label:hover{ background: var(--bg); }
+  .rs-list label small{ margin-left: auto; color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .rs-list .rs-paper{ font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 6px 8px 0; }
+  .flash{ border: 1px solid var(--correct-line); background: var(--correct-bg); color: var(--correct); border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+  .flash.bad{ border-color: var(--incorrect-line); background: var(--incorrect-bg); color: var(--incorrect); }
 </style>
 </head>
 <body>
@@ -592,31 +604,31 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261014e -- cache-busting; see the longer comment above this same
+<!-- ?v=20261015a -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261014e"></script>
-<script src="exam-data.js?v=20261014e"></script>
-<script src="syllabus-objectives.js?v=20261014e"></script>
-<script src="learn-helpers.js?v=20261014e"></script>
-<script src="learn-data.js?v=20261014e"></script>
-<script src="learn-t1.js?v=20261014e"></script>
-<script src="learn-t2.js?v=20261014e"></script>
-<script src="learn-t3.js?v=20261014e"></script>
-<script src="learn-t4.js?v=20261014e"></script>
-<script src="learn-t5.js?v=20261014e"></script>
-<script src="learn-t6.js?v=20261014e"></script>
-<script src="learn-t7.js?v=20261014e"></script>
-<script src="learn-t8.js?v=20261014e"></script>
-<script src="learn-t9.js?v=20261014e"></script>
-<script src="learn-t10.js?v=20261014e"></script>
-<script src="learn-games-data.js?v=20261014e"></script>
-<script src="learn-engine.js?v=20261014e"></script>
-<script src="report-lib.js?v=20261014e"></script>
-<script src="syllabus-data.js?v=20261014e"></script>
-<script src="syllabus-report.js?v=20261014e"></script>
-<script src="firebase-config.js?v=20261014e"></script>
-<script type="module" src="firebase-init.js?v=20261014e"></script>
+<script src="quiz-data.js?v=20261015a"></script>
+<script src="exam-data.js?v=20261015a"></script>
+<script src="syllabus-objectives.js?v=20261015a"></script>
+<script src="learn-helpers.js?v=20261015a"></script>
+<script src="learn-data.js?v=20261015a"></script>
+<script src="learn-t1.js?v=20261015a"></script>
+<script src="learn-t2.js?v=20261015a"></script>
+<script src="learn-t3.js?v=20261015a"></script>
+<script src="learn-t4.js?v=20261015a"></script>
+<script src="learn-t5.js?v=20261015a"></script>
+<script src="learn-t6.js?v=20261015a"></script>
+<script src="learn-t7.js?v=20261015a"></script>
+<script src="learn-t8.js?v=20261015a"></script>
+<script src="learn-t9.js?v=20261015a"></script>
+<script src="learn-t10.js?v=20261015a"></script>
+<script src="learn-games-data.js?v=20261015a"></script>
+<script src="learn-engine.js?v=20261015a"></script>
+<script src="report-lib.js?v=20261015a"></script>
+<script src="syllabus-data.js?v=20261015a"></script>
+<script src="syllabus-report.js?v=20261015a"></script>
+<script src="firebase-config.js?v=20261015a"></script>
+<script type="module" src="firebase-init.js?v=20261015a"></script>
 <script type="module">
 (function(){
 
@@ -1253,8 +1265,80 @@
     E.badges(st, tree).forEach(function(b){ var c = mk("span", "chip" + (b.on ? " ok" : " off"), b.icon + " " + b.name); c.title = b.how; br.appendChild(c); });
     bb.appendChild(br); right.appendChild(bb);
 
+    // ----- reset (teacher only; enforced by the Firestore rules)
+    var rb = box("Reset progress", "teacher action");
+    rb.className = "ij-box ij-danger";
+    rb.appendChild(mk("p", "admin-status", "Tick the topics to start again from the beginning. This removes the lessons, topic test results and puzzle stars for those topics. Activity days and the streak are kept. It cannot be undone."));
+    var quick = mk("div", "rs-quick"), rlist = mk("div", "rs-list"), boxes = {};
+    function sel(fn){ Object.keys(boxes).forEach(function(k){ boxes[k].checked = fn(Number(k)); }); upd(); }
+    [["Select Paper 1 (topics 1-6)", function(t){ return t <= 6; }], ["Select Paper 2 (topics 7-10)", function(t){ return t >= 7; }], ["Select all", function(){ return true; }], ["Clear selection", function(){ return false; }]].forEach(function(q){
+      var b = mk("button", null, q[0]); b.type = "button"; b.addEventListener("click", function(){ sel(q[1]); }); quick.appendChild(b);
+    });
+    rb.appendChild(quick);
+    var lastPaper = 0;
+    Object.keys(tree).map(Number).sort(function(a, b){ return a - b; }).forEach(function(tn){
+      var ls = E.LESSONS.filter(function(l){ return E.topicOf(l) === tn; });
+      var pid = tn <= 6 ? 1 : 2;
+      if(pid !== lastPaper){ rlist.appendChild(mk("div", "rs-paper", pid === 1 ? "Paper 1" : "Paper 2")); lastPaper = pid; }
+      var lab = mk("label"), cb = mk("input"); cb.type = "checkbox"; cb.addEventListener("change", upd); boxes[tn] = cb;
+      lab.appendChild(cb); lab.appendChild(mk("span", null, tn + " " + tree[tn].title));
+      var dn = ls.filter(function(l){ return L[l.id] && L[l.id].d; }).length;
+      lab.appendChild(mk("small", null, dn + " / " + ls.length + " lessons" + (st.tests[tn] ? " · test taken" : "")));
+      rlist.appendChild(lab);
+    });
+    rb.appendChild(rlist);
+    var mlab = mk("label"); mlab.style.cssText = "display:flex;gap:9px;align-items:center;font-size:13px;margin:0 8px 12px;cursor:pointer";
+    var mcb = mk("input"); mcb.type = "checkbox"; mlab.appendChild(mcb); mlab.appendChild(mk("span", null, "Also clear the Paper 1 mock exam history" + (r.p1 ? " (" + r.p1.n + " paper" + (r.p1.n === 1 ? "" : "s") + ")" : "")));
+    rb.appendChild(mlab);
+    var rbtn = mk("button", "btn btn-danger", "Reset selected topics"); rbtn.type = "button"; rbtn.disabled = true;
+    var rstat = mk("p", "admin-status"); rstat.style.marginTop = "10px";
+    function chosen(){ return Object.keys(boxes).map(Number).filter(function(k){ return boxes[k].checked; }); }
+    function upd(){ var n = chosen().length; rbtn.disabled = !n && !mcb.checked; rbtn.textContent = n ? "Reset " + n + " topic" + (n === 1 ? "" : "s") : "Reset selected topics"; }
+    mcb.addEventListener("change", upd);
+    rbtn.addEventListener("click", function(){
+      var topics = chosen(), clearMock = mcb.checked;
+      var what = (topics.length ? "Topic" + (topics.length === 1 ? " " : "s ") + topics.join(", ") : "") + (topics.length && clearMock ? " and " : "") + (clearMock ? "the Paper 1 mock history" : "");
+      if(!window.confirm("Reset " + what + " for " + nm + "?\n\nThis permanently removes that progress and cannot be undone.")) return;
+      rbtn.disabled = true; rstat.classList.remove("warn"); rstat.textContent = "Resetting…";
+      resetILearn(r, topics, clearMock).then(function(msg){ ilearnFlash = { ok: true, text: msg }; openILearnDetail(r); renderILearn(); })
+        .catch(function(err){ rstat.classList.add("warn"); rstat.textContent = "Could not reset: " + ((err && err.message) || "unknown error") + ". Nothing was changed."; upd(); });
+    });
+    rb.appendChild(rbtn); rb.appendChild(rstat);
+    right.appendChild(rb);
+
+    if(ilearnFlash){ var fl2 = mk("div", "flash" + (ilearnFlash.ok ? "" : " bad"), ilearnFlash.text); body.insertBefore(fl2, body.firstChild); ilearnFlash = null; }
+
     showTab("ilearnDetail");
     window.scrollTo(0, 0);
+  }
+  var ilearnFlash = null;
+
+  // Writes the reset into the student's own progress document (admins may
+  // write any student's document; students cannot reset themselves). A
+  // per-topic "resets" timestamp makes any older copy on the student's
+  // device ignore its stale data for that topic -- see mergeState().
+  function resetILearn(r, topics, clearMock){
+    var E = window.ILearnEngine, uid = r.s.uid;
+    if(typeof PQFirebase.saveProgress !== "function") return Promise.reject(new Error("this browser has an older cached script, hard refresh and try again"));
+    return PQFirebase.getMyProgress(uid, "ilearn").then(function(rec){
+      var st = E.mergeState(null, rec), now = Date.now();
+      topics.forEach(function(tn){
+        E.LESSONS.forEach(function(l){ if(E.topicOf(l) === tn){ delete st.learn[l.id]; delete st.games[l.id]; } });
+        delete st.tests[tn];
+        st.resets[tn] = now;
+      });
+      var snap = E.snapshot(st);
+      snap.lastActive = (rec && rec.lastActive) || now;
+      var jobs = [];
+      if(topics.length) jobs.push(PQFirebase.saveProgress(uid, "ilearn", snap));
+      if(clearMock) jobs.push(PQFirebase.saveProgress(uid, "paper1mock", { hist: [], best: 0, n: 0, lastActive: now, resetAt: now }));
+      return Promise.all(jobs).then(function(res){
+        res.forEach(function(x){ if(!x || x.ok === false) throw new Error((x && x.error) || "the save was refused"); });
+        r.st = E.mergeState(null, snap);
+        if(clearMock){ r.p1 = null; r.p1hist = []; }
+        return "Reset done: " + (topics.length ? "Topic" + (topics.length === 1 ? " " : "s ") + topics.join(", ") : "") + (topics.length && clearMock ? " and " : "") + (clearMock ? "Paper 1 mock history" : "") + ".";
+      });
+    });
   }
   document.getElementById("btn-back-ilearn").addEventListener("click", function(){ showTab("ilearn"); });
 
