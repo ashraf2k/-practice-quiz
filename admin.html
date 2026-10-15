@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-sQwCWPV+OD46Jl7XxNdrCQeWAASgXfKawNxg+rKeE+c='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-Lx28wyRK4wDsur3EQXeyS5cXg772xFKlWAerk1SRE+o='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261014e"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
@@ -241,6 +241,123 @@
   .profile-summary h3{ font-size: 17px; margin: 0; }
   .profile-summary .muted{ color: var(--muted); font-size: 13px; }
   td.nowrap{ white-space: nowrap; }
+
+  /* =====================================================================
+     Modern dashboard skin (admin only). Appended last so it refines the
+     rules above without touching the other pages that share shared.css.
+     ===================================================================== */
+  .wrap.wrap-wide{ max-width: 1200px; }
+  #screen-dashboard.card{
+    border-radius: 18px;
+    padding: 22px 26px 30px;
+    box-shadow: 0 1px 2px rgba(22,33,59,0.05), 0 22px 44px -26px rgba(22,33,59,0.28);
+  }
+  @media (max-width: 640px){ #screen-dashboard.card{ padding: 16px 14px 24px; border-radius: 14px; } }
+
+  /* Toolbar: compact, aligned controls */
+  .admin-toolbar{ align-items: center; gap: 8px; }
+  .admin-toolbar select, .admin-toolbar input[type="text"]{
+    height: 38px; padding: 0 12px; border-radius: 10px; font-size: 13px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .admin-toolbar input[type="text"]{ min-width: 190px; }
+  .admin-toolbar select:focus, .admin-toolbar input[type="text"]:focus{
+    outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint);
+  }
+  .admin-toolbar .btn{ font-size: 13px; padding: 0 14px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; }
+  .admin-status{ font-size: 13px; line-height: 1.5; }
+
+  /* Overview tiles */
+  .kpi-row{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 4px 0 20px; }
+  .kpi{ background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .kpi .k-label{ font-size: 12px; color: var(--muted); font-weight: 600; }
+  .kpi .k-value{ font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-top: 2px; }
+  .kpi .k-sub{ font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+  /* Segmented tab bar */
+  .admin-tabs{
+    flex-wrap: nowrap; overflow-x: auto; gap: 2px; padding: 4px; margin-bottom: 20px;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 13px; scrollbar-width: thin;
+  }
+  .admin-tab{
+    margin: 0; padding: 8px 14px; border: 0; border-radius: 10px; font-size: 13px; white-space: nowrap;
+    transition: background .15s ease, color .15s ease;
+  }
+  .admin-tab:hover{ color: var(--ink); }
+  .admin-tab:focus-visible{ outline: 2px solid var(--accent); outline-offset: 1px; }
+  .admin-tab.active{ background: var(--surface); color: var(--accent); box-shadow: 0 1px 3px rgba(22,33,59,0.14), 0 0 0 1px var(--line); border: 0; }
+
+  /* Tables */
+  .table-scroll{ border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  table.admin-table th{ background: var(--bg); padding: 11px 14px; font-size: 11px; border-bottom: 1px solid var(--line); position: sticky; top: 0; }
+  table.admin-table td{ padding: 11px 14px; }
+  table.admin-table tbody tr{ transition: background .12s ease; }
+  table.admin-table td.num{ font-variant-numeric: tabular-nums; }
+  .admin-card{ border-radius: 12px; }
+  .admin-card .value{ font-size: 22px; letter-spacing: -0.01em; }
+  .admin-section-title{ font-size: 15px; letter-spacing: -0.01em; }
+
+  /* ---------- iLearn: ranking table extras ---------- */
+  .rank{ display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); font-size: 12px; font-weight: 700; color: var(--muted); }
+  .rank.r1{ background: #FDF1D6; border-color: #F3DFA6; color: #A16207; }
+  .rank.r2{ background: #EEF2F6; border-color: #DCE3EA; color: #5B6478; }
+  .rank.r3{ background: #FBEEE0; border-color: #F2D9BB; color: #A8580E; }
+  .miniprog{ display: inline-block; width: 70px; height: 6px; border-radius: 99px; background: var(--line); vertical-align: middle; margin-left: 8px; overflow: hidden; }
+  .miniprog i{ display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+  .view-link{ color: var(--accent); font-weight: 700; font-size: 12.5px; }
+
+  /* ---------- iLearn: student journey page ---------- */
+  .ij-head{ display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .ij-avatar{ width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: #fff; font-weight: 800; font-size: 19px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .ij-head h3{ margin: 0; font-size: 22px; letter-spacing: -0.02em; }
+  .ij-head .ij-meta{ color: var(--muted); font-size: 13px; margin-top: 2px; display: flex; flex-wrap: wrap; gap: 6px 12px; }
+  .chip{ display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); white-space: nowrap; }
+  .chip.ok{ background: var(--correct-bg); border-color: var(--correct-line); color: var(--correct); }
+  .chip.warn{ background: var(--diff-moderate-bg); border-color: var(--diff-moderate-line); color: var(--diff-moderate); }
+  .chip.bad{ background: var(--incorrect-bg); border-color: var(--incorrect-line); color: var(--incorrect); }
+  .chip.info{ background: var(--mastery-bg); border-color: var(--mastery-line); color: var(--mastery); }
+  .ij-grid{ display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .ij-grid > div{ min-width: 0; }
+  @media (max-width: 900px){ .ij-grid{ grid-template-columns: minmax(0, 1fr); } }
+  .ij-box{ border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 18px; background: var(--surface); }
+  .ij-box h4{ margin: 0 0 12px; font-size: 14.5px; letter-spacing: -0.01em; }
+  .ij-box h4 small{ font-weight: 500; color: var(--muted); font-size: 12px; margin-left: 6px; }
+  .focus-list{ margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+  .focus-list li{ display: flex; gap: 10px; font-size: 13.5px; line-height: 1.45; }
+  .focus-list li::before{ content: ""; flex: 0 0 8px; height: 8px; border-radius: 50%; margin-top: 6px; background: var(--accent); }
+  .focus-list li.warn::before{ background: var(--diff-moderate); }
+  .focus-list li.bad::before{ background: var(--incorrect); }
+  .tp-row{ display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(90px, 1fr) auto; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .tp-row:last-child{ border-bottom: 0; }
+  .tp-name{ font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tp-name small{ color: var(--muted); font-weight: 500; margin-left: 4px; }
+  .tp-bar{ height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; display: flex; }
+  .tp-bar .m{ background: var(--accent); }
+  .tp-bar .d{ background: #E0A93B; }
+  .tp-nums{ font-size: 12px; color: var(--muted); white-space: nowrap; text-align: right; min-width: 108px; }
+  .legend{ display: flex; gap: 14px; font-size: 11.5px; color: var(--muted); margin-top: 10px; flex-wrap: wrap; }
+  .legend i{ display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 5px; }
+  .heat{ display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 14px); grid-auto-columns: 14px; gap: 3px; overflow-x: auto; padding-bottom: 4px; }
+  .heat i{ border-radius: 4px; background: var(--line); }
+  .heat i.l1{ background: #9BD5D1; } .heat i.l2{ background: #4FB5AE; } .heat i.l3{ background: var(--accent); }
+  details.ij-topic{ border: 1px solid var(--line); border-radius: 12px; margin-bottom: 8px; background: var(--surface); }
+  details.ij-topic summary{ cursor: pointer; padding: 11px 14px; display: flex; justify-content: space-between; gap: 10px; font-weight: 700; font-size: 13.5px; list-style: none; }
+  details.ij-topic summary::-webkit-details-marker{ display: none; }
+  details.ij-topic summary::before{ content: "▸"; color: var(--muted); margin-right: 8px; transition: transform .15s; display: inline-block; }
+  details.ij-topic[open] summary::before{ transform: rotate(90deg); }
+  details.ij-topic .sumr{ margin-left: auto; font-weight: 600; color: var(--muted); font-size: 12.5px; }
+  details.ij-topic .table-scroll{ border: 0; border-top: 1px solid var(--line); border-radius: 0 0 12px 12px; }
+  .stars{ color: #E0A93B; letter-spacing: 1px; white-space: nowrap; }
+  .stars .off{ color: var(--line); }
+  .p1-bars{ display: flex; align-items: flex-end; gap: 6px; height: 90px; margin: 4px 0 8px; }
+  .p1-bars div{ flex: 1; min-width: 12px; max-width: 34px; background: var(--accent); border-radius: 6px 6px 2px 2px; position: relative; }
+  .p1-bars div span{ position: absolute; top: -17px; left: 50%; transform: translateX(-50%); font-size: 10.5px; color: var(--muted); }
+  .badge-row{ display: flex; flex-wrap: wrap; gap: 6px; }
+  .badge-row .chip.off{ opacity: .45; }
+  #filter-exam{ max-width: 280px; }
+  #ilearn-table th{ white-space: normal; line-height: 1.3; vertical-align: bottom; }
+  #ilearn-table th, #ilearn-table td{ padding-left: 10px; padding-right: 10px; }
+  details.ij-topic td.wrap-cell{ min-width: 220px; }
 </style>
 </head>
 <body>
@@ -292,6 +409,8 @@
       <button class="btn btn-secondary" id="btn-logout">Log out</button>
     </div>
     <p class="admin-status" id="admin-status">Loading…</p>
+
+    <div class="kpi-row no-print" id="kpi-row" aria-label="Overview"></div>
 
     <div class="admin-tabs no-print" id="admin-tabs">
       <button class="admin-tab active" data-tab="students">Students</button>
@@ -409,11 +528,18 @@
         <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by lessons done and then by lessons mastered first time. Click "Load iLearn progress" to fetch it. Students who have not yet done a practice quiz or exam are not in this list.</p>
         <div id="ilearn-summary"></div>
         <div class="table-scroll"><table class="admin-table" id="ilearn-table" style="display:none">
-          <thead><tr><th>Student</th><th>Class</th><th>Lessons done</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Last active</th></tr></thead>
+          <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Last active</th><th></th></tr></thead>
           <tbody></tbody></table></div>
         <h3 id="ilearn-struggle-h" style="display:none;margin-top:20px">Lessons students found hardest</h3>
         <div class="table-scroll"><table class="admin-table" id="ilearn-struggle" style="display:none">
           <thead><tr><th>Lesson</th><th>Topic</th><th>Students who needed retries</th></tr></thead><tbody></tbody></table></div>
+      </div>
+
+      <div class="admin-panel" id="panel-ilearnDetail">
+        <div class="admin-toolbar no-print">
+          <button class="btn btn-secondary admin-detail-back" id="btn-back-ilearn">← Back to iLearn list</button>
+        </div>
+        <div id="ilearn-detail-body"></div>
       </div>
 
       <div class="admin-panel" id="panel-archive">
@@ -676,7 +802,7 @@
     document.querySelectorAll(".admin-tab").forEach(function(btn){
       btn.classList.toggle("active", btn.dataset.tab === name);
     });
-    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","ilearn","archive"].forEach(function(id){
+    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","ilearn","ilearnDetail","archive"].forEach(function(id){
       document.getElementById("panel-" + id).classList.toggle("active", id === name);
     });
   }
@@ -827,6 +953,7 @@
     renderExamPractice();
     renderSyllabus();
     renderArchive();
+    renderKpis();
   }
 
 
@@ -902,7 +1029,7 @@
     shown.sort(function(a, b){
       return (b.done - a.done) || (b.mastered - a.mastered) || String(a.s.name || "").localeCompare(String(b.s.name || ""));
     });
-    shown.forEach(function(r){
+    shown.forEach(function(r, i){
       var st = r.st, L = st.learn;
       var done = r.done, mastered = r.mastered;
       E.LESSONS.forEach(function(l){
@@ -910,9 +1037,22 @@
         if(!x.f && !x.pre) struggle[l.id] = (struggle[l.id] || 0) + 1;
       });
       var tests = Object.keys(st.tests).sort(function(a,b){ return a - b; }).map(function(k){ var t = st.tests[k]; return "T" + k + " " + Math.round(100 * t.s / t.t) + "%"; }).join(", ") || "-";
-      var tr = document.createElement("tr"); tr.style.cursor = "default";
-      var cells = [r.s.name || "(no name)", r.s.className || "", done + " / " + total + " (" + Math.round(100 * done / total) + "%)", mastered, E.streak(st.days) + " days", E.dueLessons(L).length, E.gameCount(st) + " / " + E.xp(st) + " XP", tests, r.p1 ? Math.round(r.p1.best) + "% best (" + r.p1.n + ")" : "-", ilearnDate(r.lastActive)];
-      cells.forEach(function(c){ var td = document.createElement("td"); td.textContent = c; tr.appendChild(td); });
+      var tr = document.createElement("tr");
+      tr.title = "Open " + (r.s.name || "student") + "'s iLearn journey";
+      var rank = document.createElement("span"); rank.className = "rank" + (i < 3 ? " r" + (i + 1) : ""); rank.textContent = String(i + 1);
+      var tdRank = document.createElement("td"); tdRank.appendChild(rank); tr.appendChild(tdRank);
+      var pctDone = Math.round(100 * done / total);
+      var cells = [r.s.name || "(no name)", r.s.className || "", null, mastered, E.streak(st.days) + " days", E.dueLessons(L).length, E.gameCount(st) + " / " + E.xp(st) + " XP", tests, r.p1 ? Math.round(r.p1.best) + "% best (" + r.p1.n + ")" : "-", ilearnDate(r.lastActive)];
+      cells.forEach(function(c, ci){
+        var td = document.createElement("td");
+        if(ci === 2){
+          td.textContent = done + " / " + total + " (" + pctDone + "%)";
+          var mp = document.createElement("span"); mp.className = "miniprog"; var mi = document.createElement("i"); mi.style.width = pctDone + "%"; mp.appendChild(mi); td.appendChild(mp);
+        } else td.textContent = c;
+        tr.appendChild(td);
+      });
+      var tdv = document.createElement("td"); var vl = document.createElement("span"); vl.className = "view-link"; vl.textContent = "View journey ›"; tdv.appendChild(vl); tr.appendChild(tdv);
+      tr.addEventListener("click", function(){ openILearnDetail(r); });
       tb.appendChild(tr);
     });
     var started = shown.filter(function(r){ return Object.keys(r.st.learn).length; }).length;
@@ -928,6 +1068,214 @@
     document.getElementById("ilearn-struggle").style.display = ids.length ? "" : "none";
     document.getElementById("ilearn-struggle-h").style.display = ids.length ? "" : "none";
   }
+  // ------------------------------------------------------------
+  // iLearn: one student's full journey (a page of its own)
+  // ------------------------------------------------------------
+  function mk(tag, cls, text){ var e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; }
+  function fmtDay(ms){ if(!ms) return "-"; try { return new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }); } catch(e){ return "-"; } }
+  function daysAgo(ms){ return ms ? Math.floor((Date.now() - ms) / 86400000) : null; }
+  function starsEl(n){
+    var sp = mk("span", "stars"); n = Math.max(0, Math.min(3, Number(n) || 0));
+    for(var i = 0; i < 3; i++){ var t = mk("span", i < n ? "" : "off", "★"); sp.appendChild(t); }
+    return sp;
+  }
+  function box(title, sub){ var b = mk("div", "ij-box"); var h = mk("h4", null, title); if(sub){ h.appendChild(mk("small", null, sub)); } b.appendChild(h); return b; }
+  function tile(label, value, sub){ var k = mk("div", "kpi"); k.appendChild(mk("div", "k-label", label)); k.appendChild(mk("div", "k-value", value)); if(sub) k.appendChild(mk("div", "k-sub", sub)); return k; }
+
+  function openILearnDetail(r){
+    var E = window.ILearnEngine, st = r.st, L = st.learn, body = document.getElementById("ilearn-detail-body");
+    body.textContent = "";
+    var total = E.LESSONS.length;
+    var done = 0, mastered = 0, skipped = 0, retried = [], reviewsTotal = 0;
+    E.LESSONS.forEach(function(l){
+      var x = L[l.id]; if(!x || !x.d) return;
+      done++; if(x.f) mastered++; if(x.pre) skipped++;
+      if(!x.f && !x.pre) retried.push({ l: l, a: Number(x.a) || 2 });
+      reviewsTotal += Number(x.rc) || 0;
+    });
+    retried.sort(function(a, b){ return b.a - a.a; });
+    var xp = E.xp(st), lv = E.level(xp), due = E.dueLessons(L);
+    var streakNow = E.streak(st.days), streakBest = E.maxStreak(st.days);
+    var activeDays = Object.keys(st.days).length;
+    var inactive = daysAgo(r.lastActive);
+
+    // ----- header
+    var head = mk("div", "ij-head");
+    var nm = (r.s.name || "?").trim();
+    var initials = nm.split(/\s+/).slice(0, 2).map(function(w){ return w.charAt(0).toUpperCase(); }).join("") || "?";
+    head.appendChild(mk("div", "ij-avatar", initials));
+    var hd = mk("div"); hd.appendChild(mk("h3", null, nm));
+    var meta = mk("div", "ij-meta");
+    meta.appendChild(mk("span", null, r.s.className || ""));
+    meta.appendChild(mk("span", null, "Last active: " + (r.lastActive ? fmtDay(r.lastActive) + (inactive > 0 ? " (" + inactive + " day" + (inactive === 1 ? "" : "s") + " ago)" : " (today)") : "never")));
+    hd.appendChild(meta); head.appendChild(hd);
+    var chips = mk("div"); chips.style.marginLeft = "auto"; chips.style.display = "flex"; chips.style.gap = "6px"; chips.style.flexWrap = "wrap";
+    chips.appendChild(mk("span", "chip info", "Level: " + lv.name));
+    if(!done) chips.appendChild(mk("span", "chip", "Not started"));
+    else if(inactive != null && inactive >= 7) chips.appendChild(mk("span", "chip bad", "Inactive " + inactive + " days"));
+    else chips.appendChild(mk("span", "chip ok", "Active"));
+    head.appendChild(chips);
+    body.appendChild(head);
+
+    // ----- tiles
+    var kr = mk("div", "kpi-row");
+    kr.appendChild(tile("Lessons done", done + " / " + total, Math.round(100 * done / total) + "% of the journey"));
+    kr.appendChild(tile("Mastered first time", String(mastered), done ? Math.round(100 * mastered / done) + "% of lessons done" : "-"));
+    kr.appendChild(tile("XP", String(xp), lv.next ? (lv.next - xp) + " XP to " + lv.nextName : "Top level"));
+    kr.appendChild(tile("Streak", streakNow + (streakNow === 1 ? " day" : " days"), "Best: " + streakBest + " · " + activeDays + " active days"));
+    kr.appendChild(tile("Reviews due", String(due.length), reviewsTotal + " reviews done so far"));
+    kr.appendChild(tile("Puzzles", E.gameCount(st) + " played", E.gameStars(st) + " stars earned"));
+    body.appendChild(kr);
+
+    var grid = mk("div", "ij-grid"), left = mk("div"), right = mk("div");
+    grid.appendChild(left); grid.appendChild(right); body.appendChild(grid);
+
+    // ----- what to focus on
+    var fb = box("What needs attention");
+    var fl = mk("ul", "focus-list");
+    function addFocus(cls, text){ fl.appendChild(mk("li", cls, text)); }
+    if(!done) addFocus("warn", "Has not started the iLearn journey yet.");
+    else {
+      if(inactive != null && inactive >= 7) addFocus("bad", "No iLearn activity for " + inactive + " days.");
+      if(retried.length) addFocus("warn", "Needed retries on " + retried.length + " lesson" + (retried.length === 1 ? "" : "s") + ". Hardest: " + retried.slice(0, 3).map(function(x){ return x.l.id + " " + x.l.title + " (" + x.a + " tries)"; }).join("; ") + ".");
+      if(due.length) addFocus("warn", due.length + " lesson" + (due.length === 1 ? " is" : "s are") + " due for spaced review: " + due.slice(0, 3).map(function(l){ return l.id + " " + l.title; }).join("; ") + (due.length > 3 ? " and more" : "") + ".");
+      if(skipped) addFocus("", skipped + " lesson" + (skipped === 1 ? " was" : "s were") + " skipped by passing a topic skip test.");
+      if(!retried.length && !due.length && !(inactive >= 7)) addFocus("", "Nothing flagged. Learning steadily with no repeated struggles.");
+    }
+    [1, 2].forEach(function(pid){
+      var nx = E.LESSONS.filter(function(l){ return (E.topicOf(l) <= 6 ? 1 : 2) === pid && !(L[l.id] && L[l.id].d); })[0];
+      addFocus("", nx ? "Paper " + pid + " next lesson: " + nx.id + " " + nx.title + "." : "Paper " + pid + " lessons are all complete.");
+    });
+    fb.appendChild(fl); left.appendChild(fb);
+
+    // ----- progress by topic
+    var tb = box("Progress by topic", "dark = mastered first time, amber = done after retries or review");
+    var tree = E.topicTree();
+    Object.keys(tree).map(Number).sort(function(a, b){ return a - b; }).forEach(function(tn){
+      var ls = E.LESSONS.filter(function(l){ return E.topicOf(l) === tn; });
+      if(!ls.length) return;
+      var d = 0, m = 0; ls.forEach(function(l){ var x = L[l.id]; if(x && x.d){ d++; if(x.f) m++; } });
+      var row = mk("div", "tp-row");
+      var nmEl = mk("div", "tp-name", tn + " " + tree[tn].title); nmEl.title = tn + " " + tree[tn].title; row.appendChild(nmEl);
+      var bar = mk("div", "tp-bar"); var bm = mk("div", "m"); bm.style.width = (100 * m / ls.length) + "%"; var bd = mk("div", "d"); bd.style.width = (100 * (d - m) / ls.length) + "%"; bar.appendChild(bm); bar.appendChild(bd); row.appendChild(bar);
+      var res = st.tests[tn];
+      var nums = mk("div", "tp-nums", d + "/" + ls.length + " lessons"); row.appendChild(nums);
+      tb.appendChild(row);
+    });
+    var lg = mk("div", "legend");
+    [["var(--accent)", "Mastered first time"], ["#E0A93B", "Done with retries / review"], ["var(--line)", "Not done"]].forEach(function(x){ var sp = mk("span"); var i = mk("i"); i.style.background = x[0]; sp.appendChild(i); sp.appendChild(document.createTextNode(x[1])); lg.appendChild(sp); });
+    tb.appendChild(lg); left.appendChild(tb);
+
+    // ----- lesson by lesson
+    var lb = box("Lesson by lesson");
+    Object.keys(tree).map(Number).sort(function(a, b){ return a - b; }).forEach(function(tn){
+      var ls = E.LESSONS.filter(function(l){ return E.topicOf(l) === tn; });
+      if(!ls.length) return;
+      var d = ls.filter(function(l){ return L[l.id] && L[l.id].d; }).length;
+      var det = mk("details", "ij-topic");
+      var sm = mk("summary"); sm.appendChild(mk("span", null, "Topic " + tn + ": " + tree[tn].title)); sm.appendChild(mk("span", "sumr", d + " / " + ls.length + " done"));
+      det.appendChild(sm);
+      var ts = mk("div", "table-scroll"), tbl = mk("table", "admin-table"), th = mk("thead"), htr = mk("tr");
+      ["Lesson", "Status", "Tries", "Completed", "Reviews", "Puzzle"].forEach(function(h){ htr.appendChild(mk("th", null, h)); });
+      th.appendChild(htr); tbl.appendChild(th);
+      var tbody = mk("tbody");
+      ls.forEach(function(l){
+        var x = L[l.id], tr = mk("tr"); tr.style.cursor = "default";
+        tr.appendChild(mk("td", "wrap-cell", l.id + "  " + l.title));
+        var sd = mk("td"), chip;
+        if(!x || !x.d) chip = mk("span", "chip", "Not started");
+        else if(x.pre) chip = mk("span", "chip info", "Skipped by test");
+        else if(x.f) chip = mk("span", "chip ok", "Mastered first time");
+        else chip = mk("span", "chip warn", "Needed retries");
+        sd.appendChild(chip); tr.appendChild(sd);
+        tr.appendChild(mk("td", "num", x && x.d && !x.pre ? String(x.a || 1) : "-"));
+        tr.appendChild(mk("td", null, x && x.d ? fmtDay(x.t) : "-"));
+        tr.appendChild(mk("td", "num", x && x.d ? String(x.rc || 0) : "-"));
+        var pz = mk("td"); if(E.GAMES[l.id]) pz.appendChild(starsEl(st.games[l.id])); else pz.textContent = "-"; tr.appendChild(pz);
+        tbody.appendChild(tr);
+      });
+      tbl.appendChild(tbody); ts.appendChild(tbl); det.appendChild(ts); lb.appendChild(det);
+    });
+    left.appendChild(lb);
+
+    // ----- topic tests
+    var tt = box("Topic tests", "80% or more earns the topic badge");
+    var testKeys = Object.keys(st.tests).map(Number).sort(function(a, b){ return a - b; });
+    if(!testKeys.length) tt.appendChild(mk("p", "empty-note", "No topic tests taken yet."));
+    else {
+      var tts = mk("div", "table-scroll"), tta = mk("table", "admin-table"), tth = mk("thead"), thr = mk("tr");
+      ["Topic", "Best score", "Result", "Date"].forEach(function(h){ thr.appendChild(mk("th", null, h)); });
+      tth.appendChild(thr); tta.appendChild(tth);
+      var ttb = mk("tbody");
+      testKeys.forEach(function(k){
+        var t = st.tests[k], pc = t.t ? Math.round(100 * t.s / t.t) : 0, tr = mk("tr"); tr.style.cursor = "default";
+        tr.appendChild(mk("td", null, "Topic " + k));
+        tr.appendChild(mk("td", "num", t.s + " / " + t.t + " (" + pc + "%)"));
+        var rd = mk("td"); rd.appendChild(mk("span", "chip " + (t.skip ? "info" : pc >= 80 ? "ok" : pc >= 50 ? "warn" : "bad"), t.skip ? "Skip test" : pc >= 80 ? "Passed" : "Below 80%")); tr.appendChild(rd);
+        tr.appendChild(mk("td", null, fmtDay(t.at)));
+        ttb.appendChild(tr);
+      });
+      tta.appendChild(ttb); tts.appendChild(tta); tt.appendChild(tts);
+    }
+    right.appendChild(tt);
+
+    // ----- activity (last 12 weeks)
+    var ab = box("Activity", "last 12 weeks, one square per day");
+    var heat = mk("div", "heat"), now = new Date(), start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 83);
+    var pad = (start.getDay() + 6) % 7;                       // Monday-first rows
+    for(var z = 0; z < pad; z++){ var ph = mk("i"); ph.style.visibility = "hidden"; heat.appendChild(ph); }
+    for(var dd = 0; dd < 84; dd++){
+      var day = new Date(start.getFullYear(), start.getMonth(), start.getDate() + dd), key = E.today(day), n = st.days[key] || 0;
+      var cell = mk("i", n >= 4 ? "l3" : n >= 2 ? "l2" : n >= 1 ? "l1" : ""); cell.title = key + ": " + n + " lesson" + (n === 1 ? "" : "s"); heat.appendChild(cell);
+    }
+    ab.appendChild(heat);
+    ab.appendChild(mk("p", "admin-status", activeDays + " active day" + (activeDays === 1 ? "" : "s") + " in total. Current streak " + streakNow + ", best streak " + streakBest + "."));
+    right.appendChild(ab);
+
+    // ----- Paper 1 mock
+    var pb = box("Paper 1 mock exam", "75 marks");
+    if(!r.p1) pb.appendChild(mk("p", "empty-note", "No mock papers attempted yet."));
+    else {
+      pb.appendChild(mk("p", "admin-status", r.p1.n + " paper" + (r.p1.n === 1 ? "" : "s") + " attempted. Best score " + Math.round(r.p1.best) + "%."));
+      var hist = (r.p1hist || []).slice(-10);
+      if(hist.length){
+        var bars = mk("div", "p1-bars");
+        hist.forEach(function(h){ var pc = h.max ? Math.round(100 * h.score / h.max) : 0, b = mk("div"); b.style.height = Math.max(4, pc) + "%"; b.title = fmtDay(h.at) + ": " + h.score + " / " + h.max + " (" + pc + "%)" + (h.timed ? ", timed" : ""); b.appendChild(mk("span", null, String(pc))); bars.appendChild(b); });
+        pb.appendChild(bars);
+        pb.appendChild(mk("p", "admin-status", "Most recent papers, oldest on the left. Hover a bar for the date and mode."));
+      }
+    }
+    right.appendChild(pb);
+
+    // ----- badges
+    var bb = box("Badges");
+    var br = mk("div", "badge-row");
+    E.badges(st, tree).forEach(function(b){ var c = mk("span", "chip" + (b.on ? " ok" : " off"), b.icon + " " + b.name); c.title = b.how; br.appendChild(c); });
+    bb.appendChild(br); right.appendChild(bb);
+
+    showTab("ilearnDetail");
+    window.scrollTo(0, 0);
+  }
+  document.getElementById("btn-back-ilearn").addEventListener("click", function(){ showTab("ilearn"); });
+
+  // ------------------------------------------------------------
+  // Overview tiles across the top of the dashboard
+  // ------------------------------------------------------------
+  function renderKpis(){
+    var row = document.getElementById("kpi-row"); if(!row) return;
+    row.textContent = "";
+    if(!loaded) return;
+    var uids = {}, weekAgo = Date.now() - 7 * 86400000, active = {};
+    attempts.forEach(function(a){ if(a.uid){ uids[a.uid] = 1; if(new Date(a.timestamp).getTime() >= weekAgo) active[a.uid] = 1; } });
+    examAttempts.forEach(function(a){ if(a.uid){ uids[a.uid] = 1; if(new Date(a.timestamp).getTime() >= weekAgo) active[a.uid] = 1; } });
+    var avgQuiz = attempts.length ? Math.round(attempts.reduce(function(s, a){ return s + attemptPct(a); }, 0) / attempts.length) : null;
+    var avgExam = examAttempts.length ? Math.round(examAttempts.reduce(function(s, a){ return s + a.pct; }, 0) / examAttempts.length) : null;
+    row.appendChild(tile("Students", String(Object.keys(uids).length), "with at least one submission"));
+    row.appendChild(tile("Active this week", String(Object.keys(active).length), "students who submitted in 7 days"));
+    row.appendChild(tile("Quiz attempts", String(attempts.length), avgQuiz == null ? "-" : "Average " + avgQuiz + "%"));
+    row.appendChild(tile("Exam practice runs", String(examAttempts.length), avgExam == null ? "-" : "Average " + avgExam + "%"));
+  }
+
   document.getElementById("btn-ilearn-load").addEventListener("click", function(){
     var status = document.getElementById("ilearn-status");
     if(!window.ILearnEngine){ status.textContent = "iLearn scripts did not load - refresh the page."; return; }
@@ -938,7 +1286,7 @@
     Promise.all(roster.map(function(s){
       return Promise.all([PQFirebase.getMyProgress(s.uid, "ilearn").catch(function(){ return null; }), PQFirebase.getMyProgress(s.uid, "paper1mock").catch(function(){ return null; })]).then(function(rr){
         var rec = rr[0], p1 = rr[1];
-        return { s:s, st: window.ILearnEngine.mergeState(null, rec), lastActive: Math.max((rec && rec.lastActive) || 0, (p1 && p1.lastActive) || 0) || null, p1: p1 && p1.n ? { best: p1.best, n: p1.n } : null };
+        return { s:s, st: window.ILearnEngine.mergeState(null, rec), lastActive: Math.max((rec && rec.lastActive) || 0, (p1 && p1.lastActive) || 0) || null, p1: p1 && p1.n ? { best: p1.best, n: p1.n } : null, p1hist: (p1 && Array.isArray(p1.hist)) ? p1.hist : [] };
       });
     })).then(function(rows){
       ilearnRows = rows;
