@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-/0FQMOIbq/DHqt/L/uWhfhYwu0hpwDohxNwgejDyOLo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261015a"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-+vOgo1rsCMaprQF0V32M467NIyKmieghN7dRF9LfgCU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261015b"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>iLearn</title>
-<link rel="stylesheet" href="shared.css?v=20261015a" />
+<link rel="stylesheet" href="shared.css?v=20261015b" />
 <style>
   .ln-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
   .ln-hero{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
@@ -141,7 +141,7 @@
     <div id="p1card"></div>
     <div class="ln-badges" id="badges"></div>
     <div class="ln-bars" id="bars"></div>
-    <p class="ln-muted" style="margin:14px 0 -8px">You can start with <b>Paper 1</b> or <b>Paper 2</b>. Each paper unlocks lesson by lesson on its own, so you do not have to finish Paper 1 first.</p>
+    <p class="ln-muted" style="margin:14px 0 -8px">Start with <b>any topic</b> you like, in Paper 1 or Paper 2. Lessons unlock one by one inside each topic, so you do not have to finish the topic before it.</p>
     <div class="ln-tabs" role="tablist" id="tabs"></div>
     <div id="topics"></div>
   </section>
@@ -194,25 +194,25 @@
   <section id="view-wait" class="card"><p class="ln-notice">Loading your journey…</p></section>
 </div>
 
-<script src="syllabus-objectives.js?v=20261015a"></script>
-<script src="learn-helpers.js?v=20261015a"></script>
-<script src="learn-data.js?v=20261015a"></script>
-<script src="learn-t1.js?v=20261015a"></script>
-<script src="learn-t2.js?v=20261015a"></script>
-<script src="learn-t3.js?v=20261015a"></script>
-<script src="learn-t4.js?v=20261015a"></script>
-<script src="learn-t5.js?v=20261015a"></script>
-<script src="learn-t6.js?v=20261015a"></script>
-<script src="learn-t7.js?v=20261015a"></script>
-<script src="learn-t8.js?v=20261015a"></script>
-<script src="learn-t9.js?v=20261015a"></script>
-<script src="learn-t10.js?v=20261015a"></script>
-<script src="learn-glossary.js?v=20261015a"></script>
-<script src="learn-games.js?v=20261015a"></script>
-<script src="learn-games-data.js?v=20261015a"></script>
-<script src="learn-engine.js?v=20261015a"></script>
-<script src="firebase-config.js?v=20261015a"></script>
-<script type="module" src="firebase-init.js?v=20261015a"></script>
+<script src="syllabus-objectives.js?v=20261015b"></script>
+<script src="learn-helpers.js?v=20261015b"></script>
+<script src="learn-data.js?v=20261015b"></script>
+<script src="learn-t1.js?v=20261015b"></script>
+<script src="learn-t2.js?v=20261015b"></script>
+<script src="learn-t3.js?v=20261015b"></script>
+<script src="learn-t4.js?v=20261015b"></script>
+<script src="learn-t5.js?v=20261015b"></script>
+<script src="learn-t6.js?v=20261015b"></script>
+<script src="learn-t7.js?v=20261015b"></script>
+<script src="learn-t8.js?v=20261015b"></script>
+<script src="learn-t9.js?v=20261015b"></script>
+<script src="learn-t10.js?v=20261015b"></script>
+<script src="learn-glossary.js?v=20261015b"></script>
+<script src="learn-games.js?v=20261015b"></script>
+<script src="learn-games-data.js?v=20261015b"></script>
+<script src="learn-engine.js?v=20261015b"></script>
+<script src="firebase-config.js?v=20261015b"></script>
+<script type="module" src="firebase-init.js?v=20261015b"></script>
 <script type="module">
 (function(){
   "use strict";
@@ -234,17 +234,25 @@
   function lessonsOf(code){ return E.lessonsOf(code); }
   function progress(){ return st.learn; }
   function isDone(id){ return !!(st.learn[id] && st.learn[id].d); }
-  // Paper 1 (topics 1-6) and Paper 2 (topics 7-10) are two independent
-  // tracks: lessons unlock in order WITHIN a paper, and a student may start
-  // either paper first -- finishing Paper 1 is not required for Paper 2.
-  function paperOf(l){ return parseInt(O[l.code][0], 10) <= 6 ? 1 : 2; }
+  // Every topic is its own track. Lessons unlock in order WITHIN a topic,
+  // but a student may start any topic (1-10) without finishing the one
+  // before it -- in either paper.
+  function topicNum(l){ return parseInt(O[l.code][0], 10); }
+  function paperOf(l){ return topicNum(l) <= 6 ? 1 : 2; }
+  function nextInTopic(tn){ for(var i = 0; i < LESSONS.length; i++){ if(topicNum(LESSONS[i]) === tn && !isDone(LESSONS[i].id)) return LESSONS[i]; } return null; }
   function nextInPaper(pid){ for(var i = 0; i < LESSONS.length; i++){ if(paperOf(LESSONS[i]) === pid && !isDone(LESSONS[i].id)) return LESSONS[i]; } return null; }
-  // With no argument: the next lesson in the paper tab being viewed, else the other paper's.
-  function currentLesson(pid){
-    if(pid) return nextInPaper(pid);
+  // After finishing a lesson: the next one in the same topic; when the topic
+  // is complete, the first unfinished lesson in the same paper, then the other.
+  function nextAfter(l){ return nextInTopic(topicNum(l)) || nextInPaper(paperOf(l)) || nextInPaper(paperOf(l) === 1 ? 2 : 1); }
+  // "Continue": carry on from the lesson the student finished most recently;
+  // a brand-new student gets the first lesson of the paper tab being viewed.
+  function currentLesson(){
+    var last = null, lt = -1;
+    LESSONS.forEach(function(l){ var r = st.learn[l.id]; if(r && r.d){ var t = r.rv || r.t || 0; if(t >= lt){ lt = t; last = l; } } });
+    if(last){ var n = nextAfter(last); if(n) return n; }
     return nextInPaper(activeTab) || nextInPaper(activeTab === 1 ? 2 : 1);
   }
-  function isUnlocked(l){ if(isDone(l.id)) return true; var c = nextInPaper(paperOf(l)); return !!c && c.id === l.id; }
+  function isUnlocked(l){ if(isDone(l.id)) return true; var c = nextInTopic(topicNum(l)); return !!c && c.id === l.id; }
   function codeCovered(code){ var ls = lessonsOf(code); return ls.length > 0 && ls.every(function(l){ return isDone(l.id); }); }
 
   // ---------- persistence ----------
@@ -321,7 +329,7 @@
     var cur = currentLesson(), streak = E.streak(st.days);
     $("hero-title").innerHTML = esc("Hi " + user.name + (doneL ? ", keep going!" : ", let's begin!")) + (streak ? '<span class="ln-streak">🔥 ' + streak + "-day streak</span>" : "") + xpChip();
     $("hero-sub").textContent = doneL + " of " + LESSONS.length + " lessons completed.";
-    $("btn-continue").textContent = cur ? (cur && st.learn && Object.keys(st.learn).some(function(k){ return LESSON_BY_ID[k] && paperOf(LESSON_BY_ID[k]) === paperOf(cur) && isDone(k); }) ? "Continue: " : "Start: ") + "Paper " + paperOf(cur) + " · " + cur.code + " " + cur.title : "All lessons complete 🎉";
+    $("btn-continue").textContent = cur ? (doneL ? "Continue: " : "Start: ") + "Topic " + topicNum(cur) + " · " + cur.code + " " + cur.title : "All lessons complete 🎉";
     $("btn-continue").disabled = !cur;
 
     var due = E.dueLessons(st.learn);
@@ -348,6 +356,7 @@
 
     var paper = PAPERS.filter(function(p){ return p.id === activeTab; })[0];
     var h = "";
+    var curInPaper = !!cur && paper.topics.indexOf(topicNum(cur)) !== -1, openedOne = false;
     paper.topics.forEach(function(tn){
       var t = tree[tn]; if(!t) return;
       var codes = []; t.secs.forEach(function(s){ s.units.forEach(function(u){ codes.push(u.code); }); });
@@ -356,7 +365,8 @@
       var tl = LESSONS.filter(function(l){ return parseInt(O[l.code][0], 10) === tn; });
       var undone = tl.filter(function(l){ return !isDone(l.id); }).length;
       var bank = E.TESTS[tn], res = st.tests[tn];
-      h += '<details class="ln-topic"' + (hasCur ? " open" : "") + "><summary><span>" + tn + " " + esc(t.title) + '</span><span class="cnt">' + cov + " / " + codes.length + " objectives</span></summary>";
+      var openIt = hasCur || (!curInPaper && !openedOne && undone > 0); if(openIt) openedOne = true;
+      h += '<details class="ln-topic"' + (openIt ? " open" : "") + "><summary><span>" + tn + " " + esc(t.title) + '</span><span class="cnt">' + cov + " / " + codes.length + " objectives</span></summary>";
       if(bank){
         h += '<div class="ln-topic-tools">';
         if(undone) h += '<button class="btn btn-secondary sm" data-pre="' + tn + '" type="button">⏩ Already know this? Take the skip test</button>';
@@ -439,7 +449,7 @@
       return;
     } else {
       renderSteps(3, true);
-      var rec = st.learn[l.id], nextL = currentLesson(paperOf(l)), mastered = rec && rec.f;
+      var rec = st.learn[l.id], nextL = nextAfter(l), mastered = rec && rec.f;
       h = '<div class="ln-done"><div class="big">' + (mastered ? "🌟" : "✅") + "</div><h2>" + (mastered ? "Mastered first time!" : "Lesson complete") + "</h2><p class='ln-muted'>" +
         (mastered ? "You answered every question correctly at the first attempt. This idea is secure." : "You got there in the end. This idea is marked to <b>review later</b>; it will come back in your warm-up.") + "</p><p><b>+" + (mastered ? 15 : 10) + " XP</b></p></div>" +
         '<div class="ln-box"><h3>Key idea to remember</h3><div class="ln-body">' + E.keyIdea(l) + '</div></div><div class="ln-actions" style="justify-content:center">' +
@@ -453,7 +463,7 @@
       if(bn) bn.addEventListener("click", function(){ c.step++; renderLesson(); window.scrollTo(0, 0); });
       if(bb) bb.addEventListener("click", function(){ c.step--; renderLesson(); window.scrollTo(0, 0); });
     } else if(c.step === 3){
-      if(bn) bn.addEventListener("click", function(){ var n = currentLesson(paperOf(l)); if(n) openLesson(n.id); });
+      if(bn) bn.addEventListener("click", function(){ var n = nextAfter(l); if(n) openLesson(n.id); });
       if(bj) bj.addEventListener("click", function(){ renderJourney(); });
     }
   }
