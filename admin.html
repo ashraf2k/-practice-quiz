@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-b2i4ZntWAKE2PshASQAomMwp0uPShVzF6fx3pKolMTc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-sQwCWPV+OD46Jl7XxNdrCQeWAASgXfKawNxg+rKeE+c='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261014e"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
@@ -406,7 +406,7 @@
           <input type="text" id="filter-search-ilearn" placeholder="Search by name" />
           <button class="btn btn-primary" id="btn-ilearn-load">Load iLearn progress</button>
         </div>
-        <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons. Click "Load iLearn progress" to fetch it. Students who have not yet done a practice quiz or exam are not in this list.</p>
+        <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by lessons done and then by lessons mastered first time. Click "Load iLearn progress" to fetch it. Students who have not yet done a practice quiz or exam are not in this list.</p>
         <div id="ilearn-summary"></div>
         <div class="table-scroll"><table class="admin-table" id="ilearn-table" style="display:none">
           <thead><tr><th>Student</th><th>Class</th><th>Lessons done</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Last active</th></tr></thead>
@@ -889,12 +889,24 @@
     table.style.display = shown.length ? "" : "none";
     tb.innerHTML = "";
     var total = E.LESSONS.length, struggle = {};
+    // Count each student's lessons done / mastered first time, then rank:
+    // most lessons done first, ties broken by most mastered first time,
+    // then by name.
     shown.forEach(function(r){
-      var st = r.st, L = st.learn;
-      var done = 0, mastered = 0;
+      var L = r.st.learn; r.done = 0; r.mastered = 0;
       E.LESSONS.forEach(function(l){
         var x = L[l.id]; if(!x || !x.d) return;
-        done++; if(x.f) mastered++;
+        r.done++; if(x.f) r.mastered++;
+      });
+    });
+    shown.sort(function(a, b){
+      return (b.done - a.done) || (b.mastered - a.mastered) || String(a.s.name || "").localeCompare(String(b.s.name || ""));
+    });
+    shown.forEach(function(r){
+      var st = r.st, L = st.learn;
+      var done = r.done, mastered = r.mastered;
+      E.LESSONS.forEach(function(l){
+        var x = L[l.id]; if(!x || !x.d) return;
         if(!x.f && !x.pre) struggle[l.id] = (struggle[l.id] || 0) + 1;
       });
       var tests = Object.keys(st.tests).sort(function(a,b){ return a - b; }).map(function(k){ var t = st.tests[k]; return "T" + k + " " + Math.round(100 * t.s / t.t) + "%"; }).join(", ") || "-";
