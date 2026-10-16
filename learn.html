@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-+vOgo1rsCMaprQF0V32M467NIyKmieghN7dRF9LfgCU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261015b"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-lEaIut0cdapqb9xMvsWhP+Ntj1x38e14vb0RpKYhaBU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261016a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>iLearn</title>
-<link rel="stylesheet" href="shared.css?v=20261015b" />
+<link rel="stylesheet" href="shared.css?v=20261016a" />
 <style>
   .ln-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
   .ln-hero{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
@@ -65,6 +65,10 @@
   .ln-table{ border-collapse:collapse; margin:0 0 12px; font-size:14px; max-width:100%; }
   .ln-table th, .ln-table td{ border:1px solid var(--line); padding:6px 11px; text-align:center; }
   .ln-table th{ background:var(--bg); }
+  .ln-ref{ border:1px solid var(--accent); border-radius:10px; margin:0 0 14px; background:var(--accent-tint); }
+  .ln-ref>summary{ cursor:pointer; padding:10px 14px; font-weight:700; color:var(--accent-dark); font-size:14px; }
+  .ln-ref-body{ padding:4px 14px 12px; background:var(--surface); border-top:1px solid var(--line); border-radius:0 0 10px 10px; max-height:60vh; overflow:auto; }
+  .ln-ref-body h4{ margin:12px 0 4px; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
   .ln-box{ border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:10px; padding:14px 16px; margin:0 0 14px; background:var(--surface); }
   .ln-box h3{ margin:0 0 8px; font-size:14px; text-transform:uppercase; letter-spacing:.04em; color:var(--accent-dark); }
   .ln-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
@@ -194,25 +198,25 @@
   <section id="view-wait" class="card"><p class="ln-notice">Loading your journey…</p></section>
 </div>
 
-<script src="syllabus-objectives.js?v=20261015b"></script>
-<script src="learn-helpers.js?v=20261015b"></script>
-<script src="learn-data.js?v=20261015b"></script>
-<script src="learn-t1.js?v=20261015b"></script>
-<script src="learn-t2.js?v=20261015b"></script>
-<script src="learn-t3.js?v=20261015b"></script>
-<script src="learn-t4.js?v=20261015b"></script>
-<script src="learn-t5.js?v=20261015b"></script>
-<script src="learn-t6.js?v=20261015b"></script>
-<script src="learn-t7.js?v=20261015b"></script>
-<script src="learn-t8.js?v=20261015b"></script>
-<script src="learn-t9.js?v=20261015b"></script>
-<script src="learn-t10.js?v=20261015b"></script>
-<script src="learn-glossary.js?v=20261015b"></script>
-<script src="learn-games.js?v=20261015b"></script>
-<script src="learn-games-data.js?v=20261015b"></script>
-<script src="learn-engine.js?v=20261015b"></script>
-<script src="firebase-config.js?v=20261015b"></script>
-<script type="module" src="firebase-init.js?v=20261015b"></script>
+<script src="syllabus-objectives.js?v=20261016a"></script>
+<script src="learn-helpers.js?v=20261016a"></script>
+<script src="learn-data.js?v=20261016a"></script>
+<script src="learn-t1.js?v=20261016a"></script>
+<script src="learn-t2.js?v=20261016a"></script>
+<script src="learn-t3.js?v=20261016a"></script>
+<script src="learn-t4.js?v=20261016a"></script>
+<script src="learn-t5.js?v=20261016a"></script>
+<script src="learn-t6.js?v=20261016a"></script>
+<script src="learn-t7.js?v=20261016a"></script>
+<script src="learn-t8.js?v=20261016a"></script>
+<script src="learn-t9.js?v=20261016a"></script>
+<script src="learn-t10.js?v=20261016a"></script>
+<script src="learn-glossary.js?v=20261016a"></script>
+<script src="learn-games.js?v=20261016a"></script>
+<script src="learn-games-data.js?v=20261016a"></script>
+<script src="learn-engine.js?v=20261016a"></script>
+<script src="firebase-config.js?v=20261016a"></script>
+<script type="module" src="firebase-init.js?v=20261016a"></script>
 <script type="module">
 (function(){
   "use strict";
@@ -434,6 +438,14 @@
   }
   $("btn-leave").addEventListener("click", function(){ renderJourney(); });
 
+  // Collapsible look-back panel so a question can refer to "the program above".
+  function refPanel(l, open){
+    return '<details class="ln-ref"' + (open ? " open" : "") + '><summary>📖 Look back at the lesson &amp; example</summary><div class="ln-ref-body"><h4>The idea</h4><div class="ln-body">' + l.concept + '</div><h4>Worked example</h4><div class="ln-body">' + l.example + '</div></div></details>';
+  }
+  function bindRef(c){
+    var d = document.querySelector("#lesson-body .ln-ref, #q-body .ln-ref");
+    if(d) d.addEventListener("toggle", function(){ c.refOpen = d.open; });
+  }
   function renderLesson(){
     var c = current, l = c.l, body = $("lesson-body"), h = "";
     if(c.step === 0){
@@ -444,7 +456,8 @@
       h = '<div class="ln-body"><div class="ln-box"><h3>Worked example</h3>' + l.example + '</div>' + gameBox(l) + '</div><div class="ln-actions"><button class="btn btn-secondary" id="b-back" type="button">← Re-read the idea</button><button class="btn btn-primary" id="b-next" type="button">Check my understanding →</button></div>';
     } else if(c.step === 2){
       renderSteps(2);
-      body.innerHTML = '<p class="ln-crumb">Question ' + (c.ci + 1) + " of " + l.checks.length + '</p><div id="qhost"></div>';
+      body.innerHTML = '<p class="ln-crumb">Question ' + (c.ci + 1) + " of " + l.checks.length + '</p>' + refPanel(l, c.refOpen) + '<div id="qhost"></div>';
+      bindRef(c);
       renderQ($("qhost"), l.checks[c.ci], l.video, function(ok, fb){ lessonAnswered(ok, fb); });
       return;
     } else {
@@ -554,7 +567,8 @@
     if(s.i >= cfg.items.length){ return finishSession(); }
     var item = cfg.items[s.i];
     $("q-bar").style.width = Math.round(s.i / cfg.items.length * 100) + "%";
-    $("q-body").innerHTML = '<p class="ln-crumb">Question ' + (s.i + 1) + " of " + cfg.items.length + (item.lid ? " · " + esc(LESSON_BY_ID[item.lid].code + " " + LESSON_BY_ID[item.lid].title) : "") + '</p><div id="qhost"></div>';
+    $("q-body").innerHTML = '<p class="ln-crumb">Question ' + (s.i + 1) + " of " + cfg.items.length + (item.lid ? " · " + esc(LESSON_BY_ID[item.lid].code + " " + LESSON_BY_ID[item.lid].title) : "") + '</p>' + (item.lid ? refPanel(LESSON_BY_ID[item.lid], s.refOpen) : "") + '<div id="qhost"></div>';
+    bindRef(s);
     renderQ($("qhost"), item.q, item.video, function(ok, fb, info){
       var got = ok ? marksOf(item.q) : (info ? Math.min(info.matched, marksOf(item.q)) : 0);
       s.score += got; s.total += marksOf(item.q);
