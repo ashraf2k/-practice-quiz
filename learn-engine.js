@@ -53,8 +53,8 @@
   // student's browser) that has not seen the latest reset for a topic is
   // stale for that topic, so its lessons, test and puzzle data for it are
   // ignored instead of bringing the old progress back.
-  function emptyState(){ return { learn:{}, days:{}, tests:{}, games:{}, resets:{} }; }
-  function pick(rec){ return rec && (rec.learn || rec.days || rec.tests || rec.games || rec.resets) ? rec : null; }
+  function emptyState(){ return { learn:{}, days:{}, tests:{}, games:{}, spent:{}, resets:{} }; }
+  function pick(rec){ return rec && (rec.learn || rec.days || rec.tests || rec.games || rec.spent || rec.resets) ? rec : null; }
   function mergeState(a, b){
     var out = emptyState();
     var srcs = [pick(a), pick(b)];
@@ -75,9 +75,17 @@
           var tx = x.rv || x.t || 0, ty = y.rv || y.t || 0;
           if(ty > tx || (ty === tx && (y.f || 0) > (x.f || 0))) out.learn[k] = y;
         }
+        // keep the time taken (seconds) whichever copy wins
+        var keep = out.learn[k], other = keep === y ? x : y;
+        if(keep && other && keep.d && other.d && !keep.s && other.s){ keep = out.learn[k] = Object.assign({}, keep, { s: other.s }); }
       });
       var D = src.days || {};
       Object.keys(D).forEach(function(k){ out.days[k] = Math.max(out.days[k] || 0, D[k] || 0); });
+      var SP = src.spent || {};
+      Object.keys(SP).forEach(function(k){
+        var les = LESSON_BY_ID[k]; if(les && stale(src, topicOf(les))) return;
+        out.spent[k] = Math.max(out.spent[k] || 0, Number(SP[k]) || 0);
+      });
       var GM = src.games || {};
       Object.keys(GM).forEach(function(k){
         var les = LESSON_BY_ID[k]; if(les && stale(src, topicOf(les))) return;
@@ -94,7 +102,7 @@
   }
   function snapshot(st){
     var done = LESSONS.filter(function(l){ return st.learn[l.id] && st.learn[l.id].d; }).length;
-    return { learn: st.learn, days: st.days, tests: st.tests, games: st.games || {}, xp: xp(st), learnDone: done, learnTotal: LESSONS.length, lastActive: Date.now(), resets: st.resets || {} };
+    return { learn: st.learn, days: st.days, tests: st.tests, games: st.games || {}, spent: st.spent || {}, xp: xp(st), learnDone: done, learnTotal: LESSONS.length, lastActive: Date.now(), resets: st.resets || {} };
   }
 
   // ---------- spaced review ----------

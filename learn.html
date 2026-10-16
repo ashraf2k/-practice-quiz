@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-lEaIut0cdapqb9xMvsWhP+Ntj1x38e14vb0RpKYhaBU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261016a"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-jjp0UiB39SfUs4AgA/deHIger2hrhw3GUW78cYQQfUY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261016b"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>iLearn</title>
-<link rel="stylesheet" href="shared.css?v=20261016a" />
+<link rel="stylesheet" href="shared.css?v=20261016b" />
 <style>
   .ln-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
   .ln-hero{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
@@ -198,25 +198,25 @@
   <section id="view-wait" class="card"><p class="ln-notice">Loading your journey…</p></section>
 </div>
 
-<script src="syllabus-objectives.js?v=20261016a"></script>
-<script src="learn-helpers.js?v=20261016a"></script>
-<script src="learn-data.js?v=20261016a"></script>
-<script src="learn-t1.js?v=20261016a"></script>
-<script src="learn-t2.js?v=20261016a"></script>
-<script src="learn-t3.js?v=20261016a"></script>
-<script src="learn-t4.js?v=20261016a"></script>
-<script src="learn-t5.js?v=20261016a"></script>
-<script src="learn-t6.js?v=20261016a"></script>
-<script src="learn-t7.js?v=20261016a"></script>
-<script src="learn-t8.js?v=20261016a"></script>
-<script src="learn-t9.js?v=20261016a"></script>
-<script src="learn-t10.js?v=20261016a"></script>
-<script src="learn-glossary.js?v=20261016a"></script>
-<script src="learn-games.js?v=20261016a"></script>
-<script src="learn-games-data.js?v=20261016a"></script>
-<script src="learn-engine.js?v=20261016a"></script>
-<script src="firebase-config.js?v=20261016a"></script>
-<script type="module" src="firebase-init.js?v=20261016a"></script>
+<script src="syllabus-objectives.js?v=20261016b"></script>
+<script src="learn-helpers.js?v=20261016b"></script>
+<script src="learn-data.js?v=20261016b"></script>
+<script src="learn-t1.js?v=20261016b"></script>
+<script src="learn-t2.js?v=20261016b"></script>
+<script src="learn-t3.js?v=20261016b"></script>
+<script src="learn-t4.js?v=20261016b"></script>
+<script src="learn-t5.js?v=20261016b"></script>
+<script src="learn-t6.js?v=20261016b"></script>
+<script src="learn-t7.js?v=20261016b"></script>
+<script src="learn-t8.js?v=20261016b"></script>
+<script src="learn-t9.js?v=20261016b"></script>
+<script src="learn-t10.js?v=20261016b"></script>
+<script src="learn-glossary.js?v=20261016b"></script>
+<script src="learn-games.js?v=20261016b"></script>
+<script src="learn-games-data.js?v=20261016b"></script>
+<script src="learn-engine.js?v=20261016b"></script>
+<script src="firebase-config.js?v=20261016b"></script>
+<script type="module" src="firebase-init.js?v=20261016b"></script>
 <script type="module">
 (function(){
   "use strict";
@@ -427,16 +427,32 @@
       return '<div class="' + cls + '">' + (i + 1) + ". " + s + "</div>";
     }).join("");
   }
+  // ---------- time on task (active seconds per lesson) ----------
+  // Counts only while a lesson is on screen, the tab is visible and the
+  // student touched the page in the last 90 s (so a lesson left open
+  // overnight is not counted). Stored as st.spent[id], copied to the
+  // lesson record (field s) on completion for the teacher dashboard.
+  var lastAct = 0;
+  function touch(){ lastAct = Date.now(); }
+  ["click", "keydown", "touchstart", "scroll", "mousemove"].forEach(function(ev){ document.addEventListener(ev, touch, { passive: true }); });
+  setInterval(function(){
+    if(!current || current.step >= 3 || document.hidden || $("view-lesson").classList.contains("hidden")) return;
+    if(Date.now() - lastAct > 90000) return;
+    st.spent = st.spent || {};
+    st.spent[current.l.id] = (st.spent[current.l.id] || 0) + 5;
+  }, 5000);
+  document.addEventListener("visibilitychange", function(){ if(document.hidden && current && current.step < 3 && !$("view-lesson").classList.contains("hidden")) save(); });
   function openLesson(id){
     var l = LESSON_BY_ID[id]; if(!l) return;
     activeTab = paperOf(l);
     current = { l: l, step: 0, ci: 0, wrongs: 0, wrongTotal: 0 };
+    touch();
     $("crumb").textContent = O[l.code][0] + "  ›  " + l.code;
     $("lesson-title").textContent = l.title;
     renderLesson();
     show("view-lesson");
   }
-  $("btn-leave").addEventListener("click", function(){ renderJourney(); });
+  $("btn-leave").addEventListener("click", function(){ save(); renderJourney(); });
 
   // Collapsible look-back panel so a question can refer to "the program above".
   function refPanel(l, open){
@@ -537,6 +553,9 @@
         if(!last){ c.ci++; renderLesson(); return; }
         var prev = st.learn[l.id];
         st.learn[l.id] = { d: 1, f: c.wrongTotal === 0 ? 1 : 0, a: c.wrongTotal + 1, t: Date.now(), rc: 0 };
+        var secs = Math.round((st.spent && st.spent[l.id]) || 0);
+        if(secs > 0) st.learn[l.id].s = secs;
+        else if(prev && prev.s) st.learn[l.id].s = prev.s;
         if(prev && prev.d){ st.learn[l.id].f = Math.max(prev.f || 0, st.learn[l.id].f); }
         markToday(); save(); c.step = 3; renderLesson(); window.scrollTo(0, 0);
       });
