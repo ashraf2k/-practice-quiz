@@ -35,13 +35,13 @@ service cloud.firestore {
     // ---------- helpers ----------
     function signedIn() { return request.auth != null; }
 
-    // New accounts (users/{uid}.createdAt on/after 18 Oct 2026) must have
+    // New accounts (users/{uid}.createdAt on/after 18 Oct 2026 00:00 Riyadh time = 17 Oct 21:00 UTC) must have
     // clicked the e-mail verification link before they can save anything.
     // Older accounts are grandfathered. Keep in step with firebase-init.src.js.
     function verifiedOrLegacy() {
       return request.auth.token.email_verified == true
         || get(/databases/$(database)/documents/users/$(request.auth.uid)).data
-             .get('createdAt', timestamp.date(2000, 1, 1)) < timestamp.date(2026, 10, 18);
+             .get('createdAt', timestamp.date(2000, 1, 1)) < timestamp.value(1792270800000);
     }
 
     function isAdmin() {

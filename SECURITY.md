@@ -50,7 +50,7 @@ Regenerate the CSP after editing any inline `<script>`: `node tools/csp.js`.
    e-mail alerts (protects against abuse-driven cost).
 9. **E-mail verification (new accounts):** nothing to enable, but check Authentication →
    Templates → *Email address verification* → pencil icon → Sender name: `iLearnCS learning hub` (also subject, language) and that your
-   GitHub Pages domain is under Authorized domains. Accounts created on/after 18 Oct 2026
+   GitHub Pages domain is under Authorized domains. Accounts created on/after 18 Oct 2026 00:00 (Riyadh)
    must click the link; older accounts are grandfathered. Republish `firestore.rules` so the
    server enforces it too (`verifiedOrLegacy()`).
 10. **2-step verification** on the Google account that owns the Firebase project and

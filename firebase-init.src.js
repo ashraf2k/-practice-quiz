@@ -116,7 +116,7 @@ function friendlyAuthError(err){
 // Older (existing) accounts are grandfathered so nobody is locked out.
 // Keep in step with verifiedOrLegacy() in firestore.rules.
 var authBusy = false;   // true while signUp/logIn/resend is mid-flight
-var VERIFY_REQUIRED_FROM = Date.parse("2026-10-18T00:00:00Z");
+var VERIFY_REQUIRED_FROM = Date.parse("2026-10-17T21:00:00Z");
 function needsVerification(user){
   if(!user || user.emailVerified) return false;
   var created = Date.parse(user.metadata && user.metadata.creationTime);
