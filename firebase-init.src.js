@@ -115,6 +115,7 @@ function friendlyAuthError(err){
 // E-mail verification is required for accounts created on/after this date.
 // Older (existing) accounts are grandfathered so nobody is locked out.
 // Keep in step with verifiedOrLegacy() in firestore.rules.
+var authBusy = false;   // true while signUp/logIn/resend is mid-flight
 var VERIFY_REQUIRED_FROM = Date.parse("2026-10-18T00:00:00Z");
 function needsVerification(user){
   if(!user || user.emailVerified) return false;
@@ -127,6 +128,7 @@ function signUp(email, password, name, cls, remember){
   if(!name) return Promise.reject(new Error("Please enter your name (letters and numbers only, no < > or &)."));
   if(!cls) return Promise.reject(new Error("Please choose your class."));
   if(!password || String(password).length < MIN_PASSWORD) return Promise.reject(new Error("Please choose a password with at least " + MIN_PASSWORD + " characters."));
+  authBusy = true;
   return authReady
     .then(function(){ return applyPersistence(remember); })
     .then(function(){ return createUserWithEmailAndPassword(auth, email, password); })
@@ -141,17 +143,23 @@ function signUp(email, password, name, cls, remember){
         // The account is unusable until this link is clicked. A failed send
         // does not fail sign-up; the student can press "Resend" on the next screen.
         return sendEmailVerification(cred.user).then(function(){ return true; }, function(){ return false; });
-      }).then(function(sent){ return { uid: uid, name: name, email: email, class: cls, needsVerification: true, verificationSent: sent }; });
+      }).then(function(sent){
+        // Not logged in until the link is clicked: end the session now.
+        setRemembered(false);
+        return signOut(auth).then(function(){ return { email: email, needsVerification: true, verificationSent: sent }; });
+      });
     })
-    .catch(function(err){ throw new Error(friendlyAuthError(err)); });
+    .then(function(r){ authBusy = false; return r; }, function(err){ authBusy = false; throw new Error(friendlyAuthError(err)); });
 }
 
 function logIn(email, password, remember){
+  authBusy = true;
   return authReady
     .then(function(){ return applyPersistence(remember); })
     .then(function(){ return signInWithEmailAndPassword(auth, email, password); })
     .then(function(cred){
-      if(needsVerification(cred.user)) return { uid: cred.user.uid, email: cred.user.email, needsVerification: true };
+      // Not verified: no login. End the session and tell the page.
+      if(needsVerification(cred.user)){ setRemembered(false); return signOut(auth).then(function(){ return { email: cred.user.email, needsVerification: true }; }); }
       return isArchived(cred.user.uid).then(function(archived){
         if(archived){
           setRemembered(false);
@@ -160,7 +168,7 @@ function logIn(email, password, remember){
         return getMyProfile(cred.user.uid);
       });
     })
-    .catch(function(err){ throw new Error(friendlyAuthError(err)); });
+    .then(function(r){ authBusy = false; return r; }, function(err){ authBusy = false; throw new Error(friendlyAuthError(err)); });
 }
 
 function logOut(){
@@ -179,9 +187,12 @@ function resetPassword(email){
 function onAuthChange(callback){
   function handle(user){
     if(!user){ callback(null); return; }
-    // Signed in but e-mail not verified yet: pages treat this as signed out;
-    // the login page uses the second argument to show the "verify" screen.
-    if(needsVerification(user)){ callback(null, { unverified: true, email: user.email }); return; }
+    // Not verified yet: never treated as logged in. Any leftover session is
+    // ended (except while sign-up / login is itself in progress).
+    if(needsVerification(user)){
+      if(!authBusy){ setRemembered(false); signOut(auth).then(function(){}, function(){}); }
+      callback(null); return;
+    }
     isArchived(user.uid).then(function(archived){
       if(archived){ setRemembered(false); return signOut(auth).then(function(){ callback(null); }); }
       return getMyProfile(user.uid).then(function(profile){
@@ -191,28 +202,22 @@ function onAuthChange(callback){
       callback({ uid: user.uid, email: user.email, name: "", class: "" });
     });
   }
-  authHandler = handle;
   return onAuthStateChanged(auth, handle);
 }
-var authHandler = null;
 
-// Re-sends the verification link to the signed-in, not-yet-verified student.
-function resendVerification(){
-  var u = auth.currentUser;
-  if(!u) return Promise.reject(new Error("Please log in again first."));
-  return sendEmailVerification(u).catch(function(err){ throw new Error(friendlyAuthError(err)); });
-}
-
-// "I've verified" button: reloads the account; resolves true (and continues
-// into the app) once the link has been clicked, false if not yet.
-function checkVerification(){
-  var u = auth.currentUser;
-  if(!u) return Promise.resolve(false);
-  return u.reload().then(function(){
-    var cu = auth.currentUser;
-    if(!cu || needsVerification(cu)) return false;
-    return cu.getIdToken(true).then(function(){ if(authHandler) authHandler(cu); return true; });
-  }).catch(function(err){ throw new Error(friendlyAuthError(err)); });
+// Re-sends the verification link for an account that has not been verified
+// yet. Needs the e-mail + password again because the student is (rightly)
+// not logged in; the session is ended straight after.
+function resendVerification(email, password){
+  authBusy = true;
+  return authReady
+    .then(function(){ return applyPersistence(false); })
+    .then(function(){ return signInWithEmailAndPassword(auth, email, password); })
+    .then(function(cred){
+      if(!needsVerification(cred.user)) return signOut(auth).then(function(){ return { alreadyVerified: true }; });
+      return sendEmailVerification(cred.user).then(function(){ return signOut(auth); }).then(function(){ return { sent: true }; });
+    })
+    .then(function(r){ authBusy = false; return r; }, function(err){ authBusy = false; throw new Error(friendlyAuthError(err)); });
 }
 
 function getMyProfile(uid){
@@ -652,7 +657,6 @@ window.PQFirebase = {
   logOut: logOut,
   resetPassword: resetPassword,
   resendVerification: resendVerification,
-  checkVerification: checkVerification,
   onAuthChange: onAuthChange,
   getMyProfile: getMyProfile,
   getMyAttempt: getMyAttempt,

@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-5YGW25MRcF08WYUJkHxs8OQOSL9VlUrEiEV+4Ie9BzU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261018a"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-lKvs+KfsnZqimraHpnSHQWJmmqrVCLvFwjizwGBoFTs='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261018b"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -15,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261018a" />
+<link rel="stylesheet" href="shared.css?v=20261018b" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -123,12 +123,11 @@
   <!-- ============ START SCREEN ============ -->
   <!-- ============ VERIFY E-MAIL (new accounts) ============ -->
   <section id="screen-verify" class="card hidden">
-    <h2 class="step-title">Verify your email</h2>
-    <p class="step-sub">We sent a link to <b id="verify-email"></b>. Open the email, click the link, then come back here and press the button below. Check your spam / junk folder if you cannot find it.</p>
+    <h2 class="step-title">Check your email</h2>
+    <p class="step-sub">We sent a verification link to <b id="verify-email"></b>. You can log in only after you click that link. Check your spam / junk folder if you cannot find it.</p>
     <div class="actions" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;">
-      <button class="btn btn-primary" id="btn-verify-check" type="button">I have verified my email</button>
+      <button class="btn btn-primary" id="btn-verify-login" type="button">I clicked the link, log me in</button>
       <button class="btn btn-secondary" id="btn-verify-resend" type="button">Send the link again</button>
-      <button class="btn btn-secondary" id="btn-verify-out" type="button">Log out</button>
     </div>
     <p class="step-sub" id="verify-status" role="status" style="margin-top:12px;"></p>
   </section>
@@ -294,7 +293,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261018a -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261018b -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -307,13 +306,13 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261018a"></script>
-<script src="exam-data.js?v=20261018a"></script>
-<script src="syllabus-objectives.js?v=20261018a"></script>
-<script src="report-lib.js?v=20261018a"></script>
-<script src="scratchpad.js?v=20261018a"></script>
-<script src="firebase-config.js?v=20261018a"></script>
-<script type="module" src="firebase-init.js?v=20261018a"></script>
+<script src="quiz-data.js?v=20261018b"></script>
+<script src="exam-data.js?v=20261018b"></script>
+<script src="syllabus-objectives.js?v=20261018b"></script>
+<script src="report-lib.js?v=20261018b"></script>
+<script src="scratchpad.js?v=20261018b"></script>
+<script src="firebase-config.js?v=20261018b"></script>
+<script type="module" src="firebase-init.js?v=20261018b"></script>
 <script type="module">
 (function(){
 
@@ -431,15 +430,41 @@
       ? PQFirebase.signUp(email, password, name, cls, inputRemember.checked)
       : PQFirebase.logIn(email, password, inputRemember.checked);
 
-    action.then(function(){
+    action.then(function(res){
       // onAuthChange (below) picks up the new signed-in state and
-      // switches screens — nothing further to do here on success.
+      // switches screens. Unverified accounts are NOT logged in: show
+      // the "check your email" screen instead.
       authStatus.textContent = "";
+      if(res && res.needsVerification) showVerify(email, password);
     }).catch(function(err){
       authStatus.textContent = err.message || "Something went wrong. Please try again.";
     }).finally(function(){
       btnAuthSubmit.disabled = false;
     });
+  });
+
+  var pendingCreds = null;
+  function showVerify(email, password){
+    pendingCreds = { email: email, password: password };
+    setHeader("Practice Questions", "One more step.");
+    document.getElementById("verify-email").textContent = email;
+    document.getElementById("verify-status").textContent = "";
+    showScreen("verify");
+  }
+  document.getElementById("btn-verify-login").addEventListener("click", function(){
+    var em = pendingCreds && pendingCreds.email;
+    pendingCreds = null;
+    setAuthMode("login"); showScreen("auth");
+    if(em) inputEmail.value = em;
+    authStatus.textContent = "";
+  });
+  document.getElementById("btn-verify-resend").addEventListener("click", function(){
+    var vs = document.getElementById("verify-status");
+    if(!pendingCreds){ vs.textContent = "Please go back and log in again to resend the link."; return; }
+    vs.textContent = "Sending…";
+    PQFirebase.resendVerification(pendingCreds.email, pendingCreds.password).then(function(r){
+      vs.textContent = r && r.alreadyVerified ? "Your email is already verified. You can log in now." : "A new link was sent. Check your inbox and spam folder.";
+    }).catch(function(e){ vs.textContent = e.message || "Could not send. Try again in a minute."; });
   });
 
   document.getElementById("link-forgot-password").addEventListener("click", function(){
@@ -2219,34 +2244,11 @@
     showScreen("start");
   }
 
-  (function(){
-    var vStatus = document.getElementById("verify-status");
-    function vs(t){ vStatus.textContent = t || ""; }
-    document.getElementById("btn-verify-check").addEventListener("click", function(){
-      vs("Checking…");
-      PQFirebase.checkVerification().then(function(ok){
-        vs(ok ? "" : "Not verified yet. Click the link in the email first, then try again.");
-      }).catch(function(e){ vs(e.message || "Could not check. Try again."); });
-    });
-    document.getElementById("btn-verify-resend").addEventListener("click", function(){
-      vs("Sending…");
-      PQFirebase.resendVerification().then(function(){ vs("A new link was sent. Check your inbox and spam folder."); })
-        .catch(function(e){ vs(e.message || "Could not send. Try again in a minute."); });
-    });
-    document.getElementById("btn-verify-out").addEventListener("click", function(){ PQFirebase.logOut(); });
-  })();
-
-  PQFirebase.onAuthChange(function(user, info){
-    if(!user && info && info.unverified){
-      state.currentUser = null;
-      setHeader("Practice Questions", "One more step.");
-      document.getElementById("verify-email").textContent = info.email || "";
-      document.getElementById("verify-status").textContent = "";
-      showScreen("verify");
-      return;
-    }
+  PQFirebase.onAuthChange(function(user){
     if(!user){
       state.currentUser = null;
+      // keep the "check your email" screen up after the post-sign-up sign-out
+      if(pendingCreds && !document.getElementById("screen-verify").classList.contains("hidden")) return;
       setHeader("Practice Questions", "Log in to begin.");
       inputEmail.value = "";
       inputPassword.value = "";
