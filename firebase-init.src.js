@@ -18,7 +18,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendEmailVerification
 } from "firebase/auth";
 import {
   initializeFirestore,
@@ -111,6 +112,16 @@ function friendlyAuthError(err){
 
 // ---------- Auth ----------
 
+// E-mail verification is required for accounts created on/after this date.
+// Older (existing) accounts are grandfathered so nobody is locked out.
+// Keep in step with verifiedOrLegacy() in firestore.rules.
+var VERIFY_REQUIRED_FROM = Date.parse("2026-10-18T00:00:00Z");
+function needsVerification(user){
+  if(!user || user.emailVerified) return false;
+  var created = Date.parse(user.metadata && user.metadata.creationTime);
+  return !(created < VERIFY_REQUIRED_FROM);
+}
+
 function signUp(email, password, name, cls, remember){
   name = cleanName(name); cls = cleanClass(cls);
   if(!name) return Promise.reject(new Error("Please enter your name (letters and numbers only, no < > or &)."));
@@ -126,7 +137,11 @@ function signUp(email, password, name, cls, remember){
         email: email,
         class: cls,
         createdAt: serverTimestamp()
-      }).then(function(){ return { uid: uid, name: name, email: email, class: cls }; });
+      }).then(function(){
+        // The account is unusable until this link is clicked. A failed send
+        // does not fail sign-up; the student can press "Resend" on the next screen.
+        return sendEmailVerification(cred.user).then(function(){ return true; }, function(){ return false; });
+      }).then(function(sent){ return { uid: uid, name: name, email: email, class: cls, needsVerification: true, verificationSent: sent }; });
     })
     .catch(function(err){ throw new Error(friendlyAuthError(err)); });
 }
@@ -136,6 +151,7 @@ function logIn(email, password, remember){
     .then(function(){ return applyPersistence(remember); })
     .then(function(){ return signInWithEmailAndPassword(auth, email, password); })
     .then(function(cred){
+      if(needsVerification(cred.user)) return { uid: cred.user.uid, email: cred.user.email, needsVerification: true };
       return isArchived(cred.user.uid).then(function(archived){
         if(archived){
           setRemembered(false);
@@ -161,8 +177,11 @@ function resetPassword(email){
 // callback(user) fires with `null` when signed out, or
 // { uid, email, name, class } (profile merged in) once signed in.
 function onAuthChange(callback){
-  return onAuthStateChanged(auth, function(user){
+  function handle(user){
     if(!user){ callback(null); return; }
+    // Signed in but e-mail not verified yet: pages treat this as signed out;
+    // the login page uses the second argument to show the "verify" screen.
+    if(needsVerification(user)){ callback(null, { unverified: true, email: user.email }); return; }
     isArchived(user.uid).then(function(archived){
       if(archived){ setRemembered(false); return signOut(auth).then(function(){ callback(null); }); }
       return getMyProfile(user.uid).then(function(profile){
@@ -171,7 +190,29 @@ function onAuthChange(callback){
     }).catch(function(){
       callback({ uid: user.uid, email: user.email, name: "", class: "" });
     });
-  });
+  }
+  authHandler = handle;
+  return onAuthStateChanged(auth, handle);
+}
+var authHandler = null;
+
+// Re-sends the verification link to the signed-in, not-yet-verified student.
+function resendVerification(){
+  var u = auth.currentUser;
+  if(!u) return Promise.reject(new Error("Please log in again first."));
+  return sendEmailVerification(u).catch(function(err){ throw new Error(friendlyAuthError(err)); });
+}
+
+// "I've verified" button: reloads the account; resolves true (and continues
+// into the app) once the link has been clicked, false if not yet.
+function checkVerification(){
+  var u = auth.currentUser;
+  if(!u) return Promise.resolve(false);
+  return u.reload().then(function(){
+    var cu = auth.currentUser;
+    if(!cu || needsVerification(cu)) return false;
+    return cu.getIdToken(true).then(function(){ if(authHandler) authHandler(cu); return true; });
+  }).catch(function(err){ throw new Error(friendlyAuthError(err)); });
 }
 
 function getMyProfile(uid){
@@ -610,6 +651,8 @@ window.PQFirebase = {
   logIn: logIn,
   logOut: logOut,
   resetPassword: resetPassword,
+  resendVerification: resendVerification,
+  checkVerification: checkVerification,
   onAuthChange: onAuthChange,
   getMyProfile: getMyProfile,
   getMyAttempt: getMyAttempt,

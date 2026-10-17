@@ -48,7 +48,12 @@ Regenerate the CSP after editing any inline `<script>`: `node tools/csp.js`.
    and a daily backup schedule.
 8. **Budget alert:** Google Cloud → Billing → Budgets & alerts → set a low cap with
    e-mail alerts (protects against abuse-driven cost).
-9. **2-step verification** on the Google account that owns the Firebase project and
+9. **E-mail verification (new accounts):** nothing to enable, but check Authentication →
+   Templates → *Email address verification* → pencil icon → Sender name: `iLearnCS learning hub` (also subject, language) and that your
+   GitHub Pages domain is under Authorized domains. Accounts created on/after 18 Oct 2026
+   must click the link; older accounts are grandfathered. Republish `firestore.rules` so the
+   server enforces it too (`verifiedOrLegacy()`).
+10. **2-step verification** on the Google account that owns the Firebase project and
    on the GitHub account that owns the repo.
 
 ## Rules Playground checklist (Firestore → Rules → Rules Playground)

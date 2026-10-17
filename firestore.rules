@@ -35,6 +35,15 @@ service cloud.firestore {
     // ---------- helpers ----------
     function signedIn() { return request.auth != null; }
 
+    // New accounts (users/{uid}.createdAt on/after 18 Oct 2026) must have
+    // clicked the e-mail verification link before they can save anything.
+    // Older accounts are grandfathered. Keep in step with firebase-init.src.js.
+    function verifiedOrLegacy() {
+      return request.auth.token.email_verified == true
+        || get(/databases/$(database)/documents/users/$(request.auth.uid)).data
+             .get('createdAt', timestamp.date(2000, 1, 1)) < timestamp.date(2026, 10, 18);
+    }
+
     function isAdmin() {
       return signedIn()
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
@@ -160,12 +169,12 @@ service cloud.firestore {
       allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
       allow list: if isAdmin();
 
-      allow create: if signedIn()
+      allow create: if signedIn() && verifiedOrLegacy()
                     && validAttempt(request.auth.uid, attemptId)
                     && request.resource.data.attemptNumber == 1
                     && !exists(/databases/$(database)/documents/attempts/$(attemptId));
 
-      allow update: if signedIn()
+      allow update: if signedIn() && verifiedOrLegacy()
                     && validAttempt(request.auth.uid, attemptId)
                     && resource.data.uid == request.auth.uid
                     && resource.data.examKey == request.resource.data.examKey
@@ -181,9 +190,9 @@ service cloud.firestore {
       allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
       allow list: if isAdmin();
 
-      allow create: if signedIn() && validExamAttempt(request.auth.uid, attemptId);
+      allow create: if signedIn() && verifiedOrLegacy() && validExamAttempt(request.auth.uid, attemptId);
 
-      allow update: if signedIn()
+      allow update: if signedIn() && verifiedOrLegacy()
                     && validExamAttempt(request.auth.uid, attemptId)
                     && resource.data.uid == request.auth.uid
                     && resource.data.paperKey == request.resource.data.paperKey
@@ -197,7 +206,7 @@ service cloud.firestore {
     match /practiceProgress/{progressId} {
       allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid || isAdmin());
       allow list: if isAdmin();
-      allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'examKey');
+      allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'examKey') && verifiedOrLegacy();
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
       allow create, update, delete: if isAdmin();
     }
@@ -205,7 +214,7 @@ service cloud.firestore {
     match /examProgress/{progressId} {
       allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid || isAdmin());
       allow list: if isAdmin();
-      allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'paperKey');
+      allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'paperKey') && verifiedOrLegacy();
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
       allow create, update, delete: if isAdmin();
     }
