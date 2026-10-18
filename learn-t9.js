@@ -1,7 +1,7 @@
 /* iLearn topic 9: Databases (Cambridge IGCSE Computer Science 0478) */
 (function(root){
   "use strict";
-  var mc = root.ILQ.mc, tx = root.ILQ.tx;
+  var mc = root.ILQ.mc, tx = root.ILQ.tx, fill = root.ILQ.fill;
   var DB = "hy7FwqJyE6c", SQ = "Gs8tTXPTo3E";
   var PLAYERS =
     "<table class='ln-table'><tr><th>ID</th><th>Name</th><th>Team</th><th>Points</th><th>Active</th></tr>" +
@@ -80,6 +80,11 @@
       "<p>Output (every record, two fields): <b>Asha 42, Ben 35, Chen 51, Dina 35, Eli 60</b>.</p>",
     checks:[
       mc("Which SQL keyword states the table that the data comes from?", "FROM", ["SELECT","WHERE","ORDER"], "FROM is followed by the table name."),
+      fill("Complete the SQL to show the <b>Name</b> and <b>Points</b> of every player in the table <b>Players</b>.",
+        "{1} Name, Points\n{2} Players",
+       [["SELECT", ["GET", "SHOW", "FIND"]],
+        ["FROM", ["IN", "TABLE", "WHERE"]]],
+        "SELECT lists the fields to show; FROM names the table they come from."),
       mc("How many records does <code>SELECT Name FROM Players</code> output for the table above?", "5", ["1","2","0"], "With no WHERE clause, every record is returned. There are 5 players.")
     ] },
 
@@ -94,6 +99,11 @@
       "<p>Which players have more than 40 points? Asha (42), Chen (51) and Eli (60). Output: <b>Asha, Chen, Eli</b>. Ben and Dina have 35, so they are left out.</p>",
     checks:[
       mc("Which clause chooses only the records that meet a condition?", "WHERE", ["SELECT","FROM","SUM"], "WHERE filters the records."),
+      fill("Complete the SQL to show only the <b>names</b> of players with <b>more than</b> 40 points.",
+        "SELECT {1}\nFROM Players\nWHERE Points {2} 40",
+       [["Name", ["Players", "Points", "*"]],
+        [">", ["<", ">=", "="]]],
+        "SELECT the field you want to display (Name). WHERE filters the records: 'more than 40' is > 40 (>= would include exactly 40)."),
       mc("Using the Players table, what does this output? <code>SELECT Name FROM Players WHERE Team = \"Blues\"</code>", "Ben, Eli", ["Ben, Dina","Asha, Chen","Eli only"], "Ben and Eli are the two players in the Blues team.")
     ] },
 
@@ -108,6 +118,11 @@
       "<p>Highest points first: <b>Eli 60, Chen 51, Asha 42</b>, then Ben 35 and Dina 35 (a tie, so these two may appear in either order).</p>",
     checks:[
       mc("Which SQL clause puts the results in order of the highest value first?", "ORDER BY Points DESC", ["ORDER BY Points ASC","WHERE Points DESC","SORT Points HIGH"], "DESC sorts from largest to smallest."),
+      fill("Complete the SQL to show <b>Name</b> and <b>Points</b>, with the <b>highest points first</b>.",
+        "SELECT Name, Points\nFROM Players\n{1} Points {2}",
+       [["ORDER BY", ["SORT BY", "GROUP BY", "ARRANGE"]],
+        ["DESC", ["ASC", "DOWN", "HIGH"]]],
+        "ORDER BY sorts the results. DESC is descending (highest first); ASC is ascending (lowest first)."),
       mc("Using the Players table, which player is output first by <code>SELECT Name FROM Players ORDER BY Points DESC</code>?", "Eli", ["Asha","Ben","Chen"], "Eli has the most points (60), so is first when sorted descending.")
     ] },
 
@@ -124,6 +139,11 @@
       "<p>Dina is Greens; Chen (51) and Eli (60) have over 50. Output: <b>Chen, Dina, Eli</b>.</p>",
     checks:[
       mc("Which keyword returns a record only when both conditions are true?", "AND", ["OR","FROM","ORDER"], "AND needs both conditions to be true."),
+      fill("Complete the SQL to show the names of players who are in the <b>Blues</b> team <b>and</b> have more than 40 points.",
+        "SELECT Name\nFROM Players\n{1} Team = \"Blues\" {2} Points > 40",
+       [["WHERE", ["IF", "FROM", "HAVING"]],
+        ["AND", ["OR", "NOT", "ALSO"]]],
+        "WHERE holds the conditions. AND means BOTH conditions must be true; OR would accept players who meet only one."),
       mc("Using the Players table, how many records are returned by <code>WHERE Team = \"Reds\" OR Points = 35</code>?", "4", ["2","3","5"], "Reds: Asha and Chen. Points 35: Ben and Dina. That is 4 records.")
     ] },
 
@@ -141,6 +161,16 @@
       "<p>Asha, Chen, Dina and Eli are active, so the output is <b>4</b>.</p>",
     checks:[
       mc("What does <code>SELECT SUM(Points) FROM Players</code> output for the table above?", "223", ["5","60","42"], "42 + 35 + 51 + 35 + 60 = 223."),
+      fill("Complete the SQL to find the <b>total</b> of the Points for the Reds team.",
+        "SELECT {1}(Points)\nFROM Players\nWHERE Team = \"Reds\"",
+       [["SUM", ["COUNT", "TOTAL", "ADD"]]],
+        "SUM adds up the values in a field. COUNT would only tell you how many records there are."),
+      fill("Complete the SQL to count <b>how many</b> players are in the Reds team.",
+        "SELECT {1}(Name)\nFROM {2}\n{3} Team = \"Reds\"",
+       [["COUNT", ["SUM", "TOTAL", "NUMBER"]],
+        ["Players", ["Name", "Team", "Reds"]],
+        ["WHERE", ["IF", "HAVING", "FOR"]]],
+        "COUNT gives the number of records that match. FROM names the table (Players) and WHERE filters to the Reds team."),
       mc("Which function is used to find how many records match a query?", "COUNT", ["SUM","ORDER","SELECT *"], "COUNT gives the number of records returned.")
     ] }
 

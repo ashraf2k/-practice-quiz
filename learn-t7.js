@@ -1,7 +1,7 @@
 /* iLearn topic 7: Algorithm design and problem-solving (Cambridge IGCSE Computer Science 0478) */
 (function(root){
   "use strict";
-  var mc = root.ILQ.mc, tx = root.ILQ.tx;
+  var mc = root.ILQ.mc, tx = root.ILQ.tx, fill = root.ILQ.fill;
   function pre(s){ return "<pre class='ln-pre'>" + s + "</pre>"; }
   var LESSONS = [
 
@@ -90,6 +90,12 @@
       "<p>Inputs 4, 7, 2: Total becomes 4, then 11, then 13. Count goes up only for 7, so Count = 1. Output: <b>13 and 1</b>.</p>",
     checks:[
       mc("What is the difference between totalling and counting?", "Totalling adds the values; counting adds 1 each time", ["Totalling adds 1 each time; counting adds the values","Totalling needs a loop but counting does not","There is no difference"], "Total ← Total + Number adds the value. Count ← Count + 1 adds one."),
+      fill("Complete the algorithm. It inputs 10 numbers, then outputs the <b>total</b> of all the numbers and <b>how many</b> of them are above 50.",
+        "{1}\nCount ← 0\nFOR Index ← 1 TO 10\n   INPUT Number\n   {2}\n   IF Number > 50\n      THEN\n         {3}\n   ENDIF\nNEXT Index\nOUTPUT \"Total \", Total, \" Above 50 \", Count",
+       [["Total ← 0", ["Total ← 1", "Number ← 0", "Total ← Number"]],
+        ["Total ← Total + Number", ["Total ← Number", "Total ← Total + 1", "Count ← Count + Number"]],
+        ["Count ← Count + 1", ["Count ← Count + Number", "Count ← 1", "Total ← Total + 1"]]],
+        "The total starts at 0 and adds the value each time (Total + Number). The counter starts at 0 and adds 1 only when the number is above 50 (Count + 1)."),
       mc("What should be done to Total before a totalling loop starts?", "Set it to 0", ["Set it to 1","Leave it as it is","Set it to the first value input"], "A total must be initialised to 0, otherwise it may start with an unknown value.")
     ] },
 
@@ -105,11 +111,25 @@
       "<p>Average of 4, 7 and 1: Total = 12, Count = 3, so Average = 12 / 3 = <b>4</b>.</p>",
     checks:[
       mc("A program finds the smallest of a set of numbers, all between 20 and 200. Which starting value is suitable for Smallest?", "201", ["0","20","1"], "Smallest must start larger than any possible value so the first number input replaces it. If it started at 0, no number would ever be smaller."),
+      fill("Complete the algorithm. It inputs 20 numbers, each between 20 and 200, and finds the <b>largest</b> and the <b>smallest</b>.",
+        "Largest ← {1}\nSmallest ← {2}\nFOR Index ← 1 TO 20\n   INPUT Number\n   IF Number {3} Largest\n      THEN\n         Largest ← Number\n   ENDIF\n   IF Number {4} Smallest\n      THEN\n         Smallest ← Number\n   ENDIF\nNEXT Index",
+       [["0", ["201", "300", "1000"]],
+        ["500", ["0", "10", "19"]],
+        [">", ["<", "=", "<>"]],
+        ["<", [">", "=", ">="]]],
+        "Largest must start BELOW every possible value (so the first number replaces it); Smallest must start ABOVE every possible value. A new number replaces Largest when it is greater than it, and replaces Smallest when it is less than it."),
+      fill("Complete the algorithm. Numbers are input until -1 is entered (the -1 is not part of the data). It then outputs the <b>average</b>.",
+        "Total ← 0\nCount ← 0\nREPEAT\n   INPUT Number\n   IF Number <> -1\n      THEN\n         Total ← {1}\n         Count ← {2}\n   ENDIF\nUNTIL Number = -1\nAverage ← {3}\nOUTPUT Average",
+       [["Total + Number", ["Total + 1", "Number", "Total * Number"]],
+        ["Count + 1", ["Count + Number", "1", "Count - 1"]],
+        ["Total / Count", ["Count / Total", "Total * Count", "Total - Count"]]],
+        "Average = total ÷ count. Totalling adds the VALUE (Total + Number); counting adds 1 (Count + 1). The -1 is skipped by the IF so it is not included."),
       mc("How is the average (mean) of a set of numbers calculated?", "Total divided by count", ["Maximum plus minimum","Count divided by total","Total multiplied by count"], "Average = Total / Count.")
     ] },
 
   { id:"7.4c", code:"7.4", title:"Linear search",
     concept:
+      "<p>You have just learned about <b>arrays</b> (syllabus 8.2). A linear search looks through the items of an array one by one, using the <b>index</b> to point at each item.</p>" +
       "<p>A <b>linear search</b> finds out whether a value is in a list. It checks each item <b>one at a time</b>, starting at the <b>first</b>, until it finds the value or reaches the <b>end</b> of the list. The data does <b>not</b> need to be sorted.</p>" +
       pre("Found ← FALSE\nIndex ← 1\nWHILE Found = FALSE AND Index <= 8 DO\n   IF DataArray[Index] = SearchValue\n      THEN\n         Found ← TRUE\n      ELSE\n         Index ← Index + 1\n   ENDIF\nENDWHILE") +
       "<p>Stopping as soon as the value is found makes the search <b>more efficient</b> than checking every item.</p>",
@@ -119,6 +139,17 @@
       "<p>Search for 7: every item is checked, none match, and the end of the list is reached: <b>not found</b>.</p>",
     checks:[
       mc("How many comparisons does a linear search for 9 make in the list 5, 3, 9, 4, 8?", "3", ["1","2","5"], "It compares 5, then 3, then 9, which matches, so three comparisons."),
+      fill("Complete the <b>linear search</b>. It searches an array <code>DataArray</code> with <b>8</b> items for <code>SearchValue</code>.",
+        "Found ← FALSE\nIndex ← 1\nWHILE Found = FALSE AND Index <= {1} DO\n   IF DataArray[Index] = SearchValue\n      THEN\n         {2}\n      ELSE\n         {3}\n   ENDIF\nENDWHILE",
+       [["8", ["7", "9", "1"]],
+        ["Found ← TRUE", ["Found ← FALSE", "Index ← Index + 1", "Index ← 1"]],
+        ["Index ← Index + 1", ["Index ← Index - 1", "Found ← TRUE", "Index ← 1"]]],
+        "The loop stops when the value is found or Index passes the last item (8). If the item matches, set Found to TRUE; if not, move on to the next item with Index + 1."),
+      fill("The search loop above has finished. Complete the code that <b>reports the result</b>.",
+        "IF {1} = TRUE\n   THEN\n      OUTPUT \"Found at position \", {2}\n   ELSE\n      OUTPUT \"Not found\"\nENDIF",
+       [["Found", ["Index", "SearchValue", "DataArray"]],
+        ["Index", ["Found", "SearchValue", "DataArray[Index]"]]],
+        "Found tells us whether the search succeeded. If it did, Index still holds the position where the value was found (the loop stopped before increasing it)."),
       mc("Which statement about a linear search is correct?", "The data does not need to be in order", ["The data must be sorted first","It starts in the middle of the list","It can only be used for numbers"], "A linear search checks items one by one so sorting is not needed.")
     ] },
 
@@ -133,6 +164,19 @@
       "<p>Total swaps: 4. After pass 1 the largest value (8) is in the right place, after pass 2 the next largest (5), and so on.</p>",
     checks:[
       mc("Sort 6 2 5 1 into ascending order using a bubble sort. What is the list after the first pass?", "2 5 1 6", ["1 2 5 6","2 6 5 1","6 5 2 1"], "Pass 1: 6 swaps with 2, 5 and 1 in turn, so 6 ends up at the end: 2 5 1 6."),
+      fill("Complete the <b>swap</b> inside an ascending <b>bubble sort</b>. <code>Numbers[Index]</code> and <code>Numbers[Index + 1]</code> are neighbours that are in the wrong order.",
+        "IF Numbers[Index] > Numbers[Index + 1]\n   THEN\n      Temp ← {1}\n      Numbers[Index] ← {2}\n      Numbers[Index + 1] ← {3}\nENDIF",
+       [["Numbers[Index]", ["Numbers[Index + 1]", "0", "Temp"]],
+        ["Numbers[Index + 1]", ["Numbers[Index]", "Temp", "Numbers[Index - 1]"]],
+        ["Temp", ["Numbers[Index]", "Numbers[Index + 1]", "0"]]],
+        "A swap needs a temporary store: save the left value in Temp, copy the right value into the left place, then put the saved (old left) value into the right place."),
+      fill("Complete the <b>bubble sort</b> for a list of 10 numbers. It repeats passes until a whole pass makes no swaps.",
+        "REPEAT\n   Swapped ← {1}\n   FOR Index ← 1 TO {2}\n      IF Numbers[Index] > Numbers[Index + 1]\n         THEN\n            // swap the two items\n            Swapped ← {3}\n      ENDIF\n   NEXT Index\nUNTIL Swapped = {4}",
+       [["FALSE", ["TRUE", "Index", "10"]],
+        ["9", ["10", "11", "1"]],
+        ["TRUE", ["FALSE", "Index", "0"]],
+        ["FALSE", ["TRUE", "10", "0"]]],
+        "Each pass starts with Swapped = FALSE and sets it to TRUE whenever a swap happens. With 10 items a pass compares 9 pairs (Index 1 to 9). When a pass ends with Swapped still FALSE, the list is sorted."),
       mc("When can a bubble sort stop?", "When a complete pass makes no swaps", ["When the first two items are in order","When it reaches the middle of the list","When the largest item is found"], "No swaps in a whole pass means the list is in order.")
     ] },
 
@@ -151,6 +195,21 @@
       "<p>This is a <b>range check</b> in a loop: it keeps asking until the age is valid. Typing 25 as 52 would pass, because 52 is within the range: validation cannot tell which is correct.</p>",
     checks:[
       mc("A form must not be submitted with the surname box empty. Which validation check is this?", "Presence check", ["Range check","Type check","Format check"], "A presence check makes sure that data has been entered."),
+      fill("Complete the <b>range check</b>. An age must be from 0 to 120; anything else is invalid and must be entered again.",
+        "REPEAT\n   INPUT Age\n   IF Age {1} 0 {2} Age {3} 120\n      THEN\n         OUTPUT \"Invalid age, enter again\"\n   ENDIF\nUNTIL Age >= 0 AND Age <= 120",
+       [["<", [">", "=", "<="]],
+        ["OR", ["AND", "NOT", "XOR"]],
+        [">", ["<", "=", ">="]]],
+        "An age is invalid when it is below 0 OR above 120. Using <= or >= would wrongly reject the valid limits 0 and 120."),
+      fill("Complete the <b>length check</b>. A password must have <b>at least 8 characters</b>.",
+        "INPUT Password\nWHILE LENGTH(Password) {1} 8\n   OUTPUT \"Password must have at least 8 characters\"\n   INPUT Password\nENDWHILE",
+       [["<", [">", "=", ">="]]],
+        "The loop repeats while the password is too short: LENGTH(Password) < 8. A length of exactly 8 is acceptable."),
+      fill("Complete the <b>presence check</b>. The name must not be left empty.",
+        "INPUT Name\nWHILE Name {1} {2}\n   OUTPUT \"You must enter a name\"\n   INPUT Name\nENDWHILE",
+       [["=", ["<>", ">", "<"]],
+        ["\"\"", ["0", "NULL", "FALSE"]]],
+        "A presence check makes sure something was entered. An empty string is \"\", so the loop repeats while Name = \"\"."),
       mc("Which validation check ensures that a postcode is in the pattern letter, letter, number?", "Format check", ["Length check","Range check","Presence check"], "A format check tests that data follows a set pattern.")
     ] },
 
@@ -217,6 +276,13 @@
       "<p>Inputs: 10 marks. Process: totalling and dividing. Output: total and average. A FOR loop is right because we know there are 10 marks.</p>",
     checks:[
       mc("An algorithm must read 30 test marks. Which loop is most suitable?", "A FOR loop", ["A WHILE loop with no condition","An IF statement","A CASE statement"], "A count-controlled FOR loop is used when the number of repeats is known."),
+      fill("<b>Problem:</b> input 30 marks (0 to 100), then output the <b>average</b> and the <b>highest</b> mark. Complete the algorithm.",
+        "Total ← 0\nHighest ← {1}\nFOR Index ← 1 TO {2}\n   INPUT Mark\n   Total ← Total + Mark\n   IF Mark {3} Highest\n      THEN\n         Highest ← Mark\n   ENDIF\nNEXT Index\nAverage ← {4}\nOUTPUT \"Average \", Average, \" Highest \", Highest",
+       [["-1", ["101", "100", "30"]],
+        ["30", ["29", "31", "100"]],
+        [">", ["<", "=", "<>"]],
+        ["Total / 30", ["Total * 30", "30 / Total", "Total + 30"]]],
+        "Use a FOR loop because there are exactly 30 marks. Highest starts below every possible mark, is replaced when a mark is greater, and the average is the total divided by the number of marks."),
       tx("Write an algorithm in pseudocode that inputs 5 numbers and outputs their total.", [["total 0","total - 0","total0","sum 0","sum - 0"],["for","loop","repeat","while"],["input"],["total + ","total+","sum + ","sum+"],["output","print"]], 5, "Total ← 0, then FOR Index ← 1 TO 5, INPUT Number, Total ← Total + Number, NEXT Index, then OUTPUT Total.")
     ] }
 

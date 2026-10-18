@@ -2,7 +2,7 @@
    All code uses the exam pseudocode conventions from the syllabus. */
 (function(root){
   "use strict";
-  var mc = root.ILQ.mc, tx = root.ILQ.tx;
+  var mc = root.ILQ.mc, tx = root.ILQ.tx, fill = root.ILQ.fill;
   function pre(s){ return "<pre class='ln-pre'>" + s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;") + "</pre>"; }
   var LESSONS = [
 
@@ -18,6 +18,11 @@
       "<p>Step by step: Score is 10; then <code>10 * 2 + 5 = 25</code>; so <b>25</b> is output. The right-hand side is worked out first, then stored in the variable on the left.</p>",
     checks:[
       mc("What is the main difference between a variable and a constant?", "A constant's value cannot change while the program runs", ["A variable can only store numbers","A constant has no identifier","A variable cannot be used in calculations"], "A variable's value can change; a constant keeps the value it was given."),
+      fill("Complete the declarations. <code>Score</code> stores whole numbers and <code>Bonus</code> is a <b>constant</b> fixed at 5.",
+        "DECLARE Score : {1}\nCONSTANT Bonus {2} 5\nScore ← 10\nScore ← Score * 2 + Bonus\nOUTPUT Score",
+       [["INTEGER", ["STRING", "BOOLEAN", "CHAR"]],
+        ["←", ["=", "==", ":"]]],
+        "A variable that holds whole numbers is declared as INTEGER. A constant is given its value once with the assignment arrow, and it cannot change while the program runs."),
       mc("What is the value of Count after these statements? <code>Count ← 4</code> then <code>Count ← Count + 3</code>", "7", ["3","4","43"], "The right side is calculated first: 4 + 3 = 7, which is then stored in Count.")
     ] },
 
@@ -35,6 +40,13 @@
       "<table class='ln-table'><tr><th>Data</th><th>Best type</th><th>Why</th></tr><tr><td>Number of students (28)</td><td>INTEGER</td><td>Whole number</td></tr><tr><td>Price (4.99)</td><td>REAL</td><td>Has a fractional part</td></tr><tr><td>Grade ('B')</td><td>CHAR</td><td>One character</td></tr><tr><td>Phone number (07123456789)</td><td>STRING</td><td>Leading zero; never calculated with</td></tr><tr><td>Is the user logged in?</td><td>BOOLEAN</td><td>Only two values</td></tr></table>",
     checks:[
       mc("Which data type is best for storing a telephone number such as 07123456789?", "STRING", ["INTEGER","REAL","BOOLEAN"], "A phone number has a leading zero and is never used in calculations, so it is stored as a string."),
+      fill("Choose the <b>best data type</b> for each variable: a person's age in whole years, a person's name, a price such as 12.50, and whether someone is a member (true or false).",
+        "DECLARE Age : {1}\nDECLARE Name : {2}\nDECLARE Price : {3}\nDECLARE IsMember : {4}",
+       [["INTEGER", ["REAL", "STRING", "BOOLEAN"]],
+        ["STRING", ["CHAR", "INTEGER", "BOOLEAN"]],
+        ["REAL", ["INTEGER", "STRING", "BOOLEAN"]],
+        ["BOOLEAN", ["INTEGER", "CHAR", "STRING"]]],
+        "Whole numbers are INTEGER, text is STRING (CHAR is only one character), numbers with a decimal part are REAL, and true/false values are BOOLEAN."),
       mc("Which data type should be used for the price 12.50?", "REAL", ["INTEGER","CHAR","STRING"], "Prices have a fractional part, so REAL is used.")
     ] },
 
@@ -48,6 +60,12 @@
       "<p>If the user types <code>Sam</code>, the screen shows:<br><code>Enter your name</code><br><code>Hello Sam</code></p>",
     checks:[
       mc("What is displayed? <code>Lives ← 3</code> then <code>OUTPUT \"You have \", Lives, \" lives\"</code>", "You have 3 lives", ["You have Lives lives","You have 3","\"You have \", Lives"], "Text in quotes is shown as written and the variable is replaced by its value."),
+      fill("Complete the program. It asks for a name, reads it in, then greets the person.",
+        "{1} \"Enter your name\"\n{2} Name\nOUTPUT \"Hello \", {3}",
+       [["OUTPUT", ["INPUT", "PRINT", "WRITE"]],
+        ["INPUT", ["OUTPUT", "READ", "GET"]],
+        ["Name", ["\"Name\"", "Hello", "INPUT"]]],
+        "OUTPUT shows a message; INPUT stores what the user types in a variable. Name (no quotes) outputs the value stored in the variable; \"Name\" would output the word itself."),
       mc("What does <code>INPUT Age</code> do?", "Stores the typed value in Age", ["Displays the value of Age on screen","Declares Age as a constant value","Compares Age with the number zero"], "INPUT reads a value from the user into the variable.")
     ] },
 
@@ -73,6 +91,13 @@
       "<p>Mark = 50: <code>50 >= 50</code> is true, so <b>Pass</b>. Mark = 49: false, so <b>Fail</b>. The <code>&gt;=</code> includes 50.</p>",
     checks:[
       mc("What is output when Mark is 50? <code>IF Mark > 50 THEN OUTPUT \"Pass\" ELSE OUTPUT \"Fail\" ENDIF</code>", "Fail", ["Pass","Nothing is output","Both words"], "50 > 50 is false, so the ELSE branch runs."),
+      fill("Complete the selection. A mark of <b>50 or more</b> is a pass; anything else is a fail.",
+        "INPUT Mark\nIF Mark {1} 50\n   {2}\n      OUTPUT \"Pass\"\n   {3}\n      OUTPUT \"Fail\"\n{4}",
+       [[">=", [">", "<=", "="]],
+        ["THEN", ["ELSE", "DO", "ENDIF"]],
+        ["ELSE", ["THEN", "OTHERWISE", "ELSEIF"]],
+        ["ENDIF", ["END", "ENDELSE", "ENDWHILE"]]],
+        "IF condition THEN ... ELSE ... ENDIF. 'Fifty or more' needs >= so that exactly 50 passes."),
       mc("What happens when the condition of an IF statement with no ELSE is false?", "The statements inside the IF are skipped", ["The program stops with an error","The statements inside run anyway","The condition is changed to true"], "Nothing in the THEN section runs, and the program continues after ENDIF.")
     ] },
 
@@ -86,6 +111,12 @@
       "<p>Position is 15 and Move is 'A': Position becomes 14. If Move is 'X' nothing matches, so <b>Beep</b> is output.</p>",
     checks:[
       mc("Position is 15 and the user enters 'E'. What is Position after the CASE statement in the example?", "25", ["5","16","14"], "'E' adds 10: 15 + 10 = 25."),
+      fill("Complete the <b>CASE</b> statement. 'R' outputs Red, 'G' outputs Green, and any other letter outputs Unknown colour.",
+        "INPUT Colour\n{1} Colour\n   'R' : OUTPUT \"Red\"\n   'G' : OUTPUT \"Green\"\n   {2} OUTPUT \"Unknown colour\"\n{3}",
+       [["CASE OF", ["IF", "SELECT", "SWITCH"]],
+        ["OTHERWISE", ["ELSE", "DEFAULT", "OTHER"]],
+        ["ENDCASE", ["ENDIF", "ENDSELECT", "END"]]],
+        "The exam pseudocode is CASE OF <identifier> ... OTHERWISE ... ENDCASE. OTHERWISE catches every value not listed."),
       mc("What is the OTHERWISE clause in a CASE statement for?", "It runs if none of the listed values match", ["It runs before the first case","It runs every time","It marks the end of the CASE"], "OTHERWISE is the default branch, and must be last.")
     ] },
 
@@ -101,6 +132,13 @@
       "<p>Output: <b>10, 7, 4, 1</b>.</p>",
     checks:[
       mc("How many times does this loop run? <code>FOR Index ← 1 TO 6</code>", "6", ["5","7","1"], "The values 1, 2, 3, 4, 5 and 6 are all used."),
+      fill("Complete the <b>FOR</b> loop that adds the even numbers 2, 4, 6, 8 and 10.",
+        "Total ← 0\nFOR Index ← {1} TO {2} STEP {3}\n   Total ← Total + Index\nNEXT {4}\nOUTPUT Total",
+       [["2", ["1", "3", "12"]],
+        ["10", ["8", "11", "2"]],
+        ["2", ["1", "10", "3"]],
+        ["Index", ["Total", "Count", "10"]]],
+        "Start at 2, finish at 10, and go up in steps of 2. The NEXT statement names the same loop counter as the FOR statement (Index)."),
       mc("What is output? <code>FOR Count ← 1 TO 9 STEP 4</code> with <code>OUTPUT Count</code> inside", "1, 5, 9", ["1, 4, 9","1, 5","5, 9"], "The counter goes up by 4: 1, 5, 9. The next value, 13, is past 9.")
     ] },
 
@@ -114,6 +152,13 @@
       "<table class='ln-table'><tr><th>Number</th><th>Number &gt; 9?</th></tr><tr><td>30</td><td>yes</td></tr><tr><td>21</td><td>yes</td></tr><tr><td>12</td><td>yes</td></tr><tr><td>3</td><td>no, stop</td></tr></table><p>Output <b>3</b>. The loop body ran 3 times. If Number started at 5, the body would run <b>0 times</b>.</p>",
     checks:[
       mc("What is output? <code>Number ← 30</code>, <code>WHILE Number > 9 DO Number ← Number - 9 ENDWHILE</code>, <code>OUTPUT Number</code>", "3", ["12","9","0"], "30, 21, 12, then 3. At 3 the condition is false, so the loop ends and 3 is output."),
+      fill("Complete the <b>WHILE</b> loop. It keeps asking until the user enters a number <b>from 1 to 10</b>.",
+        "INPUT Number\nWHILE Number {1} 1 {2} Number {3} 10 DO\n   OUTPUT \"Try again\"\n   INPUT Number\n{4}",
+       [["<", [">", "=", "<>"]],
+        ["OR", ["AND", "NOT", "XOR"]],
+        [">", ["<", "=", ">="]],
+        ["ENDWHILE", ["NEXT", "UNTIL", "ENDIF"]]],
+        "The loop must repeat while the number is INVALID: below 1 OR above 10. A number cannot be both, so AND would never be true. A WHILE loop ends with ENDWHILE."),
       mc("When is the condition of a WHILE loop tested?", "Before each repeat, so the loop may not run at all", ["After each repeat, so it runs at least once","Only once, at the end","Only when the loop is first declared"], "WHILE is a pre-condition loop.")
     ] },
 
@@ -128,6 +173,13 @@
       "<p>The prompt is always shown at least once. It repeats until the user types <code>Secret</code>. This is ideal for input validation.</p>",
     checks:[
       mc("How many times does this loop run? <code>Count ← 0</code>, <code>REPEAT Count ← Count + 1 UNTIL Count = 3</code>", "3", ["2","4","0"], "Count becomes 1, 2 and 3; after the third pass the condition is true so the loop stops."),
+      fill("Complete the <b>REPEAT</b> loop. The user has up to 3 tries; it stops when the password is right <b>or</b> 3 attempts have been made.",
+        "Attempts ← 0\n{1}\n   INPUT Password\n   Attempts ← {2}\n{3} Password = \"Secret\" {4} Attempts = 3",
+       [["REPEAT", ["WHILE", "DO", "LOOP"]],
+        ["Attempts + 1", ["Attempts", "1", "Password + 1"]],
+        ["UNTIL", ["WHILE", "IF", "ENDREPEAT"]],
+        ["OR", ["AND", "NOT", "<>"]]],
+        "REPEAT ... UNTIL checks the condition at the END, so the body always runs at least once. Counting adds 1 each time. The loop stops when EITHER the password is correct OR the attempts reach 3."),
       mc("Which loop always runs its statements at least once?", "REPEAT UNTIL", ["WHILE","FOR with value1 greater than value2","CASE"], "A post-condition loop tests after running the statements.")
     ] },
 
@@ -140,6 +192,12 @@
       "<p>Marks entered: 40, 65, 50, 72, 30. Total = 40 + 65 + 50 + 72 + 30 = <b>257</b>. Marks of 50 or more: 65, 50, 72, so Passes = <b>3</b>.</p>",
     checks:[
       mc("Marks 40, 65, 50, 72, 30 are entered into the program above. What is the value of Total at the end?", "257", ["3","5","227"], "40 + 65 + 50 + 72 + 30 = 257. Count (3) is the number of marks of 50 or more."),
+      fill("Complete the program. It inputs 5 marks, outputs the <b>total</b> and counts how many are <b>passes</b> (50 or more).",
+        "Total ← 0\nPasses ← {1}\nFOR Index ← 1 TO 5\n   INPUT Mark\n   Total ← {2}\n   IF Mark >= 50\n      THEN\n         Passes ← {3}\n   ENDIF\nNEXT Index\nOUTPUT \"Total \", Total, \" Passes \", Passes",
+       [["0", ["1", "Mark", "Total"]],
+        ["Total + Mark", ["Total + 1", "Mark", "Total * Mark"]],
+        ["Passes + 1", ["Passes + Mark", "1", "Passes - 1"]]],
+        "Both variables are initialised to 0 before the loop. Total adds the mark each time; Passes adds 1 only when the mark is 50 or more."),
       mc("Why must Total be set to 0 before the loop?", "So it starts from a known value", ["So the loop runs a lot faster","So the variable becomes a constant","So the loop always stops after one pass"], "Without initialising, the variable may hold an old or undefined value that is added in.")
     ] },
 
@@ -157,6 +215,12 @@
       pre("Word ← \"Computer\"\nOUTPUT LENGTH(Word)              // 8\nOUTPUT SUBSTRING(Word, 1, 3)     // Com\nOUTPUT SUBSTRING(Word, 4, 3)     // put\nOUTPUT UCASE(Word)               // COMPUTER"),
     checks:[
       mc("What does <code>SUBSTRING(\"Computer\", 4, 3)</code> return?", "put", ["Com","mpu","ter"], "Start at character 4 (p) and take 3 characters: p, u, t."),
+      fill("Complete the string handling. <code>Word</code> is <code>\"Computer\"</code>.",
+        "Word ← \"Computer\"\nOUTPUT {1}(Word)                   // 8\nOUTPUT SUBSTRING(Word, {2}, 3)     // put\nOUTPUT {3}(Word)                   // COMPUTER",
+       [["LENGTH", ["LEN", "SIZE", "COUNT"]],
+        ["4", ["3", "5", "2"]],
+        ["UCASE", ["LCASE", "UPPER", "TOUPPER"]]],
+        "LENGTH gives the number of characters; SUBSTRING(Word, 4, 3) starts at character 4 (p) and takes 3 characters; UCASE converts to upper case."),
       mc("What does <code>LENGTH(\"Hi there\")</code> return?", "8", ["7","2","6"], "H, i, space, t, h, e, r, e = 8 characters. The space counts.")
     ] },
 
@@ -198,6 +262,11 @@
       "<p>An IF inside a FOR loop. The even numbers 2, 4, 6, 8, 10 are counted, so Evens = <b>5</b>.</p>",
     checks:[
       mc("Mark is 85 in the nested IF example. What is output?", "Distinction", ["Pass","Fail","Nothing is output"], "85 >= 50 is true and 85 >= 80 is true, so Distinction."),
+      fill("Complete the <b>nested</b> statements. It reads 10 marks and counts passes (50 or more) and fails.",
+        "Passes ← 0\nFails ← 0\nFOR Index ← 1 TO 10\n   INPUT Mark\n   IF Mark {1} 50\n      THEN\n         Passes ← Passes + 1\n      ELSE\n         Fails ← Fails + 1\n   {2}\nNEXT Index",
+       [[">=", [">", "<=", "<"]],
+        ["ENDIF", ["ENDWHILE", "NEXT", "END"]]],
+        "The IF is nested inside the FOR loop, so it must be completely closed with ENDIF before NEXT Index. 50 or more is a pass, so the test is >=."),
       mc("How many times does the inner loop body run? <code>FOR Row ← 1 TO 3</code> containing <code>FOR Col ← 1 TO 4</code>", "12", ["7","3","4"], "The inner loop runs 4 times for each of the 3 outer passes: 3 × 4 = 12.")
     ] },
 
@@ -224,6 +293,12 @@
       "<p><code>CALL Line(3)</code> outputs 3 dashes, then <code>CALL Line(5)</code> outputs 5 dashes. One procedure, used twice, with different parameter values.</p>",
     checks:[
       mc("Which statement runs the procedure <code>Line</code> with the value 7?", "CALL Line(7)", ["Line ← 7","RUN Line","OUTPUT Line(7)"], "Procedures are called with CALL and their parameters in brackets."),
+      fill("Complete the <b>procedure</b> that outputs a line of dashes, then call it.",
+        "{1} Line(Size : INTEGER)\n   DECLARE Length : INTEGER\n   FOR Length ← 1 TO Size\n      OUTPUT \"-\"\n   NEXT Length\n{2}\n\n{3} Line(5)",
+       [["PROCEDURE", ["FUNCTION", "SUB", "DEF"]],
+        ["ENDPROCEDURE", ["ENDFUNCTION", "END", "RETURN"]],
+        ["CALL", ["RUN", "OUTPUT", "RETURN"]]],
+        "A procedure is defined between PROCEDURE and ENDPROCEDURE and is run with CALL. It does not return a value."),
       mc("Where does the program continue when a procedure has finished?", "At the line after the CALL", ["At the start of the program","At the end of the program","At the next procedure"], "Control returns to the statement that follows the call.")
     ] },
 
@@ -237,6 +312,13 @@
       "<p>10 × 10 + 20 × 20 = 100 + 400 = <b>500</b>. The output is <code>Sum of squares = 500</code>.</p>",
     checks:[
       mc("<code>FUNCTION Double(N : INTEGER) RETURNS INTEGER</code> with <code>RETURN N * 2</code>. What is output by <code>OUTPUT Double(7)</code>?", "14", ["7","2","9"], "Double(7) returns 7 * 2 = 14."),
+      fill("Complete the <b>function</b> that doubles a number, then use it in an output statement.",
+        "FUNCTION Double(Number : INTEGER) {1} INTEGER\n   {2} Number * 2\n{3}\n\nOUTPUT \"Double of 6 is \", {4}",
+       [["RETURNS", ["RETURN", "AS", "->"]],
+        ["RETURN", ["RETURNS", "OUTPUT", "CALL"]],
+        ["ENDFUNCTION", ["ENDPROCEDURE", "END", "ENDRETURN"]],
+        ["Double(6)", ["CALL Double(6)", "Double", "Number"]]],
+        "A function states the type it RETURNS, uses RETURN to send back the value, and ends with ENDFUNCTION. It is used inside an expression, such as Double(6), not with CALL."),
       mc("Which is the correct way to use a function that returns a value?", "Total ← Double(5)", ["CALL Double(5)","Double(5) ← Total","RETURN Double"], "A function call is part of an expression, so its returned value can be stored.")
     ] },
 
@@ -266,6 +348,12 @@
       "<p>472 ÷ 100 = 4 remainder 72, so DIV gives 4. 472 ÷ 10 = 47 remainder 2, so MOD gives 2. Output: <b>4 2</b>.</p>",
     checks:[
       mc("What does <code>ROUND(7.846, 1)</code> return?", "7.8", ["7.9","8","7.85"], "Rounded to 1 decimal place, 7.846 is 7.8."),
+      fill("Complete the library routines. <b>DIV</b> gives the whole-number quotient, <b>MOD</b> gives the remainder, and <b>ROUND</b> rounds to a number of decimal places.",
+        "N ← 472\nHundreds ← {1}(N, 100)      // 4\nLastDigit ← {2}(N, 10)      // 2\nPrice ← ROUND(7.456, {3})   // 7.46",
+       [["DIV", ["MOD", "ROUND", "RANDOM"]],
+        ["MOD", ["DIV", "ROUND", "RANDOM"]],
+        ["2", ["1", "3", "0"]]],
+        "472 DIV 100 = 4 (whole times it fits); 472 MOD 10 = 2 (the remainder); ROUND(7.456, 2) keeps 2 decimal places, giving 7.46."),
       mc("Which expression tests whether the whole number N is even?", "MOD(N, 2) = 0", ["DIV(N, 2) = 0","N / 2 = 0","ROUND(N, 2) = 0"], "An even number leaves a remainder of 0 when divided by 2.")
     ] },
 
@@ -295,6 +383,13 @@
       "<p><code>StudentNames[1]</code> is the first name. <code>Board[2,3]</code> is the item in row 2, column 3.</p>",
     checks:[
       mc("How many elements are in <code>DECLARE Marks : ARRAY[1:25] OF INTEGER</code>?", "25", ["24","26","1"], "Indexes 1 to 25 give 25 elements."),
+      fill("Complete the <b>array declarations</b>: a 1D array of 30 names, and a 2D board with 3 rows and 3 columns. Then store data in them.",
+        "{1} StudentNames : ARRAY[1:30] OF {2}\nDECLARE Board : ARRAY[{3}] OF CHAR\nStudentNames[1] ← \"Ali\"\nBoard[{4}] ← 'X'      // row 2, column 3",
+       [["DECLARE", ["DIM", "VAR", "ARRAY"]],
+        ["STRING", ["INTEGER", "CHAR", "BOOLEAN"]],
+        ["1:3, 1:3", ["1:3", "1:9", "0:3, 0:3"]],
+        ["2, 3", ["3, 2", "2; 3", "23"]]],
+        "Arrays are declared with DECLARE name : ARRAY[lower:upper] OF type. A 2D array has two ranges (rows, then columns), and a cell is addressed as [row, column]."),
       mc("How many elements are in <code>DECLARE Grid : ARRAY[1:3, 1:4] OF INTEGER</code>?", "12", ["7","3","4"], "3 rows × 4 columns = 12 elements.")
     ] },
 
@@ -308,6 +403,11 @@
       "<p>The element is chosen by the value of Index. Changing Index to 5 would show 23.</p>",
     checks:[
       mc("Scores holds 4, 8, 15, 16, 23 in positions 1 to 5. What is <code>Scores[Index + 1]</code> when Index is 2?", "15", ["8","16","3"], "Index + 1 = 3, and Scores[3] is 15."),
+      fill("<code>Scores</code> holds 4, 8, 15 and <code>Index</code> is 2. Complete both statements so that each outputs <b>15</b>.",
+        "Scores[1] ← 4\nScores[2] ← 8\nScores[3] ← 15\nIndex ← 2\nOUTPUT Scores[{1}]\nOUTPUT Scores[Index {2} 1]",
+       [["3", ["2", "15", "Index"]],
+        ["+", ["-", "*", "<"]]],
+        "The number in brackets is the INDEX (position), not the value. Scores[3] is 15, and Scores[Index + 1] is Scores[3] when Index is 2. A variable can be used as an index."),
       mc("Why use an array instead of 30 separate variables to store 30 names?", "A loop can process all the names using an index", ["Arrays store different data types","Arrays are faster at doing arithmetic","Arrays do not need to be declared"], "A single array can be processed with a loop and one variable index.")
     ] },
 
@@ -322,6 +422,12 @@
       "<p>15, 16 and 23 are above 10, so Count = <b>3</b>.</p>",
     checks:[
       mc("An array holds 4, 8, 15, 16, 23. What is the total after the totalling loop?", "66", ["23","15","60"], "4 + 8 + 15 + 16 + 23 = 66."),
+      fill("Complete the algorithm that finds the <b>largest</b> value in the array <code>Scores</code> (indexes 1 to 5).",
+        "Largest ← Scores[1]\nFOR Index ← 2 TO {1}\n   IF Scores[Index] > {2}\n      THEN\n         Largest ← {3}\n   ENDIF\nNEXT Index",
+       [["5", ["4", "6", "1"]],
+        ["Largest", ["Index", "Scores[1]", "Total"]],
+        ["Scores[Index]", ["Index", "Scores[Index + 1]", "Largest + 1"]]],
+        "Start with the first item as the largest so far, then check items 2 to 5. If the current item is greater than Largest, it becomes the new Largest."),
       mc("Which loop header is suitable for processing every element of <code>ARRAY[1:20]</code>?", "FOR Index ← 1 TO 20", ["FOR Index ← 0 TO 20","FOR Index ← 1 TO 19","WHILE Index = 20"], "The loop must run from the lower bound 1 to the upper bound 20.")
     ] },
 
@@ -335,6 +441,13 @@
       "<p><code>Table[2,3]</code> is <b>6</b>. All nine values add up to 1+2+3+2+4+6+3+6+9 = <b>36</b>.</p>",
     checks:[
       mc("In the table above, what is the value of <code>Table[3,2]</code>?", "6", ["5","9","3"], "Row 3 × Column 2 = 6."),
+      fill("Complete the <b>nested loops</b> that fill a 2D array of 3 rows and 5 columns with Row × Column.",
+        "DECLARE Table : ARRAY[1:3, 1:5] OF INTEGER\nFOR Row ← 1 TO 3\n   FOR Column ← 1 TO {1}\n      Table[{2}] ← Row * Column\n   {3} Column\nNEXT {4}",
+       [["5", ["3", "15", "Row"]],
+        ["Row, Column", ["Column, Row", "Row", "Column"]],
+        ["NEXT", ["ENDFOR", "END", "LOOP"]],
+        ["Row", ["Column", "Table", "Index"]]],
+        "The outer loop goes through the rows (1 to 3) and the inner loop through the columns (1 to 5). The cell is [row, column]. The inner loop is closed before the outer loop."),
       mc("How many times does the inner statement run for a 3 × 3 array processed with nested FOR loops?", "9", ["3","6","27"], "The inner loop runs 3 times for each of the 3 rows: 3 × 3 = 9.")
     ] },
 
@@ -361,6 +474,17 @@
       "<p>If the first score typed was 12, the program outputs <b>12</b>.</p>",
     checks:[
       mc("Which statement opens a file so that data can be saved to it?", "OPENFILE \"Data.txt\" FOR WRITE", ["OPENFILE \"Data.txt\" FOR READ","CLOSEFILE \"Data.txt\"","READFILE \"Data.txt\", Item"], "WRITE mode is used to put data into a file."),
+      fill("Complete the program that <b>saves</b> three scores to a file.",
+        "{1} \"Scores.txt\" FOR WRITE\nFOR Index ← 1 TO 3\n   INPUT Score\n   {2} \"Scores.txt\", Score\nNEXT Index\n{3} \"Scores.txt\"",
+       [["OPENFILE", ["OPEN", "READFILE", "FILEOPEN"]],
+        ["WRITEFILE", ["READFILE", "OUTPUT", "SAVEFILE"]],
+        ["CLOSEFILE", ["CLOSE", "ENDFILE", "OPENFILE"]]],
+        "A file is opened with OPENFILE, written with WRITEFILE, and always closed with CLOSEFILE so the data is saved properly."),
+      fill("Complete the program that <b>reads</b> the first score back from the file.",
+        "OPENFILE \"Scores.txt\" FOR {1}\n{2} \"Scores.txt\", FirstScore\nCLOSEFILE \"Scores.txt\"\nOUTPUT FirstScore",
+       [["READ", ["WRITE", "OUTPUT", "INPUT"]],
+        ["READFILE", ["WRITEFILE", "INPUT", "OPENFILE"]]],
+        "To read, open the file FOR READ, then use READFILE to copy a line into a variable, then close it."),
       mc("What is the purpose of CLOSEFILE?", "To finish using the file safely", ["To delete the file from the disk","To read the next item in the file","To open the file in write mode"], "A file should be closed when it is no longer needed.")
     ] }
 

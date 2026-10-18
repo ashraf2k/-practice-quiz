@@ -18,9 +18,28 @@
   var LESSONS = (root.ILEARN_LESSONS || []).map(function(l, i){ return { l: l, i: i }; })
     .sort(function(a, b){ var d = (CODE_INDEX[a.l.code] || 0) - (CODE_INDEX[b.l.code] || 0); return d || (a.i - b.i); })
     .map(function(x){ return x.l; });
+  // Journey placement: the 8.2 Arrays lessons are taught inside Topic 7, right
+  // before Linear search (7.4c), because linear search and bubble sort need arrays.
+  // They keep their syllabus codes (8.2.x); only the learning order/track changes.
+  var PLACEMENTS = {
+    "8.2.1":  { track: 7, before: "7.4c" },
+    "8.2.2":  { track: 7, before: "7.4c" },
+    "8.2.3a": { track: 7, before: "7.4c" },
+    "8.2.3b": { track: 7, before: "7.4c" }
+  };
+  (function(){
+    var moved = LESSONS.filter(function(l){ return PLACEMENTS[l.id]; });
+    LESSONS = LESSONS.filter(function(l){ return !PLACEMENTS[l.id]; });
+    moved.forEach(function(l){
+      var pl = PLACEMENTS[l.id]; l.track = pl.track; l.before = pl.before;
+      var at = -1; LESSONS.forEach(function(x, i){ if(x.id === pl.before) at = i; });
+      if(at < 0) LESSONS.push(l); else LESSONS.splice(at, 0, l);
+    });
+  })();
   var LESSON_BY_ID = {}; LESSONS.forEach(function(l){ LESSON_BY_ID[l.id] = l; });
   function lessonsOf(code){ return LESSONS.filter(function(l){ return l.code === code; }); }
-  function topicOf(l){ return parseInt(O[l.code][0], 10); }
+  function topicOf(l){ return l.track || parseInt(O[l.code][0], 10); }
+  function movedBefore(id){ return LESSONS.filter(function(l){ return l.before === id; }); }
 
   function topicTree(){
     var topics = {};
@@ -177,7 +196,7 @@
 
   root.ILearnEngine = {
     esc: esc, shuffle: shuffle, today: today, CODES: CODES, LESSONS: LESSONS, LESSON_BY_ID: LESSON_BY_ID, TESTS: TESTS,
-    lessonsOf: lessonsOf, topicOf: topicOf, topicTree: topicTree, gradeText: gradeText, emptyState: emptyState,
+    lessonsOf: lessonsOf, topicOf: topicOf, movedBefore: movedBefore, topicTree: topicTree, gradeText: gradeText, emptyState: emptyState,
     mergeState: mergeState, snapshot: snapshot, dueLessons: dueLessons, streak: streak, maxStreak: maxStreak, badges: badges, keyIdea: keyIdea, GAMES: GAMES, xp: xp, level: level, gameCount: gameCount, gameStars: gameStars
   };
 })(typeof window !== "undefined" ? window : this);
