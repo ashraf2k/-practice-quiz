@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-l6TLYkMHPU7irj1xm/p+8dkGTAZBoQuZL1y4TDcfDIw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261018h"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-pbG7vhXDRABQOSxJHVMociVB6ApFNCRZdzgAfWJ4pNU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261018i"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -15,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261018h" />
+<link rel="stylesheet" href="shared.css?v=20261018i" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -535,6 +535,7 @@
             <option value="10BR3">10BR3</option>
           </select>
           <input type="text" id="filter-search-ilearn" placeholder="Search by name or email" />
+          <label style="display:inline-flex;align-items:center;gap:6px;font-size:.9rem"><input type="checkbox" id="filter-hide-inactive" /> Hide students with no activity</label>
           <button class="btn btn-primary" id="btn-ilearn-load">Load iLearn progress</button>
         </div>
         <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by lessons done and then by lessons mastered first time. Click "Load iLearn progress" to fetch it. Every registered 10BR student is listed, including those who have not done a quiz yet.</p>
@@ -604,31 +605,31 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261018h -- cache-busting; see the longer comment above this same
+<!-- ?v=20261018i -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261018h"></script>
-<script src="exam-data.js?v=20261018h"></script>
-<script src="syllabus-objectives.js?v=20261018h"></script>
-<script src="learn-helpers.js?v=20261018h"></script>
-<script src="learn-data.js?v=20261018h"></script>
-<script src="learn-t1.js?v=20261018h"></script>
-<script src="learn-t2.js?v=20261018h"></script>
-<script src="learn-t3.js?v=20261018h"></script>
-<script src="learn-t4.js?v=20261018h"></script>
-<script src="learn-t5.js?v=20261018h"></script>
-<script src="learn-t6.js?v=20261018h"></script>
-<script src="learn-t7.js?v=20261018h"></script>
-<script src="learn-t8.js?v=20261018h"></script>
-<script src="learn-t9.js?v=20261018h"></script>
-<script src="learn-t10.js?v=20261018h"></script>
-<script src="learn-games-data.js?v=20261018h"></script>
-<script src="learn-engine.js?v=20261018h"></script>
-<script src="report-lib.js?v=20261018h"></script>
-<script src="syllabus-data.js?v=20261018h"></script>
-<script src="syllabus-report.js?v=20261018h"></script>
-<script src="firebase-config.js?v=20261018h"></script>
-<script type="module" src="firebase-init.js?v=20261018h"></script>
+<script src="quiz-data.js?v=20261018i"></script>
+<script src="exam-data.js?v=20261018i"></script>
+<script src="syllabus-objectives.js?v=20261018i"></script>
+<script src="learn-helpers.js?v=20261018i"></script>
+<script src="learn-data.js?v=20261018i"></script>
+<script src="learn-t1.js?v=20261018i"></script>
+<script src="learn-t2.js?v=20261018i"></script>
+<script src="learn-t3.js?v=20261018i"></script>
+<script src="learn-t4.js?v=20261018i"></script>
+<script src="learn-t5.js?v=20261018i"></script>
+<script src="learn-t6.js?v=20261018i"></script>
+<script src="learn-t7.js?v=20261018i"></script>
+<script src="learn-t8.js?v=20261018i"></script>
+<script src="learn-t9.js?v=20261018i"></script>
+<script src="learn-t10.js?v=20261018i"></script>
+<script src="learn-games-data.js?v=20261018i"></script>
+<script src="learn-engine.js?v=20261018i"></script>
+<script src="report-lib.js?v=20261018i"></script>
+<script src="syllabus-data.js?v=20261018i"></script>
+<script src="syllabus-report.js?v=20261018i"></script>
+<script src="firebase-config.js?v=20261018i"></script>
+<script type="module" src="firebase-init.js?v=20261018i"></script>
 <script type="module">
 (function(){
 
@@ -1031,8 +1032,11 @@
     var shown = ilearnRows.filter(function(r){
       var cls = document.getElementById("filter-class-ilearn").value;
       var q = document.getElementById("filter-search-ilearn").value.trim().toLowerCase();
+      if(document.getElementById("filter-hide-inactive").checked && !Object.keys(r.st.learn).length && !r.lastActive) return false;
       return (!cls || r.s.className === cls) && (!q || ((r.s.name || "") + " " + (r.s.email || "")).toLowerCase().indexOf(q) !== -1);
     });
+    var nameCount = {};
+    ilearnRows.forEach(function(r){ var k = String(r.s.name || "").trim().toLowerCase(); nameCount[k] = (nameCount[k] || 0) + 1; });
     table.style.display = shown.length ? "" : "none";
     tb.innerHTML = "";
     var total = E.LESSONS.length, struggle = {};
@@ -1047,7 +1051,7 @@
       });
     });
     shown.sort(function(a, b){
-      return (b.done - a.done) || (b.mastered - a.mastered) || String(a.s.name || "").localeCompare(String(b.s.name || ""));
+      return (b.done - a.done) || (b.mastered - a.mastered) || ((b.lastActive || 0) - (a.lastActive || 0)) || String(a.s.name || "").localeCompare(String(b.s.name || ""));
     });
     shown.forEach(function(r, i){
       var st = r.st, L = st.learn;
@@ -1068,6 +1072,10 @@
         if(ci === 2){
           td.textContent = done + " / " + total + " (" + pctDone + "%)";
           var mp = document.createElement("span"); mp.className = "miniprog"; var mi = document.createElement("i"); mi.style.width = pctDone + "%"; mp.appendChild(mi); td.appendChild(mp);
+        } else if(ci === 0){
+          td.textContent = c;
+          if(nameCount[String(c).trim().toLowerCase()] > 1){ var db = document.createElement("span"); db.textContent = " duplicate name"; db.style.cssText = "background:#fef3c7;color:#92400e;border-radius:8px;padding:1px 7px;font-size:.72rem;margin-left:6px"; td.appendChild(db); }
+          if(r.s.email){ var em = document.createElement("div"); em.textContent = r.s.email; em.style.cssText = "font-size:.75rem;color:#64748b"; td.appendChild(em); }
         } else td.textContent = c;
         tr.appendChild(td);
       });
@@ -1403,6 +1411,7 @@
   });
   document.getElementById("filter-class-ilearn").addEventListener("change", renderILearn);
   document.getElementById("filter-search-ilearn").addEventListener("input", renderILearn);
+  document.getElementById("filter-hide-inactive").addEventListener("change", renderILearn);
 
   // ============================================================
   // Archive (remove a student from the live database, restorable)

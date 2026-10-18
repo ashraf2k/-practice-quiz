@@ -65,7 +65,7 @@
     students.forEach(function(s, i){
       var c = { secure:0, developing:0, needs:0 };
       s.rows.forEach(function(r){ if(c[r.rating] != null) c[r.rating]++; });
-      h += '<tr data-i="' + i + '"><td>' + esc(s.name) + "</td><td>" + esc(s.className) + "</td><td>" + s.quizzes.length + "</td><td>" + s.papers.length +
+      h += '<tr data-i="' + i + '"><td>' + esc(s.name) + (s.email ? '<br><small style="color:#64748b">' + esc(s.email) + "</small>" : "") + "</td><td>" + esc(s.className) + "</td><td>" + s.quizzes.length + "</td><td>" + s.papers.length +
         "</td><td>" + s.overallPct + "%</td><td>" + c.secure + "</td><td>" + c.developing + "</td><td>" + c.needs + "</td></tr>";
     });
     h += "</tbody></table></div>";
