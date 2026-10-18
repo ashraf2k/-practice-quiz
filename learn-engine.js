@@ -18,23 +18,32 @@
   var LESSONS = (root.ILEARN_LESSONS || []).map(function(l, i){ return { l: l, i: i }; })
     .sort(function(a, b){ var d = (CODE_INDEX[a.l.code] || 0) - (CODE_INDEX[b.l.code] || 0); return d || (a.i - b.i); })
     .map(function(x){ return x.l; });
-  // Journey placement overrides (lesson id -> { track: topic number, before: lesson id }).
-  // Currently empty: every lesson is taught in its own syllabus topic and order.
-  // (8.2 Arrays was briefly placed before Linear search and then rolled back.)
-  var PLACEMENTS = {};
+  // Journey placement overrides (lesson id -> where it is taught).
+  // Linear search (7.4c) and bubble sort (7.4d) work on arrays, so they are taught
+  // in Topic 8 straight after 8.2 Arrays. They keep their syllabus code (7.4).
+  var PLACE_NOTE = "Linear search and bubble sort work on arrays, so you learn them here, now that you know arrays (syllabus 7.4).";
+  var PLACEMENTS = {
+    "7.4c": { track: 8, after: "8.2.3b", note: PLACE_NOTE, away: "Linear search and bubble sort are taught in Topic 8, right after Arrays" },
+    "7.4d": { track: 8, after: "8.2.3b", note: PLACE_NOTE, away: "Linear search and bubble sort are taught in Topic 8, right after Arrays" }
+  };
   (function(){
     var moved = LESSONS.filter(function(l){ return PLACEMENTS[l.id]; });
     LESSONS = LESSONS.filter(function(l){ return !PLACEMENTS[l.id]; });
+    var inserted = {};
     moved.forEach(function(l){
-      var pl = PLACEMENTS[l.id]; l.track = pl.track; l.before = pl.before;
-      var at = -1; LESSONS.forEach(function(x, i){ if(x.id === pl.before) at = i; });
-      if(at < 0) LESSONS.push(l); else LESSONS.splice(at, 0, l);
+      var pl = PLACEMENTS[l.id]; l.track = pl.track; l.note = pl.note; l.away = pl.away;
+      var anchor = pl.after || pl.before; l.after = pl.after || null; l.before = pl.before || null;
+      var at = -1; LESSONS.forEach(function(x, i){ if(x.id === anchor) at = i; });
+      if(at < 0){ LESSONS.push(l); return; }
+      if(pl.after){ var n = (inserted[anchor] || 0); inserted[anchor] = n + 1; LESSONS.splice(at + 1 + n, 0, l); }
+      else LESSONS.splice(at, 0, l);
     });
   })();
   var LESSON_BY_ID = {}; LESSONS.forEach(function(l){ LESSON_BY_ID[l.id] = l; });
   function lessonsOf(code){ return LESSONS.filter(function(l){ return l.code === code; }); }
   function topicOf(l){ return l.track || parseInt(O[l.code][0], 10); }
   function movedBefore(id){ return LESSONS.filter(function(l){ return l.before === id; }); }
+  function movedAfter(id){ return LESSONS.filter(function(l){ return l.after === id; }); }
 
   function topicTree(){
     var topics = {};
@@ -191,7 +200,7 @@
 
   root.ILearnEngine = {
     esc: esc, shuffle: shuffle, today: today, CODES: CODES, LESSONS: LESSONS, LESSON_BY_ID: LESSON_BY_ID, TESTS: TESTS,
-    lessonsOf: lessonsOf, topicOf: topicOf, movedBefore: movedBefore, topicTree: topicTree, gradeText: gradeText, emptyState: emptyState,
+    lessonsOf: lessonsOf, topicOf: topicOf, movedBefore: movedBefore, movedAfter: movedAfter, topicTree: topicTree, gradeText: gradeText, emptyState: emptyState,
     mergeState: mergeState, snapshot: snapshot, dueLessons: dueLessons, streak: streak, maxStreak: maxStreak, badges: badges, keyIdea: keyIdea, GAMES: GAMES, xp: xp, level: level, gameCount: gameCount, gameStars: gameStars
   };
 })(typeof window !== "undefined" ? window : this);

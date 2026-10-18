@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-A4v/ZTVcjjETeuhLHZ751XS0qnWKD15auABndpn1i8U='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261018f"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-mov7LVT+U3kiTt0zUN7DbX9fzNVVMMJE8Q4FOvNTDuw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261018g"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
@@ -13,7 +13,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>iLearn</title>
-<link rel="stylesheet" href="shared.css?v=20261018f" />
+<link rel="stylesheet" href="shared.css?v=20261018g" />
 <style>
   .ln-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
   .ln-hero{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
@@ -205,25 +205,25 @@
   <section id="view-wait" class="card"><p class="ln-notice">Loading your journey…</p></section>
 </div>
 
-<script src="syllabus-objectives.js?v=20261018f"></script>
-<script src="learn-helpers.js?v=20261018f"></script>
-<script src="learn-data.js?v=20261018f"></script>
-<script src="learn-t1.js?v=20261018f"></script>
-<script src="learn-t2.js?v=20261018f"></script>
-<script src="learn-t3.js?v=20261018f"></script>
-<script src="learn-t4.js?v=20261018f"></script>
-<script src="learn-t5.js?v=20261018f"></script>
-<script src="learn-t6.js?v=20261018f"></script>
-<script src="learn-t7.js?v=20261018f"></script>
-<script src="learn-t8.js?v=20261018f"></script>
-<script src="learn-t9.js?v=20261018f"></script>
-<script src="learn-t10.js?v=20261018f"></script>
-<script src="learn-glossary.js?v=20261018f"></script>
-<script src="learn-games.js?v=20261018f"></script>
-<script src="learn-games-data.js?v=20261018f"></script>
-<script src="learn-engine.js?v=20261018f"></script>
-<script src="firebase-config.js?v=20261018f"></script>
-<script type="module" src="firebase-init.js?v=20261018f"></script>
+<script src="syllabus-objectives.js?v=20261018g"></script>
+<script src="learn-helpers.js?v=20261018g"></script>
+<script src="learn-data.js?v=20261018g"></script>
+<script src="learn-t1.js?v=20261018g"></script>
+<script src="learn-t2.js?v=20261018g"></script>
+<script src="learn-t3.js?v=20261018g"></script>
+<script src="learn-t4.js?v=20261018g"></script>
+<script src="learn-t5.js?v=20261018g"></script>
+<script src="learn-t6.js?v=20261018g"></script>
+<script src="learn-t7.js?v=20261018g"></script>
+<script src="learn-t8.js?v=20261018g"></script>
+<script src="learn-t9.js?v=20261018g"></script>
+<script src="learn-t10.js?v=20261018g"></script>
+<script src="learn-glossary.js?v=20261018g"></script>
+<script src="learn-games.js?v=20261018g"></script>
+<script src="learn-games-data.js?v=20261018g"></script>
+<script src="learn-engine.js?v=20261018g"></script>
+<script src="firebase-config.js?v=20261018g"></script>
+<script type="module" src="firebase-init.js?v=20261018g"></script>
 <script type="module">
 (function(){
   "use strict";
@@ -422,12 +422,8 @@
         sec.units.forEach(function(u){
           var raw = lessonsOf(u.code);
           var ls = raw.filter(function(l){ return topicNum(l) === tn; });   // lessons taught in this topic
-          var away = raw.length - ls.length;                                  // taught elsewhere (8.2 Arrays -> Topic 7)
+          var away = raw.length - ls.length;                                  // taught in another topic (linear search / bubble sort -> Topic 8)
           h += '<div class="ln-unit"><div class="ln-unit-head"><span class="ln-code">' + esc(u.code) + "</span><span>" + esc(u.text) + "</span>" + (raw.length ? "" : '<span class="ln-soon">Coming soon</span>') + "</div>";
-          if(away && !ls.length){
-            var adone = raw.filter(function(l){ return isDone(l.id); }).length;
-            h += '<div class="ln-moved">📚 Taught in <b>Topic ' + topicNum(raw[0]) + '</b>, just before Linear search (' + adone + " of " + raw.length + " lessons done).</div>";
-          }
           if(ls.length){
             h += '<div class="ln-lessons">';
             function btn(l, extra){
@@ -440,14 +436,22 @@
               return '<button class="ln-lesson' + (done ? " done" : "") + (isCur ? " cur" : "") + '" data-l="' + l.id + '"' + (ok ? "" : " disabled") + '><span class="ln-dot">' + (done ? "✓" : (ok ? "▶" : "🔒")) + "</span><span>" + esc(l.title) + (extra ? ' <small style="color:var(--muted)">(' + esc(l.code) + ")</small>" : "") + (E.GAMES[l.id] ? " <span title=\"Has a puzzle\">🎮</span>" : "") + "</span>" + tag + "</button>";
             }
             ls.forEach(function(l){
-              var pre = E.movedBefore(l.id);
+              var pre = E.movedBefore(l.id), post = E.movedAfter(l.id);
               if(pre.length){
-                h += '<div class="ln-bridge">📚 <b>Arrays first.</b> Linear search and bubble sort work on arrays, so you learn arrays (syllabus 8.2) here.</div>';
+                h += '<div class="ln-bridge">📚 ' + esc(pre[0].note || "") + "</div>";
                 pre.forEach(function(m){ h += btn(m, true); });
               }
               h += btn(l, false);
+              if(post.length){
+                h += '<div class="ln-bridge">📚 ' + esc(post[0].note || "") + "</div>";
+                post.forEach(function(m){ h += btn(m, true); });
+              }
             });
             h += "</div>";
+          }
+          if(away){
+            var movedL = raw.filter(function(l){ return topicNum(l) !== tn; }), adone = movedL.filter(function(l){ return isDone(l.id); }).length;
+            h += '<div class="ln-moved">📚 ' + esc(movedL[0].away || ("Taught in Topic " + topicNum(movedL[0]))) + " (" + adone + " of " + movedL.length + " lessons done).</div>";
           }
           h += "</div>";
         });
