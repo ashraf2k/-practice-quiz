@@ -129,7 +129,6 @@
 
   { id:"7.4c", code:"7.4", title:"Linear search",
     concept:
-      "<p>You have just learned about <b>arrays</b> (syllabus 8.2). A linear search looks through the items of an array one by one, using the <b>index</b> to point at each item.</p>" +
       "<p>A <b>linear search</b> finds out whether a value is in a list. It checks each item <b>one at a time</b>, starting at the <b>first</b>, until it finds the value or reaches the <b>end</b> of the list. The data does <b>not</b> need to be sorted.</p>" +
       pre("Found ← FALSE\nIndex ← 1\nWHILE Found = FALSE AND Index <= 8 DO\n   IF DataArray[Index] = SearchValue\n      THEN\n         Found ← TRUE\n      ELSE\n         Index ← Index + 1\n   ENDIF\nENDWHILE") +
       "<p>Stopping as soon as the value is found makes the search <b>more efficient</b> than checking every item.</p>",

@@ -18,15 +18,10 @@
   var LESSONS = (root.ILEARN_LESSONS || []).map(function(l, i){ return { l: l, i: i }; })
     .sort(function(a, b){ var d = (CODE_INDEX[a.l.code] || 0) - (CODE_INDEX[b.l.code] || 0); return d || (a.i - b.i); })
     .map(function(x){ return x.l; });
-  // Journey placement: the 8.2 Arrays lessons are taught inside Topic 7, right
-  // before Linear search (7.4c), because linear search and bubble sort need arrays.
-  // They keep their syllabus codes (8.2.x); only the learning order/track changes.
-  var PLACEMENTS = {
-    "8.2.1":  { track: 7, before: "7.4c" },
-    "8.2.2":  { track: 7, before: "7.4c" },
-    "8.2.3a": { track: 7, before: "7.4c" },
-    "8.2.3b": { track: 7, before: "7.4c" }
-  };
+  // Journey placement overrides (lesson id -> { track: topic number, before: lesson id }).
+  // Currently empty: every lesson is taught in its own syllabus topic and order.
+  // (8.2 Arrays was briefly placed before Linear search and then rolled back.)
+  var PLACEMENTS = {};
   (function(){
     var moved = LESSONS.filter(function(l){ return PLACEMENTS[l.id]; });
     LESSONS = LESSONS.filter(function(l){ return !PLACEMENTS[l.id]; });
