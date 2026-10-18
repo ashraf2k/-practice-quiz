@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-fp2zeYzEtlZKGN83AhmQVSuIJgGf4VsqslgI0Wl20SM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-3Z5vru2zOI50w3pwbHpxrVk3PF77laJXxjpIF0rfSfM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261018m"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Browsers (not just GitHub Pages' CDN) can cache an HTML page itself,
@@ -1024,7 +1024,7 @@
     var topicStats = state.results.map(function(r){
       return { topic: r.topic, difficulty: r.difficulty, earned: r.earned, total: r.total };
     });
-    var minutesTaken = state.startedAt ? Math.max(1, Math.round((Date.now() - state.startedAt) / 60000)) : null;
+    var minutesTaken = state.startedAt ? Math.min(1440, Math.max(1, Math.round((Date.now() - state.startedAt) / 60000))) : null;
 
     saveStatus.textContent = "Saving your results…";
     PQFirebase.recordExamAttempt(state.currentUser.uid, state.paperKey, {
