@@ -254,6 +254,14 @@ function getMyAttempt(uid, examKey){
 // (attemptNumber 2), is a small snapshot of the first attempt's score so
 // the teacher's admin view can still see it even though this write
 // replaces the first attempt's answers/score as the one that counts.
+// Re-read the account and force a fresh ID token (picks up a changed
+// email_verified flag). Never rejects.
+function refreshToken(){
+  var u = auth.currentUser;
+  if(!u) return Promise.resolve();
+  return u.reload().catch(function(){}).then(function(){ return u.getIdToken(true); }).catch(function(){});
+}
+
 function recordAttempt(uid, examKey, record){
   var ref = doc(db, "attempts", attemptId(uid, examKey));
   var payload = {
@@ -273,6 +281,7 @@ function recordAttempt(uid, examKey, record){
   if(record.firstAttempt) payload.firstAttempt = record.firstAttempt;
   // Retry transient failures (flaky school Wi-Fi: unavailable / timeout /
   // network) a few times with a short back-off before giving up.
+  var refreshed = false;
   function attempt(n){
     return setDoc(ref, payload, { merge: false })
       .then(function(){ return { ok: true }; })
@@ -280,7 +289,13 @@ function recordAttempt(uid, examKey, record){
         var code = err && err.code;
         // Blocked by the rules above -- a duplicate submit or both attempts
         // already used. Not retried; quiz.html re-reads the server copy.
-        if(code === "permission-denied") return { ok: false, alreadyRecorded: true, code: code };
+        if(code === "permission-denied"){
+          // A stale sign-in token (e.g. the e-mail was verified after the
+          // token was issued) is refused by the rules. Refresh it once and
+          // retry before treating this as a real refusal.
+          if(!refreshed){ refreshed = true; return refreshToken().then(function(){ return attempt(n); }); }
+          return { ok: false, alreadyRecorded: true, code: code };
+        }
         var transient = !code || code === "unavailable" || code === "deadline-exceeded" || code === "resource-exhausted" || code === "aborted" || code === "cancelled" || code === "internal";
         if(transient && n < 3){
           return new Promise(function(r){ setTimeout(r, 1200 * n); }).then(function(){ return attempt(n + 1); });
@@ -386,11 +401,15 @@ function recordExamAttempt(uid, paperKey, record){
     minutesTaken: record.minutesTaken != null ? record.minutesTaken : null,
     recordedAt: serverTimestamp()
   };
-  return setDoc(ref, payload, { merge: false })
-    .then(function(){ return { ok: true }; })
-    .catch(function(err){
-      return { ok: false, error: (err && err.message) || "Could not save." };
-    });
+  function save(retry){
+    return setDoc(ref, payload, { merge: false })
+      .then(function(){ return { ok: true }; })
+      .catch(function(err){
+        if(retry && err && err.code === "permission-denied") return refreshToken().then(function(){ return save(false); });
+        return { ok: false, error: (err && err.message) || "Could not save.", code: err && err.code };
+      });
+  }
+  return save(true);
 }
 
 // Admin-only (enforced by security rules, not just this check): lets the
