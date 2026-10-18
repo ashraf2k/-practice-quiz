@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-fjTLqtK0Kq4M4QriXTB2Ty5wfTaSR7FxuspxG6fPbPU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261018n"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-ZrGIPxU5JFscp2UUZwDqek42aun2Cq+r229mifFTsrY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261019a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -15,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261018n" />
+<link rel="stylesheet" href="shared.css?v=20261019a" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -542,7 +542,7 @@
         <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by topics completed, then by performance (share of lessons mastered first time). Only students who have started the journey are listed. Click "Load iLearn progress" to fetch it. </p>
         <div id="ilearn-summary"></div>
         <div class="table-scroll"><table class="admin-table" id="ilearn-table" style="display:none">
-          <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Topics completed</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Last active</th><th></th></tr></thead>
+          <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Topics completed</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Paper 2 mock</th><th>Last active</th><th></th></tr></thead>
           <tbody></tbody></table></div>
         <h3 id="ilearn-struggle-h" style="display:none;margin-top:20px">Lessons students found hardest</h3>
         <div class="table-scroll"><table class="admin-table" id="ilearn-struggle" style="display:none">
@@ -606,31 +606,31 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261018n -- cache-busting; see the longer comment above this same
+<!-- ?v=20261019a -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261018n"></script>
-<script src="exam-data.js?v=20261018n"></script>
-<script src="syllabus-objectives.js?v=20261018n"></script>
-<script src="learn-helpers.js?v=20261018n"></script>
-<script src="learn-data.js?v=20261018n"></script>
-<script src="learn-t1.js?v=20261018n"></script>
-<script src="learn-t2.js?v=20261018n"></script>
-<script src="learn-t3.js?v=20261018n"></script>
-<script src="learn-t4.js?v=20261018n"></script>
-<script src="learn-t5.js?v=20261018n"></script>
-<script src="learn-t6.js?v=20261018n"></script>
-<script src="learn-t7.js?v=20261018n"></script>
-<script src="learn-t8.js?v=20261018n"></script>
-<script src="learn-t9.js?v=20261018n"></script>
-<script src="learn-t10.js?v=20261018n"></script>
-<script src="learn-games-data.js?v=20261018n"></script>
-<script src="learn-engine.js?v=20261018n"></script>
-<script src="report-lib.js?v=20261018n"></script>
-<script src="syllabus-data.js?v=20261018n"></script>
-<script src="syllabus-report.js?v=20261018n"></script>
-<script src="firebase-config.js?v=20261018n"></script>
-<script type="module" src="firebase-init.js?v=20261018n"></script>
+<script src="quiz-data.js?v=20261019a"></script>
+<script src="exam-data.js?v=20261019a"></script>
+<script src="syllabus-objectives.js?v=20261019a"></script>
+<script src="learn-helpers.js?v=20261019a"></script>
+<script src="learn-data.js?v=20261019a"></script>
+<script src="learn-t1.js?v=20261019a"></script>
+<script src="learn-t2.js?v=20261019a"></script>
+<script src="learn-t3.js?v=20261019a"></script>
+<script src="learn-t4.js?v=20261019a"></script>
+<script src="learn-t5.js?v=20261019a"></script>
+<script src="learn-t6.js?v=20261019a"></script>
+<script src="learn-t7.js?v=20261019a"></script>
+<script src="learn-t8.js?v=20261019a"></script>
+<script src="learn-t9.js?v=20261019a"></script>
+<script src="learn-t10.js?v=20261019a"></script>
+<script src="learn-games-data.js?v=20261019a"></script>
+<script src="learn-engine.js?v=20261019a"></script>
+<script src="report-lib.js?v=20261019a"></script>
+<script src="syllabus-data.js?v=20261019a"></script>
+<script src="syllabus-report.js?v=20261019a"></script>
+<script src="firebase-config.js?v=20261019a"></script>
+<script type="module" src="firebase-init.js?v=20261019a"></script>
 <script type="module">
 (function(){
 
@@ -1073,7 +1073,7 @@
       var rank = document.createElement("span"); rank.className = "rank" + (i < 3 ? " r" + (i + 1) : ""); rank.textContent = String(i + 1);
       var tdRank = document.createElement("td"); tdRank.appendChild(rank); tr.appendChild(tdRank);
       var pctDone = Math.round(100 * done / total);
-      var cells = [r.s.name || "(no name)", r.s.className || "", null, r.topicsDone + " / " + r.topicsTotal, mastered + " (" + Math.round(100 * r.perf) + "%)", E.streak(st.days) + " days", E.dueLessons(L).length, E.gameCount(st) + " / " + E.xp(st) + " XP", tests, r.p1 ? Math.round(r.p1.best) + "% best (" + r.p1.n + ")" : "-", ilearnDate(r.lastActive)];
+      var cells = [r.s.name || "(no name)", r.s.className || "", null, r.topicsDone + " / " + r.topicsTotal, mastered + " (" + Math.round(100 * r.perf) + "%)", E.streak(st.days) + " days", E.dueLessons(L).length, E.gameCount(st) + " / " + E.xp(st) + " XP", tests, r.p1 ? Math.round(r.p1.best) + "% best (" + r.p1.n + ")" : "-", r.p2 ? Math.round(r.p2.best) + "% best (" + r.p2.n + ")" : "-", ilearnDate(r.lastActive)];
       cells.forEach(function(c, ci){
         var td = document.createElement("td");
         if(ci === 2){
@@ -1296,6 +1296,21 @@
     }
     right.appendChild(pb);
 
+    // ----- Paper 2 mock
+    var pb2 = box("Paper 2 mock exam", "75 marks");
+    if(!r.p2) pb2.appendChild(mk("p", "empty-note", "No Paper 2 mocks attempted yet."));
+    else {
+      pb2.appendChild(mk("p", "admin-status", r.p2.n + " paper" + (r.p2.n === 1 ? "" : "s") + " attempted. Best score " + Math.round(r.p2.best) + "%."));
+      var hist2 = (r.p2hist || []).slice(-10);
+      if(hist2.length){
+        var bars2 = mk("div", "p1-bars");
+        hist2.forEach(function(h){ var pc = h.max ? Math.round(100 * h.score / h.max) : 0, b = mk("div"); b.style.height = Math.max(4, pc) + "%"; b.title = fmtDay(h.at) + ": " + h.score + " / " + h.max + " (" + pc + "%)" + (h.timed ? ", timed" : ""); bars2.appendChild(b); });
+        pb2.appendChild(bars2);
+        pb2.appendChild(mk("p", "admin-status", "Most recent papers, oldest on the left. Hover a bar for the date and mode."));
+      }
+    }
+    right.appendChild(pb2);
+
     // ----- badges
     var bb = box("Badges");
     var br = mk("div", "badge-row");
@@ -1325,7 +1340,7 @@
     });
     rb.appendChild(rlist);
     var mlab = mk("label"); mlab.style.cssText = "display:flex;gap:9px;align-items:center;font-size:13px;margin:0 8px 12px;cursor:pointer";
-    var mcb = mk("input"); mcb.type = "checkbox"; mlab.appendChild(mcb); mlab.appendChild(mk("span", null, "Also clear the Paper 1 mock exam history" + (r.p1 ? " (" + r.p1.n + " paper" + (r.p1.n === 1 ? "" : "s") + ")" : "")));
+    var mcb = mk("input"); mcb.type = "checkbox"; mlab.appendChild(mcb); mlab.appendChild(mk("span", null, "Also clear the Paper 1 and Paper 2 mock exam history" + ((r.p1 || r.p2) ? " (" + ((r.p1 ? r.p1.n : 0) + (r.p2 ? r.p2.n : 0)) + " paper" + (((r.p1 ? r.p1.n : 0) + (r.p2 ? r.p2.n : 0)) === 1 ? "" : "s") + ")" : "")));
     rb.appendChild(mlab);
     var rbtn = mk("button", "btn btn-danger", "Reset selected topics"); rbtn.type = "button"; rbtn.disabled = true;
     var rstat = mk("p", "admin-status"); rstat.style.marginTop = "10px";
@@ -1334,7 +1349,7 @@
     mcb.addEventListener("change", upd);
     rbtn.addEventListener("click", function(){
       var topics = chosen(), clearMock = mcb.checked;
-      var what = (topics.length ? "Topic" + (topics.length === 1 ? " " : "s ") + topics.join(", ") : "") + (topics.length && clearMock ? " and " : "") + (clearMock ? "the Paper 1 mock history" : "");
+      var what = (topics.length ? "Topic" + (topics.length === 1 ? " " : "s ") + topics.join(", ") : "") + (topics.length && clearMock ? " and " : "") + (clearMock ? "the mock exam history" : "");
       if(!window.confirm("Reset " + what + " for " + nm + "?\n\nThis permanently removes that progress and cannot be undone.")) return;
       rbtn.disabled = true; rstat.classList.remove("warn"); rstat.textContent = "Resetting…";
       resetILearn(r, topics, clearMock).then(function(msg){ ilearnFlash = { ok: true, text: msg }; openILearnDetail(r); renderILearn(); })
@@ -1368,12 +1383,12 @@
       snap.lastActive = (rec && rec.lastActive) || now;
       var jobs = [];
       if(topics.length) jobs.push(PQFirebase.saveProgress(uid, "ilearn", snap));
-      if(clearMock) jobs.push(PQFirebase.saveProgress(uid, "paper1mock", { hist: [], best: 0, n: 0, lastActive: now, resetAt: now }));
+      if(clearMock){ jobs.push(PQFirebase.saveProgress(uid, "paper1mock", { hist: [], best: 0, n: 0, lastActive: now, resetAt: now })); jobs.push(PQFirebase.saveProgress(uid, "paper2mock", { hist: [], best: 0, n: 0, lastActive: now, resetAt: now })); }
       return Promise.all(jobs).then(function(res){
         res.forEach(function(x){ if(!x || x.ok === false) throw new Error((x && x.error) || "the save was refused"); });
         r.st = E.mergeState(null, snap);
-        if(clearMock){ r.p1 = null; r.p1hist = []; }
-        return "Reset done: " + (topics.length ? "Topic" + (topics.length === 1 ? " " : "s ") + topics.join(", ") : "") + (topics.length && clearMock ? " and " : "") + (clearMock ? "Paper 1 mock history" : "") + ".";
+        if(clearMock){ r.p1 = null; r.p1hist = []; r.p2 = null; r.p2hist = []; }
+        return "Reset done: " + (topics.length ? "Topic" + (topics.length === 1 ? " " : "s ") + topics.join(", ") : "") + (topics.length && clearMock ? " and " : "") + (clearMock ? "mock exam history" : "") + ".";
       });
     });
   }
@@ -1405,9 +1420,9 @@
     if(!roster.length){ status.textContent = "No 10BR students found yet."; return; }
     status.textContent = "Loading " + roster.length + " students…";
     Promise.all(roster.map(function(s){
-      return Promise.all([PQFirebase.getMyProgress(s.uid, "ilearn").catch(function(){ return null; }), PQFirebase.getMyProgress(s.uid, "paper1mock").catch(function(){ return null; })]).then(function(rr){
-        var rec = rr[0], p1 = rr[1];
-        return { s:s, st: window.ILearnEngine.mergeState(null, rec), lastActive: Math.max((rec && rec.lastActive) || 0, (p1 && p1.lastActive) || 0) || null, p1: p1 && p1.n ? { best: p1.best, n: p1.n } : null, p1hist: (p1 && Array.isArray(p1.hist)) ? p1.hist : [] };
+      return Promise.all([PQFirebase.getMyProgress(s.uid, "ilearn").catch(function(){ return null; }), PQFirebase.getMyProgress(s.uid, "paper1mock").catch(function(){ return null; }), PQFirebase.getMyProgress(s.uid, "paper2mock").catch(function(){ return null; })]).then(function(rr){
+        var rec = rr[0], p1 = rr[1], p2 = rr[2];
+        return { s:s, st: window.ILearnEngine.mergeState(null, rec), lastActive: Math.max((rec && rec.lastActive) || 0, (p1 && p1.lastActive) || 0, (p2 && p2.lastActive) || 0) || null, p1: p1 && p1.n ? { best: p1.best, n: p1.n } : null, p2: p2 && p2.n ? { best: p2.best, n: p2.n } : null, p2hist: (p2 && p2.hist) || [], p1hist: (p1 && Array.isArray(p1.hist)) ? p1.hist : [] };
       });
     })).then(function(rows){
       ilearnRows = rows;
