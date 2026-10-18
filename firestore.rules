@@ -137,6 +137,9 @@ service cloud.firestore {
     // ---------- users ----------
     match /users/{uid} {
       allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // Teacher roster: lets the dashboard list every registered student
+      // (including those who have not submitted a quiz yet).
+      allow list: if isAdmin();
       // One-time profile creation by the owner. No later self-edit (so the
       // class / name / e-mail cannot be tampered with), no self-delete.
       allow create: if signedIn() && request.auth.uid == uid

@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-DHGJaUrMUqPiyyWXAv2OFiTHBW840gnD6xDIb4eXCzY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261018g"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-l6TLYkMHPU7irj1xm/p+8dkGTAZBoQuZL1y4TDcfDIw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261018h"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -15,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261018g" />
+<link rel="stylesheet" href="shared.css?v=20261018h" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -511,7 +511,7 @@
             <option value="10BR2">10BR2</option>
             <option value="10BR3">10BR3</option>
           </select>
-          <input type="text" id="filter-search-syllabus" placeholder="Search by name" />
+          <input type="text" id="filter-search-syllabus" placeholder="Search by name or email" />
           <button class="btn btn-secondary" id="btn-syllabus-class-pdf">Download class PDF</button>
         </div>
         <p class="admin-status">IGCSE 10BR students rated against the Cambridge 0478 syllabus using their best attempt at every completed practice quiz and exam paper. Click a student for their full report, weak points and action plan.</p>
@@ -534,10 +534,10 @@
             <option value="10BR2">10BR2</option>
             <option value="10BR3">10BR3</option>
           </select>
-          <input type="text" id="filter-search-ilearn" placeholder="Search by name" />
+          <input type="text" id="filter-search-ilearn" placeholder="Search by name or email" />
           <button class="btn btn-primary" id="btn-ilearn-load">Load iLearn progress</button>
         </div>
-        <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by lessons done and then by lessons mastered first time. Click "Load iLearn progress" to fetch it. Students who have not yet done a practice quiz or exam are not in this list.</p>
+        <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by lessons done and then by lessons mastered first time. Click "Load iLearn progress" to fetch it. Every registered 10BR student is listed, including those who have not done a quiz yet.</p>
         <div id="ilearn-summary"></div>
         <div class="table-scroll"><table class="admin-table" id="ilearn-table" style="display:none">
           <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Last active</th><th></th></tr></thead>
@@ -604,31 +604,31 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261018g -- cache-busting; see the longer comment above this same
+<!-- ?v=20261018h -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261018g"></script>
-<script src="exam-data.js?v=20261018g"></script>
-<script src="syllabus-objectives.js?v=20261018g"></script>
-<script src="learn-helpers.js?v=20261018g"></script>
-<script src="learn-data.js?v=20261018g"></script>
-<script src="learn-t1.js?v=20261018g"></script>
-<script src="learn-t2.js?v=20261018g"></script>
-<script src="learn-t3.js?v=20261018g"></script>
-<script src="learn-t4.js?v=20261018g"></script>
-<script src="learn-t5.js?v=20261018g"></script>
-<script src="learn-t6.js?v=20261018g"></script>
-<script src="learn-t7.js?v=20261018g"></script>
-<script src="learn-t8.js?v=20261018g"></script>
-<script src="learn-t9.js?v=20261018g"></script>
-<script src="learn-t10.js?v=20261018g"></script>
-<script src="learn-games-data.js?v=20261018g"></script>
-<script src="learn-engine.js?v=20261018g"></script>
-<script src="report-lib.js?v=20261018g"></script>
-<script src="syllabus-data.js?v=20261018g"></script>
-<script src="syllabus-report.js?v=20261018g"></script>
-<script src="firebase-config.js?v=20261018g"></script>
-<script type="module" src="firebase-init.js?v=20261018g"></script>
+<script src="quiz-data.js?v=20261018h"></script>
+<script src="exam-data.js?v=20261018h"></script>
+<script src="syllabus-objectives.js?v=20261018h"></script>
+<script src="learn-helpers.js?v=20261018h"></script>
+<script src="learn-data.js?v=20261018h"></script>
+<script src="learn-t1.js?v=20261018h"></script>
+<script src="learn-t2.js?v=20261018h"></script>
+<script src="learn-t3.js?v=20261018h"></script>
+<script src="learn-t4.js?v=20261018h"></script>
+<script src="learn-t5.js?v=20261018h"></script>
+<script src="learn-t6.js?v=20261018h"></script>
+<script src="learn-t7.js?v=20261018h"></script>
+<script src="learn-t8.js?v=20261018h"></script>
+<script src="learn-t9.js?v=20261018h"></script>
+<script src="learn-t10.js?v=20261018h"></script>
+<script src="learn-games-data.js?v=20261018h"></script>
+<script src="learn-engine.js?v=20261018h"></script>
+<script src="report-lib.js?v=20261018h"></script>
+<script src="syllabus-data.js?v=20261018h"></script>
+<script src="syllabus-report.js?v=20261018h"></script>
+<script src="firebase-config.js?v=20261018h"></script>
+<script type="module" src="firebase-init.js?v=20261018h"></script>
 <script type="module">
 (function(){
 
@@ -830,6 +830,8 @@
   // ============================================================
   var attempts = [];
   var examAttempts = [];
+  var usersRoster = [];       // every registered student profile (for students with no quiz data yet)
+  var usersNote = "";
   var loaded = false;
   // Set once per sign-in (below), so a saved regrade can be stamped with
   // who made it.
@@ -927,8 +929,13 @@
     Promise.all([
       PQFirebase.listAllAttempts(),
       examAttemptsSupported() ? PQFirebase.listAllExamAttempts() : Promise.resolve(null),
-      loadArchiveList()
+      loadArchiveList(),
+      typeof PQFirebase.listAllUsers === "function"
+        ? PQFirebase.listAllUsers().catch(function(err){ return (err && err.code === "permission-denied") ? "denied" : null; })
+        : Promise.resolve(null)
     ]).then(function(results){
+      usersRoster = Array.isArray(results[3]) ? results[3] : [];
+      usersNote = results[3] === "denied" ? "The student list could not be read: publish the latest firestore.rules in the Firebase console (Users: allow list for admins). Students who have not submitted a quiz are hidden until then." : "";
       // Keep every attempt across all exams/papers here; the various
       // exam/class/search/paper filters below decide what's actually
       // shown in each tab.
@@ -940,7 +947,8 @@
         (examAttemptsLoaded
           ? " and " + examAttempts.length + " exam-practice result" + (examAttempts.length === 1 ? "" : "s")
           : " (exam-practice results need a page refresh to load -- your browser has an older cached version of a script this page needs)") +
-        " · refreshed " + new Date().toLocaleTimeString();
+        " · " + usersRoster.length + " registered student" + (usersRoster.length === 1 ? "" : "s") + " · refreshed " + new Date().toLocaleTimeString() + (usersNote ? " · " + usersNote : "");
+      if(usersNote) adminStatus.classList.add("warn");
       renderAll();
     }).catch(function(err){
       adminStatus.classList.add("warn");
@@ -979,11 +987,11 @@
     var container = document.getElementById("syllabus-list");
     if(!loaded){ container.innerHTML = '<p class="empty-note">Loading…</p>'; return; }
     if(!window.SyllabusData || !window.SyllabusReport){ container.innerHTML = '<p class="empty-note">Syllabus report scripts did not load - refresh the page.</p>'; return; }
-    syllabusStudents = SyllabusData.analyse(attempts, examAttempts, EXAMS, EXAM_PAPERS, new Date());
+    syllabusStudents = SyllabusData.analyse(attempts, examAttempts, EXAMS, EXAM_PAPERS, new Date(), usersRoster);
     var cls = document.getElementById("filter-class-syllabus").value;
     var q = document.getElementById("filter-search-syllabus").value.trim().toLowerCase();
     syllabusShown = syllabusStudents.filter(function(s){
-      return (!cls || s.className === cls) && (!q || (s.name || "").toLowerCase().indexOf(q) !== -1);
+      return (!cls || s.className === cls) && (!q || ((s.name || "") + " " + (s.email || "")).toLowerCase().indexOf(q) !== -1);
     });
     SyllabusReport.renderClassList(container, syllabusShown, function(s){
       syllabusCurrent = s;
@@ -1012,8 +1020,8 @@
     if(!loaded || !window.SyllabusData) return [];
     var cls = document.getElementById("filter-class-ilearn").value;
     var q = document.getElementById("filter-search-ilearn").value.trim().toLowerCase();
-    return SyllabusData.analyse(attempts, examAttempts, EXAMS, EXAM_PAPERS, new Date()).filter(function(s){
-      return s.uid && /^10BR/.test(s.className || "") && (!cls || s.className === cls) && (!q || (s.name || "").toLowerCase().indexOf(q) !== -1);
+    return SyllabusData.analyse(attempts, examAttempts, EXAMS, EXAM_PAPERS, new Date(), usersRoster).filter(function(s){
+      return s.uid && /^10BR/.test(s.className || "") && (!cls || s.className === cls) && (!q || ((s.name || "") + " " + (s.email || "")).toLowerCase().indexOf(q) !== -1);
     });
   }
   function ilearnDate(ms){ if(!ms) return "-"; var d = new Date(ms); return d.toLocaleDateString(); }
@@ -1023,7 +1031,7 @@
     var shown = ilearnRows.filter(function(r){
       var cls = document.getElementById("filter-class-ilearn").value;
       var q = document.getElementById("filter-search-ilearn").value.trim().toLowerCase();
-      return (!cls || r.s.className === cls) && (!q || (r.s.name || "").toLowerCase().indexOf(q) !== -1);
+      return (!cls || r.s.className === cls) && (!q || ((r.s.name || "") + " " + (r.s.email || "")).toLowerCase().indexOf(q) !== -1);
     });
     table.style.display = shown.length ? "" : "none";
     tb.innerHTML = "";
@@ -1129,6 +1137,7 @@
     var hd = mk("div"); hd.appendChild(mk("h3", null, nm));
     var meta = mk("div", "ij-meta");
     meta.appendChild(mk("span", null, r.s.className || ""));
+    if(r.s.email) meta.appendChild(mk("span", null, r.s.email));
     meta.appendChild(mk("span", null, "Last active: " + (r.lastActive ? fmtDay(r.lastActive) + (inactive > 0 ? " (" + inactive + " day" + (inactive === 1 ? "" : "s") + " ago)" : " (today)") : "never")));
     hd.appendChild(meta); head.appendChild(hd);
     var chips = mk("div"); chips.style.marginLeft = "auto"; chips.style.display = "flex"; chips.style.gap = "6px"; chips.style.flexWrap = "wrap";

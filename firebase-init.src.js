@@ -292,6 +292,17 @@ function recordAttempt(uid, examKey, record){
   return attempt(1);
 }
 
+// Admin-only (enforced by security rules): every registered student profile,
+// so students who have not submitted any quiz yet (e.g. only used iLearn) are
+// still listed in the teacher reports.
+function listAllUsers(){
+  return getDocs(collection(db, "users")).then(function(snap){
+    var out = [];
+    snap.forEach(function(d){ var x = d.data() || {}; out.push({ uid: d.id, name: x.name || "", email: x.email || "", className: x["class"] || "" }); });
+    return out;
+  });
+}
+
 // Admin-only (enforced by security rules, not just this check): every
 // attempt across every student/exam, newest first.
 function listAllAttempts(){
@@ -661,6 +672,7 @@ window.PQFirebase = {
   getMyProfile: getMyProfile,
   getMyAttempt: getMyAttempt,
   recordAttempt: recordAttempt,
+  listAllUsers: listAllUsers,
   listAllAttempts: listAllAttempts,
   deleteAttempt: deleteAttempt,
   getMyExamAttempt: getMyExamAttempt,

@@ -186,7 +186,7 @@
   // attempts: normalised practice-quiz attempts (admin.html normalizeAttempt)
   // examAttempts: normalised exam-paper attempts
   // Returns [{key,name,className,...analysis}] for every 10BR student.
-  function analyse(attempts, examAttempts, EXAMS, PAPERS, now){
+  function analyse(attempts, examAttempts, EXAMS, PAPERS, now, roster){
     now = now || new Date();
     var students = {}, order = [];
     function stu(a){
@@ -215,6 +215,15 @@
       var cur = s.paperBest[a.paperKey];
       var pct = a.totalMarks ? pctOf(a.totalEarned, a.totalMarks) : (a.pct || 0);
       if(!cur || pct > cur.pct) s.paperBest[a.paperKey] = { a:a, pct:pct };
+    });
+
+    // Registered 10BR students with no quiz/exam data yet (e.g. only used iLearn)
+    // still get a row, so they appear in the reports.
+    (roster || []).forEach(function(u){
+      if(!u || !u.uid || !/^10BR/i.test(u.className || "")) return;
+      var s = stu({ uid:u.uid, name:u.name, className:u.className });
+      if(u.email) s.email = u.email;
+      if(u.name && (!s.name || s.name === "(no name)")) s.name = u.name;
     });
 
     return order.map(function(k){ return buildStudent(students[k], EXAMS, PAPERS, now); })
@@ -357,7 +366,7 @@
 
     var assessedCount = rows.filter(function(r){ return r.rating !== "none"; }).length;
     return {
-      key:s.key, uid:s.uid, name:s.name, className:s.className,
+      key:s.key, uid:s.uid, name:s.name, className:s.className, email:s.email || "",
       generated:now, quizzes:quizList, papers:paperList,
       overallPct: pctOf(bestE, bestT),
       rows:rows, weakest:weakest, strongest:strongest, technique:technique, plan:plan, extras:extras, missing:missing,
