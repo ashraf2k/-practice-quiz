@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-fAlDA7CvoHYaRWo4VY3dHJ+6yYtRJPR87nd40Xug+WU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261018m"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-fjTLqtK0Kq4M4QriXTB2Ty5wfTaSR7FxuspxG6fPbPU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261018n"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -15,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261018m" />
+<link rel="stylesheet" href="shared.css?v=20261018n" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -536,7 +536,9 @@
           </select>
           <input type="text" id="filter-search-ilearn" placeholder="Search by name or email" />
           <button class="btn btn-primary" id="btn-ilearn-load">Load iLearn progress</button>
+          <button class="btn btn-secondary" id="btn-dup-find">Find duplicate accounts</button>
         </div>
+        <div id="dup-box" style="display:none;margin:10px 0"></div>
         <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by topics completed, then by performance (share of lessons mastered first time). Only students who have started the journey are listed. Click "Load iLearn progress" to fetch it. </p>
         <div id="ilearn-summary"></div>
         <div class="table-scroll"><table class="admin-table" id="ilearn-table" style="display:none">
@@ -604,31 +606,31 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261018m -- cache-busting; see the longer comment above this same
+<!-- ?v=20261018n -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261018m"></script>
-<script src="exam-data.js?v=20261018m"></script>
-<script src="syllabus-objectives.js?v=20261018m"></script>
-<script src="learn-helpers.js?v=20261018m"></script>
-<script src="learn-data.js?v=20261018m"></script>
-<script src="learn-t1.js?v=20261018m"></script>
-<script src="learn-t2.js?v=20261018m"></script>
-<script src="learn-t3.js?v=20261018m"></script>
-<script src="learn-t4.js?v=20261018m"></script>
-<script src="learn-t5.js?v=20261018m"></script>
-<script src="learn-t6.js?v=20261018m"></script>
-<script src="learn-t7.js?v=20261018m"></script>
-<script src="learn-t8.js?v=20261018m"></script>
-<script src="learn-t9.js?v=20261018m"></script>
-<script src="learn-t10.js?v=20261018m"></script>
-<script src="learn-games-data.js?v=20261018m"></script>
-<script src="learn-engine.js?v=20261018m"></script>
-<script src="report-lib.js?v=20261018m"></script>
-<script src="syllabus-data.js?v=20261018m"></script>
-<script src="syllabus-report.js?v=20261018m"></script>
-<script src="firebase-config.js?v=20261018m"></script>
-<script type="module" src="firebase-init.js?v=20261018m"></script>
+<script src="quiz-data.js?v=20261018n"></script>
+<script src="exam-data.js?v=20261018n"></script>
+<script src="syllabus-objectives.js?v=20261018n"></script>
+<script src="learn-helpers.js?v=20261018n"></script>
+<script src="learn-data.js?v=20261018n"></script>
+<script src="learn-t1.js?v=20261018n"></script>
+<script src="learn-t2.js?v=20261018n"></script>
+<script src="learn-t3.js?v=20261018n"></script>
+<script src="learn-t4.js?v=20261018n"></script>
+<script src="learn-t5.js?v=20261018n"></script>
+<script src="learn-t6.js?v=20261018n"></script>
+<script src="learn-t7.js?v=20261018n"></script>
+<script src="learn-t8.js?v=20261018n"></script>
+<script src="learn-t9.js?v=20261018n"></script>
+<script src="learn-t10.js?v=20261018n"></script>
+<script src="learn-games-data.js?v=20261018n"></script>
+<script src="learn-engine.js?v=20261018n"></script>
+<script src="report-lib.js?v=20261018n"></script>
+<script src="syllabus-data.js?v=20261018n"></script>
+<script src="syllabus-report.js?v=20261018n"></script>
+<script src="firebase-config.js?v=20261018n"></script>
+<script type="module" src="firebase-init.js?v=20261018n"></script>
 <script type="module">
 (function(){
 
@@ -1413,6 +1415,81 @@
       renderILearn();
     });
   });
+
+  // ------------------------------------------------------------
+  // Duplicate accounts: same name registered more than once (10BR).
+  // Keeps the most active / best-performing account and offers to
+  // archive the rest (restorable; archived accounts cannot sign in).
+  // ------------------------------------------------------------
+  function dupStats(r){
+    var E = window.ILearnEngine, L = r.st.learn, done = 0, mastered = 0;
+    E.LESSONS.forEach(function(l){ var x = L[l.id]; if(x && x.d){ done++; if(x.f) mastered++; } });
+    var quizzes = (r.s.quizzes || []).length, papers = (r.s.papers || []).length;
+    var games = Object.keys(r.st.games || {}).length, tests = Object.keys(r.st.tests || {}).length;
+    var perf = done ? mastered / done : ((r.s.overallPct || 0) / 100);
+    return { r: r, done: done, quizzes: quizzes, papers: papers, perf: perf,
+             activity: done + quizzes + papers + games + tests, last: r.lastActive || 0 };
+  }
+  function findDuplicates(){
+    var groups = {};
+    ilearnRows.forEach(function(r){
+      var k = String(r.s.name || "").replace(/\s+/g, " ").trim().toLowerCase();
+      if(!k) return;
+      (groups[k] = groups[k] || []).push(dupStats(r));
+    });
+    return Object.keys(groups).filter(function(k){ return groups[k].length > 1; }).map(function(k){
+      var g = groups[k].sort(function(a, b){ return (b.activity - a.activity) || (b.perf - a.perf) || (b.last - a.last); });
+      return g;
+    }).sort(function(a, b){ return String(a[0].r.s.name).localeCompare(String(b[0].r.s.name)); });
+  }
+  function renderDuplicates(){
+    var box = document.getElementById("dup-box");
+    if(!ilearnRows.length){ box.style.display = ""; box.innerHTML = '<p class="admin-status">Click "Load iLearn progress" first, then find duplicates.</p>'; return; }
+    var groups = findDuplicates();
+    box.style.display = "";
+    if(!groups.length){ box.innerHTML = '<p class="admin-status">No duplicate names found among the 10BR accounts.</p>'; return; }
+    var h = '<p class="admin-status">' + groups.length + ' name' + (groups.length === 1 ? " is" : "s are") + ' registered more than once. In each group the most active account (then best performance, then most recent) is kept; the others are ticked to be archived. Untick any you want to keep.</p>';
+    h += '<div class="table-scroll"><table class="admin-table"><thead><tr><th>Name</th><th></th><th>E-mail</th><th>Class</th><th>Lessons done</th><th>Quizzes</th><th>Papers</th><th>Performance</th><th>Last active</th></tr></thead><tbody>';
+    groups.forEach(function(g){
+      g.forEach(function(x, i){
+        h += '<tr><td>' + (i === 0 ? escapeHtml(x.r.s.name || "") : "") + '</td><td>' +
+          (i === 0 ? '<b style="color:#047857">KEEP</b>' : '<label><input type="checkbox" class="dup-cb" data-uid="' + escapeHtml(x.r.s.uid) + '" data-name="' + escapeHtml(x.r.s.name || "") + '" checked /> archive</label>') +
+          '</td><td>' + escapeHtml(x.r.s.email || "-") + '</td><td>' + escapeHtml(x.r.s.className || "") + '</td><td>' + x.done + '</td><td>' + x.quizzes + '</td><td>' + x.papers + '</td><td>' + Math.round(100 * x.perf) + '%</td><td>' + escapeHtml(ilearnDate(x.last)) + '</td></tr>';
+      });
+    });
+    h += '</tbody></table></div><p><button class="btn btn-primary" id="btn-dup-archive">Archive the ticked duplicates</button> <span class="admin-status" id="dup-status"></span></p>';
+    box.innerHTML = h;
+    document.getElementById("btn-dup-archive").addEventListener("click", archiveDuplicates);
+  }
+  function archiveDuplicates(){
+    var cbs = Array.prototype.slice.call(document.querySelectorAll("#dup-box .dup-cb")).filter(function(c){ return c.checked; });
+    var st = document.getElementById("dup-status");
+    if(!cbs.length){ st.textContent = "Nothing ticked."; return; }
+    if(!archiveSupported()){ window.alert("This browser has an older cached script -- hard refresh and try again."); return; }
+    if(!window.confirm("Archive " + cbs.length + " duplicate account" + (cbs.length === 1 ? "" : "s") + "?\n\nTheir results, progress and profile move to the Archive tab, they disappear from every list and cannot sign in. You can restore any of them later.")) return;
+    var btn = document.getElementById("btn-dup-archive"); btn.disabled = true;
+    var done = 0, failed = 0;
+    cbs.reduce(function(chain, cb){
+      return chain.then(function(){
+        st.textContent = "Archiving " + (done + failed + 1) + " of " + cbs.length + "…";
+        var uid = cb.getAttribute("data-uid");
+        return PQFirebase.archiveStudent(uid, currentAdminEmail).then(function(){
+          done++;
+          attempts = attempts.filter(function(a){ return a.uid !== uid; });
+          examAttempts = examAttempts.filter(function(a){ return a.uid !== uid; });
+          ilearnRows = ilearnRows.filter(function(r){ return r.s.uid !== uid; });
+          if(usersRoster) usersRoster = usersRoster.filter(function(u){ return u.uid !== uid; });
+        }).catch(function(err){ failed++; st.textContent = archiveError(err, "archive " + cb.getAttribute("data-name")); });
+      });
+    }, Promise.resolve()).then(function(){
+      return loadArchiveList();
+    }).then(function(){
+      renderAll(); renderILearn(); renderDuplicates();
+      var s2 = document.getElementById("dup-status");
+      if(s2) s2.textContent = "Archived " + done + " duplicate" + (done === 1 ? "" : "s") + (failed ? " (" + failed + " failed - see message)" : "") + ". They are in the Archive tab.";
+    });
+  }
+  document.getElementById("btn-dup-find").addEventListener("click", renderDuplicates);
   document.getElementById("filter-class-ilearn").addEventListener("change", renderILearn);
   document.getElementById("filter-search-ilearn").addEventListener("input", renderILearn);
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-9b56yu5Foci0+ZRdqG+sEMxVYh61Myuj9xuVVq+0DPI='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261018m"></script>
+<script src="framebust.js?v=20261018n"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -15,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261018m" />
+<link rel="stylesheet" href="shared.css?v=20261018n" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -293,7 +293,7 @@
 <div class="streak-star-layer" id="streak-star-layer" aria-hidden="true"></div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261018m -- cache-busting query string, bumped whenever one of
+<!-- ?v=20261018n -- cache-busting query string, bumped whenever one of
      these shared files changes. Browsers cache a 600KB+ bundle like
      firebase-init.js far more aggressively than the small HTML page that
      references it, so a plain deploy can leave a visitor's browser
@@ -306,13 +306,13 @@
      that loads them (index.html, quiz.html, exam-practice.html,
      admin.html), so deploys actually take effect on the next visit
      instead of waiting out whatever cache lifetime the browser chose. -->
-<script src="quiz-data.js?v=20261018m"></script>
-<script src="exam-data.js?v=20261018m"></script>
-<script src="syllabus-objectives.js?v=20261018m"></script>
-<script src="report-lib.js?v=20261018m"></script>
-<script src="scratchpad.js?v=20261018m"></script>
-<script src="firebase-config.js?v=20261018m"></script>
-<script type="module" src="firebase-init.js?v=20261018m"></script>
+<script src="quiz-data.js?v=20261018n"></script>
+<script src="exam-data.js?v=20261018n"></script>
+<script src="syllabus-objectives.js?v=20261018n"></script>
+<script src="report-lib.js?v=20261018n"></script>
+<script src="scratchpad.js?v=20261018n"></script>
+<script src="firebase-config.js?v=20261018n"></script>
+<script type="module" src="firebase-init.js?v=20261018n"></script>
 <script type="module">
 (function(){
 
