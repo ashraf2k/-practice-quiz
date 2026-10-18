@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-aBY3SmU5vQasZZ0YHl3HAdE1Yu5fQ3GGBMYHjKn+MKQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
-<script src="framebust.js?v=20261018j"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-fAlDA7CvoHYaRWo4VY3dHJ+6yYtRJPR87nd40Xug+WU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261018k"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -15,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261018j" />
+<link rel="stylesheet" href="shared.css?v=20261018k" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -535,13 +535,12 @@
             <option value="10BR3">10BR3</option>
           </select>
           <input type="text" id="filter-search-ilearn" placeholder="Search by name or email" />
-          <label style="display:inline-flex;align-items:center;gap:6px;font-size:.9rem"><input type="checkbox" id="filter-hide-inactive" /> Hide students with no activity</label>
           <button class="btn btn-primary" id="btn-ilearn-load">Load iLearn progress</button>
         </div>
-        <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by lessons done and then by lessons mastered first time. Click "Load iLearn progress" to fetch it. Every registered 10BR student is listed, including those who have not done a quiz yet.</p>
+        <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by topics completed, then by performance (share of lessons mastered first time). Only students who have started the journey are listed. Click "Load iLearn progress" to fetch it. </p>
         <div id="ilearn-summary"></div>
         <div class="table-scroll"><table class="admin-table" id="ilearn-table" style="display:none">
-          <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Last active</th><th></th></tr></thead>
+          <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Topics completed</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Last active</th><th></th></tr></thead>
           <tbody></tbody></table></div>
         <h3 id="ilearn-struggle-h" style="display:none;margin-top:20px">Lessons students found hardest</h3>
         <div class="table-scroll"><table class="admin-table" id="ilearn-struggle" style="display:none">
@@ -605,31 +604,31 @@
 </div>
 
 <script src="jspdf.min.js"></script>
-<!-- ?v=20261018j -- cache-busting; see the longer comment above this same
+<!-- ?v=20261018k -- cache-busting; see the longer comment above this same
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
-<script src="quiz-data.js?v=20261018j"></script>
-<script src="exam-data.js?v=20261018j"></script>
-<script src="syllabus-objectives.js?v=20261018j"></script>
-<script src="learn-helpers.js?v=20261018j"></script>
-<script src="learn-data.js?v=20261018j"></script>
-<script src="learn-t1.js?v=20261018j"></script>
-<script src="learn-t2.js?v=20261018j"></script>
-<script src="learn-t3.js?v=20261018j"></script>
-<script src="learn-t4.js?v=20261018j"></script>
-<script src="learn-t5.js?v=20261018j"></script>
-<script src="learn-t6.js?v=20261018j"></script>
-<script src="learn-t7.js?v=20261018j"></script>
-<script src="learn-t8.js?v=20261018j"></script>
-<script src="learn-t9.js?v=20261018j"></script>
-<script src="learn-t10.js?v=20261018j"></script>
-<script src="learn-games-data.js?v=20261018j"></script>
-<script src="learn-engine.js?v=20261018j"></script>
-<script src="report-lib.js?v=20261018j"></script>
-<script src="syllabus-data.js?v=20261018j"></script>
-<script src="syllabus-report.js?v=20261018j"></script>
-<script src="firebase-config.js?v=20261018j"></script>
-<script type="module" src="firebase-init.js?v=20261018j"></script>
+<script src="quiz-data.js?v=20261018k"></script>
+<script src="exam-data.js?v=20261018k"></script>
+<script src="syllabus-objectives.js?v=20261018k"></script>
+<script src="learn-helpers.js?v=20261018k"></script>
+<script src="learn-data.js?v=20261018k"></script>
+<script src="learn-t1.js?v=20261018k"></script>
+<script src="learn-t2.js?v=20261018k"></script>
+<script src="learn-t3.js?v=20261018k"></script>
+<script src="learn-t4.js?v=20261018k"></script>
+<script src="learn-t5.js?v=20261018k"></script>
+<script src="learn-t6.js?v=20261018k"></script>
+<script src="learn-t7.js?v=20261018k"></script>
+<script src="learn-t8.js?v=20261018k"></script>
+<script src="learn-t9.js?v=20261018k"></script>
+<script src="learn-t10.js?v=20261018k"></script>
+<script src="learn-games-data.js?v=20261018k"></script>
+<script src="learn-engine.js?v=20261018k"></script>
+<script src="report-lib.js?v=20261018k"></script>
+<script src="syllabus-data.js?v=20261018k"></script>
+<script src="syllabus-report.js?v=20261018k"></script>
+<script src="firebase-config.js?v=20261018k"></script>
+<script type="module" src="firebase-init.js?v=20261018k"></script>
 <script type="module">
 (function(){
 
@@ -1032,7 +1031,7 @@
     var shown = ilearnRows.filter(function(r){
       var cls = document.getElementById("filter-class-ilearn").value;
       var q = document.getElementById("filter-search-ilearn").value.trim().toLowerCase();
-      if(document.getElementById("filter-hide-inactive").checked && !Object.keys(r.st.learn).length && !r.lastActive) return false;
+      if(!Object.keys(r.st.learn).length) return false; // only students who have started the journey
       return (!cls || r.s.className === cls) && (!q || ((r.s.name || "") + " " + (r.s.email || "")).toLowerCase().indexOf(q) !== -1);
     });
     var nameCount = {};
@@ -1045,13 +1044,19 @@
     // then by name.
     shown.forEach(function(r){
       var L = r.st.learn; r.done = 0; r.mastered = 0;
+      var tl = {}, td = {};
       E.LESSONS.forEach(function(l){
+        var tn = E.topicOf(l); tl[tn] = (tl[tn] || 0) + 1;
         var x = L[l.id]; if(!x || !x.d) return;
+        td[tn] = (td[tn] || 0) + 1;
         r.done++; if(x.f) r.mastered++;
       });
+      r.topicsDone = Object.keys(tl).filter(function(k){ return td[k] === tl[k]; }).length;
+      r.topicsTotal = Object.keys(tl).length;
+      r.perf = r.done ? r.mastered / r.done : 0; // share of lessons mastered first time
     });
     shown.sort(function(a, b){
-      return (b.done - a.done) || (b.mastered - a.mastered) || ((b.lastActive || 0) - (a.lastActive || 0)) || String(a.s.name || "").localeCompare(String(b.s.name || ""));
+      return (b.topicsDone - a.topicsDone) || (b.perf - a.perf) || (b.done - a.done) || ((b.lastActive || 0) - (a.lastActive || 0)) || String(a.s.name || "").localeCompare(String(b.s.name || ""));
     });
     shown.forEach(function(r, i){
       var st = r.st, L = st.learn;
@@ -1066,7 +1071,7 @@
       var rank = document.createElement("span"); rank.className = "rank" + (i < 3 ? " r" + (i + 1) : ""); rank.textContent = String(i + 1);
       var tdRank = document.createElement("td"); tdRank.appendChild(rank); tr.appendChild(tdRank);
       var pctDone = Math.round(100 * done / total);
-      var cells = [r.s.name || "(no name)", r.s.className || "", null, mastered, E.streak(st.days) + " days", E.dueLessons(L).length, E.gameCount(st) + " / " + E.xp(st) + " XP", tests, r.p1 ? Math.round(r.p1.best) + "% best (" + r.p1.n + ")" : "-", ilearnDate(r.lastActive)];
+      var cells = [r.s.name || "(no name)", r.s.className || "", null, r.topicsDone + " / " + r.topicsTotal, mastered + " (" + Math.round(100 * r.perf) + "%)", E.streak(st.days) + " days", E.dueLessons(L).length, E.gameCount(st) + " / " + E.xp(st) + " XP", tests, r.p1 ? Math.round(r.p1.best) + "% best (" + r.p1.n + ")" : "-", ilearnDate(r.lastActive)];
       cells.forEach(function(c, ci){
         var td = document.createElement("td");
         if(ci === 2){
@@ -1083,8 +1088,7 @@
       tr.addEventListener("click", function(){ openILearnDetail(r); });
       tb.appendChild(tr);
     });
-    var started = shown.filter(function(r){ return Object.keys(r.st.learn).length; }).length;
-    document.getElementById("ilearn-summary").innerHTML = shown.length ? '<p class="admin-status">' + started + " of " + shown.length + " students have started iLearn.</p>" : "";
+    document.getElementById("ilearn-summary").innerHTML = shown.length ? '<p class="admin-status">' + shown.length + " student" + (shown.length === 1 ? " has" : "s have") + " started the iLearn journey (of " + ilearnRows.length + " registered).</p>" : "";
     var ids = Object.keys(struggle).sort(function(a,b){ return struggle[b] - struggle[a]; }).slice(0, 10);
     var sb = document.querySelector("#ilearn-struggle tbody"); sb.innerHTML = "";
     ids.forEach(function(id){
@@ -1411,7 +1415,6 @@
   });
   document.getElementById("filter-class-ilearn").addEventListener("change", renderILearn);
   document.getElementById("filter-search-ilearn").addEventListener("input", renderILearn);
-  document.getElementById("filter-hide-inactive").addEventListener("change", renderILearn);
 
   // ============================================================
   // Archive (remove a student from the live database, restorable)
