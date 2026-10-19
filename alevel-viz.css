@@ -8,7 +8,7 @@
 .vb:hover:not(:disabled){border-color:var(--accent)}
 .vb.p{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .vb.on{background:var(--accent-tint);border-color:var(--accent);color:var(--accent-dark)}
-.vb:disabled{opacity:.45;cursor:default}
+.vb:disabled{opacity:.72;cursor:default;border-style:dashed}
 .vrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
 .vrow label{font-size:13px;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
 .vin{padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--input-bg,var(--surface));color:var(--ink);font:inherit;font-size:14px;min-width:0}
@@ -63,3 +63,25 @@
 .vsw button{width:42px;height:28px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font-weight:800;cursor:pointer;padding:0}
 .vsw button.one{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .vov{text-decoration:overline}
+/* process states (alevel-viz-5.js) */
+.vsvg .arr{stroke:var(--muted);stroke-width:3;fill:none} .vsvg .arh{fill:var(--muted)}
+.vsvg .arrg{cursor:pointer;outline:none} .vsvg .arrg .hit{stroke:transparent;stroke-width:22}
+.vsvg .arrg:hover .arr,.vsvg .arrg:focus-visible .arr{stroke:var(--accent);stroke-width:4.5} .vsvg .arrg:hover .arh,.vsvg .arrg:focus-visible .arh{fill:var(--accent)}
+.vsvg .arrg.bad .arr{stroke:var(--incorrect);stroke-dasharray:6 5} .vsvg .arrg.bad .arh{fill:var(--incorrect)}
+.vsvg .al{font-weight:700;font-size:13.5px;fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round} .vsvg .al.bd{fill:var(--incorrect)}
+.vsvg .tk{transition:transform .8s cubic-bezier(.4,0,.2,1);cursor:pointer;outline:none}
+.vsvg .tk circle{stroke-width:2.5} .vsvg .tk:focus-visible circle,.vsvg .tk.sel circle{stroke-width:5}
+.vsvg .t0 circle,.lg.t0{fill:var(--accent-tint);stroke:var(--accent);background:var(--accent-tint);border-color:var(--accent)}
+.vsvg .t1 circle,.lg.t1{fill:var(--diff-moderate-bg);stroke:var(--diff-moderate);background:var(--diff-moderate-bg);border-color:var(--diff-moderate)}
+.vsvg .t2 circle,.lg.t2{fill:var(--diff-hard-bg);stroke:var(--diff-hard);background:var(--diff-hard-bg);border-color:var(--diff-hard)}
+.vsvg .t3 circle,.lg.t3{fill:var(--correct-bg);stroke:var(--correct);background:var(--correct-bg);border-color:var(--correct)}
+.vsvg .dn{fill:var(--accent)} .vsvg .df{fill:none;stroke:var(--muted);stroke-width:1.5}
+.vsvg .stbox{outline:none} .vsvg .stbox rect{transition:stroke-width .2s}
+.vsvg .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+@keyframes vshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.vsvg .arrg.shake{animation:vshake .5s}
+.vlegend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;margin:6px 0}
+.vlegend span{display:inline-flex;align-items:center;gap:6px}
+.lg{display:inline-block;width:14px;height:14px;border-radius:50%;border:2.5px solid}
+.vnote{font-size:13px;color:var(--muted);margin:4px 0}
+.qt{font-size:15px;font-weight:700;margin:6px 0}

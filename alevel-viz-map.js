@@ -41,7 +41,7 @@
   add("15.p3d", "kmap", "Try the maps from Papers 31, 32 and 33", 1, { vars: 4 });
 
   /* 16 System software */
-  add("16.1c", "procstate", "Move processes between ready, running and blocked", 1);
+  add("16.1c", "pstates", "Process states: move, watch and test the processes", 1);
   add("16.1d", "sched", "Scheduling algorithms: draw the Gantt chart", 1);
   add("16.1h", "paging", "Page replacement", 1);
   add("16.2b", "compile", "Follow a line of code through the compiler", 1);
