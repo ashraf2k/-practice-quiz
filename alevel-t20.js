@@ -445,7 +445,7 @@
     ]
   };
 
-  root.ILEARN_UTIL = { runAsm: runAsm, parseKB: parseKB, ask: ask };
+  root.ILEARN_UTIL = { runAsm: runAsm, parseKB: parseKB, ask: ask, KB1_TEXT: KB1_TEXT, KB2_TEXT: KB2_TEXT };
   root.ILEARN_LESSONS = (root.ILEARN_LESSONS || []).concat(LESSONS);
   (root.ILEARN_TESTS = root.ILEARN_TESTS || {})[20] = TEST;
 })(typeof window !== "undefined" ? window : this);

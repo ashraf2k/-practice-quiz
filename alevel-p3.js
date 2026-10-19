@@ -122,6 +122,7 @@
     "owns(projector,petrov).", "owns(media_player,petrov).", "owns(projector,susan).", "owns(projector,sammy).", "owns(media_player,allan).", "owns(bluray_player,steffan).",
     "wants(main_speakers,margaret).", "wants(surround_speakers,susan).", "wants(medium_tv,steffan).",
     "may_buy_device(D,A) :- device(D), customer(A), \\+ owns(D,A)."];
+  if(root.ILEARN_UTIL) root.ILEARN_UTIL.KB31_TEXT = KB31_TEXT;
   var P31_PROJ = U.ask ? U.ask(U.parseKB(KB31_TEXT), "owns(projector,Owner)", "Owner") : ["petrov", "susan", "sammy"];
   var P31_MEDIA = U.ask ? U.ask(U.parseKB(KB31_TEXT), "owns(media_player,Owner)", "Owner") : ["petrov", "allan"];
   var P31_BUY = U.ask ? U.ask(U.parseKB(KB31_TEXT), "may_buy_device(D,susan)", "D") : [];
