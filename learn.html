@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-CrrvDyFdVFzubCpW/a8Nx3OskDT0g/sB1aS+ijK7BAY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-5I/f5eaegvEyA/NdQP4B+VH8QSPs4UR2Aq90FWNMVjY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019c"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -15,6 +15,8 @@
 <title>iLearn</title>
 <link rel="stylesheet" href="shared.css?v=20261019c" />
 <style>
+  .ln-preview{ margin:0 0 12px; padding:10px 14px; border:1.5px dashed var(--accent); border-radius:10px; background:var(--accent-tint); color:var(--accent-dark); font-size:14px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .ln-preview.hidden{ display:none; }
   .ln-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
   .ln-hero{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
   .ln-ring{ position:relative; width:84px; height:84px; flex:0 0 auto; }
@@ -123,6 +125,7 @@
 </head>
 <body>
 <div class="wrap" id="wrap">
+  <div id="preview-bar" class="ln-preview hidden"></div>
 
   <header class="top">
     <a class="logo-link" href="index.html" aria-label="iLearnCS home"><img class="logo-img" src="logo.png" alt="iLearnCS"></a>
@@ -234,6 +237,7 @@
     { id:2, title:"Paper 2", sub:"Programming and logic (topics 7–10)", topics:[7,8,9,10] }
   ];
   var PROGRESS_KEY = "ilearn";
+  var preview = false;   // an administrator trying the journey as a student: nothing is saved online
   var user = null, st = { learn:{}, days:{}, tests:{}, games:{} };
   var activeTab = 1, current = null, sess = null;
 
@@ -264,21 +268,21 @@
     if(last){ var n = nextAfter(last); if(n) return n; }
     return nextInPaper(activeTab) || nextInPaper(activeTab === 1 ? 2 : 1);
   }
-  function isUnlocked(l){ if(isDone(l.id)) return true; var c = nextInTopic(topicNum(l)); return !!c && c.id === l.id; }
+  function isUnlocked(l){ if(preview || isDone(l.id)) return true; var c = nextInTopic(topicNum(l)); return !!c && c.id === l.id; }
   function codeCovered(code){ var ls = lessonsOf(code); return ls.length > 0 && ls.every(function(l){ return isDone(l.id); }); }
 
   // ---------- persistence ----------
-  function localKey(){ return "ilearn_v1_" + (user && user.uid); }
+  function localKey(){ return (preview ? "ilearn_preview_v1_" : "ilearn_v1_") + (user && user.uid); }
   function loadState(){
     var local = null;
     try { local = JSON.parse(localStorage.getItem(localKey()) || "null"); } catch(e){}
-    var p = (PQFirebase.getMyProgress ? PQFirebase.getMyProgress(user.uid, PROGRESS_KEY) : Promise.resolve(null));
+    var p = (!preview && PQFirebase.getMyProgress ? PQFirebase.getMyProgress(user.uid, PROGRESS_KEY) : Promise.resolve(null));
     return p.catch(function(){ return null; }).then(function(remote){ return E.mergeState(local, remote); });
   }
   function save(){
     var snap = E.snapshot(st);
     try { localStorage.setItem(localKey(), JSON.stringify(snap)); } catch(e){}
-    if(PQFirebase.saveProgress) PQFirebase.saveProgress(user.uid, PROGRESS_KEY, snap);
+    if(!preview && PQFirebase.saveProgress) PQFirebase.saveProgress(user.uid, PROGRESS_KEY, snap);
   }
   function markToday(){ var d = E.today(); st.days[d] = (st.days[d] || 0) + 1; }
 
@@ -750,12 +754,31 @@
   $("g-leave").addEventListener("click", function(){ renderJourney(); });
 
   // ---------- start ----------
+  function begin(){
+    if(preview){
+      var bar = $("preview-bar");
+      bar.innerHTML = "<span><b>Admin preview.</b> You are seeing the iLearn journey exactly as a 10BR student does. Your progress here is kept only in this browser; nothing is saved online and no student data is touched.</span>" +
+        '<span><button class="btn btn-secondary sm" id="pv-reset" type="button">Reset my preview</button> <a class="link-btn" href="admin.html">← Admin dashboard</a></span>';
+      bar.classList.remove("hidden");
+      $("pv-reset").addEventListener("click", function(){
+        if(!window.confirm("Clear your preview progress in this browser?")) return;
+        try { localStorage.removeItem(localKey()); } catch(e){}
+        st = E.emptyState(); renderJourney();
+      });
+    }
+    loadState().then(function(s){ st = s; renderJourney(); });
+  }
   PQFirebase.onAuthChange(function(u){
     if(!u){ window.location.href = "quiz.html"; return; }
     user = u;
+    if(!user.name) user.name = "Admin";
     var cls = String(u.class || "");
-    if(!/^10BR/i.test(cls)){ $("view-wait").innerHTML = '<p class="ln-notice">iLearn is opening for your class soon.</p><p style="text-align:center"><a class="link-btn" href="quiz.html">← Back to practice</a></p>'; show("view-wait"); return; }
-    loadState().then(function(s){ st = s; renderJourney(); });
+    if(/^10BR/i.test(cls)){ begin(); return; }
+    var chk = PQFirebase.checkIsAdmin ? PQFirebase.checkIsAdmin(u.uid) : Promise.resolve(false);
+    chk.then(function(adm){
+      if(adm){ preview = true; begin(); return; }
+      $("view-wait").innerHTML = '<p class="ln-notice">iLearn is opening for your class soon.</p><p style="text-align:center"><a class="link-btn" href="quiz.html">← Back to practice</a></p>'; show("view-wait");
+    });
   });
 })();
 </script>
