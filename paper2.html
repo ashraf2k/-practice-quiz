@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-4MU73/U8Dmrn8P5gUhaVaCZtSnN0VQ4MEEhIG49SFN4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-H2X2pnOqxNOIaZl00MtjPzvqcpWa+RPmU5/jt3uX4XY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019c"></script>
 <script src="theme.js?v=20261019f"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -200,10 +200,11 @@
     var local = lsGet("ilearn_v1_" + u.uid);
     var pr = PQFirebase.getMyProgress ? PQFirebase.getMyProgress(u.uid, "ilearn").catch(function(){ return null; }) : Promise.resolve(null);
     var ph = PQFirebase.getMyProgress ? PQFirebase.getMyProgress(u.uid, remoteKey).catch(function(){ return null; }) : Promise.resolve(null);
-    Promise.all([pr, ph]).then(function(r){
+    var adm = PQFirebase.checkIsAdmin ? PQFirebase.checkIsAdmin(u.uid).catch(function(){ return false; }) : Promise.resolve(false);
+    Promise.all([pr, ph, adm]).then(function(r){
       var state = E.mergeState(local, r[0]);
       var left = lessonsLeft(state);
-      var preview = /[?&]preview=1/.test(location.search);
+      var preview = !!r[2];   // an administrator can open the mock paper without finishing the lessons
       remoteResetAt = (r[1] && Number(r[1].resetAt)) || 0;
       hist = P.mergeHist(lsGet(histKey()) || [], (r[1] && r[1].hist) || []).filter(function(h){ return !remoteResetAt || h.at > remoteResetAt; });
       if(left > 0 && !preview){

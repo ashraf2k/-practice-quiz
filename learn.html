@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-JQo5++tX9wAb0o8Z7fSGxC4zDmzw6kPEw45O8DgyWKw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-UYn66xXnk9QVHNZoQLiSxqJelA/LfyOrl6yZ2hEEXj8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019c"></script>
 <script src="theme.js?v=20261019f"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -483,15 +483,15 @@
   function p1Lessons(){ return LESSONS.filter(function(l){ return topicNum(l) <= 6; }); }
   function renderP1Card(){
     var all = p1Lessons(), left = all.filter(function(l){ return !isDone(l.id); }).length;
-    $("p1card").innerHTML = left === 0
-      ? '<div class="ln-card2 p1"><div><b>📝 Paper 1 mock exam is unlocked!</b><p>You have finished topics 1 to 6. Build a full 75-mark paper in the style of the real 0478 Paper 1, with its mark scheme.</p></div><a class="btn btn-primary" href="paper1.html" style="text-decoration:none">Create my Paper 1</a></div>'
+    $("p1card").innerHTML = (left === 0 || preview)
+      ? '<div class="ln-card2 p1"><div><b>📝 Paper 1 mock exam is unlocked!</b><p>' + (left ? '<i>Admin preview: unlocked for you.</i> ' : '') + 'You have finished topics 1 to 6. Build a full 75-mark paper in the style of the real 0478 Paper 1, with its mark scheme.</p></div><a class="btn btn-primary" href="paper1.html" style="text-decoration:none">Create my Paper 1</a></div>'
       : '<div class="ln-card2 p1 lock"><div><b>🔒 Paper 1 mock exam</b><p>Finish all lessons in topics 1 to 6 to unlock a full practice paper. ' + left + " of " + all.length + " lessons to go.</p></div></div>";
   }
   function p2Lessons(){ return LESSONS.filter(function(l){ return topicNum(l) >= 7; }); }
   function renderP2Card(){
     var all = p2Lessons(), left = all.filter(function(l){ return !isDone(l.id); }).length;
-    $("p2card").innerHTML = left === 0
-      ? '<div class="ln-card2 p1"><div><b>📝 Paper 2 mock exam is unlocked!</b><p>You have finished topics 7 to 10. Sit a full 75-mark paper in the style of the real 0478 Paper 2, with a drawing pad for diagrams, a 15-mark scenario question and a mark scheme.</p></div><a class="btn btn-primary" href="paper2.html" style="text-decoration:none">Start my Paper 2</a></div>'
+    $("p2card").innerHTML = (left === 0 || preview)
+      ? '<div class="ln-card2 p1"><div><b>📝 Paper 2 mock exam is unlocked!</b><p>' + (left ? '<i>Admin preview: unlocked for you.</i> ' : '') + 'You have finished topics 7 to 10. Sit a full 75-mark paper in the style of the real 0478 Paper 2, with a drawing pad for diagrams, a 15-mark scenario question and a mark scheme.</p></div><a class="btn btn-primary" href="paper2.html" style="text-decoration:none">Start my Paper 2</a></div>'
       : '<div class="ln-card2 p1 lock"><div><b>🔒 Paper 2 mock exam</b><p>Finish all lessons in topics 7 to 10 to unlock a full practice paper. ' + left + " of " + all.length + " lessons to go.</p></div></div>";
   }
   $("btn-continue").addEventListener("click", function(){ var c = currentLesson(); if(c){ activeTab = paperOf(c); openLesson(c.id); } });
