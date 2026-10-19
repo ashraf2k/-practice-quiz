@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-aHcbxi+EC+P7wXpM25tWwKjb8YmZrAGzWywl9ZX7ykc=' 'sha256-uMUkCsD/MXZKHJWpCIUc1pYrvGeVsCtD5hQ30dOgQVU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019c"></script>
+<script src="theme.js?v=20261019f"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
      the longer comment above this same block in exam-practice.html. -->
@@ -39,7 +40,7 @@
   }
 
   @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
+    :root:not([data-theme]){
       --bg: #0B121C;
       --bg-blob-1: rgba(59,182,175,0.14);
       --bg-blob-2: rgba(91,140,246,0.12);
@@ -169,14 +170,14 @@
   .admin-link{
     display: inline-block;
     margin-top: 8px;
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--muted);
     text-decoration: none;
     padding: 3px 10px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    opacity: 0.75;
+    opacity: 1;
     transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
   }
   .admin-link:hover, .admin-link:focus-visible{ color: var(--accent); border-color: var(--card-1-line); opacity: 1; }
@@ -246,7 +247,7 @@
   }
   .cta .cta-ic{
     width: 28px; height: 28px; border-radius: 9px;
-    background: var(--accent); color: #fff;
+    background: var(--accent); color: var(--on-accent);
     display: inline-flex; align-items: center; justify-content: center;
   }
   .cta svg{ transition: transform 0.15s ease; }
@@ -492,6 +493,7 @@
     margin-top: 28px;
   }
 </style>
+<link rel="stylesheet" href="theme.css?v=20261019f" />
 </head>
 <body>
 <div class="wrap">

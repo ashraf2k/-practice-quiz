@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-JQo5++tX9wAb0o8Z7fSGxC4zDmzw6kPEw45O8DgyWKw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019c"></script>
+<script src="theme.js?v=20261019f"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
@@ -50,10 +51,10 @@
   .ln-lessons{ display:grid; gap:6px; margin:8px 0 2px 0; }
   .ln-lesson{ display:flex; align-items:center; gap:10px; width:100%; padding:9px 12px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
   .ln-lesson:hover:not(:disabled){ border-color:var(--accent); }
-  .ln-lesson:disabled{ opacity:.55; cursor:not-allowed; }
+  .ln-lesson:disabled{ opacity:.72; cursor:not-allowed; }
   .ln-lesson.cur{ border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-tint); }
   .ln-dot{ flex:0 0 auto; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; border:2px solid var(--line); color:var(--muted); }
-  .ln-lesson.done .ln-dot{ background:var(--correct); border-color:var(--correct); color:#fff; }
+  .ln-lesson.done .ln-dot{ background:var(--correct); border-color:var(--correct); color:var(--on-accent); }
   .ln-lesson.cur .ln-dot{ border-color:var(--accent); color:var(--accent); }
   .ln-tag{ margin-left:auto; font-size:11.5px; font-weight:700; padding:2px 9px; border-radius:999px; white-space:nowrap; }
   .ln-tag.m{ background:var(--correct-bg); color:var(--correct); }
@@ -103,7 +104,7 @@
   .ln-tools{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 0; }
   .ln-badges{ display:flex; gap:7px; flex-wrap:wrap; margin:12px 0 0; }
   .ln-badge{ font-size:12.5px; font-weight:700; padding:4px 11px; border-radius:999px; border:1px solid var(--correct-line); background:var(--correct-bg); color:var(--correct); }
-  .ln-badge.off{ border-color:var(--line); background:var(--bg); color:var(--muted); font-weight:600; filter:grayscale(1); opacity:.75; }
+  .ln-badge.off{ border-color:var(--line); background:var(--bg); color:var(--muted); font-weight:600; filter:grayscale(1); }
   .ln-topic-tools{ display:flex; gap:8px; flex-wrap:wrap; padding:10px 16px; border-top:1px solid var(--line); background:var(--bg); align-items:center; font-size:13px; }
   .ln-topic-tools .sm{ padding:6px 12px; font-size:13px; }
   .ln-text{ width:100%; box-sizing:border-box; min-height:96px; padding:11px 13px; border:1.5px solid var(--line); border-radius:10px; font:inherit; font-size:15.5px; background:var(--surface); color:var(--ink); resize:vertical; }
@@ -123,6 +124,7 @@
   .ln-arc:hover:not(:disabled){ border-color:var(--accent); } .ln-arc:disabled{ opacity:.5; cursor:not-allowed; } .ln-arc .st{ margin-left:auto; white-space:nowrap; }
   @media (max-width:520px){ .ln-bar-row{ grid-template-columns:1fr; gap:4px; } }
 </style>
+<link rel="stylesheet" href="theme.css?v=20261019f" />
 </head>
 <body>
 <div class="wrap" id="wrap">

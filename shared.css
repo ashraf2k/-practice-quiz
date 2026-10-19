@@ -7,22 +7,22 @@
     --accent: #146C6A;
     --accent-dark: #0E4F4D;
     --accent-tint: #E4F1F0;
-    --correct: #1E8E5A;
+    --correct: #17724A;
     --correct-bg: #E8F6EF;
     --correct-line: #BFE6D3;
-    --incorrect: #C4423B;
+    --incorrect: #AD332C;
     --incorrect-bg: #FBEAEA;
     --incorrect-line: #F0C7C4;
-    --diff-easy: #0F8A6B;
+    --diff-easy: #0B7A5C;
     --diff-easy-bg: #E1F5EE;
     --diff-easy-line: #BFE8DC;
-    --diff-moderate: #A16207;
+    --diff-moderate: #8A5200;
     --diff-moderate-bg: #FDF1D6;
     --diff-moderate-line: #F3DFA6;
     --diff-hard: #7C3AED;
     --diff-hard-bg: #EEE7FC;
     --diff-hard-line: #D9C9F7;
-    --streak: #EA580C;
+    --streak: #B93C0A;
     --streak-bg: #FFEDD5;
     --streak-line: #FED7AA;
     --mastery: #1D4ED8;
@@ -37,7 +37,7 @@
   }
 
   @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
+    :root:not([data-theme]){
       --bg: #0D1420;
       --surface: #16202F;
       --ink: #E7ECF3;
@@ -49,7 +49,7 @@
       --correct: #4FCB8E;
       --correct-bg: rgba(79,203,142,0.14);
       --correct-line: rgba(79,203,142,0.35);
-      --incorrect: #F0776F;
+      --incorrect: #F58E87;
       --incorrect-bg: rgba(240,119,111,0.14);
       --incorrect-line: rgba(240,119,111,0.35);
       --diff-easy: #5EEAC0;
@@ -89,7 +89,7 @@
     --correct: #4FCB8E;
     --correct-bg: rgba(79,203,142,0.14);
     --correct-line: rgba(79,203,142,0.35);
-    --incorrect: #F0776F;
+    --incorrect: #F58E87;
     --incorrect-bg: rgba(240,119,111,0.14);
     --incorrect-line: rgba(240,119,111,0.35);
     --diff-easy: #5EEAC0;
@@ -330,7 +330,7 @@
 
   .btn-primary{
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
   }
 
   .btn-primary:hover{ background: var(--accent-dark); }
@@ -590,7 +590,7 @@
   .opt.is-correct .tag{
     background: var(--correct);
     border-color: var(--correct);
-    color: #fff;
+    color: var(--on-accent);
   }
 
   .opt.is-wrong{
@@ -601,11 +601,11 @@
   .opt.is-wrong .tag{
     background: var(--incorrect);
     border-color: var(--incorrect);
-    color: #fff;
+    color: var(--on-accent);
   }
 
   .opt.is-muted{
-    opacity: 0.55;
+    opacity: 0.92;
   }
 
   /* A handful of Topic 7 questions offer full pseudocode snippets as their
@@ -1513,7 +1513,7 @@
   }
   .pen-tools{ display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
   .pen-tools button.on{ border-color: var(--accent); outline: 1px solid var(--accent); }
-  .pen-tools button.done{ margin-left: auto; background: var(--accent); color: #fff; border-color: var(--accent); }
+  .pen-tools button.done{ margin-left: auto; background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
   .pen-canvas{
     display: block; width: 100%; height: 300px;
     border: 1px solid var(--line); border-radius: 7px;
@@ -1696,7 +1696,7 @@
     padding: 3px 10px;
     border-radius: 20px;
     background: var(--incorrect);
-    color: #fff;
+    color: var(--on-accent);
     white-space: nowrap;
   }
 
@@ -1760,7 +1760,7 @@
 .syl-pill.syl-a{ background:var(--diff-moderate-bg); color:var(--diff-moderate); border-color:var(--diff-moderate-line); }
 .syl-pill.syl-r{ background:var(--incorrect-bg); color:var(--incorrect); border-color:var(--incorrect-line); }
 .syl-pill.syl-n{ background:#E3E6EA; color:#5B6672; border-color:#D0D5DB; }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .syl-pill.syl-n{ background:#2A323E; color:#A5B0BF; border-color:#3A4555; } }
+@media (prefers-color-scheme: dark){ :root:not([data-theme]) .syl-pill.syl-n{ background:#2A323E; color:#A5B0BF; border-color:#3A4555; } }
 
 /* My Progress: per-topic study plan */
 .syl-plan{ padding:11px 16px 13px; border-top:1px dashed var(--line); background:var(--bg); font-size:13.5px; }
