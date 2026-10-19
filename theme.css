@@ -27,6 +27,66 @@
   --on-accent: #06142B;
   --logo-plate: #F7F7F8;
 }
+:root[data-theme="comfort"]{
+  color-scheme: light;
+  /* eye comfort: soft off-white (no pure white or black), muted colours, ~9:1 text contrast, warm slightly-green neutrals, calm accent */
+  --bg: #E6E9DC; --bg-blob-1: rgba(60,110,95,0.07); --bg-blob-2: rgba(120,140,90,0.06);
+  --surface: #F1F3E8; --surface-soft: #EBEEE0;
+  --ink: #2B3532; --muted: #58655F; --line: #C3CABA;
+  --accent: #285F54; --accent-dark: #1F4C43; --accent-tint: rgba(47,106,94,0.12);
+  --correct: #1F5E37; --correct-bg: rgba(38,105,63,0.10); --correct-line: rgba(38,105,63,0.35);
+  --incorrect: #9A3A33; --incorrect-bg: rgba(154,58,51,0.09); --incorrect-line: rgba(154,58,51,0.35);
+  --diff-easy: #1F6B52; --diff-easy-bg: rgba(31,107,82,0.10); --diff-easy-line: rgba(31,107,82,0.32);
+  --diff-moderate: #7A4D0C; --diff-moderate-bg: rgba(122,77,12,0.10); --diff-moderate-line: rgba(122,77,12,0.32);
+  --diff-hard: #5B4A93; --diff-hard-bg: rgba(91,74,147,0.10); --diff-hard-line: rgba(91,74,147,0.32);
+  --streak: #9A4414; --streak-bg: rgba(154,68,20,0.10); --streak-line: rgba(154,68,20,0.32);
+  --mastery: #2F5F8F; --mastery-bg: rgba(47,95,143,0.10); --mastery-line: rgba(47,95,143,0.32);
+  --input-bg: #F6F7EE; --code-bg: #2B3532; --code-text: #E4E9DD;
+  --card-1: #285F54; --card-1-bg: rgba(47,106,94,0.10); --card-1-line: rgba(47,106,94,0.30);
+  --card-2: #2F5F8F; --card-2-bg: rgba(47,95,143,0.09); --card-2-line: rgba(47,95,143,0.28);
+  --card-3: #8A5A1C; --card-3-bg: rgba(138,90,28,0.09); --card-3-line: rgba(138,90,28,0.28);
+  --card-4: #5B4A93; --card-4-bg: rgba(91,74,147,0.09); --card-4-line: rgba(91,74,147,0.28);
+  --shadow: 0 1px 2px rgba(40,50,40,0.08), 0 10px 22px -14px rgba(40,50,40,0.22);
+  --on-accent: #F6F8EF;
+  --logo-plate: #F1F3E8;
+}
+:root[data-theme="kindle"]{
+  color-scheme: light;
+  /* Kindle: warm paper, soft brown-black ink, serif reading text, hairline rules, no bright colour */
+  --bg: #F1E7CF; --bg-blob-1: transparent; --bg-blob-2: transparent;
+  --surface: #F8F0DD; --surface-soft: #F4EAD2;
+  --ink: #33291F; --muted: #5E5040; --line: #CDBE9E;
+  --accent: #6B4423; --accent-dark: #523319; --accent-tint: rgba(107,68,35,0.10);
+  --correct: #2F6035; --correct-bg: rgba(47,96,53,0.10); --correct-line: rgba(47,96,53,0.35);
+  --incorrect: #8F3328; --incorrect-bg: rgba(143,51,40,0.09); --incorrect-line: rgba(143,51,40,0.35);
+  --diff-easy: #2F6035; --diff-easy-bg: rgba(47,96,53,0.10); --diff-easy-line: rgba(47,96,53,0.32);
+  --diff-moderate: #774A0A; --diff-moderate-bg: rgba(119,74,10,0.10); --diff-moderate-line: rgba(119,74,10,0.32);
+  --diff-hard: #6A3F6E; --diff-hard-bg: rgba(106,63,110,0.10); --diff-hard-line: rgba(106,63,110,0.32);
+  --streak: #8F4417; --streak-bg: rgba(143,68,23,0.10); --streak-line: rgba(143,68,23,0.32);
+  --mastery: #3F5873; --mastery-bg: rgba(63,88,115,0.10); --mastery-line: rgba(63,88,115,0.32);
+  --input-bg: #FBF5E6; --code-bg: #3A2F24; --code-text: #F1E7CF;
+  --card-1: #6B4423; --card-1-bg: rgba(107,68,35,0.09); --card-1-line: rgba(107,68,35,0.28);
+  --card-2: #3F5873; --card-2-bg: rgba(63,88,115,0.09); --card-2-line: rgba(63,88,115,0.28);
+  --card-3: #774A0A; --card-3-bg: rgba(119,74,10,0.09); --card-3-line: rgba(119,74,10,0.28);
+  --card-4: #6A3F6E; --card-4-bg: rgba(106,63,110,0.09); --card-4-line: rgba(106,63,110,0.28);
+  --shadow: 0 1px 0 rgba(90,70,40,0.10), 0 8px 18px -14px rgba(90,70,40,0.25);
+  --on-accent: #FBF5E6;
+  --logo-plate: #F8F0DD;
+}
+/* native drop-downs: always readable (menus are drawn by the browser, so colours are set explicitly) */
+:root[data-theme] select, :root[data-theme] select option, :root[data-theme] select optgroup{ background-color: var(--input-bg, var(--surface)); color: var(--ink); }
+:root[data-theme] ::placeholder{ color: var(--muted); opacity: 1; }
+:root[data-theme] select:disabled, :root[data-theme] input:disabled{ color: var(--muted); opacity: 1; }
+/* eye comfort: gentler type, no animation or flicker */
+:root[data-theme="comfort"] body{ line-height: 1.65; }
+:root[data-theme="comfort"] *, :root[data-theme="comfort"] *::before, :root[data-theme="comfort"] *::after{ animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+:root[data-theme="comfort"] .syl-pill.syl-n{ background:#DDE2D0; color:#4F5C55; border-color:#C3CABA; }
+/* Kindle: serif reading text (kept off code and the Appearance font choice "easy") */
+:root[data-theme="kindle"] body, :root[data-theme="kindle"] button, :root[data-theme="kindle"] input, :root[data-theme="kindle"] select, :root[data-theme="kindle"] textarea{ font-family: Bookerly, Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif; }
+:root[data-theme="kindle"] body{ line-height: 1.7; }
+:root[data-theme="kindle"] pre, :root[data-theme="kindle"] code, :root[data-theme="kindle"] .vmono, :root[data-theme="kindle"] .mono{ font-family: ui-monospace, Menlo, Consolas, monospace; }
+:root[data-theme="kindle"] .syl-pill.syl-n{ background:#E8DDC0; color:#5E5040; border-color:#CDBE9E; }
+:root[data-theme="kindle"][data-font="easy"] body, :root[data-theme="kindle"][data-font="easy"] button, :root[data-theme="kindle"][data-font="easy"] input, :root[data-theme="kindle"][data-font="easy"] select, :root[data-theme="kindle"][data-font="easy"] textarea{ font-family: Verdana, Tahoma, "Trebuchet MS", "Segoe UI", sans-serif; }
 /* text size: scales every size on the page together, like browser zoom */
 html[data-size="sm"]{ zoom: .9; }
 html[data-size="lg"]{ zoom: 1.15; }
@@ -63,6 +123,8 @@ html[data-font="easy"] pre, html[data-font="easy"] code, html[data-font="easy"] 
 .ap-sw-light i:first-child{ background:#EEF2F6; } .ap-sw-light i + i{ background:#146C6A; }
 .ap-sw-dark i:first-child{ background:#0D1420; } .ap-sw-dark i + i{ background:#3BB6AF; }
 .ap-sw-blue i:first-child{ background:#0A1630; } .ap-sw-blue i + i{ background:#78B0FF; }
+.ap-sw-comfort i:first-child{ background:#E6E9DC; } .ap-sw-comfort i + i{ background:#285F54; }
+.ap-sw-kindle i:first-child{ background:#F1E7CF; } .ap-sw-kindle i + i{ background:#6B4423; }
 .ap-sw-auto i:first-child{ background:linear-gradient(90deg,#EEF2F6 50%,#0D1420 50%); } .ap-sw-auto i + i{ background:linear-gradient(90deg,#146C6A 50%,#3BB6AF 50%); }
 .ap-prev{ margin-top:12px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--bg); }
 .ap-prev p{ margin:4px 0 8px; } .ap-pa{ color:var(--accent-dark); font-weight:700; } .ap-pm{ color:var(--muted); }
