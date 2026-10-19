@@ -104,9 +104,9 @@
   --mastery: #2F5F8F; --mastery-bg: rgba(47,95,143,0.10); --mastery-line: rgba(47,95,143,0.32);
   --input-bg: #FAFDFB; --code-bg: #1E2420; --code-text: #E8ECE6;
   --card-1: #006C35; --card-1-bg: rgba(0,108,53,0.09); --card-1-line: rgba(0,108,53,0.28);
-  --card-2: #2F5F8F; --card-2-bg: rgba(47,95,143,0.09); --card-2-line: rgba(47,95,143,0.28);
-  --card-3: #7A5A00; --card-3-bg: rgba(122,90,0,0.09); --card-3-line: rgba(122,90,0,0.28);
-  --card-4: #5B4A93; --card-4-bg: rgba(91,74,147,0.09); --card-4-line: rgba(91,74,147,0.28);
+  --card-2: #004D26; --card-2-bg: rgba(0,77,38,0.09); --card-2-line: rgba(0,77,38,0.28);
+  --card-3: #006C35; --card-3-bg: rgba(0,108,53,0.09); --card-3-line: rgba(0,108,53,0.28);
+  --card-4: #004D26; --card-4-bg: rgba(0,77,38,0.09); --card-4-line: rgba(0,77,38,0.28);
   --shadow: 0 1px 2px rgba(20,30,20,0.08), 0 10px 22px -14px rgba(20,30,20,0.22);
   --on-accent: #FFFFFF;
   --logo-plate: #F7FBF8;
@@ -127,9 +127,9 @@
   --mastery: #2F5F8F; --mastery-bg: rgba(47,95,143,0.10); --mastery-line: rgba(47,95,143,0.32);
   --input-bg: #FEFCFA; --code-bg: #1E2420; --code-text: #E8ECE6;
   --card-1: #B3141F; --card-1-bg: rgba(179,20,31,0.09); --card-1-line: rgba(179,20,31,0.28);
-  --card-2: #2B2B2B; --card-2-bg: rgba(43,43,43,0.09); --card-2-line: rgba(43,43,43,0.28);
+  --card-2: #1A1A1A; --card-2-bg: rgba(26,26,26,0.09); --card-2-line: rgba(26,26,26,0.28);
   --card-3: #7A5A00; --card-3-bg: rgba(122,90,0,0.09); --card-3-line: rgba(122,90,0,0.28);
-  --card-4: #2F5F8F; --card-4-bg: rgba(47,95,143,0.09); --card-4-line: rgba(47,95,143,0.28);
+  --card-4: #8F0F18; --card-4-bg: rgba(143,15,24,0.09); --card-4-line: rgba(143,15,24,0.28);
   --shadow: 0 1px 2px rgba(20,30,20,0.08), 0 10px 22px -14px rgba(20,30,20,0.22);
   --on-accent: #FFFFFF;
   --logo-plate: #FBF8F5;
@@ -152,7 +152,7 @@
   --card-1: #1A237E; --card-1-bg: rgba(26,35,126,0.09); --card-1-line: rgba(26,35,126,0.28);
   --card-2: #A04D00; --card-2-bg: rgba(160,77,0,0.09); --card-2-line: rgba(160,77,0,0.28);
   --card-3: #0F6B06; --card-3-bg: rgba(15,107,6,0.09); --card-3-line: rgba(15,107,6,0.28);
-  --card-4: #5B4A93; --card-4-bg: rgba(91,74,147,0.09); --card-4-line: rgba(91,74,147,0.28);
+  --card-4: #000080; --card-4-bg: rgba(0,0,128,0.09); --card-4-line: rgba(0,0,128,0.28);
   --shadow: 0 1px 2px rgba(20,30,20,0.08), 0 10px 22px -14px rgba(20,30,20,0.22);
   --on-accent: #FFFFFF;
   --logo-plate: #FFFCF8;
@@ -174,8 +174,8 @@
   --input-bg: #FDFEFC; --code-bg: #1E2420; --code-text: #E8ECE6;
   --card-1: #006B35; --card-1-bg: rgba(0,107,53,0.09); --card-1-line: rgba(0,107,53,0.28);
   --card-2: #B5121F; --card-2-bg: rgba(181,18,31,0.09); --card-2-line: rgba(181,18,31,0.28);
-  --card-3: #2B2B2B; --card-3-bg: rgba(43,43,43,0.09); --card-3-line: rgba(43,43,43,0.28);
-  --card-4: #7A5A00; --card-4-bg: rgba(122,90,0,0.09); --card-4-line: rgba(122,90,0,0.28);
+  --card-3: #1A1A1A; --card-3-bg: rgba(26,26,26,0.09); --card-3-line: rgba(26,26,26,0.28);
+  --card-4: #004D26; --card-4-bg: rgba(0,77,38,0.09); --card-4-line: rgba(0,77,38,0.28);
   --shadow: 0 1px 2px rgba(20,30,20,0.08), 0 10px 22px -14px rgba(20,30,20,0.22);
   --on-accent: #FFFFFF;
   --logo-plate: #FAFBF9;
@@ -197,8 +197,8 @@
   --input-bg: #FCFDFC; --code-bg: #1E2420; --code-text: #E8ECE6;
   --card-1: #0E4D2C; --card-1-bg: rgba(14,77,44,0.09); --card-1-line: rgba(14,77,44,0.28);
   --card-2: #B5121F; --card-2-bg: rgba(181,18,31,0.09); --card-2-line: rgba(181,18,31,0.28);
-  --card-3: #2B2B2B; --card-3-bg: rgba(43,43,43,0.09); --card-3-line: rgba(43,43,43,0.28);
-  --card-4: #7A5A00; --card-4-bg: rgba(122,90,0,0.09); --card-4-line: rgba(122,90,0,0.28);
+  --card-3: #1A1A1A; --card-3-bg: rgba(26,26,26,0.09); --card-3-line: rgba(26,26,26,0.28);
+  --card-4: #7A0F18; --card-4-bg: rgba(122,15,24,0.09); --card-4-line: rgba(122,15,24,0.28);
   --shadow: 0 1px 2px rgba(20,30,20,0.08), 0 10px 22px -14px rgba(20,30,20,0.22);
   --on-accent: #FFFFFF;
   --logo-plate: #F8FAF8;
@@ -220,8 +220,8 @@
   --input-bg: #FFFEFD; --code-bg: #1E2420; --code-text: #E8ECE6;
   --card-1: #A3121B; --card-1-bg: rgba(163,18,27,0.09); --card-1-line: rgba(163,18,27,0.28);
   --card-2: #00703A; --card-2-bg: rgba(0,112,58,0.09); --card-2-line: rgba(0,112,58,0.28);
-  --card-3: #7A5A00; --card-3-bg: rgba(122,90,0,0.09); --card-3-line: rgba(122,90,0,0.28);
-  --card-4: #2F5F8F; --card-4-bg: rgba(47,95,143,0.09); --card-4-line: rgba(47,95,143,0.28);
+  --card-3: #A3121B; --card-3-bg: rgba(163,18,27,0.09); --card-3-line: rgba(163,18,27,0.28);
+  --card-4: #00703A; --card-4-bg: rgba(0,112,58,0.09); --card-4-line: rgba(0,112,58,0.28);
   --shadow: 0 1px 2px rgba(20,30,20,0.08), 0 10px 22px -14px rgba(20,30,20,0.22);
   --on-accent: #FFFFFF;
   --logo-plate: #FFFBFA;
@@ -251,19 +251,33 @@
 }
 :root[data-theme="pk"] a:not([class]){ color:var(--accent-dark); }
 :root[data-theme="pk"] .syl-pill.syl-n{ background:#0F5530; color:#B9D2C0; border-color:#2F6D48; }
-/* flag theme swatches (the picture of each flag) and the second header button */
-.ap-flag{ width:26px; height:17px; border-radius:3px; margin-bottom:4px; }
-.ap-flag i{ background:transparent !important; }
+/* flag theme icons (small round flags) and flag-colour touches */
+.ap-flags{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.ap-fl{ flex-direction:row !important; align-items:center !important; gap:8px !important; padding:6px 9px !important; }
+.ap-fl b{ font-size:13px; }
+.ap-ico{ display:inline-block; width:22px; height:22px; flex:0 0 22px; border-radius:50%; border:1px solid rgba(128,128,128,.55); background-size:100% 100%; }
 .ap-sw-sa{ background:linear-gradient(#006C35 0 38%,#fff 38% 52%,#006C35 52%); }
+:root[data-theme="sa"]{ --stripe:linear-gradient(90deg,#006C35 0 42%,#fff 42% 58%,#006C35 58%); --flag-2:#004D26; --flag-3:#006C35; --flag-sel:rgba(0,108,53,0.28); }
 .ap-sw-pk{ background:linear-gradient(90deg,#fff 0 25%,#01411C 25%); }
+:root[data-theme="pk"]{ --stripe:linear-gradient(90deg,#fff 0 25%,#01411C 25%); --flag-2:#FFFFFF; --flag-3:#9EE2B3; --flag-sel:rgba(158,226,179,0.28); }
 .ap-sw-eg{ background:linear-gradient(#CE1126 0 33%,#fff 33% 67%,#000 67%); }
-.ap-sw-in{ background:radial-gradient(circle at 50% 50%,#000080 0 4px,transparent 5px),linear-gradient(#FF9933 0 33%,#fff 33% 67%,#138808 67%); }
-.ap-sw-jo{ background:linear-gradient(115deg,#CE1126 0 28%,transparent 28%),linear-gradient(#000 0 33%,#fff 33% 67%,#007A3D 67%); }
-.ap-sw-sy{ background:radial-gradient(circle at 25% 50%,#CE1126 0 3px,transparent 4px),radial-gradient(circle at 50% 50%,#CE1126 0 3px,transparent 4px),radial-gradient(circle at 75% 50%,#CE1126 0 3px,transparent 4px),linear-gradient(#007A3D 0 33%,#fff 33% 67%,#000 67%); }
-.ap-sw-lb{ background:radial-gradient(circle at 50% 50%,#00A651 0 5px,transparent 6px),linear-gradient(#ED1C24 0 25%,#fff 25% 75%,#ED1C24 75%); }
-.ap-float{ position:fixed; top:10px; right:12px; z-index:60; display:flex; gap:6px; }
-.ap-float .ap-btn{ box-shadow:0 2px 10px rgba(0,0,0,.18); }
-.ap-btn.in-header + .ap-fbtn{ margin-left:6px; flex:0 0 auto; }
+:root[data-theme="eg"]{ --stripe:linear-gradient(90deg,#CE1126 0 33%,#fff 33% 66%,#000 66%); --flag-2:#1A1A1A; --flag-3:#C09300; --flag-sel:rgba(192,147,0,0.28); }
+.ap-sw-in{ background:radial-gradient(circle at 50% 50%,#000080 0 3px,transparent 3.5px),linear-gradient(#FF9933 0 33%,#fff 33% 67%,#138808 67%); }
+:root[data-theme="in"]{ --stripe:linear-gradient(90deg,#FF9933 0 33%,#fff 33% 66%,#138808 66%); --flag-2:#138808; --flag-3:#FF9933; --flag-sel:rgba(255,153,51,0.28); }
+.ap-sw-jo{ background:linear-gradient(115deg,#CE1126 0 30%,transparent 30%),linear-gradient(#000 0 33%,#fff 33% 67%,#007A3D 67%); }
+:root[data-theme="jo"]{ --stripe:linear-gradient(90deg,#000 0 25%,#fff 25% 50%,#007A3D 50% 75%,#CE1126 75%); --flag-2:#CE1126; --flag-3:#1A1A1A; --flag-sel:rgba(26,26,26,0.28); }
+.ap-sw-sy{ background:radial-gradient(circle at 30% 50%,#CE1126 0 2px,transparent 2.5px),radial-gradient(circle at 50% 50%,#CE1126 0 2px,transparent 2.5px),radial-gradient(circle at 70% 50%,#CE1126 0 2px,transparent 2.5px),linear-gradient(#007A3D 0 33%,#fff 33% 67%,#000 67%); }
+:root[data-theme="sy"]{ --stripe:linear-gradient(90deg,#007A3D 0 33%,#fff 33% 50%,#000 50% 83%,#CE1126 83%); --flag-2:#CE1126; --flag-3:#1A1A1A; --flag-sel:rgba(26,26,26,0.28); }
+.ap-sw-lb{ background:radial-gradient(circle at 50% 50%,#00A651 0 3.5px,transparent 4px),linear-gradient(#ED1C24 0 25%,#fff 25% 75%,#ED1C24 75%); }
+:root[data-theme="lb"]{ --stripe:linear-gradient(90deg,#ED1C24 0 30%,#fff 30% 45%,#00A651 45% 55%,#fff 55% 70%,#ED1C24 70%); --flag-2:#00A651; --flag-3:#ED1C24; --flag-sel:rgba(237,28,36,0.28); }
+html[data-flag]{ accent-color: var(--flag-2); scrollbar-color: var(--flag-2) var(--bg); }
+html[data-flag] body::before{ content:""; position:fixed; top:0; left:0; right:0; height:6px; background:var(--stripe); z-index:300; pointer-events:none; }
+html[data-flag] header.top{ box-shadow: inset 0 -3px 0 var(--flag-2); }
+html[data-flag] .btn-secondary, html[data-flag] .link-btn, html[data-flag] .ap-btn, html[data-flag] .ap-reset{ border-color: var(--flag-2); }
+html[data-flag] select, html[data-flag] input:not([type=checkbox]):not([type=radio]), html[data-flag] textarea{ border-color: var(--flag-2); }
+html[data-flag] :focus-visible{ outline-color: var(--flag-2); }
+html[data-flag] ::selection{ background: var(--flag-sel); color: var(--ink); }
+html[data-flag] .ap-panel{ border-color: var(--flag-2); box-shadow: 0 18px 50px -10px rgba(0,0,0,.45), 0 -4px 0 var(--flag-3) inset; }
 /* text size: scales every size on the page together, like browser zoom */
 html[data-size="sm"]{ zoom: .9; }
 html[data-size="lg"]{ zoom: 1.15; }
