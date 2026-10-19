@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-6wiR+1CCWv6XltNYis2t7rb+XoxLPaPzNhNBfHAs2Wc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261019d"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#146C6A" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<title>iLearn A Level</title>
+<link rel="stylesheet" href="shared.css?v=20261019d" />
+<style>
+  .ln-preview{ margin:0 0 12px; padding:10px 14px; border:1.5px dashed var(--accent); border-radius:10px; background:var(--accent-tint); color:var(--accent-dark); font-size:14px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .ln-preview.hidden{ display:none; }
+  .ln-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
+  .ln-hero{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  .ln-ring{ position:relative; width:84px; height:84px; flex:0 0 auto; }
+  .ln-ring svg{ transform:rotate(-90deg); }
+  .ln-ring .trk{ fill:none; stroke:var(--line); }
+  .ln-ring .fil{ fill:none; stroke:var(--accent); stroke-linecap:round; transition:stroke-dashoffset .5s; }
+  .ln-ring b{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:19px; }
+  .ln-hero-body{ flex:1 1 240px; min-width:0; }
+  .ln-hero-body h2{ margin:0 0 4px; font-size:18px; }
+  .ln-muted{ color:var(--muted); font-size:13.5px; margin:0 0 8px; }
+  .ln-bars{ display:grid; gap:8px; margin:14px 0 4px; }
+  .ln-bar-row{ display:grid; grid-template-columns:150px 1fr auto; gap:10px; align-items:center; font-size:13px; }
+  .ln-bar{ height:9px; border-radius:5px; background:var(--line); overflow:hidden; }
+  .ln-bar i{ display:block; height:100%; background:var(--accent); border-radius:5px; transition:width .5s; }
+  .ln-tabs{ display:flex; gap:8px; margin:18px 0 12px; flex-wrap:wrap; }
+  .ln-tab{ flex:1 1 200px; padding:11px 14px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font:inherit; font-weight:700; cursor:pointer; text-align:left; }
+  .ln-tab small{ display:block; font-weight:400; color:var(--muted); margin-top:2px; }
+  .ln-tab[aria-selected="true"]{ border-color:var(--accent); background:var(--accent-tint); }
+  .ln-topic{ border:1px solid var(--line); border-radius:10px; margin-bottom:10px; background:var(--surface); overflow:hidden; }
+  .ln-topic > summary{ list-style:none; cursor:pointer; padding:13px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight:800; background:var(--accent-tint); }
+  .ln-topic > summary::-webkit-details-marker{ display:none; }
+  .ln-topic > summary .cnt{ font-weight:600; font-size:12.5px; color:var(--muted); white-space:nowrap; }
+  .ln-sec{ padding:8px 16px 4px; font-size:12.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; border-top:1px solid var(--line); }
+  .ln-unit{ padding:9px 16px; border-top:1px solid var(--line); }
+  .ln-unit-head{ display:flex; gap:10px; align-items:baseline; font-size:13.5px; }
+  .ln-code{ font-weight:800; color:var(--accent-dark); flex:0 0 auto; }
+  .ln-bridge{ margin:6px 0 2px; padding:8px 12px; border:1px dashed var(--accent); border-radius:8px; background:var(--accent-tint); color:var(--accent-dark); font-size:13px; }
+  .ln-moved{ margin:6px 0 2px; font-size:13px; color:var(--muted); }
+  .ln-soon{ margin-left:auto; font-size:12px; font-weight:700; color:var(--muted); background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:2px 10px; white-space:nowrap; }
+  .ln-lessons{ display:grid; gap:6px; margin:8px 0 2px 0; }
+  .ln-lesson{ display:flex; align-items:center; gap:10px; width:100%; padding:9px 12px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  .ln-lesson:hover:not(:disabled){ border-color:var(--accent); }
+  .ln-lesson:disabled{ opacity:.55; cursor:not-allowed; }
+  .ln-lesson.cur{ border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-tint); }
+  .ln-dot{ flex:0 0 auto; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; border:2px solid var(--line); color:var(--muted); }
+  .ln-lesson.done .ln-dot{ background:var(--correct); border-color:var(--correct); color:#fff; }
+  .ln-lesson.cur .ln-dot{ border-color:var(--accent); color:var(--accent); }
+  .ln-tag{ margin-left:auto; font-size:11.5px; font-weight:700; padding:2px 9px; border-radius:999px; white-space:nowrap; }
+  .ln-tag.m{ background:var(--correct-bg); color:var(--correct); }
+  .ln-tag.r{ background:var(--diff-moderate-bg); color:var(--diff-moderate); }
+  .ln-crumb{ font-size:12.5px; color:var(--muted); margin:0 0 6px; }
+  .ln-steps{ display:flex; gap:6px; margin:10px 0 16px; }
+  .ln-step{ flex:1; text-align:center; font-size:12px; font-weight:700; padding:6px 4px; border-radius:6px; background:var(--bg); color:var(--muted); border:1px solid var(--line); }
+  .ln-step.on{ background:var(--accent-tint); color:var(--accent-dark); border-color:var(--accent); }
+  .ln-step.ok{ background:var(--correct-bg); color:var(--correct); border-color:var(--correct-line); }
+  .ln-body{ font-size:15.5px; line-height:1.6; }
+  .ln-body p{ margin:0 0 12px; } .ln-body ul{ margin:0 0 12px 20px; padding:0; } .ln-body li{ margin:4px 0; }
+  .ln-body code{ background:var(--bg); border:1px solid var(--line); border-radius:5px; padding:1px 6px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.92em; }
+  .ln-pre{ background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px 14px; overflow-x:auto; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14px; line-height:1.5; }
+  .ln-table{ border-collapse:collapse; margin:0 0 12px; font-size:14px; max-width:100%; }
+  .ln-table th, .ln-table td{ border:1px solid var(--line); padding:6px 11px; text-align:center; }
+  .ln-table th{ background:var(--bg); }
+  .ln-ref{ border:1px solid var(--accent); border-radius:10px; margin:0 0 14px; background:var(--accent-tint); }
+  .ln-ref>summary{ cursor:pointer; padding:10px 14px; font-weight:700; color:var(--accent-dark); font-size:14px; }
+  .ln-ref-body{ padding:4px 14px 12px; background:var(--surface); border-top:1px solid var(--line); border-radius:0 0 10px 10px; max-height:60vh; overflow:auto; }
+  .ln-ref-body h4{ margin:12px 0 4px; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .ln-fill{ line-height:2.1; white-space:pre-wrap; word-break:break-word; }
+  .ln-gap{ font:inherit; font-size:13.5px; padding:3px 6px; border:1.5px dashed var(--accent); border-radius:6px; background:var(--accent-tint); color:var(--ink); max-width:100%; cursor:pointer; }
+  .ln-gap.empty{ border-color:#C0392B; }
+  .ln-gap.right{ border-style:solid; border-color:var(--correct-line); background:var(--correct-bg); color:var(--correct); }
+  .ln-gap.wrong{ border-style:solid; border-color:#C0392B; background:#FDECEA; color:#8E2A1F; }
+  .ln-box{ border:1px solid var(--line); border-left:5px solid var(--accent); border-radius:10px; padding:14px 16px; margin:0 0 14px; background:var(--surface); }
+  .ln-box h3{ margin:0 0 8px; font-size:14px; text-transform:uppercase; letter-spacing:.04em; color:var(--accent-dark); }
+  .ln-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+  .ln-q{ font-size:16.5px; font-weight:700; margin:0 0 12px; }
+  .ln-opts{ display:grid; gap:9px; }
+  .ln-opt{ display:flex; gap:12px; align-items:center; padding:12px 14px; border:1.5px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  .ln-opt:hover:not(:disabled){ border-color:var(--accent); }
+  .ln-opt .l{ flex:0 0 auto; width:26px; height:26px; border-radius:50%; background:var(--bg); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; }
+  .ln-opt.right{ border-color:var(--correct); background:var(--correct-bg); }
+  .ln-opt.wrong{ border-color:var(--incorrect); background:var(--incorrect-bg); }
+  .ln-fb{ margin-top:14px; padding:12px 14px; border-radius:10px; font-size:14.5px; }
+  .ln-fb.ok{ background:var(--correct-bg); border:1px solid var(--correct-line); }
+  .ln-fb.no{ background:var(--incorrect-bg); border:1px solid var(--incorrect-line); }
+  .ln-done{ text-align:center; padding:8px 0 4px; }
+  .ln-done .big{ font-size:46px; line-height:1; }
+  .ln-done h2{ margin:8px 0 6px; }
+  .ln-notice{ text-align:center; color:var(--muted); padding:30px 0; }
+  .ln-streak{ display:inline-flex; gap:6px; align-items:center; font-weight:800; font-size:13px; padding:3px 11px; border-radius:999px; background:var(--diff-moderate-bg); color:var(--diff-moderate); margin-left:8px; }
+  .ln-card2{ border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:12px 0 0; background:var(--surface); display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .ln-card2 p{ margin:0; font-size:14px; } .ln-card2 b{ font-size:15px; }
+  .ln-card2.warm{ border-left:5px solid var(--diff-moderate); background:var(--diff-moderate-bg); }
+  .ln-tools{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 0; }
+  .ln-badges{ display:flex; gap:7px; flex-wrap:wrap; margin:12px 0 0; }
+  .ln-badge{ font-size:12.5px; font-weight:700; padding:4px 11px; border-radius:999px; border:1px solid var(--correct-line); background:var(--correct-bg); color:var(--correct); }
+  .ln-badge.off{ border-color:var(--line); background:var(--bg); color:var(--muted); font-weight:600; filter:grayscale(1); opacity:.75; }
+  .ln-topic-tools{ display:flex; gap:8px; flex-wrap:wrap; padding:10px 16px; border-top:1px solid var(--line); background:var(--bg); align-items:center; font-size:13px; }
+  .ln-topic-tools .sm{ padding:6px 12px; font-size:13px; }
+  .ln-text{ width:100%; box-sizing:border-box; min-height:96px; padding:11px 13px; border:1.5px solid var(--line); border-radius:10px; font:inherit; font-size:15.5px; background:var(--surface); color:var(--ink); resize:vertical; }
+  .ln-video{ margin-top:12px; } .ln-video iframe{ width:100%; aspect-ratio:16/9; border:0; border-radius:10px; background:#000; }
+  .ln-video small{ display:block; color:var(--muted); margin-top:4px; }
+  .ln-gl-search{ width:100%; box-sizing:border-box; padding:11px 13px; border:1.5px solid var(--line); border-radius:10px; font:inherit; font-size:15px; margin:10px 0 6px; background:var(--surface); color:var(--ink); }
+  .ln-gl h4{ margin:16px 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--accent-dark); }
+  .ln-gl dl{ margin:0; } .ln-gl dt{ font-weight:800; margin-top:8px; } .ln-gl dd{ margin:2px 0 0; color:var(--ink); font-size:14.5px; line-height:1.5; }
+  .ln-score{ font-size:38px; font-weight:800; margin:6px 0; }
+  .ln-prog{ height:7px; border-radius:4px; background:var(--line); overflow:hidden; margin:6px 0 14px; } .ln-prog i{ display:block; height:100%; background:var(--accent); }
+  .ln-tag.p{ background:var(--accent-tint); color:var(--accent-dark); }
+  .ln-tag.t{ background:var(--bg); color:var(--muted); border:1px solid var(--line); }
+  .ln-xp{ display:inline-flex; gap:6px; align-items:center; font-weight:800; font-size:13px; padding:3px 11px; border-radius:999px; background:var(--accent-tint); color:var(--accent-dark); margin-left:8px; }
+  .ln-card2.p1{ border-left:5px solid var(--accent); } .ln-card2.p1.lock{ opacity:.8; border-left-color:var(--line); background:var(--bg); }
+  .ln-arc-h{ margin:16px 0 6px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--accent-dark); }
+  .ln-arc{ display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; margin:6px 0; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  .ln-arc:hover:not(:disabled){ border-color:var(--accent); } .ln-arc:disabled{ opacity:.5; cursor:not-allowed; } .ln-arc .st{ margin-left:auto; white-space:nowrap; }
+  @media (max-width:520px){ .ln-bar-row{ grid-template-columns:1fr; gap:4px; } }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+
+  <header class="top">
+    <a class="logo-link" href="index.html" aria-label="iLearnCS home"><img class="logo-img" src="logo.png" alt="iLearnCS"></a>
+    <div><h1>iLearn · A Level</h1><p id="header-sub">AS &amp; A Level Computer Science 9618 · topics 13 to 20</p></div>
+  </header>
+
+  <div id="preview-bar" class="ln-preview hidden"></div>
+
+  <!-- ============ JOURNEY (home) ============ -->
+  <section id="view-journey" class="card hidden">
+    <div class="ln-top">
+      <h2 class="step-title" style="margin:0;">My learning journey</h2>
+      <a class="link-btn" href="quiz.html#menu">← iLearn / iSolve menu</a>
+    </div>
+    <div class="ln-hero">
+      <div class="ln-ring"><svg width="84" height="84" viewBox="0 0 84 84"><circle class="trk" cx="42" cy="42" r="36" stroke-width="8"></circle><circle class="fil" id="ring-fill" cx="42" cy="42" r="36" stroke-width="8" stroke-dasharray="226.2" stroke-dashoffset="226.2"></circle></svg><b id="ring-pct">0%</b></div>
+      <div class="ln-hero-body">
+        <h2 id="hero-title">Welcome</h2>
+        <p class="ln-muted" id="hero-sub"></p>
+        <button class="btn btn-primary" id="btn-continue" type="button">Continue learning</button>
+      </div>
+    </div>
+    <div id="warm"></div>
+    <div class="ln-tools">
+      <button class="btn btn-secondary" id="btn-mixed" type="button">🔀 Mixed revision</button>
+      <button class="btn btn-secondary" id="btn-gloss" type="button">📖 Glossary</button>
+    </div>
+    <div class="ln-badges" id="badges"></div>
+    <div class="ln-bars" id="bars"></div>
+    <p class="ln-muted" style="margin:14px 0 -8px"><b>Every lesson is open.</b> Start at any topic and any lesson, in any order. Already confident? Use the skip test at the top of a topic. Prepare for <b>Paper 3 (Advanced Theory)</b> and <b>Paper 4 (Practical programming)</b> in the May/June 2027 exams.</p>
+    <div class="ln-tabs" role="tablist" id="tabs"></div>
+    <div id="topics"></div>
+  </section>
+
+  <!-- ============ LESSON ============ -->
+  <section id="view-lesson" class="card hidden">
+    <div class="ln-top">
+      <p class="ln-crumb" id="crumb"></p>
+      <button class="link-btn" id="btn-leave" type="button">← Back to journey</button>
+    </div>
+    <h2 class="step-title" id="lesson-title" style="margin-top:0;"></h2>
+    <div class="ln-steps" id="steps"></div>
+    <div id="lesson-body"></div>
+  </section>
+
+  <!-- ============ QUIZ SESSION (warm-up, mixed revision, topic tests) ============ -->
+  <section id="view-quiz" class="card hidden">
+    <div class="ln-top">
+      <p class="ln-crumb" id="q-crumb"></p>
+      <button class="link-btn" id="q-leave" type="button">← Back to journey</button>
+    </div>
+    <h2 class="step-title" id="q-title" style="margin-top:0;"></h2>
+    <div class="ln-prog"><i id="q-bar" style="width:0%"></i></div>
+    <div id="q-body"></div>
+  </section>
+
+  <!-- ============ GLOSSARY ============ -->
+  <section id="view-gloss" class="card hidden">
+    <div class="ln-top">
+      <h2 class="step-title" style="margin:0;">Keyword glossary</h2>
+      <button class="link-btn" id="g-leave" type="button">← Back to journey</button>
+    </div>
+    <p class="ln-muted">The exact words examiners look for. Learn each one, then use it in your answers.</p>
+    <input type="search" class="ln-gl-search" id="g-search" placeholder="Search a keyword…" />
+    <div class="ln-gl" id="g-list"></div>
+  </section>
+
+
+
+  <section id="view-wait" class="card"><p class="ln-notice">Loading your journey…</p></section>
+</div>
+
+<script src="alevel-objectives.js?v=20261019d"></script>
+<script src="learn-helpers.js?v=20261019d"></script>
+<script src="alevel-t13.js?v=20261019d"></script>
+<script src="alevel-t14.js?v=20261019d"></script>
+<script src="alevel-t15.js?v=20261019d"></script>
+<script src="alevel-t16.js?v=20261019d"></script>
+<script src="alevel-t17.js?v=20261019d"></script>
+<script src="alevel-t18.js?v=20261019d"></script>
+<script src="alevel-t19.js?v=20261019d"></script>
+<script src="alevel-t20.js?v=20261019d"></script>
+<script src="alevel-p4.js?v=20261019d"></script>
+<script src="alevel-p3.js?v=20261019d"></script>
+<script src="alevel-glossary.js?v=20261019d"></script>
+<script src="learn-engine.js?v=20261019d"></script>
+<script src="firebase-config.js?v=20261019d"></script>
+<script type="module" src="firebase-init.js?v=20261019d"></script>
+<script type="module">
+(function(){
+  "use strict";
+  var E = window.ILearnEngine, S = window.SYLLABUS_OBJECTIVES, O = S.OBJECTIVES;
+  var PAPERS = [
+    { id:1, title:"Paper 3", label:"Advanced theory", sub:"Topics 13–18: data representation, communication, hardware, system software, security, AI", topics:[13,14,15,16,17,18] },
+    { id:2, title:"Papers 3 and 4", label:"Problem-solving and programming", sub:"Topics 19–20: algorithms, data structures, recursion, programming paradigms", topics:[19,20] }
+  ];
+  var PROGRESS_KEY = "ilearn12";
+  var preview = false;   // an administrator trying the journey as a student: nothing is saved online
+  var user = null, st = { learn:{}, days:{}, tests:{}, games:{} };
+  var activeTab = 1, current = null, sess = null;
+
+  function $(id){ return document.getElementById(id); }
+  function esc(x){ return E.esc(x); }
+  var VIEWS = ["view-journey","view-lesson","view-quiz","view-gloss","view-wait"];
+  function show(id){ VIEWS.forEach(function(v){ $(v).classList.toggle("hidden", v !== id); }); window.scrollTo(0, 0); }
+
+  var LESSONS = E.LESSONS, LESSON_BY_ID = E.LESSON_BY_ID, CODES = E.CODES;
+  function lessonsOf(code){ return E.lessonsOf(code); }
+  function progress(){ return st.learn; }
+  function isDone(id){ return !!(st.learn[id] && st.learn[id].d); }
+  // Every topic is its own track. Lessons unlock in order WITHIN a topic,
+  // but a student may start any topic (1-10) without finishing the one
+  // before it -- in either paper.
+  function topicNum(l){ return E.topicOf(l); }
+  function paperOf(l){ return topicNum(l) <= 18 ? 1 : 2; }
+  function nextInTopic(tn){ for(var i = 0; i < LESSONS.length; i++){ if(topicNum(LESSONS[i]) === tn && !isDone(LESSONS[i].id)) return LESSONS[i]; } return null; }
+  function nextInPaper(pid){ for(var i = 0; i < LESSONS.length; i++){ if(paperOf(LESSONS[i]) === pid && !isDone(LESSONS[i].id)) return LESSONS[i]; } return null; }
+  // After finishing a lesson: the next one in the same topic; when the topic
+  // is complete, the first unfinished lesson in the same paper, then the other.
+  function nextAfter(l){ return nextInTopic(topicNum(l)) || nextInPaper(paperOf(l)) || nextInPaper(paperOf(l) === 1 ? 2 : 1); }
+  // "Continue": carry on from the lesson the student finished most recently;
+  // a brand-new student gets the first lesson of the paper tab being viewed.
+  function currentLesson(){
+    var last = null, lt = -1;
+    LESSONS.forEach(function(l){ var r = st.learn[l.id]; if(r && r.d){ var t = r.rv || r.t || 0; if(t >= lt){ lt = t; last = l; } } });
+    if(last){ var n = nextAfter(last); if(n) return n; }
+    return nextInPaper(activeTab) || nextInPaper(activeTab === 1 ? 2 : 1);
+  }
+  // A Level: every lesson is open from the start, in any order.
+  function isUnlocked(l){ return true; }
+  function codeCovered(code){ var ls = lessonsOf(code); return ls.length > 0 && ls.every(function(l){ return isDone(l.id); }); }
+
+  // ---------- persistence ----------
+  function localKey(){ return (preview ? "ilearn12_preview_v1_" : "ilearn12_v1_") + (user && user.uid); }
+  function loadState(){
+    var local = null;
+    try { local = JSON.parse(localStorage.getItem(localKey()) || "null"); } catch(e){}
+    var p = (!preview && PQFirebase.getMyProgress ? PQFirebase.getMyProgress(user.uid, PROGRESS_KEY) : Promise.resolve(null));
+    return p.catch(function(){ return null; }).then(function(remote){ return E.mergeState(local, remote); });
+  }
+  function save(){
+    var snap = E.snapshot(st);
+    try { localStorage.setItem(localKey(), JSON.stringify(snap)); } catch(e){}
+    if(!preview && PQFirebase.saveProgress) PQFirebase.saveProgress(user.uid, PROGRESS_KEY, snap);
+  }
+  function markToday(){ var d = E.today(); st.days[d] = (st.days[d] || 0) + 1; }
+
+  // ---------- question renderer (multiple choice or typed answer) ----------
+  // done(ok, fbEl, info) is called once the student has answered.
+  function renderQ(host, q, video, done){
+    var h = '<p class="ln-q">' + q.q + "</p>";   // question text is trusted authored HTML (may contain code tags)
+    var fbHtml = '<div id="fb"></div>';
+    if(q.type === "text"){
+      host.innerHTML = h + '<textarea class="ln-text" id="tx" placeholder="Type your answer here…"></textarea><div class="ln-actions"><button class="btn btn-primary" id="tx-go" type="button">Check my answer</button></div>' + fbHtml;
+      $("tx-go").addEventListener("click", function(){
+        var txt = $("tx").value;
+        if(!txt.trim()){ $("tx").focus(); return; }
+        var r = E.gradeText(q, txt);
+        $("tx").disabled = true; $("tx-go").remove();
+        var fb = $("fb");
+        fb.innerHTML = r.ok
+          ? '<div class="ln-fb ok"><b>Correct.</b> ' + (q.explain ? esc(q.explain) : "") + "</div>"
+          : '<div class="ln-fb no"><b>Not quite</b> (you covered ' + r.matched + " of the " + r.need + " key points needed).<br><b>A full-mark answer:</b> " + esc(q.model || "") + "</div>" + videoHtml(video);
+        done(r.ok, fb, r);
+      });
+      return;
+    }
+    if(q.type === "fill"){
+      // "Complete the algorithm": a code listing with gaps; each gap is a drop-down list.
+      var optsFor = q.gaps.map(function(g){ return E.shuffle([g[0]].concat(g[1])); });
+      var codeHtml = esc(q.code).replace(/\{(\d+)\}/g, function(m, n){
+        var i = Number(n) - 1; if(!optsFor[i]) return m;
+        return '<select class="ln-gap" data-g="' + i + '" aria-label="Gap ' + n + '"><option value="">▼ choose</option>' + optsFor[i].map(function(o){ return "<option>" + esc(o) + "</option>"; }).join("") + "</select>";
+      });
+      host.innerHTML = h + '<pre class="ln-pre ln-fill">' + codeHtml + '</pre><p class="ln-muted" id="fl-msg" style="margin:8px 0 0">Choose the missing part for every gap, then check.</p><div class="ln-actions"><button class="btn btn-primary" id="fl-go" type="button">Check my answer</button></div>' + fbHtml;
+      $("fl-go").addEventListener("click", function(){
+        var sels = Array.prototype.slice.call(host.querySelectorAll(".ln-gap"));
+        var empty = sels.filter(function(x){ return !x.value; });
+        sels.forEach(function(x){ x.classList.toggle("empty", !x.value); });
+        if(empty.length){ $("fl-msg").textContent = "Fill every gap first (" + empty.length + " left)."; empty[0].focus(); return; }
+        var right = 0;
+        sels.forEach(function(x){
+          var good = x.value === q.gaps[Number(x.getAttribute("data-g"))][0];
+          if(good) right++;
+          x.classList.add(good ? "right" : "wrong"); x.disabled = true;
+        });
+        $("fl-go").remove(); $("fl-msg").remove();
+        var allOk = right === q.gaps.length, fb = $("fb");
+        if(allOk) fb.innerHTML = '<div class="ln-fb ok"><b>Correct.</b> ' + esc(q.explain || "") + "</div>";
+        else {
+          var full = esc(q.code).replace(/\{(\d+)\}/g, function(m, n){ var g = q.gaps[Number(n) - 1]; return g ? "<b>" + esc(g[0]) + "</b>" : m; });
+          fb.innerHTML = '<div class="ln-fb no"><b>Not quite</b> (' + right + " of " + q.gaps.length + " gaps correct)." +
+            (sess ? "<br>" + esc(q.explain || "") + '<pre class="ln-pre" style="margin-top:8px">' + full + "</pre>" : " The red gaps need another look: read the algorithm line by line and think what each gap must do.") + "</div>" + videoHtml(video);
+        }
+        done(allOk, fb, { matched: right, need: q.gaps.length });
+      });
+      return;
+    }
+    var order = E.shuffle(q.options.map(function(o, i){ return i; }));
+    host.innerHTML = h + '<div class="ln-opts" id="opts">' + order.map(function(oi, k){
+      return '<button class="ln-opt" data-o="' + oi + '" type="button"><span class="l">' + "ABCD".charAt(k) + "</span><span>" + esc(q.options[oi]) + "</span></button>";
+    }).join("") + "</div>" + fbHtml;
+    Array.prototype.forEach.call($("opts").querySelectorAll(".ln-opt"), function(b){
+      b.addEventListener("click", function(){
+        var oi = Number(b.getAttribute("data-o")), ok = oi === q.correct;
+        Array.prototype.forEach.call($("opts").querySelectorAll(".ln-opt"), function(x){
+          x.disabled = true; var o = Number(x.getAttribute("data-o"));
+          if(o === oi) x.classList.add(ok ? "right" : "wrong");
+          if(ok && o === q.correct) x.classList.add("right");
+        });
+        var fb = $("fb");
+        fb.innerHTML = ok ? '<div class="ln-fb ok"><b>Correct.</b> ' + esc(q.explain || "") + "</div>"
+          : '<div class="ln-fb no"><b>Not quite.</b> ' + (sess ? esc(q.explain || "") : "Think about it again, then have another go.") + "</div>" + videoHtml(video);
+        done(ok, fb, null);
+      });
+    });
+  }
+  function videoHtml(v){
+    if(!v || !v.id) return "";
+    return '<div class="ln-video"><iframe loading="lazy" allowfullscreen title="' + esc(v.label || "Video") + '" src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(v.id) + "?rel=0" + (v.start ? "&start=" + Number(v.start) : "") + '"></iframe><small>' + esc(v.label || "Watch this explanation") + "</small></div>";
+  }
+
+  // ---------- journey ----------
+  function xpChip(){
+    var x = E.xp(st), lv = E.level(x);
+    return '<span class="ln-xp" title="' + (lv.next ? (lv.next - x) + " XP to " + lv.nextName : "Top level!") + '">⭐ ' + x + " XP · " + esc(lv.name) + "</span>";
+  }
+  function pct(a, b){ return b ? Math.round(a / b * 100) : 0; }
+  function renderJourney(){
+    var tree = E.topicTree();
+    var doneL = LESSONS.filter(function(l){ return isDone(l.id); }).length;
+    var overall = pct(doneL, LESSONS.length);
+    $("ring-pct").textContent = overall + "%";
+    $("ring-fill").style.strokeDashoffset = String(226.2 * (1 - overall / 100));
+    var cur = currentLesson(), streak = E.streak(st.days);
+    $("hero-title").innerHTML = esc("Hi " + user.name + (doneL ? ", keep going!" : ", let's begin!")) + (streak ? '<span class="ln-streak">🔥 ' + streak + "-day streak</span>" : "") + xpChip();
+    $("hero-sub").textContent = doneL + " of " + LESSONS.length + " lessons completed.";
+    $("btn-continue").textContent = cur ? (doneL ? "Continue: " : "Start: ") + "Topic " + topicNum(cur) + " · " + cur.code + " " + cur.title : "All lessons complete 🎉";
+    $("btn-continue").disabled = !cur;
+
+    var due = E.dueLessons(st.learn);
+    $("warm").innerHTML = due.length
+      ? '<div class="ln-card2 warm"><div><b>☀️ Warm-up: ' + due.length + " idea" + (due.length === 1 ? "" : "s") + ' due for review</b><p>Spaced review keeps ideas in your memory. It takes about 3 minutes.</p></div><button class="btn btn-primary" id="btn-warm" type="button">Start warm-up</button></div>' : "";
+    if($("btn-warm")) $("btn-warm").addEventListener("click", startWarmup);
+    $("btn-mixed").disabled = doneL < 2;
+
+    $("badges").innerHTML = E.badges(st, tree).map(function(b){ return '<span class="ln-badge' + (b.on ? "" : " off") + '" title="' + esc(b.how) + '">' + b.icon + " " + esc(b.name) + "</span>"; }).join("");
+
+    var bars = "";
+    PAPERS.forEach(function(p){
+      var codes = CODES.filter(function(c){ return p.topics.indexOf(parseInt(O[c][0], 10)) !== -1; });
+      var cov = codes.filter(codeCovered).length;
+      bars += '<div class="ln-bar-row"><span><b>' + p.title + "</b> syllabus covered</span><span class='ln-bar'><i style='width:" + pct(cov, codes.length) + "%'></i></span><span>" + cov + " / " + codes.length + " objectives</span></div>";
+    });
+    $("bars").innerHTML = bars;
+
+    var tabs = "";
+    PAPERS.forEach(function(p){ tabs += '<button class="ln-tab" role="tab" data-p="' + p.id + '" aria-selected="' + (p.id === activeTab) + '">' + p.title + " · " + p.label + "<small>" + p.sub + "</small></button>"; });
+    $("tabs").innerHTML = tabs;
+    Array.prototype.forEach.call($("tabs").querySelectorAll(".ln-tab"), function(b){ b.addEventListener("click", function(){ activeTab = Number(b.getAttribute("data-p")); renderJourney(); }); });
+
+    var paper = PAPERS.filter(function(p){ return p.id === activeTab; })[0];
+    var h = "";
+    var curInPaper = !!cur && paper.topics.indexOf(topicNum(cur)) !== -1, openedOne = false;
+    paper.topics.forEach(function(tn){
+      var t = tree[tn]; if(!t) return;
+      var codes = []; t.secs.forEach(function(s){ s.units.forEach(function(u){ codes.push(u.code); }); });
+      var cov = codes.filter(codeCovered).length;
+      var hasCur = cur && topicNum(cur) === tn;
+      var tl = LESSONS.filter(function(l){ return topicNum(l) === tn; });
+      var undone = tl.filter(function(l){ return !isDone(l.id); }).length;
+      var bank = E.TESTS[tn], res = st.tests[tn];
+      var openIt = hasCur || (!curInPaper && !openedOne && undone > 0); if(openIt) openedOne = true;
+      h += '<details class="ln-topic"' + (openIt ? " open" : "") + "><summary><span>" + tn + " " + esc(t.title) + '</span><span class="cnt">' + cov + " / " + codes.length + " objectives</span></summary>";
+      if(bank){
+        h += '<div class="ln-topic-tools">';
+        if(undone) h += '<button class="btn btn-secondary sm" data-pre="' + tn + '" type="button">⏩ Already know this? Take the skip test</button>';
+        else h += '<button class="btn btn-primary sm" data-test="' + tn + '" type="button">📝 Topic ' + tn + " test</button>";
+        if(res) h += "<span>Best: <b>" + res.s + " / " + res.t + "</b> (" + pct(res.s, res.t) + "%)</span>";
+        else if(!undone) h += "<span>Not taken yet</span>";
+        h += "</div>";
+      }
+      t.secs.forEach(function(sec){
+        h += '<div class="ln-sec">' + esc(sec.name) + "</div>";
+        sec.units.forEach(function(u){
+          var raw = lessonsOf(u.code);
+          var ls = raw.filter(function(l){ return topicNum(l) === tn; });   // lessons taught in this topic
+          var away = raw.length - ls.length;                                  // taught in another topic (linear search / bubble sort -> Topic 8)
+          h += '<div class="ln-unit"><div class="ln-unit-head"><span class="ln-code">' + esc(u.code) + "</span><span>" + esc(u.text) + "</span>" + (raw.length ? "" : '<span class="ln-soon">Coming soon</span>') + "</div>";
+          if(ls.length){
+            h += '<div class="ln-lessons">';
+            function btn(l, extra){
+              var done = isDone(l.id), ok = isUnlocked(l), isCur = cur && cur.id === l.id, rec = st.learn[l.id];
+              var tag = "";
+              if(done){
+                if(rec.pre) tag = '<span class="ln-tag p">Skipped by test</span>';
+                else tag = rec.f ? '<span class="ln-tag m">Mastered</span>' : '<span class="ln-tag r">↻ Review later</span>';
+              } else if(isCur) tag = '<span class="ln-tag m">Up next</span>';
+              return '<button class="ln-lesson' + (done ? " done" : "") + (isCur ? " cur" : "") + '" data-l="' + l.id + '"' + (ok ? "" : " disabled") + '><span class="ln-dot">' + (done ? "✓" : (ok ? "▶" : "🔒")) + "</span><span>" + esc(l.title) + (extra ? ' <small style="color:var(--muted)">(' + esc(l.code) + ")</small>" : "") + (E.GAMES[l.id] ? " <span title=\"Has a puzzle\">🎮</span>" : "") + "</span>" + tag + "</button>";
+            }
+            ls.forEach(function(l){
+              var pre = E.movedBefore(l.id), post = E.movedAfter(l.id);
+              if(pre.length){
+                h += '<div class="ln-bridge">📚 ' + esc(pre[0].note || "") + "</div>";
+                pre.forEach(function(m){ h += btn(m, true); });
+              }
+              h += btn(l, false);
+              if(post.length){
+                h += '<div class="ln-bridge">📚 ' + esc(post[0].note || "") + "</div>";
+                post.forEach(function(m){ h += btn(m, true); });
+              }
+            });
+            h += "</div>";
+          }
+          if(away){
+            var movedL = raw.filter(function(l){ return topicNum(l) !== tn; }), adone = movedL.filter(function(l){ return isDone(l.id); }).length;
+            h += '<div class="ln-moved">📚 ' + esc(movedL[0].away || ("Taught in Topic " + topicNum(movedL[0]))) + " (" + adone + " of " + movedL.length + " lessons done).</div>";
+          }
+          h += "</div>";
+        });
+      });
+      h += "</details>";
+    });
+    $("topics").innerHTML = h;
+    Array.prototype.forEach.call($("topics").querySelectorAll(".ln-lesson"), function(b){ b.addEventListener("click", function(){ openLesson(b.getAttribute("data-l")); }); });
+    Array.prototype.forEach.call($("topics").querySelectorAll("[data-pre]"), function(b){ b.addEventListener("click", function(){ startTopicTest(Number(b.getAttribute("data-pre")), true); }); });
+    Array.prototype.forEach.call($("topics").querySelectorAll("[data-test]"), function(b){ b.addEventListener("click", function(){ startTopicTest(Number(b.getAttribute("data-test")), false); }); });
+    show("view-journey");
+  }
+  $("btn-continue").addEventListener("click", function(){ var c = currentLesson(); if(c){ activeTab = paperOf(c); openLesson(c.id); } });
+  $("btn-mixed").addEventListener("click", startMixed);
+  $("btn-gloss").addEventListener("click", openGlossary);
+
+  // ---------- lesson ----------
+  var STEPS = ["Learn", "Example", "Check", "Done"];
+  function renderSteps(active, allDone){
+    $("steps").innerHTML = STEPS.map(function(s, i){
+      var cls = "ln-step" + (i === active ? " on" : "") + ((i < active || allDone) ? " ok" : "");
+      return '<div class="' + cls + '">' + (i + 1) + ". " + s + "</div>";
+    }).join("");
+  }
+  // ---------- time on task (active seconds per lesson) ----------
+  // Counts only while a lesson is on screen, the tab is visible and the
+  // student touched the page in the last 90 s (so a lesson left open
+  // overnight is not counted). Stored as st.spent[id], copied to the
+  // lesson record (field s) on completion for the teacher dashboard.
+  var lastAct = 0;
+  function touch(){ lastAct = Date.now(); }
+  ["click", "keydown", "touchstart", "scroll", "mousemove"].forEach(function(ev){ document.addEventListener(ev, touch, { passive: true }); });
+  setInterval(function(){
+    if(!current || current.step >= 3 || document.hidden || $("view-lesson").classList.contains("hidden")) return;
+    if(Date.now() - lastAct > 90000) return;
+    st.spent = st.spent || {};
+    st.spent[current.l.id] = (st.spent[current.l.id] || 0) + 5;
+  }, 5000);
+  document.addEventListener("visibilitychange", function(){ if(document.hidden && current && current.step < 3 && !$("view-lesson").classList.contains("hidden")) save(); });
+  function openLesson(id){
+    var l = LESSON_BY_ID[id]; if(!l) return;
+    activeTab = paperOf(l);
+    current = { l: l, step: 0, ci: 0, wrongs: 0, wrongTotal: 0 };
+    touch();
+    $("crumb").textContent = O[l.code][0] + "  ›  " + l.code;
+    $("lesson-title").textContent = l.title;
+    renderLesson();
+    show("view-lesson");
+  }
+  $("btn-leave").addEventListener("click", function(){ save(); renderJourney(); });
+
+  // Collapsible look-back panel so a question can refer to "the program above".
+  function refPanel(l, open){
+    return '<details class="ln-ref"' + (open ? " open" : "") + '><summary>📖 Look back at the lesson &amp; example</summary><div class="ln-ref-body"><h4>The idea</h4><div class="ln-body">' + l.concept + '</div><h4>Worked example</h4><div class="ln-body">' + l.example + '</div></div></details>';
+  }
+  function bindRef(c){
+    var d = document.querySelector("#lesson-body .ln-ref, #q-body .ln-ref");
+    if(d) d.addEventListener("toggle", function(){ c.refOpen = d.open; });
+  }
+  function renderLesson(){
+    var c = current, l = c.l, body = $("lesson-body"), h = "";
+    if(c.step === 0){
+      renderSteps(0);
+      h = '<div class="ln-box"><h3>Syllabus objective ' + esc(l.code) + "</h3><div>" + esc(O[l.code][1]) + '</div></div><div class="ln-body">' + l.concept + '</div><div class="ln-actions"><button class="btn btn-primary" id="b-next" type="button">Show me an example →</button></div>';
+    } else if(c.step === 1){
+      renderSteps(1);
+      h = '<div class="ln-body"><div class="ln-box"><h3>Worked example</h3>' + l.example + '</div>' + gameBox(l) + '</div><div class="ln-actions"><button class="btn btn-secondary" id="b-back" type="button">← Re-read the idea</button><button class="btn btn-primary" id="b-next" type="button">Check my understanding →</button></div>';
+    } else if(c.step === 2){
+      renderSteps(2);
+      body.innerHTML = '<p class="ln-crumb">Question ' + (c.ci + 1) + " of " + l.checks.length + '</p>' + refPanel(l, c.refOpen) + '<div id="qhost"></div>';
+      bindRef(c);
+      renderQ($("qhost"), l.checks[c.ci], l.video, function(ok, fb){ lessonAnswered(ok, fb); });
+      return;
+    } else {
+      renderSteps(3, true);
+      var rec = st.learn[l.id], nextL = nextAfter(l), mastered = rec && rec.f;
+      h = '<div class="ln-done"><div class="big">' + (mastered ? "🌟" : "✅") + "</div><h2>" + (mastered ? "Mastered first time!" : "Lesson complete") + "</h2><p class='ln-muted'>" +
+        (mastered ? "You answered every question correctly at the first attempt. This idea is secure." : "You got there in the end. This idea is marked to <b>review later</b>; it will come back in your warm-up.") + "</p><p><b>+" + (mastered ? 15 : 10) + " XP</b></p></div>" +
+        '<div class="ln-box"><h3>Key idea to remember</h3><div class="ln-body">' + E.keyIdea(l) + '</div></div><div class="ln-actions" style="justify-content:center">' +
+        (nextL ? '<button class="btn btn-primary" id="b-next" type="button">Next: ' + esc(nextL.code + " " + nextL.title) + " →</button>" : "") +
+        '<button class="btn btn-secondary" id="b-journey" type="button">Back to journey</button></div>';
+    }
+    body.innerHTML = h;
+    var bn = $("b-next"), bb = $("b-back"), bj = $("b-journey");
+    if($("b-play")) $("b-play").addEventListener("click", function(){ runGame(l.id, $("game-host")); });
+    if(c.step < 2){
+      if(bn) bn.addEventListener("click", function(){ c.step++; renderLesson(); window.scrollTo(0, 0); });
+      if(bb) bb.addEventListener("click", function(){ c.step--; renderLesson(); window.scrollTo(0, 0); });
+    } else if(c.step === 3){
+      if(bn) bn.addEventListener("click", function(){ var n = nextAfter(l); if(n) openLesson(n.id); });
+      if(bj) bj.addEventListener("click", function(){ renderJourney(); });
+    }
+  }
+
+  // ---------- puzzles ----------
+  function gameBox(l){
+    if(!E.GAMES[l.id]) return "";
+    var best = st.games[l.id] || 0;
+    return '<div class="ln-box"><h3>🎮 Puzzle time <small style="text-transform:none;letter-spacing:0;font-weight:600;color:var(--muted)">(optional · ' + (best ? "best: " + "⭐".repeat(best) : "earn up to 3 stars") + ')</small></h3><div id="game-host"><button class="btn btn-secondary" id="b-play" type="button">▶ Play the puzzle</button></div></div>';
+  }
+  function runGame(id, host, after){
+    var spec = E.GAMES[id]; if(!spec) return;
+    window.ILGames.play(host, spec, function(res){
+      if(res.stars > (st.games[id] || 0)) st.games[id] = res.stars;
+      markToday(); save();
+      var again = document.createElement("div"); again.className = "ln-actions"; again.style.justifyContent = "center";
+      again.innerHTML = '<button class="btn btn-secondary" type="button">↻ Play again</button>';
+      again.firstChild.addEventListener("click", function(){ runGame(id, host, after); });
+      host.querySelector(".gm-stage").appendChild(again);
+      if(after) after();
+    });
+  }
+  function lessonAnswered(ok, fb){
+    var c = current, l = c.l, last = c.ci + 1 >= l.checks.length;
+    var actions = document.createElement("div"); actions.className = "ln-actions"; fb.appendChild(actions);
+    if(ok){
+      c.wrongs = 0;
+      actions.innerHTML = '<button class="btn btn-primary" id="b-cont" type="button">' + (last ? "Finish lesson →" : "Next question →") + "</button>";
+      $("b-cont").addEventListener("click", function(){
+        if(!last){ c.ci++; renderLesson(); return; }
+        var prev = st.learn[l.id];
+        st.learn[l.id] = { d: 1, f: c.wrongTotal === 0 ? 1 : 0, a: c.wrongTotal + 1, t: Date.now(), rc: 0 };
+        var secs = Math.round((st.spent && st.spent[l.id]) || 0);
+        if(secs > 0) st.learn[l.id].s = secs;
+        else if(prev && prev.s) st.learn[l.id].s = prev.s;
+        if(prev && prev.d){ st.learn[l.id].f = Math.max(prev.f || 0, st.learn[l.id].f); }
+        markToday(); save(); c.step = 3; renderLesson(); window.scrollTo(0, 0);
+      });
+    } else {
+      c.wrongs++; c.wrongTotal++;
+      if(c.wrongs >= 2){
+        actions.innerHTML = '<p>Let\'s go back and read the idea again before the next try.</p><button class="btn btn-primary" id="b-review" type="button">Re-read the idea</button>';
+        $("b-review").addEventListener("click", function(){ c.step = 0; c.wrongs = 0; renderLesson(); window.scrollTo(0, 0); });
+      } else {
+        actions.innerHTML = '<button class="btn btn-primary" id="b-retry" type="button">Try again</button>';
+        $("b-retry").addEventListener("click", function(){ renderLesson(); });
+      }
+    }
+  }
+
+  // ---------- quiz sessions: warm-up, mixed revision, topic tests, skip tests ----------
+  // cfg = { title, crumb, items:[{q, lid, topic}], onItem(item, ok), finish(score, total, results) -> html }
+  function startSession(cfg){
+    sess = { cfg: cfg, i: 0, score: 0, total: 0, wrong: [] };
+    $("q-crumb").textContent = cfg.crumb || "";
+    $("q-title").textContent = cfg.title;
+    renderSessionQ();
+    show("view-quiz");
+  }
+  function marksOf(q){ return q.type === "text" ? (q.need || (q.groups || []).length || 1) : q.type === "fill" ? q.gaps.length : 1; }
+  function renderSessionQ(){
+    var s = sess, cfg = s.cfg;
+    if(s.i >= cfg.items.length){ return finishSession(); }
+    var item = cfg.items[s.i];
+    $("q-bar").style.width = Math.round(s.i / cfg.items.length * 100) + "%";
+    $("q-body").innerHTML = '<p class="ln-crumb">Question ' + (s.i + 1) + " of " + cfg.items.length + (item.lid ? " · " + esc(LESSON_BY_ID[item.lid].code + " " + LESSON_BY_ID[item.lid].title) : "") + '</p>' + (item.lid ? refPanel(LESSON_BY_ID[item.lid], s.refOpen) : "") + '<div id="qhost"></div>';
+    bindRef(s);
+    renderQ($("qhost"), item.q, item.video, function(ok, fb, info){
+      var got = ok ? marksOf(item.q) : (info ? Math.min(info.matched, marksOf(item.q)) : 0);
+      s.score += got; s.total += marksOf(item.q);
+      if(!ok) s.wrong.push(item);
+      if(cfg.onItem) cfg.onItem(item, ok);
+      var a = document.createElement("div"); a.className = "ln-actions"; fb.appendChild(a);
+      a.innerHTML = '<button class="btn btn-primary" id="b-qn" type="button">' + (s.i + 1 >= cfg.items.length ? "See my result →" : "Next question →") + "</button>";
+      $("b-qn").addEventListener("click", function(){ s.i++; renderSessionQ(); window.scrollTo(0, 0); });
+    });
+  }
+  function finishSession(){
+    var s = sess, cfg = s.cfg;
+    $("q-bar").style.width = "100%";
+    var p = pct(s.score, s.total);
+    var extra = cfg.finish ? cfg.finish(s.score, s.total) : "";
+    $("q-body").innerHTML = '<div class="ln-done"><div class="big">' + (p >= 80 ? "🌟" : p >= 50 ? "👍" : "💪") + '</div><div class="ln-score">' + s.score + " / " + s.total + " · " + p + "%</div></div>" + extra +
+      '<div class="ln-actions" style="justify-content:center"><button class="btn btn-primary" id="b-end" type="button">Back to journey</button></div>';
+    $("b-end").addEventListener("click", function(){ sess = null; renderJourney(); });
+    sess.finished = true;
+    save();
+  }
+  $("q-leave").addEventListener("click", function(){ var wasRunning = sess && !sess.finished; sess = null; if(wasRunning) save(); renderJourney(); });
+
+  function reviewOutcome(lid, ok){
+    var r = st.learn[lid]; if(!r) return;
+    r.rv = Date.now();
+    if(ok){ r.rc = (r.rc || 0) + 1; if(r.rc >= 2 && !r.f) r.f = 1; }
+    else { r.rc = 0; r.f = 0; r.pre = 0; }
+  }
+  function pickCheck(l){ return l.checks[Math.floor(Math.random() * l.checks.length)]; }
+
+  function startWarmup(){
+    var due = E.dueLessons(st.learn).slice(0, 6);
+    if(!due.length) return;
+    startSession({
+      title: "Daily warm-up", crumb: "Spaced review",
+      items: due.map(function(l){ return { q: pickCheck(l), lid: l.id, video: l.video }; }),
+      onItem: function(item, ok){ reviewOutcome(item.lid, ok); markToday(); },
+      finish: function(score, total){ return '<p class="ln-muted" style="text-align:center">Ideas you got right come back later; ones you missed come back tomorrow.</p>'; }
+    });
+  }
+  function startMixed(){
+    var done = LESSONS.filter(function(l){ return isDone(l.id); });
+    if(done.length < 2) return;
+    done = E.shuffle(done).sort(function(a, b){ return (st.learn[a.id].f || 0) - (st.learn[b.id].f || 0); }).slice(0, 10);
+    startSession({
+      title: "Mixed revision", crumb: "Questions from topics you have completed",
+      items: E.shuffle(done).map(function(l){ return { q: pickCheck(l), lid: l.id, video: l.video }; }),
+      onItem: function(item, ok){ reviewOutcome(item.lid, ok); markToday(); },
+      finish: function(){ return '<p class="ln-muted" style="text-align:center">Lessons you missed are marked to review again soon.</p>'; }
+    });
+  }
+  function startTopicTest(tn, isSkip){
+    var bank = E.TESTS[tn]; if(!bank) return;
+    var items = E.shuffle(bank.mcq.slice()).map(function(q){ return { q: q, topic: tn }; }).concat((bank.typed || []).map(function(q){ return { q: Object.assign({ type: "text" }, q), topic: tn }; }));
+    startSession({
+      title: isSkip ? "Skip test: Topic " + tn : "Topic " + tn + " test", crumb: isSkip ? "Score at least 80% to skip the lessons you have not done yet" : "End-of-topic check",
+      items: items,
+      finish: function(score, total){
+        var p = score / total, out = "";
+        if(!isSkip){
+          var old = st.tests[tn];
+          if(!old || score / total > old.s / old.t) st.tests[tn] = { s: score, t: total, at: Date.now() };
+          markToday();
+          out = p >= 0.8 ? '<p style="text-align:center"><b>Topic badge earned! 🏅</b></p>' : '<p class="ln-muted" style="text-align:center">Score 80% or more to earn this topic\'s badge. Revisit the lessons marked “Review later” and try again.</p>';
+        } else if(p >= 0.8){
+          var n = 0;
+          LESSONS.forEach(function(l){ if(topicNum(l) === tn && !isDone(l.id)){ st.learn[l.id] = { d: 1, f: 0, a: 0, t: Date.now(), rc: 0, pre: 1 }; n++; } });
+          markToday();
+          out = '<p style="text-align:center"><b>Passed! ' + n + " lesson" + (n === 1 ? "" : "s") + " marked as skipped.</b><br>They will come back in your warm-up so you keep them fresh.</p>";
+        } else {
+          out = '<p class="ln-muted" style="text-align:center">Not quite 80% yet, so the lessons stay open. Work through them step by step; you can try the skip test again any time.</p>';
+        }
+        return out;
+      }
+    });
+  }
+
+  // ---------- glossary ----------
+  function openGlossary(){
+    $("g-search").value = ""; renderGloss(); show("view-gloss");
+  }
+  function renderGloss(){
+    var q = $("g-search").value.trim().toLowerCase(), by = {};
+    (window.ILEARN_GLOSSARY || []).forEach(function(g){
+      if(q && g[0].toLowerCase().indexOf(q) === -1 && g[1].toLowerCase().indexOf(q) === -1) return;
+      (by[g[2]] = by[g[2]] || []).push(g);
+    });
+    var h = "";
+    Object.keys(by).sort(function(a, b){ return a - b; }).forEach(function(tn){
+      h += "<h4>Topic " + tn + " · " + esc(S.TOPICS[tn] || "") + "</h4><dl>" + by[tn].sort(function(a, b){ return a[0].localeCompare(b[0]); }).map(function(g){ return "<dt>" + esc(g[0]) + "</dt><dd>" + esc(g[1]) + "</dd>"; }).join("") + "</dl>";
+    });
+    $("g-list").innerHTML = h || '<p class="ln-muted">No keyword matches your search.</p>';
+  }
+  $("g-search").addEventListener("input", renderGloss);
+  $("g-leave").addEventListener("click", function(){ renderJourney(); });
+
+  // ---------- start ----------
+  function begin(){
+    if(preview){
+      var bar = $("preview-bar");
+      bar.innerHTML = "<span><b>Admin preview.</b> You are seeing the A Level journey exactly as a 12BR student does. Your progress here is kept only in this browser; nothing is saved online and no student data is touched.</span>" +
+        '<span><button class="btn btn-secondary sm" id="pv-reset" type="button">Reset my preview</button> <a class="link-btn" href="admin.html">← Admin dashboard</a></span>';
+      bar.classList.remove("hidden");
+      $("pv-reset").addEventListener("click", function(){
+        if(!window.confirm("Clear your preview progress in this browser?")) return;
+        try { localStorage.removeItem(localKey()); } catch(e){}
+        st = E.emptyState(); renderJourney();
+      });
+    }
+    loadState().then(function(s){ st = s; renderJourney(); });
+  }
+  PQFirebase.onAuthChange(function(u){
+    if(!u){ window.location.href = "quiz.html"; return; }
+    user = u;
+    if(!user.name) user.name = "Admin";
+    var cls = String(u.class || "");
+    if(/^12BR/i.test(cls)){ begin(); return; }
+    var chk = PQFirebase.checkIsAdmin ? PQFirebase.checkIsAdmin(u.uid) : Promise.resolve(false);
+    chk.then(function(adm){
+      if(adm){ preview = true; begin(); return; }
+      $("view-wait").innerHTML = '<p class="ln-notice">The A Level iLearn journey is for class 12BR.</p><p style="text-align:center"><a class="link-btn" href="quiz.html">← Back to practice</a></p>';
+      show("view-wait");
+    });
+  });
+})();
+</script>
+</body>
+</html>

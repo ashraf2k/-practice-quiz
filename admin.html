@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-ZrGIPxU5JFscp2UUZwDqek42aun2Cq+r229mifFTsrY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-g7W3duuhZzBrR9+qLU7MUVVWTrOElWuiUnok+2NGyUA='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019c"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
@@ -536,11 +536,14 @@
           </select>
           <input type="text" id="filter-search-ilearn" placeholder="Search by name or email" />
           <button class="btn btn-primary" id="btn-ilearn-load">Load iLearn progress</button>
+          <button class="btn btn-secondary" id="btn-ilearn12-load" type="button">Load 12BR A Level report</button>
+          <a class="btn btn-secondary" href="alevel.html" target="_blank" rel="noopener">View A Level journey as a student ↗</a>
           <button class="btn btn-secondary" id="btn-dup-find">Find duplicate accounts</button>
         </div>
         <div id="dup-box" style="display:none;margin:10px 0"></div>
         <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by topics completed, then by performance (share of lessons mastered first time). Only students who have started the journey are listed. Click "Load iLearn progress" to fetch it. </p>
         <div id="ilearn-summary"></div>
+        <div id="ilearn12-box" class="table-scroll"></div>
         <div class="table-scroll"><table class="admin-table" id="ilearn-table" style="display:none">
           <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Topics completed</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Paper 2 mock</th><th>Last active</th><th></th></tr></thead>
           <tbody></tbody></table></div>
@@ -1431,6 +1434,29 @@
     });
   });
 
+
+  // 12BR A Level iLearn report (progress key "ilearn12"; lesson ids start with the topic number, e.g. 15.2c)
+  document.getElementById("btn-ilearn12-load").addEventListener("click", function(){
+    var status = document.getElementById("ilearn-status"), box = document.getElementById("ilearn12-box");
+    if(!loaded){ status.textContent = "Load the dashboard data first."; return; }
+    var roster = (usersRoster || []).filter(function(u){ return u.uid && /^12BR/i.test(u.className || u.class || ""); });
+    if(!roster.length){ status.textContent = "No 12BR students found yet."; box.innerHTML = ""; return; }
+    status.textContent = "Loading " + roster.length + " 12BR students…";
+    Promise.all(roster.map(function(u){ return PQFirebase.getMyProgress(u.uid, "ilearn12").catch(function(){ return null; }).then(function(rec){ return { u:u, rec:rec }; }); })).then(function(rows){
+      var T = [13,14,15,16,17,18,19,20];
+      var started = rows.filter(function(r){ return r.rec && r.rec.learn && Object.keys(r.rec.learn).length; });
+      started.forEach(function(r){ r.done = 0; r.by = {}; Object.keys(r.rec.learn).forEach(function(id){ if(r.rec.learn[id] && r.rec.learn[id].d){ r.done++; var t = parseInt(id, 10); r.by[t] = (r.by[t] || 0) + 1; } }); });
+      started.sort(function(a, b){ return b.done - a.done; });
+      var h = "<table class='admin-table'><thead><tr><th>Student</th><th>Done</th>" + T.map(function(t){ return "<th>T" + t + "</th>"; }).join("") + "<th>XP</th><th>Tests</th><th>Last active</th></tr></thead><tbody>";
+      started.forEach(function(r){
+        var tests = Object.keys(r.rec.tests || {}).sort().map(function(k){ var t = r.rec.tests[k]; return "T" + k + " " + Math.round(100 * t.s / t.t) + "%"; }).join(", ") || "-";
+        h += "<tr><td>" + esc12(r.u.name || "(no name)") + "</td><td>" + r.done + " / " + (r.rec.learnTotal || "?") + "</td>" + T.map(function(t){ return "<td>" + (r.by[t] || 0) + "</td>"; }).join("") + "<td>" + (r.rec.xp || 0) + "</td><td>" + esc12(tests) + "</td><td>" + (r.rec.lastActive ? new Date(r.rec.lastActive).toLocaleDateString() : "-") + "</td></tr>";
+      });
+      box.innerHTML = "<h3>12BR A Level journey</h3>" + (started.length ? h + "</tbody></table>" : "<p class='admin-status'>No 12BR student has started yet.</p>");
+      status.textContent = started.length + " of " + roster.length + " 12BR students have started. Columns T13 to T20 count lessons completed per topic.";
+    });
+  });
+  function esc12(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
   // ------------------------------------------------------------
   // Duplicate accounts: same name registered more than once (10BR).
   // Keeps the most active / best-performing account and offers to

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-9b56yu5Foci0+ZRdqG+sEMxVYh61Myuj9xuVVq+0DPI='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-WcGDBd4mkxzZ7Ck2hzH9IQgdgpEL35v5fdY/PXNUrvo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019c"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- Discourage the browser from caching this HTML document itself -- see
@@ -2263,15 +2263,18 @@
   });
 
   // ---------- 10BR home menu: iLearn / iSolve ----------
-  function isBR(user){ return /^10BR/i.test(String((user && user.class) || "")); }
+  function isBR(user){ return /^(10BR|12BR)/i.test(String((user && user.class) || "")); }
+  function is12(user){ return /^12BR/i.test(String((user && user.class) || "")); }
   function showHub(){
     var user = state.currentUser;
     setHeader("iLearnCS", "Choose how you want to work today.");
     document.getElementById("hub-greeting").textContent = "Hi " + user.name + " — " + user.class;
     var meta = document.getElementById("hub-learn-meta");
-    meta.textContent = "Start your journey at topic 1.1";
+    var a12 = is12(user);
+    document.getElementById("hub-learn").setAttribute("href", a12 ? "alevel.html" : "learn.html");
+    meta.textContent = a12 ? "Start at any topic from 13 to 20" : "Start your journey at topic 1.1";
     if(PQFirebase.getMyProgress){
-      PQFirebase.getMyProgress(user.uid, "ilearn").then(function(rec){
+      PQFirebase.getMyProgress(user.uid, a12 ? "ilearn12" : "ilearn").then(function(rec){
         if(rec && typeof rec.learnDone === "number" && rec.learnDone > 0) meta.textContent = rec.learnDone + " of " + rec.learnTotal + " lessons completed" + (rec.xp ? " · " + rec.xp + " XP" : "") + " — continue your journey";
       }).catch(function(){});
     }
