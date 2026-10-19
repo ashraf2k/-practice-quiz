@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-5I/f5eaegvEyA/NdQP4B+VH8QSPs4UR2Aq90FWNMVjY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-JQo5++tX9wAb0o8Z7fSGxC4zDmzw6kPEw45O8DgyWKw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019c"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>iLearn</title>
 <link rel="stylesheet" href="shared.css?v=20261019c" />
+<link rel="stylesheet" href="alevel-viz.css?v=20261019c" />
 <style>
   .ln-preview{ margin:0 0 12px; padding:10px 14px; border:1.5px dashed var(--accent); border-radius:10px; background:var(--accent-tint); color:var(--accent-dark); font-size:14px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
   .ln-preview.hidden{ display:none; }
@@ -226,6 +227,14 @@
 <script src="learn-games.js?v=20261019c"></script>
 <script src="learn-games-data.js?v=20261019c"></script>
 <script src="learn-engine.js?v=20261019c"></script>
+<script src="alevel-viz.js?v=20261019c"></script>
+<script src="alevel-viz-1.js?v=20261019c"></script>
+<script src="alevel-viz-2.js?v=20261019c"></script>
+<script src="alevel-viz-3.js?v=20261019c"></script>
+<script src="alevel-viz-4.js?v=20261019c"></script>
+<script src="learn-viz-1.js?v=20261019c"></script>
+<script src="learn-viz-2.js?v=20261019c"></script>
+<script src="learn-viz-map.js?v=20261019c"></script>
 <script src="firebase-config.js?v=20261019c"></script>
 <script type="module" src="firebase-init.js?v=20261019c"></script>
 <script type="module">
@@ -554,6 +563,7 @@
         '<button class="btn btn-secondary" id="b-journey" type="button">Back to journey</button></div>';
     }
     body.innerHTML = h;
+    if(window.ILEARN_VIZ && c.step < 2) ILEARN_VIZ.mount(body, l, c.step);
     var bn = $("b-next"), bb = $("b-back"), bj = $("b-journey");
     if($("b-play")) $("b-play").addEventListener("click", function(){ runGame(l.id, $("game-host")); });
     if(c.step < 2){
