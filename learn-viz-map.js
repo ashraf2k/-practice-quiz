@@ -37,6 +37,8 @@
   add("6.3.3a", "mlearn", "Supervised and unsupervised learning", 1); add("6.3.3b", "expert", "Ask an expert system", 1);
   // Topic 7: Algorithm design and problem solving
   add("7.1", "pdlc", "The four stages of the life cycle", 1);
+  add("7.2b", "flowsym", "The flowchart symbols", 0); add("7.2b", "flowrun", "Run a flowchart step by step", 1); add("7.2b", "flowfix", "Find the mistake in the flowchart", 1);
+  add("7.4a", "flowrun", "The flowchart for totalling and counting", 1, { charts: ["total"] }); add("7.4b", "flowrun", "The flowchart for finding the largest", 1, { charts: ["max"] }); add("7.4c", "flowrun", "The flowchart for linear search", 1, { charts: ["lsearch"] });
   add("7.4a", "trace", "Dry run: totalling and counting", 1, { p: "count" }); add("7.4c", "lsearch", "Linear search", 1); add("7.4d", "sort", "Bubble sort animation", 1, { kind: "bubble" });
   add("7.5a", "valid", "Try the validation checks", 1); add("7.6", "testdata", "Which kind of test data is it?", 1);
   add("7.7", "trace", "Fill in a trace table", 1, { p: "total" });

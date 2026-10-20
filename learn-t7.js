@@ -37,20 +37,22 @@
 
   { id:"7.2b", code:"7.2", title:"Flowcharts",
     concept:
-      "<p>A <b>flowchart</b> is a diagram of an algorithm. Each step is a shape and <b>arrows</b> show the order.</p>" +
+      "<p>A <b>flowchart</b> is a diagram of an algorithm. Each step is drawn in a <b>shape</b> and <b>arrows</b> show the order. Every shape has one job:</p>" +
       "<table class='ln-table' style='text-align:left'><tr><th>Shape</th><th>Used for</th></tr>" +
-      "<tr><td><b>Rounded rectangle (terminator)</b></td><td>Start and Stop</td></tr>" +
-      "<tr><td><b>Parallelogram</b></td><td>Input and output</td></tr>" +
+      "<tr><td><b>Rounded rectangle (terminator)</b></td><td>START and END</td></tr>" +
+      "<tr><td><b>Parallelogram</b></td><td>Input and output, e.g. INPUT Number, OUTPUT \"Valid\"</td></tr>" +
       "<tr><td><b>Rectangle</b></td><td>Process (calculation or assignment), e.g. Total ← Total + Number</td></tr>" +
-      "<tr><td><b>Diamond</b></td><td>Decision: a question with two outcomes, YES and NO</td></tr></table>" +
-      "<ul><li>Start has <b>one arrow out</b>; Stop has <b>one arrow in</b>.</li><li>A decision has <b>one arrow in and two out</b>, labelled YES/NO (or TRUE/FALSE).</li><li>Every arrow must lead somewhere: you must never get stuck.</li></ul>",
+      "<tr><td><b>Diamond</b></td><td>Decision: a question with two outcomes, YES and NO</td></tr>" +
+      "<tr><td><b>Rectangle with double side lines</b></td><td>Subroutine: a call to a procedure or function drawn separately</td></tr></table>" +
+      "<ul><li>START has <b>one arrow out</b>; END has <b>one arrow in</b>.</li><li>A decision has <b>one arrow in and two out</b>, labelled <b>YES</b> and <b>NO</b>.</li><li>Every flow line is an <b>arrow</b> that shows the direction.</li><li>Every path must lead to END: you must never get stuck.</li><li>A <b>loop</b> is an arrow that goes back up to an earlier step.</li></ul>",
     example:
-      "<p>Flowchart for &ldquo;input a number and say if it is too small&rdquo; in words:</p>" +
-      pre("START\n  |\nINPUT Number          (parallelogram)\n  |\nNumber < 10 ?         (diamond)\n  |YES        |NO\nOUTPUT         OUTPUT\n\"too small\"    \"valid\"\n  |______________|\n         |\n       STOP") +
-      "<p>Two outputs come from one decision, and both lead on to Stop.</p>",
+      "<p>Look at the flowchart in the animation below. It inputs a number and says whether it is too small. START leads to an <b>INPUT</b> parallelogram, then a <b>decision</b> diamond asks <i>Number &lt; 10 ?</i>. The YES arrow goes to OUTPUT \"Too small\", the NO arrow goes to OUTPUT \"Valid\", and both arrows then lead to END.</p>" +
+      "<p>Press <b>Step</b> to follow one number through the flowchart. Choose the other flowcharts to see a loop, a total, a maximum and a search drawn the same way.</p>",
     checks:[
       mc("Which flowchart symbol is used for a decision?", "Diamond", ["Parallelogram","Rectangle","Rounded rectangle"], "A diamond holds a question with a YES and a NO exit."),
-      mc("Which flowchart symbol is used for input and output?", "Parallelogram", ["Diamond","Rectangle","Rounded rectangle"], "The parallelogram represents input and output.")
+      mc("Which flowchart symbol is used for input and output?", "Parallelogram", ["Diamond","Rectangle","Rounded rectangle"], "The parallelogram represents input and output."),
+      mc("How many arrows leave a decision symbol, and how are they labelled?", "Two, labelled YES and NO", ["One, labelled NEXT","Two, with no labels","Three, labelled A, B and C"], "A decision is a question, so it has exactly two exits: YES and NO."),
+      mc("In which symbol should Total ← Total + Number be drawn?", "Rectangle", ["Diamond","Parallelogram","Rounded rectangle"], "A calculation or assignment is a process, so it goes in a rectangle.")
     ] },
 
   { id:"7.2c", code:"7.2", title:"Pseudocode",

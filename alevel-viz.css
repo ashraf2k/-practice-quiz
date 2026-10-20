@@ -85,3 +85,25 @@
 .lg{display:inline-block;width:14px;height:14px;border-radius:50%;border:2.5px solid}
 .vnote{font-size:13px;color:var(--muted);margin:4px 0}
 .qt{font-size:15px;font-weight:700;margin:6px 0}
+/* flowcharts (learn-viz-3.js) */
+.fcsvg{max-width:640px}
+.fcsvg .fnt{font-size:13.5px;font-weight:600}
+.fcsvg .fep{fill:none;stroke:var(--ink);stroke-width:2}
+.fcsvg .feh{fill:var(--ink)}
+.fcsvg .fhit{fill:none;stroke:transparent;stroke-width:16}
+.fcsvg .fl2{stroke:var(--correct);stroke-width:1.5}
+.fcsvg .fel{font-size:12.5px;font-weight:800;fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.fcsvg .fn.vis polygon,.fcsvg .fn.vis rect{stroke-width:2.5}
+.fcsvg .fn.act polygon,.fcsvg .fn.act rect{stroke:var(--accent);stroke-width:5}
+.fcsvg .fn.act .fnt{font-weight:800}
+.fcsvg .fe.on .fep{stroke:var(--accent);stroke-width:3.5} .fcsvg .fe.on .feh{fill:var(--accent)}
+.fcsvg .fe.nx .fep{stroke:var(--accent);stroke-width:4;stroke-dasharray:7 4} .fcsvg .fe.nx .feh{fill:var(--accent)}
+.fcsvg.pick .fn,.fcsvg.pick .fe{cursor:pointer}
+.fcsvg.pick .fn:hover polygon,.fcsvg.pick .fn:hover rect{stroke:var(--accent);stroke-width:4}
+.fcsvg.pick .fe:hover .fep{stroke:var(--accent);stroke-width:4}
+.fcsvg .badn polygon,.fcsvg .badn rect{stroke:var(--incorrect);stroke-width:5}
+.fcsvg .badn .fep{stroke:var(--incorrect);stroke-width:5} .fcsvg .badn .feh{fill:var(--incorrect)}
+.fcsvg .pickwrong polygon,.fcsvg .pickwrong rect,.fcsvg .pickwrong .fep{stroke-dasharray:6 4}
+.fcsvg .sy{cursor:pointer;outline:none}
+.fcsvg .sy:focus-visible polygon,.fcsvg .sy:focus-visible rect{stroke:var(--accent);stroke-width:4}
+.fcsvg .sm2{font-size:11.5px}
