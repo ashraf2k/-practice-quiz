@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-JHAbKlZdkonO+GllWYat1wOxLniHHVZiJdfMrvaH4g0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-gs2Cx86InrxgJm/ZtpCi1QlWwyCPKD4ex70QnsGOdP8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -1470,8 +1470,11 @@
   var rows12 = [];
   function idx12(){ return window.ILEARN12_INDEX || []; }
   function roster12(){
-    if(!loaded || !window.SyllabusData) return [];
-    return SyllabusData.analyse(attempts, examAttempts, EXAMS, EXAM_PAPERS, new Date(), usersRoster).filter(function(s){ return s.uid && /^12BR/i.test(s.className || ""); });
+    // Built straight from the registered-student list. (SyllabusData.analyse only covers 10BR quiz/exam students, so it never returned 12BR.)
+    if(!loaded) return [];
+    return (usersRoster || []).filter(function(u){ return u && u.uid && /^\s*12\s*BR/i.test(u.className || u.class || ""); }).map(function(u){
+      return { uid: u.uid, name: u.name || "(no name)", email: u.email || "", className: String(u.className || u.class || "").replace(/\s+/g, "") };
+    }).sort(function(a, b){ return (a.className + a.name).localeCompare(b.className + b.name); });
   }
   function fillClasses12(list){
     var sel = document.getElementById("filter-class-ilearn12"), cur = sel.value, seen = {};
@@ -1499,9 +1502,9 @@
     var cls = document.getElementById("filter-class-ilearn12").value, q = document.getElementById("filter-search-ilearn12").value.trim().toLowerCase();
     var total = idx12().length, struggle = {};
     var shown = rows12.filter(function(r){
-      if(!r.c.done) return false;
       return (!cls || r.s.className === cls) && (!q || ((r.s.name || "") + " " + (r.s.email || "")).toLowerCase().indexOf(q) !== -1);
     });
+    var startedN = shown.filter(function(r){ return r.c.done > 0; }).length;
     shown.sort(function(a, b){
       return (b.c.topicsDone - a.c.topicsDone) || (b.c.perf - a.c.perf) || (b.c.done - a.c.done) || ((b.lastActive || 0) - (a.lastActive || 0)) || String(a.s.name || "").localeCompare(String(b.s.name || ""));
     });
@@ -1524,7 +1527,7 @@
       tb.appendChild(tr);
       c.retried.forEach(function(x){ struggle[x.l.id] = (struggle[x.l.id] || 0) + 1; });
     });
-    document.getElementById("ilearn12-summary").innerHTML = rows12.length ? '<p class="admin-status">' + shown.length + " student" + (shown.length === 1 ? " has" : "s have") + " started the A Level journey (of " + rows12.length + " registered 12BR students).</p>" : "";
+    document.getElementById("ilearn12-summary").innerHTML = rows12.length ? '<p class="admin-status">' + startedN + " of " + shown.length + " registered 12BR student" + (shown.length === 1 ? " has" : "s have") + " started the A Level journey (students who have not started are listed last).</p>" : "";
     var byId = {}; idx12().forEach(function(l){ byId[l.id] = l; });
     var ids = Object.keys(struggle).sort(function(a, b){ return struggle[b] - struggle[a]; }).slice(0, 10);
     var hb = document.querySelector("#ilearn12-hard tbody"); hb.innerHTML = "";
