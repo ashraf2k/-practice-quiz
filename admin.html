@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-gs2Cx86InrxgJm/ZtpCi1QlWwyCPKD4ex70QnsGOdP8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-e2s+4/vNOd5nzZPKEazoOzI9/HJr9j6Ih7Uo44ZmVbs='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -1064,7 +1064,6 @@
     var shown = ilearnRows.filter(function(r){
       var cls = document.getElementById("filter-class-ilearn").value;
       var q = document.getElementById("filter-search-ilearn").value.trim().toLowerCase();
-      if(!Object.keys(r.st.learn).length) return false; // only students who have started the journey
       return (!cls || r.s.className === cls) && (!q || ((r.s.name || "") + " " + (r.s.email || "")).toLowerCase().indexOf(q) !== -1);
     });
     var nameCount = {};
@@ -1121,7 +1120,8 @@
       tr.addEventListener("click", function(){ openILearnDetail(r); });
       tb.appendChild(tr);
     });
-    document.getElementById("ilearn-summary").innerHTML = shown.length ? '<p class="admin-status">' + shown.length + " student" + (shown.length === 1 ? " has" : "s have") + " started the iLearn journey (of " + ilearnRows.length + " registered).</p>" : "";
+    var startedN = shown.filter(function(r){ return r.done > 0; }).length;
+    document.getElementById("ilearn-summary").innerHTML = ilearnRows.length ? '<p class="admin-status">' + startedN + " of " + shown.length + " student" + (shown.length === 1 ? " has" : "s have") + " started the iLearn journey (students who have not started are listed last).</p>" : "";
     var ids = Object.keys(struggle).sort(function(a,b){ return struggle[b] - struggle[a]; }).slice(0, 10);
     var sb = document.querySelector("#ilearn-struggle tbody"); sb.innerHTML = "";
     ids.forEach(function(id){
@@ -1450,14 +1450,15 @@
     var roster = ilearnRoster();
     if(!roster.length){ status.textContent = "No 10BR students found yet."; return; }
     status.textContent = "Loading " + roster.length + " students…";
+    var readErrs = 0;
     Promise.all(roster.map(function(s){
-      return Promise.all([PQFirebase.getMyProgress(s.uid, "ilearn").catch(function(){ return null; }), PQFirebase.getMyProgress(s.uid, "paper1mock").catch(function(){ return null; }), PQFirebase.getMyProgress(s.uid, "paper2mock").catch(function(){ return null; })]).then(function(rr){
+      return Promise.all([PQFirebase.getMyProgress(s.uid, "ilearn").catch(function(){ readErrs++; return null; }), PQFirebase.getMyProgress(s.uid, "paper1mock").catch(function(){ return null; }), PQFirebase.getMyProgress(s.uid, "paper2mock").catch(function(){ return null; })]).then(function(rr){
         var rec = rr[0], p1 = rr[1], p2 = rr[2];
         return { s:s, st: window.ILearnEngine.mergeState(null, rec), lastActive: Math.max((rec && rec.lastActive) || 0, (p1 && p1.lastActive) || 0, (p2 && p2.lastActive) || 0) || null, p1: p1 && p1.n ? { best: p1.best, n: p1.n } : null, p2: p2 && p2.n ? { best: p2.best, n: p2.n } : null, p2hist: (p2 && p2.hist) || [], p1hist: (p1 && Array.isArray(p1.hist)) ? p1.hist : [] };
       });
     })).then(function(rows){
       ilearnRows = rows;
-      status.textContent = "Loaded " + rows.length + " students.";
+      status.textContent = "Loaded " + rows.length + " students." + (readErrs ? " WARNING: iLearn progress could not be read for " + readErrs + " of them (Firestore denied the request). Publish the latest firestore.rules in the Firebase console, then press Load again." : "");
       renderILearn();
     });
   });
@@ -1601,13 +1602,14 @@
     fillClasses12(roster);
     if(!roster.length){ status.textContent = "No 12BR students found yet."; rows12 = []; renderILearn12(); return; }
     status.textContent = "Loading " + roster.length + " students…";
+    var readErrs12 = 0;
     Promise.all(roster.map(function(s){
-      return PQFirebase.getMyProgress(s.uid, "ilearn12").catch(function(){ return null; }).then(function(rec){
+      return PQFirebase.getMyProgress(s.uid, "ilearn12").catch(function(){ readErrs12++; return null; }).then(function(rec){
         rec = rec || {}; return { s: s, rec: rec, c: calc12(rec), lastActive: rec.lastActive || null };
       });
     })).then(function(rows){
       rows12 = rows;
-      status.textContent = "Loaded " + rows.length + " 12BR students.";
+      status.textContent = "Loaded " + rows.length + " 12BR students." + (readErrs12 ? " WARNING: progress could not be read for " + readErrs12 + " of them (Firestore denied the request). Publish the latest firestore.rules in the Firebase console, then press Load again." : "");
       renderILearn12();
     });
   });
