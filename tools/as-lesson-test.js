@@ -2,7 +2,7 @@
 // (a model answer built from the published mark scheme must score full marks; a junk answer must score 0).   Run: node tools/as-lesson-test.js
 global.window = global; const fs = require("fs"), path = require("path"), root = path.join(__dirname, "..");
 ["as-objectives.js", "learn-helpers.js", "as-author.js"].forEach(f => require(path.join(root, f)));
-fs.readdirSync(root).filter(f => /^as-t\d+\.js$/.test(f)).sort((a, b) => parseInt(a.slice(4)) - parseInt(b.slice(4))).forEach(f => require(path.join(root, f)));
+fs.readdirSync(root).filter(f => /^as-t\d+b?\.js$/.test(f)).sort((a, b) => parseInt(a.slice(4)) - parseInt(b.slice(4))).forEach(f => require(path.join(root, f)));
 require(path.join(root, "as-pp.js"));
 const O = SYLLABUS_OBJECTIVES.OBJECTIVES, P = ASPP, norm = s => String(s || "").toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, " ").trim();
 let bad = 0, nPP = 0, nMC = 0, nTX = 0, ppMarks = 0; const ids = {}, byTopic = {};
