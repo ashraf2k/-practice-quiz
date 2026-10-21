@@ -16,8 +16,8 @@ var ASEX = (function(){
   // near(text, marks, [anchor words], [stop words], [[theme]...], need): keywords must appear after the anchor and before the next stop word
   function near(text, marks, anchor, stop, groups, need){ return { text: text, marks: marks, match: { type: "near", span: 400, anchor: anchor, stop: stop, groups: groups, needCount: need || groups.length } }; }
   function n(text, marks, values){ return { text: text, marks: marks, match: { type: "value", values: values } }; }
-  function q(id, difficulty, src, topic, prompt, points, explanation){
-    var marks = points.reduce(function(a, p){ return a + p.marks; }, 0);
+  function q(id, difficulty, src, topic, prompt, points, explanation, cap){
+    var marks = cap || points.reduce(function(a, p){ return a + p.marks; }, 0);
     return { id: id, marks: marks, difficulty: difficulty, topic: topic,
       prompt: prompt + "\n\n[Cambridge " + src + "]", markPoints: points, explanation: explanation, calc: false };
   }

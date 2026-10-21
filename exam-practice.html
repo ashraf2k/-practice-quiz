@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-2rBzWaThAH/cwocm0djMxbAvnIPjdeyZBZ0PSSJzN/U='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-Ser+zMQooYIk27WDiVIfYhHdU2OnSNP7SXHa+5wYEH8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -421,7 +421,7 @@
     sylArea.innerHTML = "";
     var sylEl = window.SYLLABUS_OBJECTIVES ? SYLLABUS_OBJECTIVES.render(q.syl) : null;
     if(sylEl){ sylArea.appendChild(sylEl); sylArea.classList.remove("hidden"); } else sylArea.classList.add("hidden");
-    qPrompt.textContent = q.prompt;
+    qPrompt.textContent = promptWithMarks(q);
     if(!scratchPad && window.ScratchPad) scratchPad = ScratchPad.mount(qPrompt.parentNode, answerField);
     if(scratchPad) scratchPad.show(!!q.calc);
     answerTextarea.value = ""; answerTextarea.readOnly = false;
@@ -745,9 +745,19 @@
     examVideosEl.classList.remove("hidden");
   }
 
+  // Cambridge style: every question (part) shows its marks in square brackets at the end, e.g. [3].
+  // Questions whose text already carries [n] marks keep them; any other question gets its total added
+  // just above the source line, so the student always knows how much to write.
+  function promptWithMarks(q){
+    var p = q.prompt || "";
+    if(/\[\d+(\s*marks?)?\]\s*$/mi.test(p)) return p;
+    var m = p.match(/\n\n(\[Cambridge[^\]]*\])\s*$/);
+    return m ? p.slice(0, m.index) + " [" + q.marks + "]\n\n" + m[1] : p + " [" + q.marks + "]";
+  }
+
   function recomputeLiveScore(){
     var q = currentQuestion();
-    var earned = currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0);
+    var earned = Math.min(q.marks, currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0));
     renderExamVideos(q, q.markPoints.filter(function(mp, i){ return currentControls[i] && currentControls[i].get() < mp.marks; }));
     checkScoreBanner.className = "check-score-banner " + (earned === q.marks ? "full" : (earned > 0 ? "partial" : "none"));
     // "Ticked" describes the normal markpoints-list checkboxes/selects
@@ -881,7 +891,7 @@
   btnNext.addEventListener("click", function(){
     if(!currentChecked) return;
     var q = currentQuestion();
-    var earned = currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0);
+    var earned = Math.min(q.marks, currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0));
 
     state.results.push({
       id: q.id, topic: q.topic, difficulty: q.difficulty,
@@ -1034,7 +1044,7 @@
       num.className = "num";
       num.textContent = (idx + 1) + ".";
       rq.appendChild(num);
-      rq.appendChild(document.createTextNode(q ? q.prompt : r.topic));
+      rq.appendChild(document.createTextNode(q ? promptWithMarks(q) : r.topic));
       var diffBadge = document.createElement("span");
       diffBadge.className = "diff-badge diff-" + (DIFF_CSS_CLASS[r.difficulty] || "easy");
       diffBadge.textContent = examPaperDifficultyLabel(r.difficulty);
