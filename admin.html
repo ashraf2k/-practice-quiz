@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-iacNnpyD7yGmjU0zkPbFzM7aC4HYEvHBV9Q2i2j1H60='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-9DlOSSL+QwtSFntcVQKjZ0mO3vjmt4J8VjyGbdyyR1c='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -269,6 +269,9 @@
   .admin-status{ font-size: 13px; line-height: 1.5; }
 
   /* Overview tiles */
+  .lvl-sw{ display:flex; gap:6px; margin:0 0 14px; }
+  .lvl-btn{ border:1px solid var(--line); background:var(--surface); color:var(--text, inherit); border-radius:999px; padding:6px 16px; font-weight:700; font-size:13px; cursor:pointer; }
+  .lvl-btn.on{ background:#2563eb; color:#fff; border-color:#2563eb; }
   .kpi-row{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 4px 0 20px; }
   .kpi{ background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
   .kpi .k-label{ font-size: 12px; color: var(--muted); font-weight: 600; }
@@ -427,19 +430,18 @@
     <div class="kpi-row no-print" id="kpi-row" aria-label="Overview"></div>
 
     <div class="admin-tabs no-print" id="admin-tabs">
-      <button class="admin-tab active" data-tab="students">Students</button>
-      <button class="admin-tab" data-tab="byStudent">By student</button>
-      <button class="admin-tab" data-tab="classes">Class overview</button>
-      <button class="admin-tab" data-tab="examPractice">Exam Practice</button>
+      <button class="admin-tab active" data-tab="byStudent">By student</button>
       <button class="admin-tab" data-tab="syllabus">Syllabus report</button>
       <button class="admin-tab" data-tab="ilearn">iLearn</button>
-      <button class="admin-tab" data-tab="ilearn12">A Level iLearn (12BR)</button>
-      <button class="admin-tab" data-tab="ilearnAS">AS Level iLearn (11BR)</button>
+      <button class="admin-tab" data-tab="isolve">iSolve</button>
       <button class="admin-tab" data-tab="archive">Archive</button>
+      <button class="admin-tab" data-tab="attention">Needs attention</button>
+      <button class="admin-tab" data-tab="classes">Class overview</button>
+      <button class="admin-tab" data-tab="students">Quiz log</button>
     </div>
 
     <div id="admin-panels">
-      <div class="admin-panel active" id="panel-students">
+      <div class="admin-panel" id="panel-students">
         <div class="admin-toolbar no-print">
           <select id="filter-class">
             <option value="">All classes</option>
@@ -454,7 +456,7 @@
         </div>
       </div>
 
-      <div class="admin-panel" id="panel-byStudent">
+      <div class="admin-panel active" id="panel-byStudent">
         <div class="admin-toolbar no-print">
           <select id="filter-class-bystudent">
             <option value="">All classes</option>
@@ -617,6 +619,58 @@
         <div id="ilearnAS-detail-body"></div>
       </div>
 
+      <div class="admin-panel" id="panel-isolve">
+        <div class="admin-toolbar no-print">
+          <select id="filter-class-isolve"><option value="">All classes</option></select>
+          <input type="text" id="filter-search-isolve" placeholder="Search by name or email" />
+          <button class="btn btn-secondary" id="btn-isolve-list" type="button">All attempts (list view) &rsaquo;</button>
+        </div>
+        <p class="admin-status" id="isolve-status"></p>
+        <div id="isolve-summary"></div>
+        <div class="table-scroll"><table class="admin-table" id="isolve-table" style="display:none">
+          <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Topics attempted</th><th>Average</th><th>Marks</th><th>Last active</th><th></th></tr></thead>
+          <tbody></tbody></table></div>
+        <h3 id="isolve-hard-h" style="display:none;margin-top:20px">Topics students found hardest</h3>
+        <div class="table-scroll"><table class="admin-table" id="isolve-hard" style="display:none">
+          <thead><tr><th>Topic</th><th>Students attempted</th><th>Average</th><th>Under 50%</th></tr></thead><tbody></tbody></table></div>
+      </div>
+
+      <div class="admin-panel" id="panel-isolveDetail">
+        <div class="admin-toolbar no-print">
+          <button class="btn btn-secondary admin-detail-back" id="btn-back-isolve" type="button">&larr; Back to the iSolve list</button>
+        </div>
+        <div id="isolve-detail-body"></div>
+      </div>
+
+      <div class="admin-panel" id="panel-syllabus9618">
+        <div class="admin-toolbar no-print">
+          <select id="filter-class-syl9618"><option value="">All classes</option></select>
+          <input type="text" id="filter-search-syl9618" placeholder="Search by name or email" />
+          <button class="btn btn-primary" id="btn-syl9618-load" type="button">Reload progress</button>
+          <button class="btn btn-secondary" id="btn-syl9618-print" type="button">Print / save as PDF</button>
+        </div>
+        <p class="admin-status" id="syl9618-status"></p>
+        <div id="syl9618-list"></div>
+      </div>
+
+      <div class="admin-panel" id="panel-syllabus9618Student">
+        <div class="admin-toolbar no-print">
+          <button class="btn btn-secondary admin-detail-back" id="btn-back-syl9618" type="button">&larr; Back to syllabus report</button>
+          <button class="btn btn-secondary" id="btn-syl9618-student-print" type="button">Print / save as PDF</button>
+        </div>
+        <div id="syl9618-student-body"></div>
+      </div>
+
+      <div class="admin-panel" id="panel-attention">
+        <div class="admin-toolbar no-print">
+          <select id="filter-class-attn"><option value="">All classes</option></select>
+          <button class="btn btn-primary" id="btn-attn-load" type="button">Load iLearn progress for every level</button>
+        </div>
+        <p class="admin-status" id="attn-status"></p>
+        <div class="table-scroll"><table class="admin-table" id="attn-table" style="display:none">
+          <thead><tr><th>Student</th><th>Class</th><th>Why</th><th>Last activity</th></tr></thead><tbody></tbody></table></div>
+      </div>
+
       <div class="admin-panel" id="panel-archive">
         <p class="admin-status">Archived students are removed from every list and cannot sign in. Their data is kept here and can be restored at any time.</p>
         <p class="admin-status no-print" id="archive-status"></p>
@@ -649,7 +703,7 @@
 
       <div class="admin-panel" id="panel-examDetail">
         <div class="admin-toolbar no-print">
-          <button class="btn btn-secondary admin-detail-back" id="btn-back-examdetail">← Back to Exam Practice list</button>
+          <button class="btn btn-secondary admin-detail-back" id="btn-back-examdetail">← Back</button>
           <button class="btn btn-primary" id="btn-examdetail-save" disabled>Save regrade</button>
           <button class="btn btn-danger" id="btn-examdetail-reset">Reset this attempt</button>
           <select id="sel-class-examdetail" aria-label="New class for this student"><option value="">Move to class…</option><option>10AM1</option><option>10AM2</option><option>10AM3</option><option>10AM4</option><option>10AM5</option><option>10AM6</option><option>10BR1</option><option>10BR2</option><option>10BR3</option><option>11BR</option><option>12BR</option></select>
@@ -861,7 +915,7 @@
     screenLogin.classList.add("hidden");
     screenDashboard.classList.remove("hidden");
     document.getElementById("wrap").classList.add("wrap-wide");
-    showTab("students");
+    showTab("byStudent");
     loadData();
   }
 
@@ -889,18 +943,23 @@
   // ============================================================
   // Tabs
   // ============================================================
+  var PANELS = ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","archive"];
+  var MENU_OF = { profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
+    ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
+    var menu = MENU_OF[name] || name;
     document.querySelectorAll(".admin-tab").forEach(function(btn){
-      btn.classList.toggle("active", btn.dataset.tab === name);
+      btn.classList.toggle("active", btn.dataset.tab === menu);
     });
-    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","archive"].forEach(function(id){
-      document.getElementById("panel-" + id).classList.toggle("active", id === name);
+    PANELS.forEach(function(id){
+      var el = document.getElementById("panel-" + id); if(el) el.classList.toggle("active", id === name);
     });
   }
 
   document.getElementById("admin-tabs").addEventListener("click", function(e){
     var btn = e.target.closest(".admin-tab");
     if(!btn) return;
+    if(window.__goMenu && window.__goMenu(btn.dataset.tab)) return;
     showTab(btn.dataset.tab);
   });
 
@@ -1053,6 +1112,7 @@
     renderSyllabus();
     renderArchive();
     renderKpis();
+    if(window.__renderMenus) window.__renderMenus();
   }
 
 
@@ -1870,6 +1930,352 @@
       return g;
     }).sort(function(a, b){ return String(a[0].r.s.name).localeCompare(String(b[0].r.s.name)); });
   }
+  // ------------------------------------------------------------
+  // Menu rework: level switchers (10BR / 11BR / 12BR), iSolve report,
+  // 9618 (11BR/12BR) syllabus report and the "Needs attention" list.
+  // ------------------------------------------------------------
+  var LV = { ilearn: "10", syllabus: "10", isolve: "10" };
+  var LV_NAMES = ["10", "11", "12"];
+  var TOPIC_NAMES = { 1:"Information representation", 2:"Communication", 3:"Hardware", 4:"Processor fundamentals", 5:"System software", 6:"Security, privacy and data integrity", 7:"Ethics and ownership", 8:"Databases", 9:"Algorithm design and problem-solving", 10:"Data types and structures", 11:"Programming", 12:"Software development",
+    13:"Data representation", 14:"Communication and internet technologies", 15:"Hardware and virtual machines", 16:"System software", 17:"Security", 18:"Artificial intelligence", 19:"Computational thinking and problem solving", 20:"Further programming" };
+  function levelOf(cls){ var m = /^\s*(\d+)\s*BR/i.exec(cls || ""); return m ? m[1] : ""; }
+  function rosterFor(level){
+    return (usersRoster || []).filter(function(u){ return u && u.uid && levelOf(u.className || u.class) === level; }).map(function(u){
+      return { uid: u.uid, name: u.name || "(no name)", email: u.email || "", className: String(u.className || u.class || "").replace(/\s+/g, "") };
+    });
+  }
+  function papersForLevel(level){
+    return Object.keys(EXAM_PAPERS).filter(function(k){ return (EXAM_PAPERS[k].classes || []).some(function(c){ return levelOf(c) === level; }); });
+  }
+  function ratingOf(score){ return score == null ? "" : score >= 80 ? "Strong" : score >= 60 ? "Secure" : score >= 40 ? "Developing" : "Needs work"; }
+  function chip(label){
+    var c = { "Strong":"#16a34a", "Secure":"#0ea5e9", "Developing":"#f59e0b", "Needs work":"#dc2626", "In progress":"#64748b" }[label] || "#94a3b8";
+    var e = mk("span", null, label || "Not started"); e.style.cssText = "display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:" + c; return e;
+  }
+
+  // ---- switchers --------------------------------------------------
+  var SW_PANELS = { ilearn: ["ilearn", "ilearn12", "ilearnAS"], syllabus: ["syllabus", "syllabus9618"], isolve: ["isolve"] };
+  function buildSwitchers(){
+    Object.keys(SW_PANELS).forEach(function(menu){
+      SW_PANELS[menu].forEach(function(pid){
+        var panel = document.getElementById("panel-" + pid); if(!panel || panel.querySelector(".lvl-sw")) return;
+        var bar = mk("div", "lvl-sw no-print"); bar.setAttribute("data-menu", menu);
+        LV_NAMES.forEach(function(l){
+          var b = mk("button", "lvl-btn", l + "BR"); b.type = "button"; b.setAttribute("data-l", l);
+          b.addEventListener("click", function(){ setLevel(menu, l); });
+          bar.appendChild(b);
+        });
+        panel.insertBefore(bar, panel.firstChild);
+      });
+    });
+    markSwitchers();
+  }
+  function markSwitchers(){
+    Array.prototype.forEach.call(document.querySelectorAll(".lvl-sw"), function(bar){
+      var menu = bar.getAttribute("data-menu");
+      Array.prototype.forEach.call(bar.querySelectorAll(".lvl-btn"), function(b){ b.classList.toggle("on", b.getAttribute("data-l") === LV[menu]); });
+    });
+  }
+  function setLevel(menu, l){
+    LV[menu] = l; markSwitchers();
+    if(menu === "ilearn"){
+      var tab = l === "10" ? "ilearn" : l === "11" ? "ilearnAS" : "ilearn12";
+      showTab(tab);
+      var btn = { ilearn: "btn-ilearn-load", ilearnAS: "btn-ilearnAS-load", ilearn12: "btn-ilearn12-load" }[tab];
+      var have = { ilearn: ilearnRows, ilearnAS: rowsAS, ilearn12: rows12 }[tab];
+      if(loaded && !have.length && btn) document.getElementById(btn).click();
+    } else if(menu === "syllabus"){
+      if(l === "10"){ showTab("syllabus"); }
+      else { showTab("syllabus9618"); loadLevelRows(l).then(renderSyl9618); renderSyl9618(); }
+    } else if(menu === "isolve"){
+      renderIsolve(); showTab("isolve");
+    }
+  }
+  window.__goMenu = function(tab){
+    if(tab === "ilearn" || tab === "syllabus" || tab === "isolve"){ setLevel(tab, LV[tab]); return true; }
+    if(tab === "attention"){ showTab("attention"); renderAttention(); return true; }
+    return false;
+  };
+  window.__renderMenus = function(){ buildSwitchers(); fillIsolveClasses(); renderIsolve(); renderAttention(); };
+
+  // ---- iLearn progress loaders for 11BR / 12BR --------------------
+  function loadLevelRows(level){
+    if(!loaded || typeof PQFirebase.getMyProgress !== "function") return Promise.resolve();
+    var key = level === "11" ? "ilearnAS" : "ilearn12", calc = level === "11" ? calcAS : calc12, roster = rosterFor(level);
+    return Promise.all(roster.map(function(s){
+      return PQFirebase.getMyProgress(s.uid, key).catch(function(){ return null; }).then(function(rec){
+        rec = rec || {}; return { s: s, rec: rec, c: calc(rec), lastActive: rec.lastActive || null };
+      });
+    })).then(function(rows){ if(level === "11") rowsAS = rows; else rows12 = rows; });
+  }
+
+  // ---- iSolve report ---------------------------------------------
+  var isoCur = null, isoStudents = [];
+  function pctOf(a){ return typeof a.pct === "number" ? a.pct : (a.totalMarks ? Math.round(100 * a.totalEarned / a.totalMarks) : 0); }
+  function fillIsolveClasses(){
+    var sel = document.getElementById("filter-class-isolve"), cur = sel.value, seen = {};
+    rosterFor(LV.isolve).forEach(function(s){ if(s.className) seen[s.className] = 1; });
+    examAttempts.forEach(function(a){ if(levelOf(a.className) === LV.isolve && a.className) seen[a.className.replace(/\s+/g, "")] = 1; });
+    sel.innerHTML = '<option value="">All ' + LV.isolve + 'BR classes</option>' + Object.keys(seen).sort().map(function(c){ return '<option value="' + esc12(c) + '">' + esc12(c) + '</option>'; }).join("");
+    sel.value = seen[cur] ? cur : "";
+  }
+  function isolveStudents(){
+    var lv = LV.isolve, byUid = {}, papers = papersForLevel(lv);
+    rosterFor(lv).forEach(function(s){ byUid[s.uid] = { s: s, atts: [] }; });
+    examAttempts.forEach(function(a){
+      if(levelOf(a.className) !== lv || !a.uid) return;
+      if(!byUid[a.uid]) byUid[a.uid] = { s: { uid: a.uid, name: a.name || "(no name)", email: "", className: String(a.className || "").replace(/\s+/g, "") }, atts: [] };
+      byUid[a.uid].atts.push(a);
+    });
+    return Object.keys(byUid).map(function(k){
+      var r = byUid[k], e = 0, t = 0, ps = 0, last = 0;
+      r.atts.forEach(function(a){ e += a.totalEarned || 0; t += a.totalMarks || 0; ps += pctOf(a); var ts = new Date(a.timestamp).getTime() || 0; if(ts > last) last = ts; });
+      r.avg = r.atts.length ? Math.round(ps / r.atts.length) : null; r.earned = e; r.total = t; r.last = last || null; r.nPapers = papers.length;
+      return r;
+    });
+  }
+  function renderIsolve(){
+    if(!document.getElementById("isolve-table")) return;
+    var lv = LV.isolve, papers = papersForLevel(lv);
+    var cls = document.getElementById("filter-class-isolve").value, q = document.getElementById("filter-search-isolve").value.trim().toLowerCase();
+    if(cls && levelOf(cls) !== lv) { cls = ""; }
+    var all = isolveStudents();
+    var shown = all.filter(function(r){ return (!cls || r.s.className === cls) && (!q || ((r.s.name || "") + " " + (r.s.email || "")).toLowerCase().indexOf(q) !== -1); });
+    shown.sort(function(a, b){ return (b.atts.length ? 1 : 0) - (a.atts.length ? 1 : 0) || (b.avg || 0) - (a.avg || 0) || String(a.s.name).localeCompare(String(b.s.name)); });
+    isoStudents = shown;
+    var active = shown.filter(function(r){ return r.atts.length; }), nAtt = 0, sumP = 0;
+    active.forEach(function(r){ r.atts.forEach(function(a){ nAtt++; sumP += pctOf(a); }); });
+    var sum = document.getElementById("isolve-summary"); sum.textContent = "";
+    var row = mk("div", "kpi-row");
+    row.appendChild(tile("Students", String(shown.length), lv + "BR"));
+    row.appendChild(tile("Have started iSolve", String(active.length), shown.length ? Math.round(100 * active.length / shown.length) + "% of students" : ""));
+    row.appendChild(tile("Papers completed", String(nAtt), papers.length + " iSolve topics available"));
+    row.appendChild(tile("Average score", nAtt ? Math.round(sumP / nAtt) + "%" : "-", "across all attempts"));
+    sum.appendChild(row);
+    var st = document.getElementById("isolve-status");
+    st.textContent = !loaded ? "" : (papers.length ? "" : "No iSolve papers exist for " + lv + "BR yet.");
+    var table = document.getElementById("isolve-table"), tb = table.querySelector("tbody"); tb.innerHTML = "";
+    table.style.display = shown.length ? "" : "none";
+    shown.forEach(function(r, i){
+      var tr = document.createElement("tr");
+      var tdRank = mk("td"); tdRank.appendChild(mk("span", "rank" + (i < 3 && r.atts.length ? " r" + (i + 1) : ""), String(i + 1))); tr.appendChild(tdRank);
+      var nameTd = mk("td", null, r.s.name); if(r.s.email){ var em = mk("div", null, r.s.email); em.style.cssText = "font-size:.75rem;color:#64748b"; nameTd.appendChild(em); } tr.appendChild(nameTd);
+      tr.appendChild(mk("td", null, r.s.className));
+      tr.appendChild(mk("td", null, r.atts.length + " / " + r.nPapers));
+      tr.appendChild(mk("td", null, r.avg == null ? "-" : r.avg + "%"));
+      tr.appendChild(mk("td", null, r.total ? r.earned + " / " + r.total : "-"));
+      tr.appendChild(mk("td", null, r.last ? fmtDay(r.last) : "-"));
+      var tdv = mk("td"); tdv.appendChild(mk("span", "view-link", "View ›")); tr.appendChild(tdv);
+      tr.addEventListener("click", function(){ openIsolveDetail(r); });
+      tb.appendChild(tr);
+    });
+    // hardest topics
+    var per = {};
+    active.forEach(function(r){ r.atts.forEach(function(a){ var p = per[a.paperKey] = per[a.paperKey] || { n: 0, s: 0, low: 0 }; var v = pctOf(a); p.n++; p.s += v; if(v < 50) p.low++; }); });
+    var keys = Object.keys(per).sort(function(a, b){ return per[a].s / per[a].n - per[b].s / per[b].n; }).slice(0, 10);
+    var hb = document.querySelector("#isolve-hard tbody"); hb.innerHTML = "";
+    keys.forEach(function(k){ var p = per[k], tr = document.createElement("tr"); tr.style.cursor = "default";
+      [paperLabel(k), p.n, Math.round(p.s / p.n) + "%", p.low].forEach(function(v){ tr.appendChild(mk("td", null, String(v))); }); hb.appendChild(tr); });
+    document.getElementById("isolve-hard").style.display = keys.length ? "" : "none";
+    document.getElementById("isolve-hard-h").style.display = keys.length ? "" : "none";
+  }
+  ["filter-class-isolve"].forEach(function(id){ document.getElementById(id).addEventListener("change", renderIsolve); });
+  document.getElementById("filter-search-isolve").addEventListener("input", renderIsolve);
+  document.getElementById("btn-isolve-list").addEventListener("click", function(){ renderExamPractice(); showTab("examPractice"); });
+  function openIsolveDetail(r){
+    isoCur = r;
+    var body = document.getElementById("isolve-detail-body"); body.textContent = "";
+    var nm = (r.s.name || "?").trim();
+    var head = mk("div", "ij-head");
+    head.appendChild(mk("div", "ij-avatar", nm.split(/\s+/).slice(0, 2).map(function(w){ return w.charAt(0).toUpperCase(); }).join("") || "?"));
+    var hd = mk("div"); hd.appendChild(mk("h3", null, nm));
+    var meta = mk("div", "ij-meta"); meta.appendChild(mk("span", null, r.s.className)); if(r.s.email) meta.appendChild(mk("span", null, r.s.email));
+    meta.appendChild(mk("span", null, "Last iSolve activity: " + (r.last ? fmtDay(r.last) : "never")));
+    hd.appendChild(meta); head.appendChild(hd); body.appendChild(head);
+    var row = mk("div", "kpi-row");
+    row.appendChild(tile("Topics attempted", r.atts.length + " / " + r.nPapers));
+    row.appendChild(tile("Average", r.avg == null ? "-" : r.avg + "%"));
+    row.appendChild(tile("Marks", r.total ? r.earned + " / " + r.total : "-"));
+    body.appendChild(row);
+    var b = box("iSolve topics", "click an attempted topic to see every question, the answer and the marks");
+    var t = mk("table", "admin-table"), th = mk("thead"), htr = mk("tr");
+    ["Topic", "Marks", "%", "Date", ""].forEach(function(h){ htr.appendChild(mk("th", null, h)); }); th.appendChild(htr); t.appendChild(th);
+    var tb = mk("tbody");
+    var done = {}; r.atts.forEach(function(a){ done[a.paperKey] = a; });
+    var order = papersForLevel(LV.isolve);
+    r.atts.forEach(function(a){ if(order.indexOf(a.paperKey) === -1) order.push(a.paperKey); });
+    order.sort(function(x, y){ return (done[y] ? 1 : 0) - (done[x] ? 1 : 0); });
+    order.forEach(function(k){
+      var a = done[k], tr = document.createElement("tr");
+      tr.appendChild(mk("td", null, paperLabel(k)));
+      if(a){
+        var p = pctOf(a);
+        tr.appendChild(mk("td", null, a.totalEarned + " / " + a.totalMarks)); var tp = mk("td"); tp.appendChild(chip(ratingOf(p))); tp.appendChild(mk("span", null, "  " + p + "%")); tr.appendChild(tp);
+        tr.appendChild(mk("td", null, fmtDay(new Date(a.timestamp).getTime())));
+        var tv = mk("td"); tv.appendChild(mk("span", "view-link", "Open ›")); tr.appendChild(tv);
+        tr.addEventListener("click", function(){ examBackTarget = "isolveDetail"; openExamDetail(a); });
+      } else {
+        var td = mk("td", null, "Not attempted yet"); td.colSpan = 4; td.style.color = "#94a3b8"; tr.appendChild(td); tr.style.cursor = "default";
+      }
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); var sc = mk("div", "table-scroll"); sc.appendChild(t); b.appendChild(sc); body.appendChild(b);
+    showTab("isolveDetail");
+  }
+  window.__isoBack = function(){ if(isoCur) openIsolveDetail(isoCur); else showTab("isolve"); };
+  document.getElementById("btn-back-isolve").addEventListener("click", function(){ renderIsolve(); showTab("isolve"); });
+
+  // ---- 11BR / 12BR syllabus report -------------------------------
+  var sylCur = null;
+  function topicStats(row, level){
+    var idx = level === "11" ? idxAS() : idx12(), L = (row.rec && row.rec.learn) || {}, T = (row.rec && row.rec.tests) || {}, out = {};
+    idx.forEach(function(l){
+      var o = out[l.topic] = out[l.topic] || { topic: l.topic, total: 0, done: 0, mastered: 0, ppA: 0, ppM: 0 };
+      o.total++; var x = L[l.id]; if(!x || !x.d) return;
+      o.done++; if(x.f) o.mastered++;
+      if(x.pp && x.pp[1]){ o.ppA += x.pp[0]; o.ppM += x.pp[1]; }
+    });
+    Object.keys(out).forEach(function(k){
+      var o = out[k], t = T[k]; o.test = t && t.t ? Math.round(100 * t.s / t.t) : null;
+      o.pp = o.ppM ? Math.round(100 * o.ppA / o.ppM) : null;
+      o.mastery = o.done ? Math.round(100 * o.mastered / o.done) : null;
+      var parts = []; if(o.mastery != null) parts.push(o.mastery); if(o.pp != null) parts.push(o.pp); if(o.test != null) parts.push(o.test);
+      o.cov = Math.round(100 * o.done / o.total);
+      // only rate a topic once there is real evidence: a topic test, past-paper marks, or at least half the lessons done
+      o.score = parts.length && (o.test != null || o.pp != null || o.cov >= 50) ? Math.round(parts.reduce(function(a, b){ return a + b; }, 0) / parts.length) : null;
+    });
+    return out;
+  }
+  function isolveAvgFor(uid, level){
+    var s = 0, n = 0; examAttempts.forEach(function(a){ if(a.uid === uid && levelOf(a.className) === level){ s += pctOf(a); n++; } });
+    return n ? { avg: Math.round(s / n), n: n } : null;
+  }
+  function sylRows(){ var lv = LV.syllabus; return lv === "11" ? rowsAS : lv === "12" ? rows12 : []; }
+  function renderSyl9618(){
+    var lv = LV.syllabus, list = document.getElementById("syl9618-list"); list.textContent = "";
+    var rows = sylRows(), cSel = document.getElementById("filter-class-syl9618");
+    var seen = {}; rows.forEach(function(r){ if(r.s.className) seen[r.s.className] = 1; });
+    var cur = cSel.value; cSel.innerHTML = '<option value="">All ' + lv + 'BR classes</option>' + Object.keys(seen).sort().map(function(c){ return '<option value="' + esc12(c) + '">' + esc12(c) + '</option>'; }).join(""); cSel.value = seen[cur] ? cur : "";
+    var cls = cSel.value, q = document.getElementById("filter-search-syl9618").value.trim().toLowerCase();
+    var st = document.getElementById("syl9618-status");
+    st.textContent = loaded ? (lv === "11" ? "AS Level (9618 topics 1-12)" : "A Level (9618 topics 13-20)") + " - " + rows.length + " registered " + lv + "BR student" + (rows.length === 1 ? "" : "s") + ". Each topic is rated from lesson mastery, real past-paper marks and the topic test; iSolve average shown separately." : "";
+    var shown = rows.filter(function(r){ return (!cls || r.s.className === cls) && (!q || ((r.s.name || "") + " " + (r.s.email || "")).toLowerCase().indexOf(q) !== -1); }).map(function(r){
+      var ts = topicStats(r, lv), arr = Object.keys(ts).map(function(k){ return ts[k]; }), sc = arr.filter(function(o){ return o.score != null; });
+      var overall = sc.length ? Math.round(sc.reduce(function(a, o){ return a + o.score; }, 0) / sc.length) : null;
+      var weak = sc.slice().sort(function(a, b){ return a.score - b.score; })[0];
+      var d = arr.reduce(function(a, o){ return a + o.done; }, 0), tot = arr.reduce(function(a, o){ return a + o.total; }, 0);
+      return { r: r, ts: ts, arr: arr, overall: overall, weak: weak, cov: tot ? Math.round(100 * d / tot) : 0, iso: isolveAvgFor(r.s.uid, lv) };
+    }).sort(function(a, b){ return (b.overall == null ? -1 : b.overall) - (a.overall == null ? -1 : a.overall) || b.cov - a.cov; });
+    if(!shown.length){ list.appendChild(mk("p", "admin-status", rows.length ? "No students match." : (loaded ? "Loading progress..." : ""))); return; }
+    var t = mk("table", "admin-table"), htr = mk("tr");
+    ["Student", "Class", "Syllabus covered", "Overall rating", "iSolve avg", "Weakest topic", ""].forEach(function(h){ htr.appendChild(mk("th", null, h)); });
+    var th = mk("thead"); th.appendChild(htr); t.appendChild(th); var tb = mk("tbody");
+    shown.forEach(function(x){
+      var tr = document.createElement("tr");
+      var nt = mk("td", null, x.r.s.name); if(x.r.s.email){ var em = mk("div", null, x.r.s.email); em.style.cssText = "font-size:.75rem;color:#64748b"; nt.appendChild(em); } tr.appendChild(nt);
+      tr.appendChild(mk("td", null, x.r.s.className)); tr.appendChild(mk("td", null, x.cov + "%"));
+      var to = mk("td"); to.appendChild(chip(x.overall == null && x.cov > 0 ? "In progress" : ratingOf(x.overall))); if(x.overall != null) to.appendChild(mk("span", null, "  " + x.overall + "%")); tr.appendChild(to);
+      tr.appendChild(mk("td", null, x.iso ? x.iso.avg + "% (" + x.iso.n + ")" : "-"));
+      tr.appendChild(mk("td", null, x.weak ? "T" + x.weak.topic + " " + (TOPIC_NAMES[x.weak.topic] || "") + " (" + x.weak.score + "%)" : "-"));
+      var tv = mk("td"); tv.appendChild(mk("span", "view-link", "Report ›")); tr.appendChild(tv);
+      tr.addEventListener("click", function(){ openSyl9618Student(x); });
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); var sc2 = mk("div", "table-scroll"); sc2.appendChild(t); list.appendChild(sc2);
+  }
+  function openSyl9618Student(x){
+    sylCur = x; var lv = LV.syllabus, body = document.getElementById("syl9618-student-body"); body.textContent = "";
+    var nm = x.r.s.name || "?";
+    var head = mk("div", "ij-head"); head.appendChild(mk("div", "ij-avatar", nm.split(/\s+/).slice(0, 2).map(function(w){ return w.charAt(0).toUpperCase(); }).join("")));
+    var hd = mk("div"); hd.appendChild(mk("h3", null, nm + " - Cambridge 9618 " + (lv === "11" ? "AS" : "A") + " Level report"));
+    var meta = mk("div", "ij-meta"); meta.appendChild(mk("span", null, x.r.s.className)); if(x.r.s.email) meta.appendChild(mk("span", null, x.r.s.email)); meta.appendChild(mk("span", null, "Generated " + fmtDay(Date.now())));
+    hd.appendChild(meta); head.appendChild(hd); body.appendChild(head);
+    var row = mk("div", "kpi-row");
+    row.appendChild(tile("Overall rating", x.overall == null ? "-" : x.overall + "%", ratingOf(x.overall) || "Not enough evidence yet"));
+    row.appendChild(tile("Syllabus covered", x.cov + "%", "lessons completed"));
+    row.appendChild(tile("iSolve average", x.iso ? x.iso.avg + "%" : "-", x.iso ? x.iso.n + " topic" + (x.iso.n === 1 ? "" : "s") : "none yet"));
+    body.appendChild(row);
+    var b = box("Topic by topic", "syllabus order");
+    var t = mk("table", "admin-table"), htr = mk("tr");
+    ["Topic", "Lessons", "Mastered first time", "Past-paper marks", "Topic test", "Rating"].forEach(function(h){ htr.appendChild(mk("th", null, h)); });
+    var th = mk("thead"); th.appendChild(htr); t.appendChild(th); var tb = mk("tbody");
+    x.arr.sort(function(a, b2){ return a.topic - b2.topic; }).forEach(function(o){
+      var tr = document.createElement("tr"); tr.style.cursor = "default";
+      tr.appendChild(mk("td", null, o.topic + ". " + (TOPIC_NAMES[o.topic] || "")));
+      tr.appendChild(mk("td", null, o.done + " / " + o.total));
+      tr.appendChild(mk("td", null, o.mastery == null ? "-" : o.mastery + "%"));
+      tr.appendChild(mk("td", null, o.pp == null ? "-" : o.pp + "% (" + o.ppA + "/" + o.ppM + ")"));
+      tr.appendChild(mk("td", null, o.test == null ? "-" : o.test + "%"));
+      var tr2 = mk("td"); tr2.appendChild(chip(o.score == null && o.done > 0 ? "In progress" : ratingOf(o.score))); tr.appendChild(tr2);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); var sc = mk("div", "table-scroll"); sc.appendChild(t); b.appendChild(sc); body.appendChild(b);
+    var plan = box("Action plan", "generated from the figures above"); var ul = mk("ul");
+    var notStarted = x.arr.filter(function(o){ return o.done === 0; }), weak = x.arr.filter(function(o){ return o.score != null && o.score < 60; }).sort(function(a, b2){ return a.score - b2.score; }), part = x.arr.filter(function(o){ return o.done > 0 && o.done < o.total; });
+    if(weak.length) weak.slice(0, 4).forEach(function(o){ ul.appendChild(mk("li", null, "Revisit topic " + o.topic + " (" + (TOPIC_NAMES[o.topic] || "") + "): rated " + o.score + "%. Redo the lessons not mastered first time and re-attempt the past-paper questions.")); });
+    if(part.length) ul.appendChild(mk("li", null, "Finish the unfinished topics: " + part.map(function(o){ return o.topic; }).join(", ") + "."));
+    if(notStarted.length) ul.appendChild(mk("li", null, notStarted.length + " topic" + (notStarted.length === 1 ? "" : "s") + " not started yet (" + notStarted.slice(0, 6).map(function(o){ return o.topic; }).join(", ") + (notStarted.length > 6 ? "..." : "") + ")."));
+    if(!x.iso) ul.appendChild(mk("li", null, "Start iSolve: no exam-style topics attempted yet."));
+    else if(x.iso.avg < 60) ul.appendChild(mk("li", null, "iSolve average is " + x.iso.avg + "%: practise writing answers to the number of marks shown."));
+    if(!ul.children.length) ul.appendChild(mk("li", null, "On track. Keep going and move on to timed past papers."));
+    plan.appendChild(ul); body.appendChild(plan);
+    showTab("syllabus9618Student");
+  }
+  document.getElementById("btn-back-syl9618").addEventListener("click", function(){ showTab("syllabus9618"); });
+  document.getElementById("btn-syl9618-student-print").addEventListener("click", function(){ window.print(); });
+  document.getElementById("btn-syl9618-print").addEventListener("click", function(){ window.print(); });
+  document.getElementById("btn-syl9618-load").addEventListener("click", function(){
+    var st = document.getElementById("syl9618-status"); st.textContent = "Loading..."; loadLevelRows(LV.syllabus).then(renderSyl9618);
+  });
+  document.getElementById("filter-class-syl9618").addEventListener("change", renderSyl9618);
+  document.getElementById("filter-search-syl9618").addEventListener("input", renderSyl9618);
+
+  // ---- Needs attention -------------------------------------------
+  function renderAttention(){
+    var tb = document.querySelector("#attn-table tbody"), table = document.getElementById("attn-table"), st = document.getElementById("attn-status");
+    if(!tb) return; tb.innerHTML = "";
+    if(!loaded){ table.style.display = "none"; return; }
+    var last = {}, iso = {}, ilast = {};
+    function touch(uid, ms){ if(uid && ms && (!last[uid] || ms > last[uid])) last[uid] = ms; }
+    attempts.forEach(function(a){ touch(a.uid, new Date(a.timestamp).getTime()); });
+    examAttempts.forEach(function(a){ touch(a.uid, new Date(a.timestamp).getTime()); (iso[a.uid] = iso[a.uid] || []).push(pctOf(a)); });
+    ilearnRows.forEach(function(r){ ilast[r.s.uid] = r.lastActive || 0; touch(r.s.uid, r.lastActive); });
+    rowsAS.concat(rows12).forEach(function(r){ ilast[r.s.uid] = r.lastActive || 0; touch(r.s.uid, r.lastActive); });
+    var cSel = document.getElementById("filter-class-attn"), cls = cSel.value, seen = {};
+    var list = [];
+    (usersRoster || []).forEach(function(u){
+      if(!u || !u.uid) return; var c = String(u.className || u.class || "").replace(/\s+/g, ""); if(!levelOf(c)) return; seen[c] = 1;
+      if(cls && c !== cls) return;
+      var why = [], d = last[u.uid] ? daysAgo(last[u.uid]) : null;
+      if(d == null) why.push("No activity recorded yet");
+      else if(d >= 14) why.push("Inactive for " + d + " days");
+      var sc = iso[u.uid]; if(sc && sc.length >= 2){ var av = Math.round(sc.reduce(function(a, b){ return a + b; }, 0) / sc.length); if(av < 50) why.push("iSolve average " + av + "%"); }
+      if(sc && sc.length === 1 && sc[0] < 40) why.push("Scored " + sc[0] + "% on their only iSolve paper");
+      if(u.uid in ilast && !ilast[u.uid] && d != null) why.push("Has not started iLearn");
+      if(why.length) list.push({ u: u, c: c, why: why, d: d, last: last[u.uid] });
+    });
+    var prev = cSel.value; cSel.innerHTML = '<option value="">All classes</option>' + Object.keys(seen).sort().map(function(c){ return '<option value="' + esc12(c) + '">' + esc12(c) + '</option>'; }).join(""); cSel.value = seen[prev] ? prev : "";
+    list.sort(function(a, b){ return b.why.length - a.why.length || (b.d == null ? 9999 : b.d) - (a.d == null ? 9999 : a.d); });
+    table.style.display = list.length ? "" : "none";
+    st.textContent = list.length ? list.length + " student" + (list.length === 1 ? "" : "s") + " to follow up. Load iLearn progress for every level to include 'Has not started iLearn' and iLearn activity." : "Nobody needs attention right now.";
+    list.forEach(function(x){
+      var tr = document.createElement("tr"); tr.style.cursor = "default";
+      var nt = mk("td", null, x.u.name || "(no name)"); if(x.u.email){ var em = mk("div", null, x.u.email); em.style.cssText = "font-size:.75rem;color:#64748b"; nt.appendChild(em); }
+      tr.appendChild(nt); tr.appendChild(mk("td", null, x.c)); tr.appendChild(mk("td", null, x.why.join(" · "))); tr.appendChild(mk("td", null, x.last ? fmtDay(x.last) : "never"));
+      tb.appendChild(tr);
+    });
+  }
+  document.getElementById("filter-class-attn").addEventListener("change", renderAttention);
+  document.getElementById("btn-attn-load").addEventListener("click", function(){
+    var st = document.getElementById("attn-status"); st.textContent = "Loading iLearn progress for every level...";
+    var jobs = [loadLevelRows("11"), loadLevelRows("12")];
+    var roster = rosterFor("10");
+    jobs.push(Promise.all(roster.map(function(s){
+      return PQFirebase.getMyProgress(s.uid, "ilearn").catch(function(){ return null; }).then(function(rec){ return { s: s, rec: rec || {}, lastActive: (rec && rec.lastActive) || null, st: window.ILearnEngine ? window.ILearnEngine.mergeState(null, rec) : null }; });
+    })).then(function(rows){ if(!ilearnRows.length) ilearnRows = rows; }));
+    Promise.all(jobs).then(renderAttention);
+  });
+
   function renderDuplicates(){
     var box = document.getElementById("dup-box");
     if(!ilearnRows.length){ box.style.display = ""; box.innerHTML = '<p class="admin-status">Click "Load iLearn progress" first, then find duplicates.</p>'; return; }
@@ -2732,7 +3138,7 @@
         "<td>" + a.totalEarned + "/" + a.totalMarks + "</td>" +
         "<td>" + pct + "%</td>" +
         "<td class=\"nowrap\">" + fmtDateTime(a.timestamp) + "</td>";
-      tr.addEventListener("click", function(){ openExamDetail(a); });
+      tr.addEventListener("click", function(){ examBackTarget = "examPractice"; openExamDetail(a); });
       tbody.appendChild(tr);
     });
   }
@@ -2920,8 +3326,9 @@
     showTab("examDetail");
   }
 
+  var examBackTarget = "examPractice";
   document.getElementById("btn-back-examdetail").addEventListener("click", function(){
-    showTab("examPractice");
+    if(examBackTarget === "isolveDetail" && window.__isoBack) window.__isoBack(); else showTab("examPractice");
   });
 
   // Lets the admin correct a question's awarded mark after re-reading the
