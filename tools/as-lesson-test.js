@@ -29,6 +29,7 @@ ILEARN_LESSONS.forEach(l => {
           if(r.awarded !== p.marks) fail(pw, "model answer scores " + r.awarded + "/" + p.marks + "; missed: " + p.points.filter((x, k) => !r.hits[k]).map(x => x.t.slice(0, 50)).join(" | "));
           if(j.awarded !== 0) fail(pw, "junk scores " + j.awarded);
           if(p.points.length < p.marks) fail(pw, "fewer mark points than marks");
+          const VAGUE = P.markText(p, "It is good and makes the computer work better and faster for the user and the data is safe and secure"); if(VAGUE.awarded > Math.floor(p.marks / 2)) fail(pw, "a vague generic answer scores " + VAGUE.awarded + "/" + p.marks);
           const mm = P.markText(p, "yes"); if(mm.awarded) fail(pw, "'yes' scores " + mm.awarded);
         } else if(p.kind === "fields"){
           const ok = P.markFields(p, p.fields.map(f => f.ans[0])), jn = P.markFields(p, p.fields.map(() => JUNK));

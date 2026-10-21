@@ -1,0 +1,74 @@
+/* iLearn AS Level (11BR) -- Topic 7 Ethics and ownership. Each lesson ends with a REAL Cambridge 9618 past-paper question marked on the mark-scheme keywords. */
+(function(root){
+  "use strict";
+  var mc = root.ILQ.mc, tx = root.ILQ.tx, tbl = root.ASA.tbl, ASA = root.ASA;
+  root.ILEARN_LESSONS = (root.ILEARN_LESSONS || []).concat([
+
+  { id:"7.1.1a", code:"7.1.1", title:"Acting ethically: professional bodies, BCS and IEEE",
+    concept:
+      "<p><b>Ethics</b> means doing what is right and fair. A computing professional has power over other people's data and safety, so they must act ethically. <b>Professional bodies</b> such as the <b>BCS</b> (British Computer Society) and the <b>IEEE</b> publish a <b>code of conduct</b>.</p>" +
+      tbl(["Towards colleagues the programmer should&hellip;", "Towards the public the programmer should&hellip;"], [["treat everyone fairly; avoid discrimination", "maintain the <b>health, safety and welfare</b> of the public"], ["accept and offer critique so the work improves", "be <b>honest and realistic</b> about claims, so trust is kept"], ["credit others' contributions so they feel valued", "protect the <b>security of the public's data</b>"], ["help and train colleagues", "avoid endangering anyone"]]) +
+      "<h4>Why join a professional body?</h4>" +
+      "<ul><li>It provides <b>ethical guidelines</b>, so the programmer does not have to decide what is ethical alone.</li><li>Clients and staff know the programmer is <b>reputable</b> (there may be an entry test), giving recognition of skills.</li><li>It gives <b>help and support</b> (for example legal advice) and <b>training</b> to keep skills up to date.</li></ul>" +
+      "<p>A <b>code of conduct</b> creates a safe, respectable, professional working environment and makes sure that employees understand what is expected.</p>",
+    example:
+      "<p>A programmer discovers a bug in a medical-device program but her manager wants to ship it on time. The code of conduct says that the public's health and safety comes first: she must report the problem rather than hide it.</p>",
+    checks:[
+      mc("Which is an example of acting ethically towards the public?", "Being honest about what the software can and cannot do", ["Copying a colleague's code without credit", "Selling users' personal data", "Hiding a safety bug"], "Public trust depends on honesty."),
+      mc("Which organisation is a professional body for computing?", "BCS", ["HTTP", "DNS", "IDE"], "BCS (British Computer Society); IEEE is another."),
+      mc("What is the purpose of a code of conduct?", "To make sure employees understand what behaviour is expected", ["To compress files", "To encrypt emails", "To speed up a network"], "It sets out the expected behaviour."),
+      tx("Give one reason for joining a professional ethical body. [1]", [["guidelines","reputable","recogni","support","legal advice","training","standards","trust","qualification","skills"]], 1, "Ethical guidelines to follow; recognition as reputable; help and support; training."),
+      ASA.pp("9618/13 October/November 2024 · Question 5(b)", "Three developed points: guidelines/standards, clients know you are reputable (recognition of skills), help and support, training to keep skills up to date.",
+        [ ASA.text("(b)", 3, "Explain the reasons why it is important for the computer programmer to join a professional ethical body.",
+            [ ["The professional ethical body has ethical guidelines to follow", ["guideline", "code of conduct", "code of ethics", "rules", "standards", "ethical code"]], ["... so clients / other staff know the standards being applied // so the programmer does not have to decide what is ethical", ["clients", "other staff", "colleagues", "know the standards", "written down", "do not have to decide", "does not have to decide", "don't have to decide", "clear"]], ["Clients / staff know the programmer is reputable // there may be a test for entry // recognition of skills", ["reputable", "trust", "recogni", "credib", "qualif", "test", "professional", "reliable"]], ["The body provides help and support, for example legal advice", ["help", "support", "advice", "legal", "guidance"]], ["The body runs training courses to keep skills up to date", ["training", "courses", "up to date", "learn", "skills"]] ],
+            { lead: "1 mark for each bullet point, maximum 3:", lines: 5 }),
+          ASA.text("(a) 2024 N12 Q5(a)", 4, "Explain the reasons why a computer programmer needs to act ethically towards colleagues and the public (max 2 for colleagues, max 2 for the public).",
+            [ ["Colleagues: treat fairly / avoid discrimination", ["fair", "discriminat", "equal", "respect"]], ["Colleagues: accept / offer critique so the technical work can be improved", ["critique", "criticism", "feedback", "improve"]], ["Colleagues: credit contributions so they feel valued / respected, or help / train colleagues", ["credit", "valued", "respected", "recogni", "train", "help", "support"]], ["Public: maintain health, safety and welfare so as not to endanger anyone", ["health", "safety", "welfare", "endanger", "harm", "safe"]], ["Public: be honest / realistic about claims so public trust is maintained", ["honest", "realistic", "claims", "trust", "truth", "mislead"]], ["Public: maintain the security of the public's data", ["secur", "data", "privacy", "confidential", "protect"]] ],
+            { lead: "1 mark for each bullet point; max 2 for colleagues and max 2 for the public:", lines: 5 }) ])
+    ] },
+
+  { id:"7.1.2a", code:"7.1.2", title:"Copyright and software licences",
+    concept:
+      "<p><b>Copyright</b> gives the holder the <b>legal right of ownership</b> of their intellectual property. It identifies the author as owner, allows legal action against copying and restricts competition.</p>" +
+      "<p>A <b>software licence</b> is a (legal) agreement that defines the rights and terms of use of the software.</p>" +
+      tbl(["Licence", "Features"], [["<b>Commercial</b>", "a <b>fee</b> is paid; <b>no access to the source code</b>; no free trial; users cannot legally alter or share it; support and updates provided; limits such as the number of installs"], ["<b>Shareware</b>", "users can <b>try before buying</b>, with limited features or time; payment required to keep or unlock; the code is still protected"], ["<b>Open source</b> (Open Source Initiative)", "source code is available, so the software can be <b>freely copied, distributed or adapted</b>; the author may still earn from support or updates"], ["<b>Free software</b> (Free Software Foundation)", "free to use, study, share and change"], ["Freeware", "free of charge, but the code stays closed"]]),
+    example:
+      "<p>A programmer writes a program for a business that must be able to modify the source code, and pays the programmer for maintenance. <b>Open source</b> fits: the source can be examined and adapted, and the programmer still earns from updates. Meanwhile a text-reading app for visually impaired shoppers is better released under a <b>commercial</b> licence: open source would let anyone change the code and cause wrong output (for instance a wrong allergy warning).</p>",
+    checks:[
+      mc("Which licence lets users try the software before they buy, perhaps with limited features?", "Shareware", ["Commercial", "Open source", "Free software"], "Shareware = try before you buy."),
+      mc("Which licence gives users access to the source code so they can alter the program?", "Open source", ["Commercial", "Shareware", "Copyright"], "Open source licences make the source code available."),
+      mc("What does copyright give the holder?", "The legal right of ownership of the intellectual property", ["The right to copy anyone's work", "Free internet access", "A faster computer"], "Copyright is legal ownership."),
+      tx("Explain why a programmer should copyright their program. [2]", [["owner","author","ownership","recognition","identify"],["legal","consequence","steal","copy","compet","court","sue"]], 2, "To identify themselves as the owner; to allow legal consequences if anyone copies or steals it; to restrict competition."),
+      ASA.pp("9618/13 October/November 2024 · Question 5(a)", "Match each description: fee + no source code + no trial = commercial; try first = shareware; free + source code can be altered = open source / free software.",
+        [ ASA.fields("(a)", 3, "Complete the table by writing the type of software licence each statement describes.<br>(1) A fee is charged for the software. The source code cannot be accessed. Users do not get a free trial.<br>(2) Users can try the software before buying it. Users may not be able to access all features during the trial.<br>(3) Software is usually free of charge. Users can access the source code and alter the program to their needs.",
+            [ ["(1)", ["commercial"], "text", "Commercial", 1], ["(2)", ["shareware"], "text", "Shareware", 1], ["(3)", ["open source", "free software", "open-source"], "text", "Open Source // Free software", 1] ],
+            { lead: "1 mark for each correct licence:" }),
+          ASA.text("(b)(ii) Nov 2024 Paper 12 Q5(b)(ii)", 2, "Explain the reasons why the programmer should copyright their program.",
+            [ ["To identify themselves as the owner / author // gain formal recognition of ownership", ["owner", "author", "recogni", "ownership", "identif"]], ["To allow for legal consequences if anyone steals / copies it", ["legal", "consequence", "steal", "copy", "court", "sue", "action"]], ["To restrict competition", ["competi", "compet"]] ],
+            { lead: "1 mark for each bullet point, maximum 2:", lines: 3 }) ])
+    ] },
+
+  { id:"7.1.3a", code:"7.1.3", title:"Artificial Intelligence: how it works and what it changes",
+    concept:
+      "<p><b>Artificial intelligence (AI)</b> is a computer system doing tasks that normally need human intelligence, often by learning from data (machine learning). Typical applications:</p>" +
+      tbl(["Application", "How AI is used"], [["Image recognition / OCR (text from a camera)", "analyses the <b>pixels</b> to find where characters or faces are, matches the <b>pattern</b> to stored patterns, and converts the pattern of pixels into characters or a recognised object"], ["Natural language processing", "combines characters into words, compares them to a database to find a match, predicts what is missing, and can translate"], ["Text-to-speech / speech recognition", "converts words to audio waveforms; or identifies key words in speech and matches them to a database to give the most likely command"], ["Facial recognition autofocus", "scans the scene in real time, identifies faces, then focuses on the matching pattern"]]) +
+      "<h4>Social, economic and environmental impact</h4>" +
+      "<ul><li><b>Social benefits:</b> helps people with visual impairment, with a language barrier or with reading difficulties; safer transport and health diagnosis.</li><li><b>Economic:</b> automation can reduce costs but remove jobs.</li><li><b>Environmental:</b> can save energy (smart grids) but training large models uses a lot of power.</li></ul>",
+    example:
+      "<p>A phone app reads the label on a tin out loud in the shopper's language: (1) <b>image recognition / OCR</b> finds the characters in the photo; (2) <b>natural language</b> processing joins them into words and translates them; (3) <b>text-to-speech</b> produces the audio. Visually impaired users benefit directly.</p>",
+    checks:[
+      mc("Which AI technique converts a pattern of pixels in a photo into characters?", "Image recognition (OCR)", ["Text-to-speech", "Encryption", "Compression"], "OCR/image recognition identifies characters."),
+      mc("Which is a social benefit of a text-reading AI app?", "It helps people with visual impairment", ["It removes the need for cameras", "It increases the price of food", "It stores all the user's data"], "Accessibility is a clear social benefit."),
+      mc("Which AI feature creates an audio waveform from words?", "Text-to-speech", ["Image recognition", "Parity checking", "Defragmentation"], "Text-to-speech output."),
+      tx("Explain how AI can be used to convert a user's speech into commands. [3]", [["speech recognition","recognis","recogniz","voice recognition"],["key phrase","key word","keyword","words spoken","phrases"],["database","match","compare","likely","stored"]], 3, "Uses speech recognition, which identifies key phrases / words spoken, matches these to a database and generates the most likely command."),
+      ASA.pp("9618/12 May/June 2025 · Question 3(a) and (b)", "AI steps: image recognition / OCR to find characters in the pixels, natural language to join them into words and translate, text-to-speech for the audio. Social benefits: visual impairment, language barrier, reading difficulty.",
+        [ ASA.text("(a)", 4, "A computer program uses a digital camera to read the words on an item, translates the words to a chosen language and outputs them as audio. The program uses Artificial Intelligence (AI). Explain how AI is used in the computer program.",
+            [ ["Uses image recognition // optical character recognition", ["image recognition", "optical character", "ocr", "character recognition", "pattern recognition", "computer vision"]], ["... to analyse the pixels to identify the characters / words in the image", ["pixel", "analys", "identify the location", "locate", "characters", "letters", "scan"]], ["... in order to convert the pattern of pixels into individual characters", ["pattern", "convert", "individual characters", "into characters", "into letters"]], ["Uses natural language processing to combine the characters into words and compare them to a database to identify a match", ["natural language", "words", "database", "match", "dictionary"]], ["... then compare the words to a database of the chosen language to find a match and translate", ["translate", "chosen language", "other language", "target language"]], ["Uses text-to-speech to generate the audio waveforms corresponding to the words", ["text to speech", "text-to-speech", "speech synthesis", "audio", "waveform", "speak", "voice"]] ],
+            { lead: "1 mark each, maximum 4:", lines: 6 }),
+          ASA.text("(b)", 2, "State two social benefits of the use of AI in the computer program described.",
+            [ ["It can help people with visual impairment to identify which products to purchase", ["visual", "blind", "sight", "impair"]], ["It can help people who cannot understand the language", ["language", "foreign", "translate", "understand"]], ["It can help to overcome learning / reading difficulties", ["learning", "reading", "dyslexi", "difficult"]] ],
+            { lead: "1 mark each, maximum 2:", lines: 3 }) ])
+    ] }
+
+  ]);
+})(typeof window !== "undefined" ? window : this);
