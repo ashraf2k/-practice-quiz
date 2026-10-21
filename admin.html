@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-WU9TxsHdMb6CC409H/ISulmVjgJpxP5yjGdOcZXuAi0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-c13PPzBoHCDqFYtv0xv/hwNdLT4APqYJz2k+wnUgJng='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -435,6 +435,7 @@
       <button class="admin-tab" data-tab="syllabus">Syllabus report</button>
       <button class="admin-tab" data-tab="ilearn">iLearn</button>
       <button class="admin-tab" data-tab="ilearn12">A Level iLearn (12BR)</button>
+      <button class="admin-tab" data-tab="ilearnAS">AS Level iLearn (11BR)</button>
       <button class="admin-tab" data-tab="archive">Archive</button>
     </div>
 
@@ -590,6 +591,13 @@
           <a class="btn btn-secondary" href="alevel.html">Try the A Level journey as a student (admin preview) ›</a>
         </div>
         <div id="ilearn12-detail-body"></div>
+      </div>
+
+      <div class="admin-panel" id="panel-ilearnAS">
+        <div class="admin-toolbar no-print">
+          <a class="btn btn-primary" href="as.html">Try the AS Level journey as a student (admin preview) ›</a>
+        </div>
+        <p class="admin-status">Opens the AS Level (9618) iLearn journey exactly as an 11BR student sees it. Your progress there is kept only in your own browser; nothing is saved online and no student data is changed. The per-student progress report for 11BR will be added with the full set of lessons.</p>
       </div>
 
       <div class="admin-panel" id="panel-archive">
@@ -853,7 +861,7 @@
     document.querySelectorAll(".admin-tab").forEach(function(btn){
       btn.classList.toggle("active", btn.dataset.tab === name);
     });
-    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","ilearn","ilearnDetail","ilearn12","ilearn12Detail","archive"].forEach(function(id){
+    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","archive"].forEach(function(id){
       document.getElementById("panel-" + id).classList.toggle("active", id === name);
     });
   }
