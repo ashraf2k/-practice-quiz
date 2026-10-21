@@ -156,3 +156,13 @@
 .hchip{font-size:15px;padding:9px 6px;text-align:center}
 .bdp{font:600 16px ui-monospace,Menlo,Consolas,monospace;cursor:pointer;color:var(--ink)}
 .bdp.bdnt{color:var(--accent-dark)}
+/* AS visuals */
+.bcdrow{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.bcdcell{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:6px 10px;text-align:center}
+.bcdd{font:700 22px ui-monospace,Menlo,Consolas,monospace;color:var(--accent-dark)}
+.bcdb{font:600 16px ui-monospace,Menlo,Consolas,monospace}
+.dcm{margin:8px 0}.dcn{margin:4px 0}.dck{margin:4px 0 4px 22px;padding-left:12px;border-left:2px solid var(--line)}
+.dcb{padding:7px 12px;border:1.5px solid var(--ink);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-weight:600;font-size:14px;cursor:pointer;text-align:left}
+.dcb.leaf{cursor:default;border-style:dashed;background:var(--bg);font-weight:500}
+.dcb.open{background:var(--accent-tint);border-color:var(--accent)}
+.dcb:hover:not(.leaf){border-color:var(--accent)}

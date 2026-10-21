@@ -1,0 +1,57 @@
+/* Real past-paper questions (as-pp.js): laid out the way the exam paper shows them, then marked and followed by the mark scheme */
+.pp-paper{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:14px 16px;margin:0 0 14px}
+.pp-src{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-dark);margin:0 0 10px;padding-bottom:6px;border-bottom:2px solid var(--ink)}
+.pp-intro{margin:0 0 12px;font-size:15px;line-height:1.55}
+.pp-intro p{margin:0 0 8px}
+.pp-part{margin:0 0 14px}
+.pp-row{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:start}
+.pp-lab{font-weight:800;font-size:15px}
+.pp-q{font-size:15px;line-height:1.55;margin:0 0 8px}
+.pp-q p{margin:0 0 6px}
+.pp-marks{font-weight:800;font-size:14px;white-space:nowrap;align-self:end}
+.pp-ans{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:4px;padding:6px 8px;font:inherit;font-size:15px;line-height:28px;color:var(--ink);resize:vertical;min-height:84px;
+  background-color:var(--surface);background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 26px,var(--line) 26px,var(--line) 27px);background-attachment:local}
+.pp-ans.pp-code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
+.pp-ans:disabled{opacity:1;background-color:var(--bg)}
+.pp-field{display:flex;gap:10px;align-items:center;margin:6px 0;flex-wrap:wrap}
+.pp-field label{min-width:92px;font-weight:600;font-size:14.5px}
+.pp-in{border:none;border-bottom:1.5px dotted var(--ink);background:transparent;color:var(--ink);font:inherit;font-size:15px;padding:3px 4px;min-width:200px;max-width:100%;font-family:ui-monospace,Menlo,Consolas,monospace;border-radius:0}
+.pp-table .pp-in{min-width:0;width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:4px;font-size:14px}
+.pp-in:focus,.pp-ans:focus{outline:2px solid var(--accent);outline-offset:1px}
+.pp-in:disabled{opacity:1;background:var(--bg)}
+.pp-tw{overflow-x:auto;max-width:100%}
+.pp-table{border-collapse:collapse;font-size:14px;min-width:100%}
+.pp-table th,.pp-table td{border:1.5px solid var(--ink);padding:6px 9px;text-align:left;vertical-align:middle}
+.pp-table th{background:var(--bg)}
+.pp-table td.pp-tk{text-align:center}
+.pp-table td.pp-tk input{width:20px;height:20px;accent-color:var(--accent)}
+.pp-table tr.pp-rok td{background:var(--correct-bg)}
+.pp-table tr.pp-rno td{background:var(--incorrect-bg)}
+.pp-res{margin:6px 0 0 42px}
+.pp-score{display:inline-block;padding:2px 10px;border-radius:999px;font-size:13.5px;margin:2px 0 6px;border:1px solid var(--line)}
+.pp-score.full{background:var(--correct-bg);border-color:var(--correct-line);color:var(--correct)}
+.pp-score.part{background:var(--diff-moderate-bg);color:var(--diff-moderate);border-color:var(--diff-moderate)}
+.pp-score.none{background:var(--incorrect-bg);border-color:var(--incorrect-line);color:var(--incorrect)}
+.pp-pts{list-style:none;margin:0;padding:0;font-size:14px}
+.pp-pts li{margin:3px 0;padding:4px 8px;border-radius:6px;border:1px solid var(--line)}
+.pp-pts li.hit{background:var(--correct-bg);border-color:var(--correct-line)}
+.pp-pts li.miss{background:var(--incorrect-bg);border-color:var(--incorrect-line)}
+.pp-mk{font-weight:800;margin-right:4px}
+.pp-cap{margin:4px 0;font-size:13px;color:var(--muted)}
+.pp-sch{margin-top:14px;border:2px solid var(--ink);border-radius:4px;background:var(--surface);font-size:14px}
+.pp-sch-h{padding:7px 12px;background:var(--ink);color:var(--surface);font-weight:800;font-size:13px;letter-spacing:.03em}
+.pp-sch-head,.pp-sch-row{display:grid;grid-template-columns:74px 1fr 52px;gap:0}
+.pp-sch-head span{padding:5px 10px;font-weight:800;font-size:12.5px;background:var(--bg);border-bottom:1.5px solid var(--ink)}
+.pp-sch-head span+span,.pp-sch-row>div+div{border-left:1px solid var(--line)}
+.pp-sch-row{border-bottom:1px solid var(--line)}
+.pp-sch-row:last-child{border-bottom:none}
+.pp-sch-row>div{padding:7px 10px;line-height:1.5}
+.pp-sch-a p{margin:0 0 5px}
+.pp-sch-a ul{margin:2px 0 4px 18px;padding:0}
+.pp-sch-a pre{margin:4px 0;padding:6px 8px;background:var(--bg);border:1px solid var(--line);border-radius:4px;font-size:13px;overflow-x:auto}
+.pp-sch-a table{border-collapse:collapse;font-size:13px;margin:4px 0}
+.pp-sch-a td,.pp-sch-a th{border:1px solid var(--ink);padding:3px 7px;text-align:left}
+.pp-sch-m{text-align:center;font-weight:800}
+.pp-sch-q{font-weight:800}
+.pp-note{margin:6px 0 0;padding:6px 9px;border-left:4px solid var(--accent);background:var(--accent-tint);font-size:13px;border-radius:0 6px 6px 0}
+@media(max-width:560px){.pp-row{grid-template-columns:28px 1fr}.pp-marks{grid-column:2;justify-self:end}.pp-res{margin-left:0}.pp-sch-head,.pp-sch-row{grid-template-columns:48px 1fr 40px}}

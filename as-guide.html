@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net ; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261019j"></script>
+<script src="theme.js?v=20261019j"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="icon" href="icons/icon-192.png" />
+<title>CS 9618 AS Level: syllabus and exam guide</title>
+<link rel="stylesheet" href="shared.css?v=20261019j" />
+<style>
+  .g-wrap{ max-width:860px; margin:0 auto; padding:18px 16px 60px; }
+  .g-wrap h1{ font-size:26px; margin:6px 0 6px; }
+  .g-wrap h2{ font-size:19px; margin:30px 0 10px; }
+  .g-lead{ color:var(--muted); font-size:15px; margin:0 0 6px; }
+  .g-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; margin:12px 0; }
+  .g-card{ border:1.5px solid var(--line); border-radius:12px; padding:14px 16px; background:var(--card, transparent); }
+  .g-card h3{ margin:0 0 8px; font-size:16px; }
+  .g-big{ display:flex; flex-wrap:wrap; gap:8px 18px; margin:8px 0; }
+  .g-big b{ display:block; font-size:20px; color:var(--accent-dark, var(--accent)); }
+  .g-big span{ font-size:12.5px; color:var(--muted); }
+  .g-wrap table{ width:100%; border-collapse:collapse; font-size:14px; margin:8px 0; }
+  .g-wrap th,.g-wrap td{ border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top; }
+  .g-wrap th{ background:var(--accent-tint); color:var(--accent-dark); }
+  .g-wrap ul{ margin:6px 0; padding-left:20px; }
+  .g-wrap li{ margin:4px 0; }
+  .g-tip{ border-left:4px solid var(--accent); background:var(--accent-tint); color:var(--text); padding:10px 14px; border-radius:0 10px 10px 0; margin:12px 0; font-size:14.5px; }
+  .g-tbl{ overflow-x:auto; }
+  .g-btn{ display:inline-block; margin-top:18px; padding:12px 20px; border-radius:10px; background:#1d5fd0; color:#fff; font-weight:700; text-decoration:none; }
+</style>
+</head>
+<body>
+<main class="g-wrap">
+  <h1>Cambridge AS Level Computer Science (9618)</h1>
+  <p class="g-lead">Everything you need to know about the course and the exam before you start the learning journey.</p>
+
+  <h2>1. The big picture</h2>
+  <p>The AS Level is the first half of the full Cambridge International A Level in Computer Science. It is examined by <b>two written papers</b>. Both are answered on the question paper, with <b>no calculator</b>. Together they cover 12 syllabus sections, and the two papers carry equal weight.</p>
+  <div class="g-big">
+    <div><b>2</b><span>papers</span></div>
+    <div><b>75 + 75</b><span>marks (150 in total)</span></div>
+    <div><b>1h 30 + 2h</b><span>exam time</span></div>
+    <div><b>50% / 50%</b><span>weight of each paper</span></div>
+  </div>
+
+  <h2>2. The two papers</h2>
+  <div class="g-grid">
+    <div class="g-card">
+      <h3>Paper 1: Theory Fundamentals (9618/1x)</h3>
+      <ul>
+        <li><b>1 hour 30 minutes, 75 marks</b></li>
+        <li>Short-answer and structured questions, all compulsory</li>
+        <li>Covers <b>syllabus sections 1 to 8</b></li>
+        <li>You write your answers on the question paper</li>
+        <li>Mostly knowledge, explanation and short calculations (binary, hexadecimal, file sizes, logic circuits, SQL)</li>
+      </ul>
+    </div>
+    <div class="g-card">
+      <h3>Paper 2: Fundamental Problem-solving and Programming Skills (9618/2x)</h3>
+      <ul>
+        <li><b>2 hours, 75 marks</b></li>
+        <li>Structured questions, all compulsory</li>
+        <li>Covers <b>syllabus sections 9 to 12</b></li>
+        <li>You get an <b>insert</b> with the list of pseudocode functions and operators, and sometimes a program or scenario to refer to</li>
+        <li>Mostly writing, reading and tracing pseudocode, plus design and testing questions</li>
+      </ul>
+    </div>
+  </div>
+  <p>The code in the paper number tells you the variant: 11, 12 and 13 are Paper 1 variants, and 21, 22 and 23 are Paper 2 variants. Different variants contain different questions with the same structure and difficulty. Exams are held in the May/June and October/November series.</p>
+
+  <h2>3. What is in each section</h2>
+  <div class="g-tbl"><table>
+    <tr><th>Paper</th><th>Section</th><th>What you study</th></tr>
+    <tr><td rowspan="8">Paper 1</td><td>1 Information representation</td><td>Binary, denary, hexadecimal, BCD, two's complement, binary addition, ASCII/Unicode, images, sound, compression</td></tr>
+    <tr><td>2 Communication</td><td>Networks, topologies, client-server, cloud, routers, IP addressing, DNS, the internet</td></tr>
+    <tr><td>3 Hardware</td><td>Input, output, memory and storage, sensors, logic gates and circuits</td></tr>
+    <tr><td>4 Processor fundamentals</td><td>CPU architecture, registers, fetch-execute cycle, interrupts, assembly language, bit manipulation</td></tr>
+    <tr><td>5 System software</td><td>Operating systems, utility software, compilers, interpreters, assemblers, IDEs</td></tr>
+    <tr><td>6 Security, privacy and data integrity</td><td>Threats and protection, validation and verification</td></tr>
+    <tr><td>7 Ethics and ownership</td><td>Professional ethics, copyright, software licences, artificial intelligence</td></tr>
+    <tr><td>8 Databases</td><td>Relational databases, normalisation, DBMS, SQL (DDL and DML)</td></tr>
+    <tr><td rowspan="4">Paper 2</td><td>9 Algorithm design and problem-solving</td><td>Abstraction, decomposition, algorithms, identifier tables, flowcharts, pseudocode, stepwise refinement</td></tr>
+    <tr><td>10 Data types and structures</td><td>Data types, records, arrays, files, stacks, queues, linked lists</td></tr>
+    <tr><td>11 Programming</td><td>Variables, selection, iteration, procedures, functions, parameters</td></tr>
+    <tr><td>12 Software development</td><td>Development life cycle, structure charts, state-transition diagrams, errors, testing and maintenance</td></tr>
+  </table></div>
+
+  <h2>4. The kinds of question you will meet</h2>
+  <ul>
+    <li><b>State / give / identify / name:</b> a short fact or term. One mark per correct point.</li>
+    <li><b>Describe / outline:</b> say what something is or how it works, usually in two or three marks' worth of points.</li>
+    <li><b>Explain / justify:</b> give a point <i>and</i> the reason. A bare statement earns no mark.</li>
+    <li><b>Complete a table or diagram:</b> ticks in a table, trace tables, logic truth tables, a circuit, a state diagram, or filling in missing words.</li>
+    <li><b>Calculate or convert:</b> binary, hexadecimal, two's complement, file sizes. Show your working.</li>
+    <li><b>Write or complete pseudocode (Paper 2):</b> the biggest mark totals in the exam, often 6 to 12 marks per question.</li>
+    <li><b>Trace or correct an algorithm:</b> follow the code line by line, or find and fix the error.</li>
+    <li><b>Write SQL (Paper 1):</b> create a table or query and update data using the SELECT, INSERT, UPDATE and DELETE statements.</li>
+  </ul>
+
+  <h2>5. How you are marked</h2>
+  <p>Examiners follow a published <b>mark scheme</b>. It is a list of specific points (keywords and ideas). You earn one mark for each correct point you make, up to the maximum for that part. There are no marks for length.</p>
+  <ul>
+    <li>Correct technical words matter. Vague everyday language ("it's faster", "it does the work") usually earns nothing.</li>
+    <li>Some marks have a <b>cap</b>: for example, an answer must mention the given context to earn full marks.</li>
+    <li>Pseudocode is marked on whether each required step is present, not on perfect spelling or layout.</li>
+    <li>This site marks your past-paper answers the same way: by the mark-scheme keywords. After you answer, you always see the real published mark scheme.</li>
+  </ul>
+
+  <h2>6. How this learning journey works</h2>
+  <ul>
+    <li>Every lesson: concept, worked example, quick checks, then a <b>real past-paper question</b> in exam style.</li>
+    <li>Lessons unlock in order within each paper. Paper 1 and Paper 2 are two separate tracks, so you can work on either at any time.</li>
+    <li>Your answer is marked against the mark scheme. Then you see the exact published scheme and what the examiners said about common mistakes.</li>
+    <li>Below 60% of the marks, the lesson is flagged "review later". You can always move on, but come back to it.</li>
+  </ul>
+
+  <div class="g-tip"><b>Exam technique.</b> Read how many marks a part is worth and give that many distinct points. Use the technical word the syllabus uses. In Paper 2, read the insert first, name variables clearly and never leave a pseudocode question blank: partial credit is common.</div>
+
+  <p class="g-lead">The syllabus document and the mark schemes are the final authority, so check the latest Cambridge syllabus for your exam year.</p>
+  <a class="g-btn" href="as.html">Back to the learning journey</a>
+</main>
+</body>
+</html>

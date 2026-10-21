@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-WcGDBd4mkxzZ7Ck2hzH9IQgdgpEL35v5fdY/PXNUrvo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-HDN/EYUZndsFbmY5dLI8tXItW27w2b3XVelJNkxSMIk='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -64,6 +64,9 @@
           <option>10BR1</option>
           <option>10BR2</option>
           <option>10BR3</option>
+        </optgroup>
+        <optgroup label="AS Level Computer Science 9618 — 11BR">
+          <option>11BR</option>
         </optgroup>
         <optgroup label="AS &amp; A Level Computer Science 9618 — 12BR">
           <option>12BR</option>
@@ -2265,7 +2268,8 @@
   });
 
   // ---------- 10BR home menu: iLearn / iSolve ----------
-  function isBR(user){ return /^(10BR|12BR)/i.test(String((user && user.class) || "")); }
+  function isBR(user){ return /^(10BR|11BR|12BR)/i.test(String((user && user.class) || "")); }
+  function is11(user){ return /^11BR/i.test(String((user && user.class) || "")); }
   function is12(user){ return /^12BR/i.test(String((user && user.class) || "")); }
   function showHub(){
     var user = state.currentUser;
@@ -2273,10 +2277,11 @@
     document.getElementById("hub-greeting").textContent = "Hi " + user.name + " — " + user.class;
     var meta = document.getElementById("hub-learn-meta");
     var a12 = is12(user);
-    document.getElementById("hub-learn").setAttribute("href", a12 ? "alevel.html" : "learn.html");
-    meta.textContent = a12 ? "Start at any topic from 13 to 20" : "Start your journey at topic 1.1";
+    var a11 = is11(user);
+    document.getElementById("hub-learn").setAttribute("href", a12 ? "alevel.html" : a11 ? "as.html" : "learn.html");
+    meta.textContent = a12 ? "Start at any topic from 13 to 20" : a11 ? "AS Level topics 1 to 12, lessons unlock in order" : "Start your journey at topic 1.1";
     if(PQFirebase.getMyProgress){
-      PQFirebase.getMyProgress(user.uid, a12 ? "ilearn12" : "ilearn").then(function(rec){
+      PQFirebase.getMyProgress(user.uid, a12 ? "ilearn12" : a11 ? "ilearnAS" : "ilearn").then(function(rec){
         if(rec && typeof rec.learnDone === "number" && rec.learnDone > 0) meta.textContent = rec.learnDone + " of " + rec.learnTotal + " lessons completed" + (rec.xp ? " · " + rec.xp + " XP" : "") + " — continue your journey";
       }).catch(function(){});
     }
