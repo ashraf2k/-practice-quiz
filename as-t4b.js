@@ -66,9 +66,12 @@
       mc("Which register holds the instruction currently being decoded?", "CIR", ["PC", "MAR", "ACC"], "Current instruction register."),
       tx("Write, in register transfer notation, the step that increments the program counter. [1]", [["pc"],["+ 1","+1","[pc]"]], 2, "PC <- [PC] + 1"),
       ASA.pp("9618/13 October/November 2023 · Question 9(b)", "The four fetch steps in order: MAR<-[PC], PC<-[PC]+1, MDR<-[[MAR]], CIR<-[MDR]. Type RTN with <- for the arrow.",
-        [ ASA.fields("(b)", 4, "Complete the table of steps of the Fetch-Execute cycle (use <b>&lt;-</b> for the arrow, e.g. X &lt;- [Y]).<br><table class='ln-table'><tr><th>Step</th><th>Description</th></tr><tr><td>(1) ?</td><td>The address in PC is incremented.</td></tr><tr><td>MDR &lt;- [[MAR]]</td><td>(2) ?</td></tr><tr><td>MAR &lt;- [PC]</td><td>(3) ?</td></tr><tr><td>(4) ?</td><td>The contents of MDR are copied into CIR.</td></tr></table>",
-            [ ["(1) step", ["pc<-[pc]+1", "pc<-[pc]+1", "pc←[pc]+1", "pc <- [pc] + 1"], "text", "PC <- [PC] + 1", 1], ["(2) description", ["data", "location", "pointed", "mar", "address"], "text", "The data in the location pointed to by the MAR is copied to the MDR", 1], ["(3) description", ["contents of pc", "pc", "program counter"], "text", "The contents of PC are copied to the MAR", 1], ["(4) step", ["cir<-[mdr]", "cir←[mdr]", "cir <- [mdr]"], "text", "CIR <- [MDR]", 1] ],
-            { lead: "1 mark for each correct answer:" }) ])
+        [ ASA.fields("(b) steps", 2, "Complete the table of the Fetch-Execute cycle using register transfer notation (type <b>&lt;-</b> for the arrow, e.g. X &lt;- [Y]).<br><table class='ln-table'><tr><th>Step</th><th>Description</th></tr><tr><td>(1) ?</td><td>The address in PC is incremented.</td></tr><tr><td>MDR &lt;- [[MAR]]</td><td>The data in the location pointed to by the MAR is copied to the MDR.</td></tr><tr><td>MAR &lt;- [PC]</td><td>The contents of PC are copied to the MAR.</td></tr><tr><td>(4) ?</td><td>The contents of MDR are copied into CIR.</td></tr></table>",
+            [ ["(1) step", ["pc<-[pc]+1", "pc←[pc]+1"], "text", "PC <- [PC] + 1", 1], ["(4) step", ["cir<-[mdr]", "cir←[mdr]"], "text", "CIR <- [MDR]", 1] ],
+            { lead: "1 mark for each correct step:" }),
+          ASA.text("(b) descriptions", 2, "In the same table, the descriptions for two other steps were missing in the original question. Describe in words what <b>MDR &lt;- [[MAR]]</b> does and what <b>MAR &lt;- [PC]</b> does.",
+            [ ["MDR <- [[MAR]]: the data in the location pointed to by the MAR is copied to the MDR", ["mdr"], ["location", "address", "pointed", "contents of the memory", "memory"]], ["MAR <- [PC]: the contents of the PC are copied to the MAR", ["pc", "program counter"], ["mar", "memory address register"], ["copied", "copy", "transferred", "moved", "loaded", "contents"]] ],
+            { lead: "1 mark for each correct description:", lines: 3 }) ])
     ] },
 
   { id:"4.2.1a", code:"4.2.1", title:"Assembly language, machine code and the two-pass assembler",
