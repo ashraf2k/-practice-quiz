@@ -18,7 +18,7 @@
   add("1.3.1", "units", "Convert between units of storage", 1); add("1.3.2", "fsize", "File size calculator with working", 1);
   add("1.3.3", "rle", "Compress with run length encoding", 1); add("1.3.4", "rle", "Lossless against lossy compression", 1);
   // Topic 2: Data transmission
-  add("2.1.1a", "packet", "Split a message into packets", 1); add("2.1.1b", "switching", "Packet switching against circuit switching", 1);
+  add("2.1.1a", "packet", "Split a message into packets", 1);
   add("2.1.2a", "serpar", "Serial against parallel transmission", 1); add("2.1.2b", "duplex", "Simplex, half-duplex and full-duplex", 1);
   add("2.1.2c", "serpar", "Serial against parallel transmission", 1); add("2.1.2c", "duplex", "Simplex, half-duplex and full-duplex", 1);
   add("2.2.2a", "parity", "Build a parity byte and damage it", 1); add("2.2.2b", "echo", "Follow an echo check", 1);
