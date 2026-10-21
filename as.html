@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-NTkY1MUup6DTNqgPj0YswfDl9+P1gm6Xyq9yQDOpDdc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-6vsR7Sj/JwZpM/2VI4COu22ZvH5N0HAOIFkEAXu6YPM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>iLearn AS Level</title>
 <link rel="stylesheet" href="shared.css?v=20261019j" />
-<link rel="stylesheet" href="alevel-viz.css?v=20261021b" />
+<link rel="stylesheet" href="alevel-viz.css?v=20261021c" />
 <link rel="stylesheet" href="learn-viz-4.css?v=20261021a" />
 <link rel="stylesheet" href="as.css?v=20261021a" />
 <style>
@@ -161,7 +161,7 @@
     </div>
     <div class="ln-badges" id="badges"></div>
     <div class="ln-bars" id="bars"></div>
-    <p class="ln-muted" style="margin:14px 0 -8px"><b>Lessons unlock in order.</b> Finish each lesson to open the next one. Paper 1 and Paper 2 are separate tracks, so you can work on either at any time. Every lesson ends with a real past-paper question that is marked on the mark scheme keywords, then the full mark scheme is shown. Prepare for <b>Paper 1 (Theory Fundamentals)</b> and <b>Paper 2 (Fundamental Problem-solving and Programming)</b>.</p>
+    <p class="ln-muted" style="margin:14px 0 -8px"><b>Start with any topic you like.</b> Lessons unlock one by one inside each topic, so you do not have to finish a topic before starting the next one. Paper 1 and Paper 2 are separate tracks, so you can work on either at any time. Every lesson ends with a real past-paper question that is marked on the mark scheme keywords, then the full mark scheme is shown. Prepare for <b>Paper 1 (Theory Fundamentals)</b> and <b>Paper 2 (Fundamental Problem-solving and Programming)</b>.</p>
     <div class="ln-tabs" role="tablist" id="tabs"></div>
     <div id="topics"></div>
   </section>
@@ -206,22 +206,22 @@
 
 <script src="as-objectives.js?v=20261021a"></script>
 <script src="learn-helpers.js?v=20261021a"></script>
-<script src="as-author.js?v=20261021b"></script>
-<script src="as-t1.js?v=20261021b"></script>
-<script src="as-t2.js?v=20261021b"></script>
-<script src="as-t3.js?v=20261021b"></script>
+<script src="as-author.js?v=20261021c"></script>
+<script src="as-t1.js?v=20261021c"></script>
+<script src="as-t2.js?v=20261021c"></script>
+<script src="as-t3.js?v=20261021c"></script>
 <script src="as-t4.js?v=20261021a"></script>
-<script src="as-t4b.js?v=20261021b"></script>
-<script src="as-t5.js?v=20261021b"></script>
-<script src="as-t6.js?v=20261021b"></script>
-<script src="as-t7.js?v=20261021b"></script>
-<script src="as-t8.js?v=20261021b"></script>
+<script src="as-t4b.js?v=20261021c"></script>
+<script src="as-t5.js?v=20261021c"></script>
+<script src="as-t6.js?v=20261021c"></script>
+<script src="as-t7.js?v=20261021c"></script>
+<script src="as-t8.js?v=20261021c"></script>
 <script src="as-t9.js?v=20261021a"></script>
-<script src="as-t9b.js?v=20261021b"></script>
-<script src="as-t10.js?v=20261021b"></script>
-<script src="as-t11.js?v=20261021b"></script>
+<script src="as-t9b.js?v=20261021c"></script>
+<script src="as-t10.js?v=20261021c"></script>
+<script src="as-t11.js?v=20261021c"></script>
 <script src="as-t12.js?v=20261021a"></script>
-<script src="as-t12b.js?v=20261021b"></script>
+<script src="as-t12b.js?v=20261021c"></script>
 <script src="as-pp.js?v=20261021a"></script>
 <script src="learn-engine.js?v=20261021a"></script>
 <script src="alevel-viz.js?v=20261019o"></script>
@@ -277,17 +277,9 @@
     if(last){ var n = nextAfter(last); if(n) return n; }
     return nextInPaper(activeTab) || nextInPaper(activeTab === 1 ? 2 : 1);
   }
-    // AS: lessons unlock strictly in order. Paper 1 (topics 1-8) and Paper 2 (topics 9-12) are two separate tracks, so a student can
-  // start either paper at any time, but inside a paper each lesson opens only when the one before it is complete.
-  function isUnlocked(l){
-    var pid = paperOf(l);
-    for(var i = 0; i < LESSONS.length; i++){
-      var x = LESSONS[i]; if(paperOf(x) !== pid) continue;
-      if(x.id === l.id) return true;
-      if(!isDone(x.id)) return false;
-    }
-    return true;
-  }
+  // AS: every topic is its own track. Lessons unlock in order WITHIN a topic, but any topic (1-12, in either paper) can be started
+  // straight away without finishing the topic before it.
+  function isUnlocked(l){ if(preview || isDone(l.id)) return true; var c = nextInTopic(topicNum(l)); return !!c && c.id === l.id; }
   function codeCovered(code){ var ls = lessonsOf(code); return ls.length > 0 && ls.every(function(l){ return isDone(l.id); }); }
 
   // ---------- persistence ----------
