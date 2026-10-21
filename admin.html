@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-9DlOSSL+QwtSFntcVQKjZ0mO3vjmt4J8VjyGbdyyR1c='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-vb/z+tm+1YuQ2yztXsiHWT5WLBsbIfpxNedpVJjASiA='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -269,6 +269,8 @@
   .admin-status{ font-size: 13px; line-height: 1.5; }
 
   /* Overview tiles */
+  .sylbar{ display:inline-block; width:90px; height:9px; border-radius:6px; background:var(--line); vertical-align:middle; overflow:hidden; }
+  .sylbar i{ display:block; height:100%; }
   .lvl-sw{ display:flex; gap:6px; margin:0 0 14px; }
   .lvl-btn{ border:1px solid var(--line); background:var(--surface); color:var(--text, inherit); border-radius:999px; padding:6px 16px; font-weight:700; font-size:13px; cursor:pointer; }
   .lvl-btn.on{ background:#2563eb; color:#fff; border-color:#2563eb; }
@@ -624,6 +626,7 @@
           <select id="filter-class-isolve"><option value="">All classes</option></select>
           <input type="text" id="filter-search-isolve" placeholder="Search by name or email" />
           <button class="btn btn-secondary" id="btn-isolve-list" type="button">All attempts (list view) &rsaquo;</button>
+          <a class="btn btn-secondary" id="lnk-isolve-preview" href="exam-practice.html?preview=1">Try iSolve as a student (admin preview) &rsaquo;</a>
         </div>
         <p class="admin-status" id="isolve-status"></p>
         <div id="isolve-summary"></div>
@@ -1132,9 +1135,16 @@
     syllabusShown = syllabusStudents.filter(function(s){
       return (!cls || s.className === cls) && (!q || ((s.name || "") + " " + (s.email || "")).toLowerCase().indexOf(q) !== -1);
     });
-    SyllabusReport.renderClassList(container, syllabusShown, function(s){
-      syllabusCurrent = s;
-      SyllabusReport.renderStudent(document.getElementById("syllabus-student-body"), s);
+    ensureIlearn10();
+    var ilBy = {}; ilearnRows.forEach(function(r){ ilBy[r.s.uid] = r; });
+    var items = syllabusShown.map(function(s){
+      var iso = isolveAvgFor(s.uid, "10");
+      var r = ilBy[s.uid];
+      return { s: s, uid: s.uid, name: s.name || "(no name)", email: s.email || "", className: s.className || "", il: r ? il10pct(r) : null, iso: iso ? iso.avg : null };
+    });
+    sylTable(container, items, function(x){
+      syllabusCurrent = x.s;
+      SyllabusReport.renderStudent(document.getElementById("syllabus-student-body"), x.s);
       showTab("syllabusStudent");
       window.scrollTo(0, 0);
     });
@@ -1947,9 +1957,10 @@
   function papersForLevel(level){
     return Object.keys(EXAM_PAPERS).filter(function(k){ return (EXAM_PAPERS[k].classes || []).some(function(c){ return levelOf(c) === level; }); });
   }
-  function ratingOf(score){ return score == null ? "" : score >= 80 ? "Strong" : score >= 60 ? "Secure" : score >= 40 ? "Developing" : "Needs work"; }
+  function ratingOf(score){ return score == null ? "" : score >= 90 ? "Excellent" : score >= 80 ? "Secure" : score >= 70 ? "Improving" : score >= 50 ? "Developing" : "Struggling"; }
+  var RATING_COL = { "Excellent":"#0f766e", "Secure":"#16a34a", "Improving":"#0ea5e9", "Developing":"#f59e0b", "Struggling":"#dc2626", "In progress":"#64748b" };
   function chip(label){
-    var c = { "Strong":"#16a34a", "Secure":"#0ea5e9", "Developing":"#f59e0b", "Needs work":"#dc2626", "In progress":"#64748b" }[label] || "#94a3b8";
+    var c = RATING_COL[label] || "#94a3b8";
     var e = mk("span", null, label || "Not started"); e.style.cssText = "display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:" + c; return e;
   }
 
@@ -2052,6 +2063,7 @@
     row.appendChild(tile("Papers completed", String(nAtt), papers.length + " iSolve topics available"));
     row.appendChild(tile("Average score", nAtt ? Math.round(sumP / nAtt) + "%" : "-", "across all attempts"));
     sum.appendChild(row);
+    var pv = document.getElementById("lnk-isolve-preview"); if(pv){ pv.href = "exam-practice.html?preview=1" + (papers.length ? "&topic=" + encodeURIComponent(papers[0]) : ""); pv.textContent = "Try the " + lv + "BR iSolve topics as a student (admin preview) \u203a"; }
     var st = document.getElementById("isolve-status");
     st.textContent = !loaded ? "" : (papers.length ? "" : "No iSolve papers exist for " + lv + "BR yet.");
     var table = document.getElementById("isolve-table"), tb = table.querySelector("tbody"); tb.innerHTML = "";
@@ -2125,6 +2137,49 @@
   window.__isoBack = function(){ if(isoCur) openIsolveDetail(isoCur); else showTab("isolve"); };
   document.getElementById("btn-back-isolve").addEventListener("click", function(){ renderIsolve(); showTab("isolve"); });
 
+  // One table for every level: iLearn %, iSolve %, combined bar and rating.
+  function pctCell(v){ return mk("td", null, v == null ? "-" : Math.round(v) + "%"); }
+  function sylTable(container, items, onOpen){
+    container.textContent = "";
+    if(!items.length){ container.appendChild(mk("p", "admin-status", "No students match.")); return; }
+    items.forEach(function(x){ var p = []; if(x.il != null) p.push(x.il); if(x.iso != null) p.push(x.iso); x.comb = p.length ? Math.round(p.reduce(function(a, b){ return a + b; }, 0) / p.length) : null; });
+    items.sort(function(a, b){ return (b.comb == null ? -1 : b.comb) - (a.comb == null ? -1 : a.comb) || String(a.name).localeCompare(String(b.name)); });
+    var t = mk("table", "admin-table"), htr = mk("tr");
+    ["Student", "Class", "iLearn", "iSolve", "Combined", "Rating", ""].forEach(function(h){ htr.appendChild(mk("th", null, h)); });
+    var th = mk("thead"); th.appendChild(htr); t.appendChild(th); var tb = mk("tbody");
+    items.forEach(function(x){
+      var tr = document.createElement("tr"), lab = ratingOf(x.comb);
+      var nt = mk("td", null, x.name); if(x.email){ var em = mk("div", null, x.email); em.style.cssText = "font-size:.75rem;color:#64748b"; nt.appendChild(em); } tr.appendChild(nt);
+      tr.appendChild(mk("td", null, x.className)); tr.appendChild(pctCell(x.il)); tr.appendChild(pctCell(x.iso));
+      var tc = mk("td"); tc.style.minWidth = "150px";
+      if(x.comb != null){
+        var bar = mk("span", "sylbar"), fill = document.createElement("i"); fill.style.width = x.comb + "%"; fill.style.background = RATING_COL[lab]; bar.appendChild(fill); tc.appendChild(bar);
+        tc.appendChild(mk("span", null, " " + x.comb + "%"));
+      } else tc.appendChild(mk("span", null, "-"));
+      tr.appendChild(tc);
+      var tr2 = mk("td"); if(lab) tr2.appendChild(chip(lab)); else tr2.appendChild(mk("span", null, "No data yet")); tr.appendChild(tr2);
+      var tv = mk("td"); if(onOpen && x.open !== false) tv.appendChild(mk("span", "view-link", "Report ›")); tr.appendChild(tv);
+      if(onOpen && x.open !== false) tr.addEventListener("click", function(){ onOpen(x); });
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); var sc = mk("div", "table-scroll"); sc.appendChild(t);
+    var key = mk("p", "admin-status", "iLearn needs at least 3 completed lessons (or a topic test / past-paper marks) before it counts. Combined = average of iLearn and iSolve (whichever exist). Struggling under 50% · Developing 50-69% · Improving 70-79% · Secure 80-89% · Excellent 90-100%.");
+    container.appendChild(sc); container.appendChild(key);
+  }
+  function il10pct(r){
+    var E = window.ILearnEngine; if(!E || !r.st) return null; var L = r.st.learn || {}, d = 0, m = 0;
+    E.LESSONS.forEach(function(l){ var x = L[l.id]; if(x && x.d){ d++; if(x.f) m++; } });
+    return d >= 3 ? Math.round(100 * m / d) : null;
+  }
+  var sylLoading10 = false;
+  function ensureIlearn10(){
+    if(ilearnRows.length || sylLoading10 || !loaded || !window.ILearnEngine || typeof PQFirebase.getMyProgress !== "function") return;
+    sylLoading10 = true;
+    Promise.all(rosterFor("10").map(function(s){
+      return PQFirebase.getMyProgress(s.uid, "ilearn").catch(function(){ return null; }).then(function(rec){ return { s: s, st: window.ILearnEngine.mergeState(null, rec), lastActive: (rec && rec.lastActive) || null }; });
+    })).then(function(rows){ if(!ilearnRows.length) ilearnRows = rows; sylLoading10 = false; renderSyllabus(); });
+  }
+
   // ---- 11BR / 12BR syllabus report -------------------------------
   var sylCur = null;
   function topicStats(row, level){
@@ -2167,21 +2222,13 @@
       return { r: r, ts: ts, arr: arr, overall: overall, weak: weak, cov: tot ? Math.round(100 * d / tot) : 0, iso: isolveAvgFor(r.s.uid, lv) };
     }).sort(function(a, b){ return (b.overall == null ? -1 : b.overall) - (a.overall == null ? -1 : a.overall) || b.cov - a.cov; });
     if(!shown.length){ list.appendChild(mk("p", "admin-status", rows.length ? "No students match." : (loaded ? "Loading progress..." : ""))); return; }
-    var t = mk("table", "admin-table"), htr = mk("tr");
-    ["Student", "Class", "Syllabus covered", "Overall rating", "iSolve avg", "Weakest topic", ""].forEach(function(h){ htr.appendChild(mk("th", null, h)); });
-    var th = mk("thead"); th.appendChild(htr); t.appendChild(th); var tb = mk("tbody");
-    shown.forEach(function(x){
-      var tr = document.createElement("tr");
-      var nt = mk("td", null, x.r.s.name); if(x.r.s.email){ var em = mk("div", null, x.r.s.email); em.style.cssText = "font-size:.75rem;color:#64748b"; nt.appendChild(em); } tr.appendChild(nt);
-      tr.appendChild(mk("td", null, x.r.s.className)); tr.appendChild(mk("td", null, x.cov + "%"));
-      var to = mk("td"); to.appendChild(chip(x.overall == null && x.cov > 0 ? "In progress" : ratingOf(x.overall))); if(x.overall != null) to.appendChild(mk("span", null, "  " + x.overall + "%")); tr.appendChild(to);
-      tr.appendChild(mk("td", null, x.iso ? x.iso.avg + "% (" + x.iso.n + ")" : "-"));
-      tr.appendChild(mk("td", null, x.weak ? "T" + x.weak.topic + " " + (TOPIC_NAMES[x.weak.topic] || "") + " (" + x.weak.score + "%)" : "-"));
-      var tv = mk("td"); tv.appendChild(mk("span", "view-link", "Report ›")); tr.appendChild(tv);
-      tr.addEventListener("click", function(){ openSyl9618Student(x); });
-      tb.appendChild(tr);
+    var items = shown.map(function(x){
+      var d = 0, m = 0; x.arr.forEach(function(o){ d += o.done; m += o.mastered; });
+      x.name = x.r.s.name; x.email = x.r.s.email; x.className = x.r.s.className;
+      x.il = x.overall != null ? x.overall : (d >= 3 ? Math.round(100 * m / d) : null); x.iso = x.iso ? x.iso.avg : null; x.isoObj = isolveAvgFor(x.r.s.uid, lv);
+      return x;
     });
-    t.appendChild(tb); var sc2 = mk("div", "table-scroll"); sc2.appendChild(t); list.appendChild(sc2);
+    sylTable(list, items, function(x){ x.iso = x.isoObj; openSyl9618Student(x); });
   }
   function openSyl9618Student(x){
     sylCur = x; var lv = LV.syllabus, body = document.getElementById("syl9618-student-body"); body.textContent = "";

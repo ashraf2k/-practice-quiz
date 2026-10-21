@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-Ser+zMQooYIk27WDiVIfYhHdU2OnSNP7SXHa+5wYEH8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-o1tTsFkrO4T1sQj20vxngpi6vzTWfRXntKWw2+zKVCw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -355,8 +355,9 @@
   // Fire-and-forget checkpoint, called every time the student moves past
   // a question (see the btnNext handler) — lets them close the tab and
   // resume later, same device or a different one, from exactly here.
+  var PREVIEW = false; // admin trial view: nothing is read from or written to a student's records
   function saveExamProgressSnapshot(){
-    if(!state.paperKey || !state.currentUser) return;
+    if(PREVIEW || !state.paperKey || !state.currentUser) return;
     PQFirebase.saveExamProgress(state.currentUser.uid, state.paperKey, {
       pool: state.pool,
       order: state.order,
@@ -1118,6 +1119,7 @@
     });
     var minutesTaken = state.startedAt ? Math.min(1440, Math.max(1, Math.round((Date.now() - state.startedAt) / 60000))) : null;
 
+    if(PREVIEW){ saveStatus.textContent = "Admin preview: this result was not saved."; return; }
     saveStatus.textContent = "Saving your results…";
     PQFirebase.recordExamAttempt(state.currentUser.uid, state.paperKey, {
       name: state.currentUser.name,
@@ -1198,6 +1200,7 @@
   btnConfirmRestart.addEventListener("click", function(){
     restartConfirm.classList.add("hidden");
     btnConfirmRestart.disabled = true;
+    if(PREVIEW){ btnConfirmRestart.disabled = false; renderResumePrompt(null); startAttempt(); return; }
     PQFirebase.deleteExamProgress(state.currentUser.uid, state.paperKey).then(function(){
       btnConfirmRestart.disabled = false;
       renderResumePrompt(null);
@@ -1268,9 +1271,10 @@
   // ============================================================
   // Boot: auth + pick the paper from ?topic= (or the class's only one)
   // ============================================================
-  function initForUser(user){
+  function initForUser(user, previewAll){
     state.currentUser = user;
-    var choices = examPaperChoicesForClass(user.class);
+    PREVIEW = !!previewAll;
+    var choices = previewAll ? Object.keys(EXAM_PAPERS).map(function(k){ return { key: k, label: EXAM_PAPERS[k].title }; }) : examPaperChoicesForClass(user.class);
 
     if(choices.length === 0){
       document.getElementById("loading-status").textContent = "There are no topical exam-question papers set up for your class yet.";
@@ -1309,7 +1313,8 @@
     }
 
     setHeader(state.paper.title, state.paper.subtitle);
-    startGreeting.textContent = "Hi " + user.name + " — " + user.class + ".";
+    startGreeting.textContent = PREVIEW ? "Admin preview — nothing you do here is saved." : "Hi " + user.name + " — " + user.class + ".";
+    if(PREVIEW) buildPreviewPicker(match.key);
     renderPaperSummary(state.paper);
 
     // "Practice again" (on the results screen) only ever makes sense for
@@ -1327,6 +1332,7 @@
       ? "Automated check — your mark comes from the same key-term check used everywhere else, but the official mark scheme itself isn't shown during this single-attempt exam. Make your answer as complete as you can before checking it."
       : "Automated check — it looks for the key terms and values the mark scheme asks for. Always compare with the official mark scheme below and adjust the ticks yourself if it missed something.";
 
+    if(PREVIEW){ renderLastResult(null); renderResumePrompt(null); btnStart.classList.remove("hidden"); btnStart.textContent = "Start exam practice"; showScreen("start"); return; }
     Promise.all([
       PQFirebase.getMyExamAttempt(user.uid, state.paperKey),
       PQFirebase.getMyExamProgress(user.uid, state.paperKey)
@@ -1359,6 +1365,26 @@
     showScreen("start");
   }
 
+  // Admin trial view: pick any iSolve topic for any class level (10BR / 11BR / 12BR / other).
+  function buildPreviewPicker(currentKey){
+    var old = document.getElementById("preview-picker"); if(old) old.parentNode.removeChild(old);
+    var box = document.createElement("div"); box.id = "preview-picker"; box.className = "cohort-note";
+    box.style.cssText = "margin:10px 0;padding:10px 12px;border:1px dashed #94a3b8;border-radius:10px";
+    var lab = document.createElement("strong"); lab.textContent = "Admin trial view of iSolve. "; box.appendChild(lab);
+    var sel = document.createElement("select"); sel.setAttribute("aria-label", "Choose an iSolve topic");
+    var groups = {};
+    Object.keys(EXAM_PAPERS).forEach(function(k){ var c = (EXAM_PAPERS[k].classes || []).join(", ") || "Other"; (groups[c] = groups[c] || []).push(k); });
+    Object.keys(groups).sort().forEach(function(c){
+      var og = document.createElement("optgroup"); og.label = c;
+      groups[c].forEach(function(k){ var o = document.createElement("option"); o.value = k; o.textContent = EXAM_PAPERS[k].title; if(k === currentKey) o.selected = true; og.appendChild(o); });
+      sel.appendChild(og);
+    });
+    sel.addEventListener("change", function(){ window.location.href = "exam-practice.html?preview=1&topic=" + encodeURIComponent(sel.value); });
+    box.appendChild(sel);
+    var back = document.createElement("a"); back.className = "link-btn"; back.href = "admin.html"; back.textContent = " ← Back to admin"; back.style.marginLeft = "10px"; box.appendChild(back);
+    var anchor = document.getElementById("paper-summary"); anchor.parentNode.insertBefore(box, anchor);
+  }
+
   PQFirebase.onAuthChange(function(user){
     if(!user){
       // Not signed in here -- quiz.html owns the login form, and the
@@ -1367,7 +1393,13 @@
       window.location.href = "quiz.html";
       return;
     }
-    initForUser(user);
+    var wantPreview = /[?&]preview=1/.test(window.location.search);
+    if(wantPreview || examPaperChoicesForClass(user.class).length === 0){
+      var chk = PQFirebase.checkIsAdmin ? PQFirebase.checkIsAdmin(user.uid) : Promise.resolve(false);
+      chk.then(function(adm){ if(adm) initForUser(user, true); else initForUser(user, false); });
+      return;
+    }
+    initForUser(user, false);
   });
 
 })();
