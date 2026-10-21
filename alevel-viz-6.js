@@ -158,7 +158,7 @@
       var g = G[cur]; var wrap = el("div", "sdlist");
       g.diagrams.forEach(function(d){ var c = el("div", "sdcard"); var s = diagram(d[0], d[1]); svgs[d[0]] = s; c.appendChild(s); wrap.appendChild(c); });
       host.appendChild(wrap);
-      bnfBox.innerHTML = "<b>The same grammar in BNF</b><pre class='ln-pre' style='margin:6px 0 0'>" + g.bnf.map(esc).join("\n") + "</pre>";
+      bnfBox.innerHTML = "<details><summary><b>Peek: the same grammar in BNF</b> (next lesson)</summary><pre class='ln-pre' style='margin:6px 0 0'>" + g.bnf.map(esc).join("\n") + "</pre></details>";
     }
     function strShow(upto, bad){
       var s = inp.value.trim(); var h = '<span class="sdlab">Input: </span>';
@@ -216,14 +216,14 @@
   /* ================= the key: how to read a diagram, and the BNF equivalent ================= */
   V.reg("synkey", function(box){
     var R = [
-      ["Sequence", "Items are visited <b>in order</b>, left to right, following the arrows.", seq(N("letter"), N("digit")), "<variable> ::= <letter><digit>", "variable"],
-      ["Alternatives", "The paths are <b>choices</b>: take exactly one. Ovals hold the exact characters allowed.", alt(T("A"), T("B"), T("C")), "<letter> ::= A | B | C", "letter"],
-      ["Repetition", "An arrow that <b>loops back</b> lets the item be repeated any number of times (at least once here). BNF has no loop, so it uses <b>recursion</b>: the item is defined using itself.", loop(N("digit")), "<integer> ::= <digit> | <integer><digit>", "integer"],
-      ["Optional part", "A path that <b>skips</b> the item makes it optional. In BNF you write both versions as alternatives.", seq(N("letter"), opt(N("digit"))), "<code> ::= <letter> | <letter><digit>", "code"],
-      ["Repeat, zero or more", "A skip path <b>and</b> a loop: the item can be missing, or appear again and again.", seq(N("letter"), zom(N("digit"))), "<name> ::= <letter> | <name><digit>", "name"]
+      ["Sequence", "Items are visited <b>in order</b>, left to right, following the arrows.", seq(N("letter"), N("digit")), "<variable> ::= <letter><digit>", "variable", "B3 is valid; 3B is not."],
+      ["Alternatives", "The paths are <b>choices</b>: take exactly one. Ovals hold the exact characters allowed.", alt(T("A"), T("B"), T("C")), "<letter> ::= A | B | C", "letter", "A, B or C. Only one of them."],
+      ["Repetition", "An arrow that <b>loops back</b> lets the item be repeated any number of times (at least once here). BNF has no loop, so it uses <b>recursion</b>: the item is defined using itself.", loop(N("digit")), "<integer> ::= <digit> | <integer><digit>", "integer", "7, 42 and 1032 all work."],
+      ["Optional part", "A path that <b>skips</b> the item makes it optional. In BNF you write both versions as alternatives.", seq(N("letter"), opt(N("digit"))), "<code> ::= <letter> | <letter><digit>", "code", "A and A3 both work."],
+      ["Repeat, zero or more", "A skip path <b>and</b> a loop: the item can be missing, or appear again and again.", seq(N("letter"), zom(N("digit"))), "<name> ::= <letter> | <name><digit>", "name", "A, A7 and A777 all work."]
     ];
     var wrap = el("div", "synk");
-    wrap.appendChild(el("div", "vnote", "A syntax diagram is read like a road map: start at the dot, follow the arrows, and end at the exit arrow. Each idea below is shown as a diagram and as the same rule written in BNF."));
+    wrap.appendChild(el("div", "vnote", "Think of a syntax diagram as a train-track map: start at the dot, follow the arrows, and you must reach the exit. Here are the five track pieces you need."));
     var key = el("div", "sdcard sdkey"); key.innerHTML = "<b>Shapes</b>";
     var ks = V.svg(520, 52, '<g class="sdl sdterm"><rect class="sdt" x="10" y="9" width="40" height="34" rx="17"/><text class="sdx" x="30" y="30.5">A</text></g><text class="sdkt" x="58" y="31">Oval: a character typed exactly as shown (terminal)</text>');
     key.appendChild(ks);
@@ -231,7 +231,7 @@
     key.appendChild(ks2); wrap.appendChild(key);
     R.forEach(function(r){
       var c = el("div", "sdcard synr"), left = el("div"), right = el("div");
-      left.appendChild(diagram(r[4], r[2])); right.innerHTML = "<b>" + r[0] + "</b><p style='margin:4px 0 6px'>" + r[1] + "</p><div class='vnote' style='margin:2px 0'>In BNF:</div><pre class='ln-pre' style='margin:0'>" + esc(r[3]) + "</pre>";
+      left.appendChild(diagram(r[4], r[2])); right.innerHTML = "<b>" + r[0] + "</b><p style='margin:4px 0 6px'>" + r[1] + "</p><div class='vnote' style='margin:4px 0 0'>Example: " + r[5] + "</div>";
       c.appendChild(left); c.appendChild(right); wrap.appendChild(c);
     });
     box.appendChild(wrap);
@@ -342,36 +342,108 @@
     load("variable");
   });
 
-  /* ================= quiz ================= */
+
+  /* ================= quizzes (one for diagrams, one for BNF) ================= */
+  var lt = function(){ return ["letter", alt(T("A"), T("B"), T("C"))]; }, dg = function(){ return ["digit", alt(T("1"), T("2"), T("3"))]; };
+  function mkQuiz(box, intro, Q, hi){
+    var qi = 0, score = 0, done = false, view = el("div");
+    function show(){
+      view.innerHTML = ""; done = false;
+      if(qi >= Q.length){ var st = score >= Q.length - 1 ? "⭐⭐⭐ Superb!" : score >= Q.length * 0.6 ? "⭐⭐ Good work!" : "⭐ Keep going, then try again."; view.appendChild(el("div", "vres", "<b>Finished: " + score + " out of " + Q.length + ".</b> " + st + " " + hi)); view.appendChild(row(btn("Restart", function(){ qi = 0; score = 0; show(); }))); return; }
+      var q = Q[qi], c = el("div", "vres"); c.appendChild(el("div", "", "<b>Question " + (qi + 1) + " of " + Q.length + "</b> (score " + score + ")")); c.appendChild(el("div", "qt", esc(q.q)));
+      if(q.pre){ var pr = el("pre", "ln-pre"); pr.textContent = q.pre.join("\n"); c.appendChild(pr); }
+      if(q.dg){ var l = el("div", "sdlist"); q.dg.forEach(function(d){ var w = el("div", "sdcard"); w.appendChild(diagram(d[0], d[1])); l.appendChild(w); }); c.appendChild(l); }
+      var opts = el("div", q.opt === "diag" ? "sdopts" : "vrow"), fb = el("div", "qf");
+      function pick(i, ansIdx){
+        var A = ansIdx === undefined ? q.a : ansIdx; if(done) return; done = true; var ok = i === A; if(ok) score++;
+        Array.prototype.forEach.call(opts.children, function(x, j){ x.disabled = true; if(j === A) x.className += " sdright"; else if(j === i) x.className += " sdwrong"; });
+        fb.innerHTML = (ok ? '<span class="vok">✓ Correct.</span> ' : '<span class="vbad">✗ Not quite.</span> ') + q.w; var nx = btn(qi + 1 >= Q.length ? "See my score" : "Next ›", function(){ qi++; show(); }, "p"); fb.appendChild(el("div", "vrow")).appendChild(nx); nx.focus();
+      }
+      if(q.opt === "diag"){ q.ds.forEach(function(d, i){ var b = el("button", "vb sdopt"); b.type = "button"; b.appendChild(diagram("", d)); b.setAttribute("aria-label", "Diagram " + String.fromCharCode(65 + i)); b.appendChild(el("div", "sdoptl", "Diagram " + String.fromCharCode(65 + i))); b.addEventListener("click", function(){ pick(i); }); opts.appendChild(b); }); }
+      else {
+        var L = (q.opts || q.bnf || q.txt), ord = L.map(function(_, i){ return i; });
+        for(var z = ord.length - 1; z > 0; z--){ var r = (qi * 7 + z * 5 + score * 3 + 1) % (z + 1), tmp = ord[z]; ord[z] = ord[r]; ord[r] = tmp; }
+        var ans = ord.indexOf(q.a);
+        ord.forEach(function(o, i){ var b = btn(L[o], function(){ pick(i, ans); }); if(q.bnf) b.className += " vmono"; opts.appendChild(b); });
+      }
+      c.appendChild(opts); c.appendChild(fb); view.appendChild(c);
+    }
+    box.appendChild(el("div", "vnote", intro)); box.appendChild(view); show();
+  }
   V.reg("synquiz", function(box){
-    function dgs(list){ return list.map(function(d){ return [d[0], d[1]]; }); }
-    var lt = function(){ return ["letter", alt(T("A"), T("B"), T("C"))]; }, dg = function(){ return ["digit", alt(T("1"), T("2"), T("3"))]; };
     var Q = [
       { q: "Using the syntax diagrams, which of these is a valid <variable>?", dg: [["variable", seq(N("letter"), N("digit"))], lt(), dg()], opts: ["3B", "B3", "CC", "D2"], a: 1, w: "A variable is one letter (A, B or C) followed by one digit (1, 2 or 3). B3 follows the arrows: letter B, then digit 3." },
       { q: "Using the syntax diagrams, which of these statements is valid?", dg: [["assignment", seq(N("variable"), T("="), N("variable"), N("operator"), N("variable"))], ["variable", seq(N("letter"), N("digit"))], lt(), dg(), ["operator", alt(T("+"), T("-"), T("*"), T("/"))]], opts: ["A1:=B2+C3", "A1=B2+C3+A2", "A1=B2+C3", "A1=B2%C3"], a: 2, w: "The diagram gives variable, =, variable, operator, variable. := is not allowed, a fourth item is not allowed, and % is not an operator." },
       { q: "This diagram loops back. Which string can NOT be produced?", dg: [["name", seq(N("letter"), zom(alt(N("letter"), N("digit"))))], lt(), dg()], opts: ["A", "AB12", "C3C", "1AB"], a: 3, w: "The path must start with a letter. 1AB starts with a digit, so it cannot be produced. After the first letter, any mix of letters and digits is allowed." },
       { q: "This diagram has an optional digit. Which string is NOT accepted?", dg: [["code", seq(N("letter"), opt(N("digit")))], lt(), dg()], opts: ["A", "B2", "C", "AB"], a: 3, w: "A letter is needed, then the digit can be skipped or used once. AB has a second letter, which the diagram does not allow." },
-      { q: "Which BNF matches this syntax diagram?", dg: [["integer", loop(N("digit"))], ["digit", alt(T("0"), T("1"), T("2"))]], bnf: ["<integer> ::= <digit> | <integer><digit>", "<integer> ::= <digit><digit>", "<integer> ::= <integer>", "<integer> ::= <digit> & <digit>"], a: 0, w: "The loop-back arrow means repetition. BNF shows repetition with recursion: an integer is a digit, or an integer followed by a digit." },
-      { q: "Which syntax diagram matches this BNF?  <code> ::= <letter><digit>", opt: "diag", ds: [seq(N("letter"), N("digit")), alt(N("letter"), N("digit")), seq(N("digit"), N("letter"))], a: 0, w: "Two items side by side in BNF (no |) are a sequence: a letter, then a digit, in that order." },
-      { q: "Which syntax diagram matches this BNF?  <sign> ::= + | -", opt: "diag", ds: [seq(T("+"), T("-")), alt(T("+"), T("-")), loop(alt(T("+"), T("-")))], a: 1, w: "The | symbol means a choice, so the diagram has two alternative paths: one with +, one with -." },
+      { q: "How many digits can the <integer> diagram below produce?", dg: [["integer", loop(N("digit"))], ["digit", alt(T("0"), T("1"), T("2"))]], opts: ["Exactly one", "Exactly two", "One or more (the loop repeats)", "None"], a: 2, w: "The loop-back arrow lets the digit be repeated, so at least one digit, with no upper limit." },
+      { q: "In this diagram, which path through <letter> allows the character B?", dg: [["letter", alt(T("A"), T("B"), T("C"))]], opts: ["The top path", "The middle path", "The bottom path", "None: B is not allowed"], a: 1, w: "The three ovals are alternatives in the order A, B, C from top to bottom. B is the middle path." },
+      { q: "Which syntax diagram allows a letter OR a digit, but not both?", opt: "diag", ds: [seq(N("letter"), N("digit")), alt(N("letter"), N("digit")), loop(N("digit"))], a: 1, w: "Paths side by side are alternatives: exactly one is taken. Items in a line (diagram A) would need both." },
       { q: "In a syntax diagram, what does an arrow that loops back mean?", txt: ["Repetition: the item can be used again", "The item is optional", "The diagram contains an error", "The end of the diagram"], a: 0, w: "A loop-back arrow lets the path go round again, so the item can be repeated." }
     ];
-    var qi = 0, score = 0, done = false, view = el("div");
+    mkQuiz(box, "Eight questions in the style of the exam. Read each diagram carefully, character by character.", Q, "You can read syntax diagrams. Next up: BNF.");
+  });
+  V.reg("bnfquiz", function(box){
+    var Q = [
+      { q: "What does ::= mean in BNF?", txt: ["is defined as", "is not equal to", "repeat", "end of the program"], a: 0, w: "The left side is defined as whatever is on the right side." },
+      { q: "Which BNF rule says a <sign> is a plus or a minus?", bnf: ["<sign> ::= + | -", "<sign> ::= +-", "<sign> ::= + & -", "<sign> ::= <+><->"], a: 0, w: "The | symbol means 'or'. Without it, +- would mean a plus followed by a minus." },
+      { q: "Using these rules, which string is valid for <variable>?", pre: ["<variable> ::= <letter><digit>", "<letter> ::= A | B | C", "<digit> ::= 1 | 2 | 3"], opts: ["1A", "AA", "C2", "D1"], a: 2, w: "A letter from A, B, C then a digit from 1, 2, 3. C2 fits; D is not a letter in the rule." },
+      { q: "Which rule makes <integer> any number of digits (one or more)?", bnf: ["<integer> ::= <digit> | <integer><digit>", "<integer> ::= <digit><digit>", "<integer> ::= <integer>", "<integer> ::= <digit> | <digit>"], a: 0, w: "A recursive rule: an integer is a digit, or an integer followed by another digit. This is how BNF repeats." },
+      { q: "Why can the rule <integer> ::= <digit> | <integer><digit> produce 472?", txt: ["4 is an integer, 47 is that integer plus digit 7, 472 is that plus digit 2", "Because 472 has three digits, which the rule counts", "Because the rule has a loop symbol", "It cannot produce 472"], a: 0, w: "Each use of the second alternative adds one more digit on the right." },
+      { q: "A <code> is a letter followed by an optional digit. Which rule is correct?", pre: ["(letter is A | B | C and digit is 0 | 1 | 2)"], bnf: ["<code> ::= <letter> | <letter><digit>", "<code> ::= <letter><digit>", "<code> ::= <letter> & <digit>", "<code> ::= <digit> | <letter>"], a: 0, w: "Write the rule both without and with the optional item, separated by |." },
+      { q: "Which string is NOT valid? <word> ::= <letter> | <word><letter>, <letter> ::= A | B", opts: ["A", "ABBA", "AB1", "B"], a: 2, w: "1 is not a <letter>. The recursive rule only repeats letters." },
+      { q: "Which is a terminal (written exactly as it appears)?", txt: ["+", "<digit>", "<integer>", "<letter>"], a: 0, w: "Anything inside < > is another item defined by a rule. A plain character like + is a terminal." }
+    ];
+    mkQuiz(box, "Eight BNF questions. Read the rules carefully and check one character at a time.", Q, "You can read BNF. Try writing your own rules on paper next.");
+  });
+
+  /* ================= hunt: pick the valid strings (diagram or BNF view) ================= */
+  var HUNT = {
+    variable: ["A1", "B3", "CC", "1A", "Z2", "A4", "C2", "B"],
+    optional: ["A", "AB", "A3", "AB3", "ABC", "3", "B2", "ACD3"],
+    assign: ["A1=B2+C3", "C3=A1*B2", "A1:=B2+C3", "A1=B2+C3+A2", "B2=A1/C1", "A1=B2%C3", "A1B2+C3", "C1=C2-A3"],
+    integer: ["1032", "42", "4a", "5", "0", "31", "-3", "1.5"],
+    ident: ["A", "A1B2", "CC", "1A", "B33", "C3C", "AB-", "3"]
+  };
+  function mkHunt(box, mode, rounds){
+    var ri = 0, sel = {}, checked = false, total = 0, got = 0, view = el("div");
     function show(){
-      view.innerHTML = ""; done = false;
-      if(qi >= Q.length){ view.appendChild(el("div", "vres", "<b>Finished: " + score + " out of " + Q.length + ".</b> " + (score >= 7 ? "Excellent! You can read and write syntax diagrams and BNF." : "Go back through the animations above and try again."))); view.appendChild(row(btn("Restart", function(){ qi = 0; score = 0; show(); }))); return; }
-      var q = Q[qi], c = el("div", "vres"); c.appendChild(el("div", "", "<b>Question " + (qi + 1) + " of " + Q.length + "</b> (score " + score + ")")); c.appendChild(el("div", "qt", esc(q.q)));
-      if(q.dg){ var l = el("div", "sdlist"); q.dg.forEach(function(d){ var w = el("div", "sdcard"); w.appendChild(diagram(d[0], d[1])); l.appendChild(w); }); c.appendChild(l); }
-      var opts = el("div", q.opt === "diag" ? "sdopts" : "vrow"), fb = el("div", "qf");
-      function pick(i, b){
-        if(done) return; done = true; var ok = i === q.a; if(ok) score++;
-        Array.prototype.forEach.call(opts.children, function(x, j){ x.disabled = true; if(j === q.a) x.className += " sdright"; else if(j === i) x.className += " sdwrong"; });
-        fb.innerHTML = (ok ? '<span class="vok">✓ Correct.</span> ' : '<span class="vbad">✗ Not quite.</span> ') + q.w; var nx = btn(qi + 1 >= Q.length ? "See my score" : "Next ›", function(){ qi++; show(); }, "p"); fb.appendChild(el("div", "vrow")).appendChild(nx); nx.focus();
-      }
-      if(q.opt === "diag"){ q.ds.forEach(function(d, i){ var b = el("button", "vb sdopt"); b.type = "button"; b.appendChild(diagram("", d)); b.setAttribute("aria-label", "Diagram " + String.fromCharCode(65 + i)); b.appendChild(el("div", "sdoptl", "Diagram " + String.fromCharCode(65 + i))); b.addEventListener("click", function(){ pick(i, b); }); opts.appendChild(b); }); }
-      else (q.opts || q.bnf || q.txt).forEach(function(t, i){ var b = btn(t, function(){ pick(i, b); }); if(q.bnf) b.className += " vmono"; opts.appendChild(b); });
-      c.appendChild(opts); c.appendChild(fb); view.appendChild(c);
+      view.innerHTML = ""; checked = false; sel = {};
+      if(ri >= rounds.length){ view.appendChild(el("div", "vres", "<b>Hunt complete: " + got + " of " + total + " strings judged correctly.</b> " + (got >= total - 2 ? "⭐⭐⭐ Sharp eyes!" : got >= total * 0.7 ? "⭐⭐ Nice work." : "⭐ Re-read the rules and try again."))); view.appendChild(row(btn("Play again", function(){ ri = 0; got = 0; total = 0; show(); }))); return; }
+      var k = rounds[ri], g = G[k], strs = HUNT[k];
+      view.appendChild(el("div", "", "<b>Round " + (ri + 1) + " of " + rounds.length + ":</b> tap every string that is <b>valid</b>, then press Check."));
+      if(mode === "diagram"){ var l = el("div", "sdlist"); g.diagrams.forEach(function(d){ var w = el("div", "sdcard"); w.appendChild(diagram(d[0], d[1])); l.appendChild(w); }); view.appendChild(l); }
+      else { var pr = el("pre", "ln-pre"); pr.textContent = g.bnf.join("\n"); view.appendChild(pr); }
+      var grid = el("div", "hgrid"), fb = el("div", "vlog"), tiles = [];
+      strs.forEach(function(s, i){ var b = el("button", "vb hchip vmono"); b.type = "button"; b.textContent = s; b.setAttribute("aria-pressed", "false"); b.addEventListener("click", function(){ if(checked) return; sel[i] = !sel[i]; b.setAttribute("aria-pressed", !!sel[i]); b.className = "vb hchip vmono" + (sel[i] ? " on" : ""); }); tiles.push(b); grid.appendChild(b); });
+      var chk = btn("Check", function(){
+        if(checked) return; checked = true; var good = 0, why = [];
+        strs.forEach(function(s, i){ var r = walk(g, s), ok = !!sel[i] === r.ok; if(ok) good++; tiles[i].disabled = true; tiles[i].className = "vb hchip vmono " + (ok ? "sdright" : "sdwrong");
+          if(!ok || !r.ok) why.push("<b>" + esc(s) + "</b> " + (r.ok ? "is <span class='vok'>valid</span>." : "is <span class='vbad'>invalid</span>: " + (r.pos < s.length ? "no rule allows <b>" + esc(s.charAt(r.pos)) + "</b> after " + (r.pos ? "<b>" + esc(s.substr(0, r.pos)) + "</b>" : "the start") + "." : "it stops too early.")) + (!ok ? " (you chose " + (sel[i] ? "valid" : "invalid") + ")" : "")); });
+        got += good; total += strs.length;
+        fb.innerHTML = "<b>" + good + " of " + strs.length + " correct.</b><br>" + why.join("<br>"); fb.appendChild(el("div", "vrow")).appendChild(btn(ri + 1 >= rounds.length ? "Finish" : "Next round ›", function(){ ri++; show(); }, "p"));
+      }, "p");
+      view.appendChild(grid); view.appendChild(row(chk)); view.appendChild(fb);
     }
-    box.appendChild(el("div", "vnote", "Eight questions in the style of the exam: read a diagram, then match diagrams and BNF.")); box.appendChild(view); show();
+    box.appendChild(el("div", "vnote", mode === "diagram" ? "Game: use the diagrams to decide which strings are valid. Check every character in order." : "Game: use the BNF rules to decide which strings are valid. Check every character in order.")); box.appendChild(view); show();
+  }
+  V.reg("synhunt", function(box){ mkHunt(box, "diagram", ["variable", "optional", "assign"]); });
+  V.reg("bnfhunt", function(box){ mkHunt(box, "bnf", ["variable", "integer", "ident"]); });
+
+  /* ================= BNF anatomy: click each part of a rule ================= */
+  V.reg("bnfparts", function(box){
+    var R = [
+      { name: "Sequence", parts: [["<variable>", "Name of the item being defined. The angle brackets < > show it is a named item."], ["::=", "'Is defined as'. Left side is the name, right side is what it can be."], ["<letter>", "Another named item (defined by its own rule). It must come first."], ["<digit>", "Written right after the letter with no | between: a letter, <b>then</b> a digit."]] },
+      { name: "Choice", parts: [["<letter>", "The item being defined."], ["::=", "Is defined as"], ["A", "A terminal: the character A exactly as written. No < > around it."], ["|", "'Or'. A, B or C: choose <b>one</b>."], ["B", "Another alternative."], ["C", "A third alternative."]] },
+      { name: "Recursion", parts: [["<integer>", "The item being defined... and it will appear on the right side too!"], ["::=", "Is defined as"], ["<digit>", "First choice: an integer can be just one digit. This is where repeating stops (the <b>base case</b>)."], ["|", "'Or'"], ["<integer>", "Second choice starts with <b>integer</b> itself: the rule uses itself (<b>recursion</b>)."], ["<digit>", "...then one more digit. Each use adds a digit, so 4, 47, 472, ..."]] }
+    ];
+    var tabs = row(), line = el("div", "bdform"), info = el("div", "vlog"), cur = 0;
+    function show(k, hi){
+      cur = k; Array.prototype.forEach.call(tabs.children, function(b, i){ b.className = "vb" + (i === k ? " on" : ""); b.setAttribute("aria-pressed", i === k); });
+      line.innerHTML = ""; R[k].parts.forEach(function(p, i){ var isNT = /^</.test(p[0]), b = el("button", "bdp" + (isNT ? " bdnt" : " bdt") + (i === hi ? " bdnew" : "")); b.type = "button"; b.textContent = p[0]; b.addEventListener("click", function(){ show(k, i); }); line.appendChild(b); });
+      info.innerHTML = hi === undefined ? "Tap any part of the rule to find out what it does." : "<b>" + esc(R[k].parts[hi][0]) + ":</b> " + R[k].parts[hi][1];
+    }
+    R.forEach(function(r, i){ tabs.appendChild(btn(r.name, function(){ show(i); })); });
+    box.appendChild(el("div", "vnote", "A BNF rule has a name on the left, ::= in the middle, and what it can be on the right. Tap each piece to see what it does.")); box.appendChild(tabs); box.appendChild(line); box.appendChild(info); show(0);
   });
 })(typeof window !== "undefined" ? window : this);

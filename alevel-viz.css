@@ -143,7 +143,7 @@
 .vsvg .bdn.tm rect{fill:var(--correct-bg);stroke:var(--correct)}
 .vsvg .bdn text{font:600 13px ui-monospace,Menlo,Consolas,monospace;fill:var(--ink)}
 .vsvg .bdl{stroke:var(--ink);stroke-width:1.6}
-.vsvg .hid{opacity:0}
+.vsvg .hid{opacity:0;visibility:hidden}
 .vsvg .fresh rect{stroke-width:3}
 .sdopts{display:flex;flex-direction:column;gap:8px;margin:8px 0}
 .sdopt{text-align:left;overflow-x:auto;max-width:100%}
@@ -152,3 +152,7 @@
 .sdwrong{background:var(--incorrect-bg)!important;border-color:var(--incorrect)!important}
 .synr pre,.sdcard pre{white-space:pre-wrap;word-break:break-word}
 .vsvg .sdl rect,.vsvg .sdl text,.vsvg .sdp,.vsvg .sda{transition:none!important}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:10px 0}
+.hchip{font-size:15px;padding:9px 6px;text-align:center}
+.bdp{font:600 16px ui-monospace,Menlo,Consolas,monospace;cursor:pointer;color:var(--ink)}
+.bdp.bdnt{color:var(--accent-dark)}

@@ -218,42 +218,57 @@
       tx("List the four stages of compilation in order. [4]", [["lexical"],["syntax"],["code generation","generation","code gen"],["optimis"]], 4, "1 lexical analysis, 2 syntax analysis, 3 code generation, 4 optimisation.")
     ] },
 
-  { id:"16.2c", code:"16.2.3", title:"Syntax diagrams and Backus-Naur form (BNF)",
+  { id:"16.2c", code:"16.2.3", title:"Syntax diagrams: the grammar map",
     concept:
-      "<p>Every programming language has a <b>grammar</b> (its <b>syntax</b>): the exact rules for what counts as a valid statement. The rules must be written down precisely so that programmers can obey them and so that the compiler can check them during syntax analysis. Two notations are on the syllabus: <b>syntax diagrams</b> (a picture) and <b>Backus-Naur form</b> (written rules). Both describe the same thing.</p>" +
-      "<h4>1. Syntax diagrams</h4>" +
-      "<p>A syntax diagram is read like a road map. Start at the dot on the left, follow the arrows, and finish at the exit arrow on the right. A string is <b>valid</b> if there is a path that spells it out.</p>" +
+      "<p>Every programming language has a <b>grammar</b> (its <b>syntax</b>): the exact rules for what counts as a valid statement. During syntax analysis the compiler checks your program against these rules, a bit like a spell checker for code.</p>" +
+      "<p>One way to write the rules is a <b>syntax diagram</b>. Think of it as a <b>train-track map</b>: you start at the dot on the left, follow the arrows, and a string is <b>valid</b> only if you can reach the exit arrow on the right by spelling it out, one character at a time.</p>" +
+      "<h4>The pieces of the map</h4>" +
       tbl(["Part of the diagram", "Meaning"], [
-        ["Oval or circle", "A <b>terminal</b>: a character or word that is typed exactly as shown. It has nothing more to define."],
-        ["Rectangle", "A <b>non-terminal</b>: the name of another diagram. Go and follow that diagram, then come back."],
+        ["Oval or circle", "A <b>terminal</b>: a character or word typed exactly as shown. Nothing more to define."],
+        ["Rectangle", "A <b>non-terminal</b>: the name of <b>another diagram</b>. Go and follow that diagram, then come back."],
         ["Arrows in a line", "A <b>sequence</b>: the items must appear in that order."],
-        ["Paths side by side (one above the other)", "<b>Alternatives</b>: choose exactly one path."],
+        ["Paths one above the other", "<b>Alternatives</b>: choose exactly one path."],
         ["An arrow that loops back", "<b>Repetition</b>: the item can be used again, and again."],
         ["A path that skips an item", "The item is <b>optional</b>."]
       ]) +
-      "<p>Use the first two animations below to see each of these, then follow strings through the diagrams yourself.</p>" +
-      "<h4>2. Backus-Naur form (BNF)</h4>" +
-      "<p>BNF is a list of <b>replacement rules</b>. Each rule says what an item can be replaced with.</p>" +
-      tbl(["Symbol", "Meaning"], [["&lt; &gt;", "encloses the name of an item that is defined by a rule (a non-terminal)"], ["::=", "'is defined as'"], ["|", "or (a choice between alternatives)"], ["Characters with no &lt; &gt;", "typed exactly as written (terminals)"]]) +
-      pre("<variable> ::= <letter><digit>\n<letter>   ::= A | B | C\n<digit>    ::= 1 | 2 | 3") +
-      "<p>Two items side by side (no |) are a <b>sequence</b>, just like arrows in a line. Some books end each rule with a semicolon; the Cambridge papers normally do not.</p>" +
-      "<h4>3. Repetition in BNF is recursion</h4>" +
-      "<p>BNF has no loop symbol. To allow repetition, a rule is defined <b>using itself</b> (<b>recursion</b>). The loop-back arrow in a diagram becomes a recursive rule in BNF:</p>" +
-      pre("<integer> ::= <digit> | <integer><digit>\n<digit>   ::= 0|1|2|3|4|5|6|7|8|9") +
-      "<p>This says: an integer is a single digit, <b>or</b> an integer followed by one more digit. So 4 is an integer, then 47 (the integer 4 followed by 7), then 472, and so on.</p>" +
-      "<h4>4. Converting between the two</h4>" +
-      tbl(["Syntax diagram", "BNF"], [["Items in a line", "Items side by side: <code>&lt;a&gt;&lt;b&gt;</code>"], ["Alternative paths", "Separate with <code>|</code>"], ["Loop-back arrow", "A recursive rule: <code>&lt;x&gt; ::= &lt;y&gt; | &lt;x&gt;&lt;y&gt;</code>"], ["Path that skips an item", "Write the rule with and without the item, separated by <code>|</code>"]]),
+      "<p>Start with the first animation (the five track pieces), then follow real strings through the diagrams in the second one.</p>",
     example:
-      "<p><b>Worked example.</b> The diagrams give a variable as a letter (A, B or C) followed by a digit (1, 2 or 3). In BNF: <code>&lt;variable&gt; ::= &lt;letter&gt;&lt;digit&gt;</code>, <code>&lt;letter&gt; ::= A | B | C</code>, <code>&lt;digit&gt; ::= 1 | 2 | 3</code>.</p>" +
-      "<ul><li><b>A1, B3, C2</b> are valid: a letter from the list, then a digit from the list.</li><li><b>CC</b> is invalid: the second character must be a digit.</li><li><b>1A</b> is invalid: the letter must come first.</li><li><b>Z2</b> is invalid: Z is not one of the letters.</li><li><b>A4</b> is invalid: 4 is not one of the digits.</li></ul>" +
-      "<p><b>Recursive example.</b> <code>&lt;integer&gt; ::= &lt;digit&gt; | &lt;integer&gt;&lt;digit&gt;</code> accepts 7, 42 and 1999. To show 42 is valid: 42 is an &lt;integer&gt; (4) followed by a &lt;digit&gt; (2), and 4 is a &lt;digit&gt;, so it is an &lt;integer&gt;.</p>" +
-      "<p><b>Optional part.</b> A code is a letter, then a digit that may be missing: <code>&lt;code&gt; ::= &lt;letter&gt; | &lt;letter&gt;&lt;digit&gt;</code>. In the diagram, the digit rectangle has a path that goes round it.</p>" +
-      "<p><b>Exam link:</b> past papers ask you to complete or write BNF rules, to draw or complete a syntax diagram, and to say whether given strings are valid. Always check every character, in order, against the rules.</p>",
+      "<p><b>Worked example.</b> A <i>variable</i> is a letter (A, B or C) followed by a digit (1, 2 or 3). The diagram for <i>variable</i> has two rectangles in a line, and the <i>letter</i> and <i>digit</i> diagrams each have alternative paths.</p>" +
+      "<ul><li><b>B3</b> is valid: go to the letter diagram and take B, then the digit diagram and take 3.</li><li><b>CC</b> is invalid: after the letter, the next item must be a digit.</li><li><b>3B</b> is invalid: the letter must come first.</li><li><b>D1</b> is invalid: D is not one of the ovals in the letter diagram.</li><li><b>A4</b> is invalid: 4 is not one of the digit ovals.</li></ul>" +
+      "<p><b>Loops and bypasses.</b> If the <i>digit</i> rectangle has an arrow looping back, the digit can be repeated (7, 42, 1032 ...). If a path goes round it, it is optional (A and A3 are both fine).</p>" +
+      "<p><b>Exam tip:</b> past papers ask you to complete or draw a syntax diagram and to say whether given strings are valid. Check <b>every character in order</b>, and remember a rectangle means 'go and follow another diagram'.</p>",
+    checks:[
+      mc("In a syntax diagram, what is drawn inside a rectangle?", "The name of another diagram (a non-terminal)", ["A character typed exactly as shown", "A comment", "The end of the program"], "Ovals/circles hold terminals; rectangles refer to other diagrams."),
+      mc("In a syntax diagram, what does an arrow that loops back mean?", "The item can be repeated", ["The item is optional", "The program must stop", "The item is a comment"], "A loop lets the path go round again, so the item can be used several times."),
+      mc("What does a path that goes round (skips) an item mean?", "The item is optional", ["The item must be repeated", "The item is an error", "The item must come last"], "A skip path lets you avoid the item completely."),
+      mc("A variable is one letter (A, B or C) followed by one digit (1, 2 or 3), each shown in its own diagram. Which is a valid variable?", "B3", ["3B", "CC", "A4"], "Letter from A, B, C then digit from 1, 2, 3."),
+      mc("What are the items in ovals or circles called?", "Terminals", ["Non-terminals", "Loops", "Tokens only"], "Terminals are typed exactly as shown. Rectangles are non-terminals."),
+      tx("Describe how a syntax diagram shows that an item can be repeated. [1]", [["loop","back","arrow","return","again","repeat"]], 1, "An arrow loops back so the path can pass through the item again.")
+    ] },
+
+  { id:"16.2cb", code:"16.2.3", title:"Backus-Naur form (BNF): grammar as rules",
+    concept:
+      "<p>A syntax diagram is a picture of the grammar. <b>Backus-Naur form (BNF)</b> says the same thing in <b>written rules</b>, which is easier to type and for a compiler to read. Each rule says what an item can be <b>replaced with</b>.</p>" +
+      "<h4>The symbols</h4>" +
+      tbl(["Symbol", "Meaning"], [["&lt; &gt;", "encloses the name of an item that has its own rule (a non-terminal)"], ["::=", "'is defined as'"], ["|", "or: a choice between alternatives"], ["Plain characters (no &lt; &gt;)", "typed exactly as written (terminals)"]]) +
+      pre("<variable> ::= <letter><digit>\n<letter>   ::= A | B | C\n<digit>    ::= 1 | 2 | 3") +
+      "<p>Two items side by side (no |) are a <b>sequence</b>, like arrows in a line on a diagram. Some books end each rule with a semicolon; the Cambridge papers normally do not.</p>" +
+      "<h4>Repetition = recursion</h4>" +
+      "<p>BNF has no loop symbol. To repeat, a rule is defined <b>using itself</b> (<b>recursion</b>). The loop-back arrow on a diagram becomes a recursive rule:</p>" +
+      pre("<integer> ::= <digit> | <integer><digit>\n<digit>   ::= 0|1|2|3|4|5|6|7|8|9") +
+      "<p>An integer is a single digit (the stopping point), <b>or</b> an integer followed by one more digit. So 4 is an integer, then 47, then 472, and so on.</p>" +
+      "<h4>Diagram to BNF</h4>" +
+      tbl(["Syntax diagram", "BNF"], [["Items in a line", "Items side by side: <code>&lt;a&gt;&lt;b&gt;</code>"], ["Alternative paths", "Separate with <code>|</code>"], ["Loop-back arrow", "A recursive rule: <code>&lt;x&gt; ::= &lt;y&gt; | &lt;x&gt;&lt;y&gt;</code>"], ["Path that skips an item", "Write the rule with and without the item, separated by <code>|</code>"]]) +
+      "<p>Tap through the rule anatomy first, then build strings with the rules and watch the parse tree grow.</p>",
+    example:
+      "<p><b>Worked example.</b> With <code>&lt;variable&gt; ::= &lt;letter&gt;&lt;digit&gt;</code>, <code>&lt;letter&gt; ::= A | B | C</code>, <code>&lt;digit&gt; ::= 1 | 2 | 3</code>:</p>" +
+      "<ul><li><b>A1, B3, C2</b> are valid: a letter from the list then a digit from the list.</li><li><b>CC</b> is invalid: the second character must be a digit.</li><li><b>1A</b> is invalid: the letter must come first.</li><li><b>Z2</b> is invalid: Z is not in the list of letters.</li></ul>" +
+      "<p><b>Recursive example.</b> <code>&lt;integer&gt; ::= &lt;digit&gt; | &lt;integer&gt;&lt;digit&gt;</code> accepts 7, 42 and 1999. To show 42 is valid: 4 is a &lt;digit&gt; so it is an &lt;integer&gt;; an &lt;integer&gt; followed by the &lt;digit&gt; 2 is an &lt;integer&gt;.</p>" +
+      "<p><b>Optional part.</b> A code is a letter, then an optional digit: <code>&lt;code&gt; ::= &lt;letter&gt; | &lt;letter&gt;&lt;digit&gt;</code>.</p>" +
+      "<p><b>Exam tip:</b> past papers ask you to complete or write BNF rules and to say whether given strings are valid. Replace the left-most item each time, and check one character at a time.</p>",
     checks:[
       mc("What does the symbol | mean in BNF?", "Or (a choice between items)", ["And then", "Is defined as", "Repeat"], "It separates alternatives."),
       mc("What does ::= mean in BNF?", "Is defined as", ["Is not equal to", "Or", "Repeat"], "It separates an item from its definition."),
-      mc("In a syntax diagram, what is drawn inside a rectangle?", "The name of another diagram (a non-terminal)", ["A character typed exactly as shown", "A comment", "The end of the program"], "Ovals/circles hold terminals; rectangles refer to other diagrams."),
-      mc("In a syntax diagram, what does an arrow that loops back mean?", "The item can be repeated", ["The item is optional", "The program must stop", "The item is a comment"], "A loop lets the path go round again, so the item can be used several times."),
       mc("<variable> ::= <letter><digit>, <letter> ::= A|B|C, <digit> ::= 1|2|3. Which is a valid variable?", "B3", ["3B", "CC", "A4"], "A valid variable is a letter from A, B, C followed by a digit from 1, 2, 3."),
       mc("Which BNF rule describes an integer made of one or more digits?", "<integer> ::= <digit> | <integer><digit>", ["<integer> ::= <digit> <digit>", "<integer> ::= <integer>", "<integer> ::= <digit> & <digit>"], "The recursive rule allows any number of digits."),
       mc("Why does BNF use a recursive rule to show repetition?", "BNF has no loop symbol", ["Recursive rules run faster", "Digits can only be used once", "It saves the programmer typing"], "A rule that is defined using itself is the BNF way to repeat an item."),

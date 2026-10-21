@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-e2s+4/vNOd5nzZPKEazoOzI9/HJr9j6Ih7Uo44ZmVbs='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-WU9TxsHdMb6CC409H/ISulmVjgJpxP5yjGdOcZXuAi0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -539,14 +539,20 @@
           </select>
           <input type="text" id="filter-search-ilearn" placeholder="Search by name or email" />
           <button class="btn btn-primary" id="btn-ilearn-load">Load iLearn progress</button>
+          <label class="admin-status" style="display:inline-flex;align-items:center;gap:5px;margin:0"><input type="checkbox" id="chk-ilearn-all" /> Also list students from other / blank classes</label>
           <button class="btn btn-secondary" id="btn-dup-find">Find duplicate accounts</button>
           <a class="btn btn-secondary" href="learn.html">Try the iLearn journey as a student (admin preview) ›</a>
         </div>
         <div id="dup-box" style="display:none;margin:10px 0"></div>
         <p class="admin-status" id="ilearn-status">Shows each student's progress through the iLearn lessons, ranked by topics completed, then by performance (share of lessons mastered first time). Only students who have started the journey are listed. Click "Load iLearn progress" to fetch it. </p>
         <div id="ilearn-summary"></div>
+        <div id="il-bulk" class="no-print" style="display:none;margin:8px 0;gap:8px;align-items:center;flex-wrap:wrap"><span class="admin-status" id="il-bulk-n" style="margin:0"></span>
+          <button class="btn btn-danger" id="btn-il-archive">Archive selected</button>
+          <button class="btn btn-danger" id="btn-il-delete">Delete selected permanently</button>
+          <button class="btn btn-secondary" id="btn-il-clear">Clear selection</button>
+          <span class="admin-status" id="il-bulk-st" style="margin:0"></span></div>
         <div class="table-scroll"><table class="admin-table" id="ilearn-table" style="display:none">
-          <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Topics completed</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Paper 2 mock</th><th>Last active</th><th></th></tr></thead>
+          <thead><tr><th><input type="checkbox" id="il-all" aria-label="Select all shown students" /></th><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Topics completed</th><th>Mastered first time</th><th>Streak</th><th>Reviews due</th><th>Puzzles / XP</th><th>Topic tests</th><th>Paper 1 mock</th><th>Paper 2 mock</th><th>Last active</th><th></th></tr></thead>
           <tbody></tbody></table></div>
         <h3 id="ilearn-struggle-h" style="display:none;margin-top:20px">Lessons students found hardest</h3>
         <div class="table-scroll"><table class="admin-table" id="ilearn-struggle" style="display:none">
@@ -656,7 +662,7 @@
 <script src="learn-t10.js?v=20261019j"></script>
 <script src="learn-games-data.js?v=20261019j"></script>
 <script src="learn-engine.js?v=20261019j"></script>
-<script src="alevel-index.js?v=20261019j"></script>
+<script src="alevel-index.js?v=20261021b"></script>
 <script src="report-lib.js?v=20261019j"></script>
 <script src="syllabus-data.js?v=20261019j"></script>
 <script src="syllabus-report.js?v=20261019j"></script>
@@ -1049,13 +1055,32 @@
   // iLearn tab (progress through the learning journey)
   // ============================================================
   var ilearnRows = [];
+  // Every 10BR student: class typed in any form ("10br1", "10 BR 1", " 10BR2"), from the registered-student list AND from quiz/exam records.
+  // The tick box also adds students whose class is blank or something else (not 12BR), e.g. someone who picked the wrong class.
+  function is10BR(c){ return /^\s*10\s*BR/i.test(c || ""); }
+  function normClass(c){ c = String(c || "").replace(/\s+/g, "").toUpperCase(); return c || "(no class)"; }
   function ilearnRoster(){
-    if(!loaded || !window.SyllabusData) return [];
+    if(!loaded) return [];
     var cls = document.getElementById("filter-class-ilearn").value;
     var q = document.getElementById("filter-search-ilearn").value.trim().toLowerCase();
-    return SyllabusData.analyse(attempts, examAttempts, EXAMS, EXAM_PAPERS, new Date(), usersRoster).filter(function(s){
-      return s.uid && /^10BR/.test(s.className || "") && (!cls || s.className === cls) && (!q || ((s.name || "") + " " + (s.email || "")).toLowerCase().indexOf(q) !== -1);
+    var all = !!(document.getElementById("chk-ilearn-all") && document.getElementById("chk-ilearn-all").checked);
+    var seen = {}, out = [];
+    function add(s){ if(!s || !s.uid || seen[s.uid]) return; seen[s.uid] = 1; out.push(s); }
+    if(window.SyllabusData) SyllabusData.analyse(attempts, examAttempts, EXAMS, EXAM_PAPERS, new Date(), usersRoster).forEach(function(s){
+      if(is10BR(s.className) || (all && !/^\s*12\s*BR/i.test(s.className || ""))){ s.className = normClass(s.className); add(s); }
     });
+    (usersRoster || []).forEach(function(u){
+      var c = u && (u.className || u.class) || "";
+      if(u && u.uid && (is10BR(c) || (all && !/^\s*12\s*BR/i.test(c)))) add({ uid: u.uid, name: u.name || "(no name)", email: u.email || "", className: normClass(c), quizzes: [], papers: [], overallPct: 0 });
+    });
+    return out.filter(function(s){ return (!cls || s.className === cls) && (!q || ((s.name || "") + " " + (s.email || "")).toLowerCase().indexOf(q) !== -1); })
+      .sort(function(a, b){ return (a.className + a.name).localeCompare(b.className + b.name); });
+  }
+  function nameKey(n){ return String(n || "").toLowerCase().replace(/[^a-z\u0600-\u06ff0-9 ]/g, " ").split(/\s+/).filter(Boolean).sort().join(" "); }
+  var ilSel = {};
+  function ilUpdateBulk(){
+    var n = Object.keys(ilSel).length, bar = document.getElementById("il-bulk");
+    bar.style.display = n ? "flex" : "none"; document.getElementById("il-bulk-n").textContent = n + " selected";
   }
   function ilearnDate(ms){ if(!ms) return "-"; var d = new Date(ms); return d.toLocaleDateString(); }
   function renderILearn(){
@@ -1067,7 +1092,7 @@
       return (!cls || r.s.className === cls) && (!q || ((r.s.name || "") + " " + (r.s.email || "")).toLowerCase().indexOf(q) !== -1);
     });
     var nameCount = {};
-    ilearnRows.forEach(function(r){ var k = String(r.s.name || "").trim().toLowerCase(); nameCount[k] = (nameCount[k] || 0) + 1; });
+    ilearnRows.forEach(function(r){ var k = nameKey(r.s.name); nameCount[k] = (nameCount[k] || 0) + 1; });
     table.style.display = shown.length ? "" : "none";
     tb.innerHTML = "";
     var total = E.LESSONS.length, struggle = {};
@@ -1100,6 +1125,9 @@
       var tests = Object.keys(st.tests).sort(function(a,b){ return a - b; }).map(function(k){ var t = st.tests[k]; return "T" + k + " " + Math.round(100 * t.s / t.t) + "%"; }).join(", ") || "-";
       var tr = document.createElement("tr");
       tr.title = "Open " + (r.s.name || "student") + "'s iLearn journey";
+      var tdSel = document.createElement("td"), cb = document.createElement("input"); cb.type = "checkbox"; cb.className = "il-cb"; cb.setAttribute("data-uid", r.s.uid); cb.checked = !!ilSel[r.s.uid]; cb.setAttribute("aria-label", "Select " + (r.s.name || "student"));
+      cb.addEventListener("click", function(ev){ ev.stopPropagation(); if(cb.checked) ilSel[r.s.uid] = { name: r.s.name, email: r.s.email }; else delete ilSel[r.s.uid]; ilUpdateBulk(); });
+      tdSel.addEventListener("click", function(ev){ ev.stopPropagation(); }); tdSel.appendChild(cb); tr.appendChild(tdSel);
       var rank = document.createElement("span"); rank.className = "rank" + (i < 3 ? " r" + (i + 1) : ""); rank.textContent = String(i + 1);
       var tdRank = document.createElement("td"); tdRank.appendChild(rank); tr.appendChild(tdRank);
       var pctDone = Math.round(100 * done / total);
@@ -1111,7 +1139,7 @@
           var mp = document.createElement("span"); mp.className = "miniprog"; var mi = document.createElement("i"); mi.style.width = pctDone + "%"; mp.appendChild(mi); td.appendChild(mp);
         } else if(ci === 0){
           td.textContent = c;
-          if(nameCount[String(c).trim().toLowerCase()] > 1){ var db = document.createElement("span"); db.textContent = " duplicate name"; db.style.cssText = "background:#fef3c7;color:#92400e;border-radius:8px;padding:1px 7px;font-size:.72rem;margin-left:6px"; td.appendChild(db); }
+          if(nameCount[nameKey(c)] > 1){ var db = document.createElement("span"); db.textContent = " duplicate name"; db.style.cssText = "background:#fef3c7;color:#92400e;border-radius:8px;padding:1px 7px;font-size:.72rem;margin-left:6px"; td.appendChild(db); }
           if(r.s.email){ var em = document.createElement("div"); em.textContent = r.s.email; em.style.cssText = "font-size:.75rem;color:#64748b"; td.appendChild(em); }
         } else td.textContent = c;
         tr.appendChild(td);
@@ -1120,6 +1148,7 @@
       tr.addEventListener("click", function(){ openILearnDetail(r); });
       tb.appendChild(tr);
     });
+    ilUpdateBulk();
     var startedN = shown.filter(function(r){ return r.done > 0; }).length;
     document.getElementById("ilearn-summary").innerHTML = ilearnRows.length ? '<p class="admin-status">' + startedN + " of " + shown.length + " student" + (shown.length === 1 ? " has" : "s have") + " started the iLearn journey (students who have not started are listed last).</p>" : "";
     var ids = Object.keys(struggle).sort(function(a,b){ return struggle[b] - struggle[a]; }).slice(0, 10);
@@ -1448,7 +1477,7 @@
     if(!window.ILearnEngine){ status.textContent = "iLearn scripts did not load - refresh the page."; return; }
     if(typeof PQFirebase.getMyProgress !== "function"){ status.textContent = "This browser has an older cached script - hard refresh and try again."; return; }
     var roster = ilearnRoster();
-    if(!roster.length){ status.textContent = "No 10BR students found yet."; return; }
+    if(!roster.length){ status.textContent = "No 10BR students found yet. If students picked another class, tick \"Also list students from other / blank classes\"."; return; }
     status.textContent = "Loading " + roster.length + " students…";
     var readErrs = 0;
     Promise.all(roster.map(function(s){
@@ -1458,6 +1487,8 @@
       });
     })).then(function(rows){
       ilearnRows = rows;
+      (function(){ var sel = document.getElementById("filter-class-ilearn"), cur = sel.value, seen = {}; rows.forEach(function(r){ if(r.s.className) seen[r.s.className] = 1; });
+        sel.innerHTML = '<option value="">All classes shown</option>' + Object.keys(seen).sort().map(function(c){ return '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + '</option>'; }).join(""); sel.value = seen[cur] ? cur : ""; })();
       status.textContent = "Loaded " + rows.length + " students." + (readErrs ? " WARNING: iLearn progress could not be read for " + readErrs + " of them (Firestore denied the request). Publish the latest firestore.rules in the Firebase console, then press Load again." : "");
       renderILearn();
     });
@@ -1634,7 +1665,7 @@
   function findDuplicates(){
     var groups = {};
     ilearnRows.forEach(function(r){
-      var k = String(r.s.name || "").replace(/\s+/g, " ").trim().toLowerCase();
+      var k = nameKey(r.s.name);
       if(!k) return;
       (groups[k] = groups[k] || []).push(dupStats(r));
     });
@@ -1691,6 +1722,41 @@
     });
   }
   document.getElementById("btn-dup-find").addEventListener("click", renderDuplicates);
+  document.getElementById("chk-ilearn-all").addEventListener("change", function(){ document.getElementById("ilearn-status").textContent = "List changed. Press \"Load iLearn progress\" to fetch the progress of the students now shown."; });
+  document.getElementById("il-all").addEventListener("change", function(){
+    var on = this.checked; Array.prototype.forEach.call(document.querySelectorAll("#ilearn-table .il-cb"), function(c){ c.checked = on; var u = c.getAttribute("data-uid"); if(on){ var r = ilearnRows.filter(function(x){ return x.s.uid === u; })[0]; ilSel[u] = { name: r && r.s.name, email: r && r.s.email }; } else delete ilSel[u]; }); ilUpdateBulk();
+  });
+  document.getElementById("btn-il-clear").addEventListener("click", function(){ ilSel = {}; document.getElementById("il-all").checked = false; renderILearn(); });
+  function bulkRemove(permanent){
+    var uids = Object.keys(ilSel), st = document.getElementById("il-bulk-st");
+    if(!uids.length) return;
+    if(!archiveSupported()){ window.alert("This browser has an older cached script -- hard refresh and try again."); return; }
+    var names = uids.slice(0, 8).map(function(u){ return "  - " + (ilSel[u].name || "(no name)") + (ilSel[u].email ? " <" + ilSel[u].email + ">" : ""); }).join("\n") + (uids.length > 8 ? "\n  ...and " + (uids.length - 8) + " more" : "");
+    var msg = (permanent ? "PERMANENTLY DELETE " : "Archive ") + uids.length + " account" + (uids.length === 1 ? "" : "s") + "?\n\n" + names + "\n\n" +
+      (permanent ? "Their results, progress and profile are erased from the database and can NOT be restored. The e-mail can no longer be used to sign in to the site." : "Their results, progress and profile move to the Archive tab, they disappear from every list and cannot sign in. You can restore them later.");
+    if(!window.confirm(msg)) return;
+    if(permanent && !window.confirm("Last check: permanently delete " + uids.length + " account" + (uids.length === 1 ? "" : "s") + "? This cannot be undone.")) return;
+    var done = 0, failed = 0, lastErr = "";
+    ["btn-il-archive", "btn-il-delete", "btn-il-clear"].forEach(function(id){ document.getElementById(id).disabled = true; });
+    uids.reduce(function(chain, uid){
+      return chain.then(function(){
+        st.textContent = (permanent ? "Deleting " : "Archiving ") + (done + failed + 1) + " of " + uids.length + "…";
+        return PQFirebase.archiveStudent(uid, currentAdminEmail).then(function(){ return permanent ? PQFirebase.deleteArchivedStudent(uid) : null; }).then(function(){
+          done++; delete ilSel[uid];
+          attempts = attempts.filter(function(a){ return a.uid !== uid; });
+          examAttempts = examAttempts.filter(function(a){ return a.uid !== uid; });
+          ilearnRows = ilearnRows.filter(function(r){ return r.s.uid !== uid; });
+          if(usersRoster) usersRoster = usersRoster.filter(function(u){ return u.uid !== uid; });
+        }).catch(function(err){ failed++; lastErr = archiveError(err, (permanent ? "delete " : "archive ") + (ilSel[uid] && ilSel[uid].name || "a student")); });
+      });
+    }, Promise.resolve()).then(function(){ return loadArchiveList(); }).then(function(){
+      ["btn-il-archive", "btn-il-delete", "btn-il-clear"].forEach(function(id){ document.getElementById(id).disabled = false; });
+      document.getElementById("il-all").checked = false; renderAll(); renderILearn();
+      var s2 = document.getElementById("il-bulk-st"); s2.textContent = (permanent ? "Deleted " : "Archived ") + done + " account" + (done === 1 ? "" : "s") + (failed ? " (" + failed + " failed: " + lastErr + ")" : (permanent ? "." : ". They are in the Archive tab and can be restored."));
+    });
+  }
+  document.getElementById("btn-il-archive").addEventListener("click", function(){ bulkRemove(false); });
+  document.getElementById("btn-il-delete").addEventListener("click", function(){ bulkRemove(true); });
   document.getElementById("filter-class-ilearn").addEventListener("change", renderILearn);
   document.getElementById("filter-search-ilearn").addEventListener("input", renderILearn);
 
