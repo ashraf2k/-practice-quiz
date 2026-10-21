@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-UYn66xXnk9QVHNZoQLiSxqJelA/LfyOrl6yZ2hEEXj8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-ph9AC46euIlJxy5b21pkg5DaHKamgYPOYUy4znvyZNM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -282,7 +282,9 @@
     if(last){ var n = nextAfter(last); if(n) return n; }
     return nextInPaper(activeTab) || nextInPaper(activeTab === 1 ? 2 : 1);
   }
-  function isUnlocked(l){ if(preview || isDone(l.id)) return true; var c = nextInTopic(topicNum(l)); return !!c && c.id === l.id; }
+  // Topic 2 (Data transmission) is fully open: every lesson can be started straight away, in any order.
+  var OPEN_TOPICS = { 2: true };
+  function isUnlocked(l){ if(preview || isDone(l.id) || OPEN_TOPICS[topicNum(l)]) return true; var c = nextInTopic(topicNum(l)); return !!c && c.id === l.id; }
   function codeCovered(code){ var ls = lessonsOf(code); return ls.length > 0 && ls.every(function(l){ return isDone(l.id); }); }
 
   // ---------- persistence ----------
