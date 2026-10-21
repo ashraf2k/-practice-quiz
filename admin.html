@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-vb/z+tm+1YuQ2yztXsiHWT5WLBsbIfpxNedpVJjASiA='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-i/YOTpgWEMEqs7Xn9y+Oh/VZqPsepvf+AHocvE10bNw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -269,6 +269,7 @@
   .admin-status{ font-size: 13px; line-height: 1.5; }
 
   /* Overview tiles */
+  @media print{ body.pr-printing .card > :not(.admin-panel):not(#admin-panels){ display:none !important; } body.pr-printing .admin-tabs, body.pr-printing .kpi-row, body.pr-printing .top, body.pr-printing footer{ display:none !important; } }
   .sylbar{ display:inline-block; width:90px; height:9px; border-radius:6px; background:var(--line); vertical-align:middle; overflow:hidden; }
   .sylbar i{ display:block; height:100%; }
   .lvl-sw{ display:flex; gap:6px; margin:0 0 14px; }
@@ -529,6 +530,7 @@
         <div class="admin-toolbar no-print">
           <button class="btn btn-secondary admin-detail-back" id="btn-back-syllabus">&larr; Back to syllabus report</button>
           <button class="btn btn-secondary" id="btn-syllabus-student-pdf">Download PDF</button>
+          <button class="btn btn-primary" id="btn-pr-syl10" type="button">Parent report</button>
         </div>
         <div id="syllabus-student-body"></div>
       </div>
@@ -641,6 +643,7 @@
       <div class="admin-panel" id="panel-isolveDetail">
         <div class="admin-toolbar no-print">
           <button class="btn btn-secondary admin-detail-back" id="btn-back-isolve" type="button">&larr; Back to the iSolve list</button>
+          <button class="btn btn-primary" id="btn-pr-isolve" type="button">Parent report</button>
         </div>
         <div id="isolve-detail-body"></div>
       </div>
@@ -660,8 +663,19 @@
         <div class="admin-toolbar no-print">
           <button class="btn btn-secondary admin-detail-back" id="btn-back-syl9618" type="button">&larr; Back to syllabus report</button>
           <button class="btn btn-secondary" id="btn-syl9618-student-print" type="button">Print / save as PDF</button>
+          <button class="btn btn-primary" id="btn-pr-syl9618" type="button">Parent report</button>
         </div>
         <div id="syl9618-student-body"></div>
+      </div>
+
+      <div class="admin-panel" id="panel-parentReport">
+        <div class="admin-toolbar no-print">
+          <button class="btn btn-secondary admin-detail-back" id="btn-back-pr" type="button">&larr; Back</button>
+          <button class="btn btn-primary" id="btn-pr-print" type="button">Print / save as PDF</button>
+          <button class="btn btn-secondary" id="btn-pr-copy" type="button">Copy short summary (WhatsApp / email)</button>
+        </div>
+        <p class="admin-status no-print" id="pr-status"></p>
+        <div id="pr-body"></div>
       </div>
 
       <div class="admin-panel" id="panel-attention">
@@ -763,6 +777,7 @@
 <script src="report-lib.js?v=20261019j"></script>
 <script src="syllabus-data.js?v=20261019j"></script>
 <script src="syllabus-report.js?v=20261019j"></script>
+<script src="parent-report.js?v=20261021a"></script>
 <script src="firebase-config.js?v=20261019j"></script>
 <script type="module" src="firebase-init.js?v=20261019j"></script>
 <script type="module">
@@ -946,8 +961,8 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","archive"];
-  var MENU_OF = { profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
+  var PANELS = ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","archive"];
+  var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
     var menu = MENU_OF[name] || name;
@@ -2158,7 +2173,10 @@
       } else tc.appendChild(mk("span", null, "-"));
       tr.appendChild(tc);
       var tr2 = mk("td"); if(lab) tr2.appendChild(chip(lab)); else tr2.appendChild(mk("span", null, "No data yet")); tr.appendChild(tr2);
-      var tv = mk("td"); if(onOpen && x.open !== false) tv.appendChild(mk("span", "view-link", "Report ›")); tr.appendChild(tv);
+      var tv = mk("td"); if(onOpen && x.open !== false) tv.appendChild(mk("span", "view-link", "Report ›"));
+      var pb = mk("button", "btn btn-secondary", "Parent report"); pb.type = "button"; pb.style.cssText = "margin-left:8px;padding:3px 10px;font-size:12px";
+      pb.addEventListener("click", function(ev){ ev.stopPropagation(); openParentReport({ uid: x.uid || (x.r && x.r.s.uid), name: x.name, email: x.email, className: x.className }); });
+      tv.appendChild(pb); tr.appendChild(tv);
       if(onOpen && x.open !== false) tr.addEventListener("click", function(){ onOpen(x); });
       tb.appendChild(tr);
     });
@@ -2224,7 +2242,7 @@
     if(!shown.length){ list.appendChild(mk("p", "admin-status", rows.length ? "No students match." : (loaded ? "Loading progress..." : ""))); return; }
     var items = shown.map(function(x){
       var d = 0, m = 0; x.arr.forEach(function(o){ d += o.done; m += o.mastered; });
-      x.name = x.r.s.name; x.email = x.r.s.email; x.className = x.r.s.className;
+      x.name = x.r.s.name; x.email = x.r.s.email; x.className = x.r.s.className; x.uid = x.r.s.uid;
       x.il = x.overall != null ? x.overall : (d >= 3 ? Math.round(100 * m / d) : null); x.iso = x.iso ? x.iso.avg : null; x.isoObj = isolveAvgFor(x.r.s.uid, lv);
       return x;
     });
@@ -2276,6 +2294,79 @@
   });
   document.getElementById("filter-class-syl9618").addEventListener("change", renderSyl9618);
   document.getElementById("filter-search-syl9618").addEventListener("input", renderSyl9618);
+
+  // ---- Parent report -------------------------------------------
+  var prBack = "syllabus", prData = null;
+  function tstats(idx, learn, tests){
+    var out = {}, order = [];
+    idx.forEach(function(l){
+      var o = out[l.topic]; if(!o){ o = out[l.topic] = { num: l.topic, total: 0, done: 0, mastered: 0, ppA: 0, ppM: 0 }; order.push(l.topic); }
+      o.total++; var x = learn[l.id]; if(!x || !x.d) return;
+      o.done++; if(x.f) o.mastered++; if(x.pp && x.pp[1]){ o.ppA += x.pp[0]; o.ppM += x.pp[1]; }
+    });
+    return order.sort(function(a, b){ return a - b; }).map(function(k){
+      var o = out[k], t = tests && tests[k];
+      o.mastery = o.done ? Math.round(100 * o.mastered / o.done) : null; o.pp = o.ppM ? Math.round(100 * o.ppA / o.ppM) : null; o.test = t && t.t ? Math.round(100 * t.s / t.t) : null;
+      var parts = []; [o.mastery, o.pp, o.test].forEach(function(v){ if(v != null) parts.push(v); });
+      o.score = parts.length && (o.test != null || o.pp != null || o.done >= o.total / 2) ? Math.round(parts.reduce(function(a, b){ return a + b; }, 0) / parts.length) : null;
+      return o;
+    });
+  }
+  function openParentReport(stu){
+    var lv = levelOf(stu.className);
+    var act = document.querySelector(".admin-panel.active"); if(act && act.id !== "panel-parentReport") prBack = act.id.replace("panel-", "");
+    MENU_OF.parentReport = MENU_OF[prBack] || prBack;
+    if(["10", "11", "12"].indexOf(lv) === -1){ alert("Parent reports are available for 10BR, 11BR and 12BR students."); return; }
+    var st = document.getElementById("pr-status"); st.textContent = "Building the report..."; document.getElementById("pr-body").textContent = ""; showTab("parentReport");
+    var key = lv === "10" ? "ilearn" : lv === "11" ? "ilearnAS" : "ilearn12";
+    var E = window.ILearnEngine;
+    var idx = lv === "10" ? (E ? E.LESSONS.map(function(l){ return { id: l.id, topic: E.topicOf(l), code: l.code, title: l.title }; }) : []) : (lv === "11" ? idxAS() : idx12());
+    var tnames = lv === "10" && window.SYLLABUS_OBJECTIVES ? window.SYLLABUS_OBJECTIVES.TOPICS : TOPIC_NAMES;
+    (typeof PQFirebase.getMyProgress === "function" ? PQFirebase.getMyProgress(stu.uid, key).catch(function(){ return null; }) : Promise.resolve(null)).then(function(rec){
+      rec = rec || {};
+      var learn = lv === "10" && E ? (E.mergeState(null, rec).learn || {}) : (rec.learn || {});
+      var topics = tstats(idx, learn, rec.tests || {});
+      topics.forEach(function(t){ t.name = tnames[t.num] || ("Topic " + t.num); });
+      var done = 0, mast = 0; topics.forEach(function(t){ done += t.done; mast += t.mastered; });
+      var sc = topics.filter(function(t){ return t.score != null; }).map(function(t){ return t.score; });
+      var ilPct = sc.length ? Math.round(sc.reduce(function(a, b){ return a + b; }, 0) / sc.length) : (done >= 3 ? Math.round(100 * mast / done) : null);
+      // iSolve
+      var mine = examAttempts.filter(function(a){ return a.uid === stu.uid; }), tried = {};
+      var papers = mine.map(function(a){ tried[a.paperKey] = 1; return { title: paperLabel(a.paperKey), earned: a.totalEarned, total: a.totalMarks, pct: pctOf(a), date: a.timestamp ? fmtDay(new Date(a.timestamp).getTime()) : "" }; }).sort(function(a, b){ return a.title.localeCompare(b.title); });
+      var avail = papersForLevel(lv);
+      // objectives + quizzes
+      var objectives = [], quizzes = [];
+      if(lv === "10"){
+        var s10 = (syllabusStudents || []).filter(function(s){ return s.uid === stu.uid; })[0];
+        if(!s10 && window.SyllabusData){ s10 = SyllabusData.analyse(attempts, examAttempts, EXAMS, EXAM_PAPERS, new Date(), usersRoster).filter(function(s){ return s.uid === stu.uid; })[0]; }
+        if(s10){
+          s10.rows.forEach(function(r){ if(r.pct != null) objectives.push({ group: "Section " + r.sec, label: r.title, pct: r.pct }); });
+          quizzes = (s10.quizzes || []).map(function(q){ return { label: q.label, pct: q.pct }; });
+        }
+      } else {
+        var byCode = {};
+        idx.forEach(function(l){ var o = byCode[l.code] = byCode[l.code] || { code: l.code, topic: l.topic, title: l.title, d: 0, m: 0, a: 0, mm: 0 }; var x = learn[l.id]; if(x && x.d){ o.d++; if(x.f) o.m++; if(x.pp && x.pp[1]){ o.a += x.pp[0]; o.mm += x.pp[1]; } } });
+        Object.keys(byCode).forEach(function(c){ var o = byCode[c]; if(!o.d) return; var parts = [Math.round(100 * o.m / o.d)]; if(o.mm) parts.push(Math.round(100 * o.a / o.mm));
+          objectives.push({ group: "Topic " + o.topic, label: c + " " + o.title, pct: Math.round(parts.reduce(function(x, y){ return x + y; }, 0) / parts.length) }); });
+      }
+      prData = { name: stu.name, className: stu.className, date: new Date().toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" }),
+        syllabus: lv === "10" ? "Cambridge IGCSE Computer Science 0478" : lv === "11" ? "Cambridge AS Level Computer Science 9618" : "Cambridge A Level Computer Science 9618",
+        ilearn: { done: done, total: idx.length, mastery: ilPct, lastActive: rec.lastActive || null, topics: topics },
+        isolve: { papers: papers, available: avail.length, notTried: avail.filter(function(k){ return !tried[k]; }).map(paperLabel) },
+        quizzes: quizzes, objectives: objectives };
+      var body = document.getElementById("pr-body"); body.textContent = ""; body.appendChild(ParentReport.build(prData));
+      st.textContent = "Review the report, add a teacher's comment at the bottom if you like, then print / save as PDF or copy the short summary."; window.scrollTo(0, 0);
+    });
+  }
+  document.getElementById("btn-back-pr").addEventListener("click", function(){ showTab(prBack); });
+  document.getElementById("btn-pr-print").addEventListener("click", function(){ document.body.classList.add("pr-printing"); window.print(); setTimeout(function(){ document.body.classList.remove("pr-printing"); }, 500); });
+  document.getElementById("btn-pr-copy").addEventListener("click", function(){
+    if(!prData) return; var t = ParentReport.text(prData), st = document.getElementById("pr-status");
+    (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ st.textContent = "Summary copied. Paste it into WhatsApp or an email."; }, function(){ window.prompt("Copy this summary:", t); });
+  });
+  document.getElementById("btn-pr-syl10").addEventListener("click", function(){ if(syllabusCurrent) openParentReport({ uid: syllabusCurrent.uid, name: syllabusCurrent.name, email: syllabusCurrent.email, className: syllabusCurrent.className }); });
+  document.getElementById("btn-pr-syl9618").addEventListener("click", function(){ if(sylCur) openParentReport({ uid: sylCur.r.s.uid, name: sylCur.r.s.name, email: sylCur.r.s.email, className: sylCur.r.s.className }); });
+  document.getElementById("btn-pr-isolve").addEventListener("click", function(){ if(isoCur) openParentReport({ uid: isoCur.s.uid, name: isoCur.s.name, email: isoCur.s.email, className: isoCur.s.className }); });
 
   // ---- Needs attention -------------------------------------------
   function renderAttention(){
