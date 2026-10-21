@@ -4,6 +4,11 @@
   var M = root.ILEARN_VIZ.MAP;
   function add(id, w, title, at, o, note){ (M[id] = M[id] || []).push({ w: w, title: title, at: at, o: o || {}, note: note || "" }); }
   // Topic 1: Data representation
+  add("1.1.1", "switches", "Switches, lamps and binary", 0);
+  add("1.1.2b", "divtwo", "Denary to binary by dividing by 2", 1);
+  add("1.1.2d", "nibble", "Split a byte into nibbles and read it as hex", 1); add("1.1.3", "nibble", "Why hex is shorter: one digit per nibble", 1);
+  add("1.3.1", "ladder", "Climb the ladder of storage units", 0);
+  add("1.3.4", "lossy", "Compress a picture: lossless against lossy", 1);
   add("1.1.2a", "bits", "Switch bits on and off", 0);
   ["1.1.2b", "1.1.2c", "1.1.2d", "1.1.3"].forEach(function(id){ add(id, "bits", "Switch bits on and off: binary, denary and hex", 1); });
   add("1.1.4a", "binadd", "Add two binary numbers", 1); add("1.1.4b", "binadd", "Spot the overflow error", 1);
@@ -19,6 +24,8 @@
   add("2.2.2a", "parity", "Build a parity byte and damage it", 1); add("2.2.2b", "echo", "Follow an echo check", 1);
   add("2.2.3", "checkdigit", "Catch a typing mistake with a check digit", 1); add("2.2.4", "arq", "Acknowledgements and timeouts", 1);
   add("2.3.2a", "caesar", "Encrypt and decrypt with one shared key", 1); add("2.3.2b", "enc", "Public and private keys", 1, { kind: "private" });
+  add("2.1.1b", "packetnet", "Packets finding their own routes", 0);
+  add("2.1.3", "usb", "Plug in a USB cable", 0); add("2.2.1", "noise", "What interference does to data", 0); add("2.3.1", "encrypt", "Send a message past a hacker", 0);
   // Topic 3: Hardware
   add("3.1.2a", "fde", "Inside the CPU", 1); add("3.1.2b", "fde", "Watch the fetch stage", 1); add("3.1.2c", "fde", "Watch decode and execute", 1);
   add("3.3.4", "vmem", "Fill RAM and use virtual memory", 1);
