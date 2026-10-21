@@ -1,0 +1,1 @@
+ASEX.register();

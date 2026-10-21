@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-3Z5vru2zOI50w3pwbHpxrVk3PF77laJXxjpIF0rfSfM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-2rBzWaThAH/cwocm0djMxbAvnIPjdeyZBZ0PSSJzN/U='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -144,6 +144,20 @@
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
 <script src="exam-data.js?v=20261019j"></script>
+<script src="as-exam-core.js?v=20261021a"></script>
+<script src="as-exam-t1.js?v=20261021a"></script>
+<script src="as-exam-t2.js?v=20261021a"></script>
+<script src="as-exam-t3.js?v=20261021a"></script>
+<script src="as-exam-t4.js?v=20261021a"></script>
+<script src="as-exam-t5.js?v=20261021a"></script>
+<script src="as-exam-t6.js?v=20261021a"></script>
+<script src="as-exam-t7.js?v=20261021a"></script>
+<script src="as-exam-t8.js?v=20261021a"></script>
+<script src="as-exam-t9.js?v=20261021a"></script>
+<script src="as-exam-t10.js?v=20261021a"></script>
+<script src="as-exam-t11.js?v=20261021a"></script>
+<script src="as-exam-t12.js?v=20261021a"></script>
+<script src="as-exam-register.js?v=20261021a"></script>
 <script src="syllabus-objectives.js?v=20261019j"></script>
 <script src="scratchpad.js?v=20261019j"></script>
 <script src="firebase-config.js?v=20261019j"></script>
@@ -222,9 +236,30 @@
     return false;
   }
 
+  // "value": an exact answer (number, binary pattern, hex, short word) found as a separate token in the answer. Unlike
+  // numericMatch, spaces and commas between answers do NOT run neighbouring answers together ("1: 11, 2: 13" still finds 13);
+  // binary patterns may contain spaces ("0100 1001").
+  function valueMatch(studentText, values){
+    var low = normalize(studentText);
+    for(var i = 0; i < values.length; i++){
+      var v = normalize(values[i]).trim(); if(!v) continue;
+      var esc = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      var re = new RegExp("(^|[^0-9a-z.])" + esc + "(?![0-9a-z]|\\.[0-9])");
+      if(re.test(low)) return true;
+      var bin = v.replace(/\s+/g, "");
+      // a binary pattern may be typed with spaces between its bits ("0100 1001"), but its edges must still be separate tokens
+      if(/^[01]{4,}$/.test(bin) && new RegExp("(^|[^0-9a-z.])" + bin.split("").join("\\s*") + "(?![0-9a-z]|\\.[0-9])").test(low)) return true;
+    }
+    return false;
+  }
+
   function keywordGroupMatches(studentText, group){
     var norm = normalize(studentText);
-    return group.some(function(kw){ return norm.indexOf(normalize(kw)) !== -1; });
+    return group.some(function(kw){
+      // a keyword written "re:pattern" is a regular expression (used for whole-word tests, e.g. PROM versus EEPROM)
+      if(kw.indexOf("re:") === 0){ try { return new RegExp(kw.slice(3), "i").test(studentText); } catch(e){ return false; } }
+      return norm.indexOf(normalize(kw)) !== -1;
+    });
   }
 
   function rleMatch(studentText, tokens){
@@ -239,7 +274,27 @@
     if(!studentText || !studentText.trim()) return 0;
     var m = mp.match;
     if(m.type === "numeric") return numericMatch(studentText, m.values) ? mp.marks : 0;
+    if(m.type === "value") return valueMatch(studentText, m.values) ? mp.marks : 0;
     if(m.type === "rle") return rleMatch(studentText, m.tokens) ? mp.marks : 0;
+    // "near": the keywords must appear in the stretch of the answer that follows an anchor word (e.g. the gate name),
+    // up to the next stop word. Used when one answer describes several items (NAND, NOR, XOR ...) so words about
+    // one item cannot earn marks for another.
+    if(m.type === "near"){
+      var low = normalize(studentText), at = -1, alen = 0;
+      for(var ai = 0; ai < m.anchor.length; ai++){
+        var re0 = new RegExp("\\b" + m.anchor[ai].toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b"), mm = re0.exec(low);
+        if(mm && (at === -1 || mm.index < at)){ at = mm.index; alen = mm[0].length; }
+      }
+      if(at === -1) return 0;
+      var end = Math.min(low.length, at + (m.span || 160)), after = low.slice(at + alen);
+      (m.stop || []).forEach(function(sw){
+        var re1 = new RegExp("\\b" + sw.toLowerCase() + "\\b"), m1 = re1.exec(after);
+        if(m1 && at + alen + m1.index < end) end = at + alen + m1.index;
+      });
+      var win = low.slice(at, end);
+      var hit = m.groups.filter(function(g){ return g.some(function(kw){ return win.indexOf(normalize(kw)) !== -1; }); }).length;
+      return hit >= m.needCount ? mp.marks : 0;
+    }
     if(m.type === "keywords"){
       var matchedCount = m.groups.filter(function(g){ return keywordGroupMatches(studentText, g); }).length;
       if(m.marksPerGroup){
@@ -369,7 +424,7 @@
     qPrompt.textContent = q.prompt;
     if(!scratchPad && window.ScratchPad) scratchPad = ScratchPad.mount(qPrompt.parentNode, answerField);
     if(scratchPad) scratchPad.show(!!q.calc);
-    answerTextarea.value = "";
+    answerTextarea.value = ""; answerTextarea.readOnly = false;
     if(penDraw) penDraw.reset();
     answerField.classList.remove("invalid");
     btnCheck.disabled = false;
@@ -699,7 +754,7 @@
     // below this banner -- on a single-attempt paper those aren't shown
     // (see renderMarkPoints()), so the wording shouldn't imply the
     // student ticked anything themselves.
-    checkScoreBanner.textContent = state.paper.singleAttempt
+    checkScoreBanner.textContent = (state.paper.singleAttempt || state.paper.strictMarks)
       ? "Scored " + earned + " of " + q.marks + (q.marks === 1 ? " mark" : " marks") + " for this question."
       : "You've ticked " + earned + " of " + q.marks + (q.marks === 1 ? " mark" : " marks") + " for this question.";
     return earned;
@@ -726,6 +781,26 @@
       return;
     }
     markpointsLabel.classList.remove("hidden");
+
+    // strictMarks papers (the 11BR AS Level past-paper sets): the published mark scheme is shown after the answer,
+    // but marks come ONLY from the keyword matcher. The student cannot tick or change them.
+    if(state.paper.strictMarks){
+      markpointsLabel.textContent = "Published mark scheme — marks are awarded by keyword (\u2713 found, \u2717 missing)";
+      q.markPoints.forEach(function(mp){
+        var got = gradeMarkPoint(studentText, mp), row = document.createElement("div");
+        row.className = "markpoint-row";
+        var wrap = document.createElement("div"); wrap.className = "markpoint-control";
+        var badge = document.createElement("strong");
+        badge.textContent = (got >= mp.marks ? "\u2713 " : got > 0 ? "\u25D0 " : "\u2717 ") + got + " / " + mp.marks;
+        badge.style.color = got >= mp.marks ? "var(--correct, #15803d)" : got > 0 ? "var(--accent-dark, #92400e)" : "var(--wrong, #b91c1c)";
+        wrap.appendChild(badge);
+        var label = document.createElement("div"); label.textContent = mp.text;
+        row.appendChild(wrap); row.appendChild(label); markpointsList.appendChild(row);
+        currentControls.push({ get: function(){ return got; } });
+      });
+      recomputeLiveScore();
+      return;
+    }
 
     q.markPoints.forEach(function(mp, i){
       var suggested = gradeMarkPoint(studentText, mp);
@@ -785,6 +860,11 @@
     qExplanation.textContent = q.explanation;
     checkArea.classList.remove("hidden");
     currentChecked = true;
+    if(state.paper.strictMarks){
+      // one attempt per question: seeing the scheme must not let the student reword the answer for marks
+      answerTextarea.readOnly = true; btnCheck.disabled = true;
+      btnCheck.textContent = "Marked. Your mark is final; read the mark scheme below, then continue";
+    } else
     btnCheck.textContent = "Checked — edit your answer above and check again anytime";
     btnNext.classList.remove("hidden");
     btnNext.focus();
