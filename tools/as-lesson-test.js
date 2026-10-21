@@ -42,7 +42,7 @@ ILEARN_LESSONS.forEach(l => {
         } else fail(pw, "unknown kind " + p.kind);
       });
     } else if(c.type === "text"){
-      nTX++; const t = norm(c.model); let m = 0;
+      nTX++; const EN = s => " " + String(s || "").toLowerCase().replace(/[^a-z0-9\s+\-\/.']/g, " ").replace(/\s+/g, " ") + " "; const t = EN(c.model); let m = 0;
       c.groups.forEach(g => { if(g.some(k => t.indexOf(String(k).toLowerCase()) !== -1)) m++; });
       if(m < (c.need || c.groups.length)) fail(w, "model answer fails its own keywords (" + m + "/" + (c.need || c.groups.length) + ")");
       const j = norm(JUNK); let jm = 0; c.groups.forEach(g => { if(g.some(k => j.indexOf(String(k).toLowerCase()) !== -1)) jm++; });

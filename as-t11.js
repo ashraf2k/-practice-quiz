@@ -17,7 +17,7 @@
       mc("Which expression gives a random whole number from 1 to 6?", "INT(RAND(6)) + 1", ["RAND(6)", "INT(RAND(7))", "RAND(1, 6)"], "RAND(6) is 0 up to but not including 6; INT gives 0&ndash;5; add 1."),
       mc("What does DAYINDEX return for a Sunday?", "1", ["0", "7", "Sunday"], "Sunday = 1, Monday = 2 and so on."),
       mc("Which should you do before using INPUT to read a value?", "OUTPUT a prompt message", ["DECLARE a constant", "CLOSEFILE", "Call RAND()"], "The mark scheme gives a mark for a prompt."),
-      tx("Write a pseudocode statement to assign the date 05/03/2012 to the variable Birthday using SETDATE. [1]", [["birthday"],["setdate(5","setdate (5","setdate(05","setdate (05"],["3","03"],["2012"]], 4, "Birthday <- SETDATE(5, 3, 2012)"),
+      tx("Write a pseudocode statement to assign the date 05/03/2012 to the variable Birthday using SETDATE. [1]", [["birthday"],["setdate"],["3","03"],["2012"]], 4, "Birthday <- SETDATE(5, 3, 2012)"),
       ASA.pp("9618/22 May/June 2023 · Question 2", "SETDATE(day, month, year); a number of months to the end of the year is 12 minus the month number; for the day name use a 7-element STRING array, DAYINDEX to find the index, then output that element.",
         [ ASA.fields("(a)", 1, "A program stores a user's date of birth using a variable MyDOB of type DATE. Write a pseudocode statement, using a function from the insert, to assign the value corresponding to 17/11/2007 to MyDOB.",
             [ ["Statement", ["mydob<-setdate(17,11,2007)", "mydob←setdate(17,11,2007)", "mydob=setdate(17,11,2007)"], "text", "MyDOB <- SETDATE(17, 11, 2007)", 1] ],
