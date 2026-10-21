@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-o1tTsFkrO4T1sQj20vxngpi6vzTWfRXntKWw2+zKVCw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-RLfFUNb0usJtInXjxI8Z5B7R4Dp/boBz5PW2usLXOFU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -144,6 +144,7 @@
      block in quiz.html. Bump this version string here too whenever one
      of these shared files changes. -->
 <script src="exam-data.js?v=20261019j"></script>
+<script src="arrow-btn.js?v=20261021a"></script>
 <script src="as-exam-core.js?v=20261021a"></script>
 <script src="as-exam-t1.js?v=20261021a"></script>
 <script src="as-exam-t2.js?v=20261021a"></script>
@@ -216,7 +217,7 @@
   // ============================================================
   // Keyword-assisted grader
   // ============================================================
-  function normalize(s){ return (s || "").toLowerCase(); }
+  function normalize(s){ return (s || "").toLowerCase().replace(/<[-\u2013\u2014]/g, "\u2190"); }
   function normalizeTight(s){ return normalize(s).replace(/[\s,]+/g, ""); }
 
   function numericMatch(studentText, values){

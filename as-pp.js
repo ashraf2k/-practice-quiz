@@ -19,7 +19,7 @@
 (function(root){
   "use strict";
   function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
-  function norm(s){ return " " + String(s || "").toLowerCase().replace(/[‘’]/g, "'").replace(/[-_]/g, " ").replace(/[^a-z0-9\s+\/.'<>=*#&:()\[\],]/g, " ").replace(/\s+/g, " ").trim() + " "; }
+  function norm(s){ return " " + String(s || "").toLowerCase().replace(/[‘’]/g, "'").replace(/\u2190/g, "<").replace(/[-_]/g, " ").replace(/[^a-z0-9\s+\/.'<>=*#&:()\[\],]/g, " ").replace(/\s+/g, " ").trim() + " "; }
   function has(t, k){
     if(Array.isArray(k)) return k.every(function(x){ return has(t, x); });
     if(k.indexOf("re:") === 0){ try { return new RegExp(k.slice(3), "i").test(t); } catch(e){ return false; } }

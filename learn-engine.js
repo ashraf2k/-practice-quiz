@@ -59,7 +59,7 @@
 
   // ---------- typed answers (keyword marking) ----------
   // q.groups = [[synonyms...], ...]; each group is one mark point; q.need = points needed (default all groups)
-  function norm(s){ return " " + String(s || "").toLowerCase().replace(/[^a-z0-9\s+\-\/.']/g, " ").replace(/\s+/g, " ") + " "; }
+  function norm(s){ return " " + String(s || "").toLowerCase().replace(/\u2190/g, "<-").replace(/<[-\u2013\u2014]/g, "<-").replace(/[^a-z0-9\s+\-\/.']/g, " ").replace(/\s+/g, " ") + " "; }
   function gradeText(q, text){
     var t = norm(text), matched = 0;
     (q.groups || []).forEach(function(g){
