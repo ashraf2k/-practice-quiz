@@ -107,3 +107,48 @@
 .fcsvg .sy{cursor:pointer;outline:none}
 .fcsvg .sy:focus-visible polygon,.fcsvg .sy:focus-visible rect{stroke:var(--accent);stroke-width:4}
 .fcsvg .sm2{font-size:11.5px}
+/* syntax diagrams (16.2.3) */
+.sdsvg{overflow:visible}
+.vsvg .sdp{fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.vsvg .sda{fill:var(--ink);stroke:none}
+.vsvg .sdot{fill:var(--ink)}
+.vsvg .sdt{fill:var(--surface);stroke:var(--ink);stroke-width:1.8}
+.vsvg .sdn{fill:var(--surface);stroke:var(--ink);stroke-width:1.8}
+.vsvg text.sdx{fill:var(--ink);font:600 15px system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-anchor:middle}
+.vsvg text.sdname{fill:var(--accent-dark);font:700 14px system-ui,-apple-system,"Segoe UI",sans-serif}
+.vsvg text.sdkt{fill:var(--ink);font:13px system-ui,-apple-system,"Segoe UI",sans-serif}
+.vsvg .sdnon .sdn{fill:var(--bg)}
+.vsvg .sdl.act .sdt,.vsvg .sdl.act .sdn{fill:var(--accent);stroke:var(--accent-dark)}
+.vsvg .sdl.act text.sdx{fill:var(--on-accent)}
+.vsvg .sdl.done .sdt,.vsvg .sdl.done .sdn{fill:var(--correct-bg);stroke:var(--correct)}
+.vsvg .sdb.on .sdp{stroke:var(--accent);stroke-width:3}
+.vsvg .sdb.on .sda{fill:var(--accent)}
+.sdlist{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.sdcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px;overflow-x:auto;max-width:100%}
+.sdkey{margin-bottom:8px}
+.synr{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px;align-items:center;margin:8px 0}
+@media(max-width:640px){.synr{grid-template-columns:1fr}}
+.sdstr{margin:8px 0;font:600 17px ui-monospace,Menlo,Consolas,monospace}
+.sdlab{font:13px system-ui,sans-serif;font-weight:400;color:var(--muted)}
+.sdch{display:inline-block;min-width:1.3em;text-align:center;padding:1px 3px;margin:0 1px;border:1px solid var(--line);border-radius:5px;background:var(--bg)}
+.sdch.got{background:var(--correct-bg);border-color:var(--correct)}
+.sdch.bad{background:var(--incorrect-bg);border-color:var(--incorrect)}
+.bdform{margin:8px 0;font:600 16px ui-monospace,Menlo,Consolas,monospace}
+.bdnt,.bdt{display:inline-block;padding:1px 5px;margin:0 2px;border-radius:5px;border:1px solid var(--line)}
+.bdnt{background:var(--accent-tint);color:var(--accent-dark);border-color:var(--accent)}
+.bdt{background:var(--bg);color:var(--ink)}
+.bdnew{outline:2px solid var(--accent);outline-offset:1px}
+.vsvg .bdn rect{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+.vsvg .bdn.nt rect{fill:var(--accent-tint);stroke:var(--accent)}
+.vsvg .bdn.tm rect{fill:var(--correct-bg);stroke:var(--correct)}
+.vsvg .bdn text{font:600 13px ui-monospace,Menlo,Consolas,monospace;fill:var(--ink)}
+.vsvg .bdl{stroke:var(--ink);stroke-width:1.6}
+.vsvg .hid{opacity:0}
+.vsvg .fresh rect{stroke-width:3}
+.sdopts{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.sdopt{text-align:left;overflow-x:auto;max-width:100%}
+.sdoptl{font-size:12px;color:var(--muted);margin-top:2px}
+.sdright{background:var(--correct-bg)!important;border-color:var(--correct)!important}
+.sdwrong{background:var(--incorrect-bg)!important;border-color:var(--incorrect)!important}
+.synr pre,.sdcard pre{white-space:pre-wrap;word-break:break-word}
+.vsvg .sdl rect,.vsvg .sdl text,.vsvg .sdp,.vsvg .sda{transition:none!important}

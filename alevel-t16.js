@@ -220,23 +220,43 @@
 
   { id:"16.2c", code:"16.2.3", title:"Syntax diagrams and Backus-Naur form (BNF)",
     concept:
-      "<p>The grammar (syntax) of a language is written down precisely so programmers can obey it and the compiler can check it. Two notations:</p>" +
-      "<p><b>Syntax diagrams</b> show each item as a path: boxes/circles in order, branches for alternatives, loops for repetition.</p>" +
-      "<p><b>Backus-Naur form (BNF)</b> is a list of replacement rules:</p>" +
-      tbl(["Symbol", "Meaning"], [["&lt; &gt;", "encloses a named item"], ["::=", "'is defined as'"], ["|", "or (a choice)"], ["(rule end)", "each rule is written on its own line"]]) +
-      pre("<variable> ::= <letter> | <digit>\n<letter>   ::= A | B | C\n<digit>    ::= 1 | 2 | 3") +
-      "<p>BNF can be <b>recursive</b>: an item is defined using itself. This allows repetition.</p>" +
-      pre("<integer> ::= <digit> | <integer><digit>\n<digit>   ::= 0|1|2|3|4|5|6|7|8|9"),
+      "<p>Every programming language has a <b>grammar</b> (its <b>syntax</b>): the exact rules for what counts as a valid statement. The rules must be written down precisely so that programmers can obey them and so that the compiler can check them during syntax analysis. Two notations are on the syllabus: <b>syntax diagrams</b> (a picture) and <b>Backus-Naur form</b> (written rules). Both describe the same thing.</p>" +
+      "<h4>1. Syntax diagrams</h4>" +
+      "<p>A syntax diagram is read like a road map. Start at the dot on the left, follow the arrows, and finish at the exit arrow on the right. A string is <b>valid</b> if there is a path that spells it out.</p>" +
+      tbl(["Part of the diagram", "Meaning"], [
+        ["Oval or circle", "A <b>terminal</b>: a character or word that is typed exactly as shown. It has nothing more to define."],
+        ["Rectangle", "A <b>non-terminal</b>: the name of another diagram. Go and follow that diagram, then come back."],
+        ["Arrows in a line", "A <b>sequence</b>: the items must appear in that order."],
+        ["Paths side by side (one above the other)", "<b>Alternatives</b>: choose exactly one path."],
+        ["An arrow that loops back", "<b>Repetition</b>: the item can be used again, and again."],
+        ["A path that skips an item", "The item is <b>optional</b>."]
+      ]) +
+      "<p>Use the first two animations below to see each of these, then follow strings through the diagrams yourself.</p>" +
+      "<h4>2. Backus-Naur form (BNF)</h4>" +
+      "<p>BNF is a list of <b>replacement rules</b>. Each rule says what an item can be replaced with.</p>" +
+      tbl(["Symbol", "Meaning"], [["&lt; &gt;", "encloses the name of an item that is defined by a rule (a non-terminal)"], ["::=", "'is defined as'"], ["|", "or (a choice between alternatives)"], ["Characters with no &lt; &gt;", "typed exactly as written (terminals)"]]) +
+      pre("<variable> ::= <letter><digit>\n<letter>   ::= A | B | C\n<digit>    ::= 1 | 2 | 3") +
+      "<p>Two items side by side (no |) are a <b>sequence</b>, just like arrows in a line. Some books end each rule with a semicolon; the Cambridge papers normally do not.</p>" +
+      "<h4>3. Repetition in BNF is recursion</h4>" +
+      "<p>BNF has no loop symbol. To allow repetition, a rule is defined <b>using itself</b> (<b>recursion</b>). The loop-back arrow in a diagram becomes a recursive rule in BNF:</p>" +
+      pre("<integer> ::= <digit> | <integer><digit>\n<digit>   ::= 0|1|2|3|4|5|6|7|8|9") +
+      "<p>This says: an integer is a single digit, <b>or</b> an integer followed by one more digit. So 4 is an integer, then 47 (the integer 4 followed by 7), then 472, and so on.</p>" +
+      "<h4>4. Converting between the two</h4>" +
+      tbl(["Syntax diagram", "BNF"], [["Items in a line", "Items side by side: <code>&lt;a&gt;&lt;b&gt;</code>"], ["Alternative paths", "Separate with <code>|</code>"], ["Loop-back arrow", "A recursive rule: <code>&lt;x&gt; ::= &lt;y&gt; | &lt;x&gt;&lt;y&gt;</code>"], ["Path that skips an item", "Write the rule with and without the item, separated by <code>|</code>"]]),
     example:
-      "<p>Using <code>&lt;variable&gt; ::= &lt;letter&gt;&lt;digit&gt;</code>, <code>&lt;letter&gt; ::= A | B | C</code>, <code>&lt;digit&gt; ::= 1 | 2 | 3</code>:</p>" +
-      "<ul><li>A1, B3, C2 are valid.</li><li>CC is invalid (the second character must be a digit).</li><li>1A is invalid (letter must come first).</li><li>Z2 is invalid (Z is not in the list of letters).</li></ul>" +
-      "<p>Recursive example: <code>&lt;integer&gt; ::= &lt;digit&gt; | &lt;integer&gt;&lt;digit&gt;</code> accepts 7, 42 and 1999: 42 is an &lt;integer&gt; (4) followed by a &lt;digit&gt; (2).</p>" +
-      "<p><b>Exam link:</b> past papers ask you to complete or write BNF rules and to say whether given strings are valid.</p>",
+      "<p><b>Worked example.</b> The diagrams give a variable as a letter (A, B or C) followed by a digit (1, 2 or 3). In BNF: <code>&lt;variable&gt; ::= &lt;letter&gt;&lt;digit&gt;</code>, <code>&lt;letter&gt; ::= A | B | C</code>, <code>&lt;digit&gt; ::= 1 | 2 | 3</code>.</p>" +
+      "<ul><li><b>A1, B3, C2</b> are valid: a letter from the list, then a digit from the list.</li><li><b>CC</b> is invalid: the second character must be a digit.</li><li><b>1A</b> is invalid: the letter must come first.</li><li><b>Z2</b> is invalid: Z is not one of the letters.</li><li><b>A4</b> is invalid: 4 is not one of the digits.</li></ul>" +
+      "<p><b>Recursive example.</b> <code>&lt;integer&gt; ::= &lt;digit&gt; | &lt;integer&gt;&lt;digit&gt;</code> accepts 7, 42 and 1999. To show 42 is valid: 42 is an &lt;integer&gt; (4) followed by a &lt;digit&gt; (2), and 4 is a &lt;digit&gt;, so it is an &lt;integer&gt;.</p>" +
+      "<p><b>Optional part.</b> A code is a letter, then a digit that may be missing: <code>&lt;code&gt; ::= &lt;letter&gt; | &lt;letter&gt;&lt;digit&gt;</code>. In the diagram, the digit rectangle has a path that goes round it.</p>" +
+      "<p><b>Exam link:</b> past papers ask you to complete or write BNF rules, to draw or complete a syntax diagram, and to say whether given strings are valid. Always check every character, in order, against the rules.</p>",
     checks:[
       mc("What does the symbol | mean in BNF?", "Or (a choice between items)", ["And then", "Is defined as", "Repeat"], "It separates alternatives."),
       mc("What does ::= mean in BNF?", "Is defined as", ["Is not equal to", "Or", "Repeat"], "It separates an item from its definition."),
+      mc("In a syntax diagram, what is drawn inside a rectangle?", "The name of another diagram (a non-terminal)", ["A character typed exactly as shown", "A comment", "The end of the program"], "Ovals/circles hold terminals; rectangles refer to other diagrams."),
+      mc("In a syntax diagram, what does an arrow that loops back mean?", "The item can be repeated", ["The item is optional", "The program must stop", "The item is a comment"], "A loop lets the path go round again, so the item can be used several times."),
       mc("<variable> ::= <letter><digit>, <letter> ::= A|B|C, <digit> ::= 1|2|3. Which is a valid variable?", "B3", ["3B", "CC", "A4"], "A valid variable is a letter from A, B, C followed by a digit from 1, 2, 3."),
       mc("Which BNF rule describes an integer made of one or more digits?", "<integer> ::= <digit> | <integer><digit>", ["<integer> ::= <digit> <digit>", "<integer> ::= <integer>", "<integer> ::= <digit> & <digit>"], "The recursive rule allows any number of digits."),
+      mc("Why does BNF use a recursive rule to show repetition?", "BNF has no loop symbol", ["Recursive rules run faster", "Digits can only be used once", "It saves the programmer typing"], "A rule that is defined using itself is the BNF way to repeat an item."),
       fill("Complete the BNF for a code made of the letter X followed by a digit.", "<code> {1} X<digit>\n<digit> {2} 0 {3} 1 {4} 2", [["::=", ["=", "->", ":"]], ["::=", ["=", "->", ":"]], ["|", ["&", ",", "+"]], ["|", ["&", ",", "+"]]], "::= means 'is defined as' and | separates the alternatives."),
       tx("State the purpose of BNF. [1]", [["grammar","syntax","rules","define","language"]], 1, "BNF is a formal way of defining the syntax (grammatical rules) of a programming language.")
     ] },

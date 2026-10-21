@@ -88,5 +88,8 @@
   add("18.1g", "regress", "Regression: fit a line to the data", 1);
   add("18.p3a", "regress", "Regression: fit a line to the data", 1);
   add("16.2a", "interp", "Interpreter against compiler", 1);
-  add("16.2c", "bnf", "Test strings against the BNF rules", 1);
+  add("16.2c", "synkey", "How to read a syntax diagram", 0);
+  add("16.2c", "syndiag", "Walk through a syntax diagram", 0);
+  add("16.2c", "bnfderive", "Build a string step by step from BNF rules", 1);
+  add("16.2c", "synquiz", "Syntax diagram and BNF quiz", 1);
 })(typeof window !== "undefined" ? window : this);
