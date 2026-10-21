@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-Zna3HXJIL4lGXFEJqsr5slUWs1KaVBtrTHuEP98NliQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-NTkY1MUup6DTNqgPj0YswfDl9+P1gm6Xyq9yQDOpDdc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -533,7 +533,7 @@
       renderSteps(2);
       body.innerHTML = '<p class="ln-crumb">Question ' + (c.ci + 1) + " of " + l.checks.length + '</p>' + refPanel(l, c.refOpen) + '<div id="qhost"></div>';
       bindRef(c);
-      renderQ($("qhost"), l.checks[c.ci], l.video, function(ok, fb, info){ if(info && info.low) c.wrongTotal++; lessonAnswered(ok, fb); });
+      renderQ($("qhost"), l.checks[c.ci], l.video, function(ok, fb, info){ if(info && info.low) c.wrongTotal++; if(info && info.max){ var bp = c.pp; if(!bp || info.awarded / info.max >= bp[0] / bp[1]) c.pp = [info.awarded, info.max]; } lessonAnswered(ok, fb); });
       return;
     } else {
       renderSteps(3, true);
@@ -585,6 +585,9 @@
         if(!last){ c.ci++; renderLesson(); return; }
         var prev = st.learn[l.id];
         st.learn[l.id] = { d: 1, f: c.wrongTotal === 0 ? 1 : 0, a: c.wrongTotal + 1, t: Date.now(), rc: 0 };
+        // the real past-paper question: best mark scored in this attempt [awarded, max], so the teacher report can show it
+        if(c.pp) st.learn[l.id].pp = c.pp;
+        else if(prev && prev.pp) st.learn[l.id].pp = prev.pp;
         var secs = Math.round((st.spent && st.spent[l.id]) || 0);
         if(secs > 0) st.learn[l.id].s = secs;
         else if(prev && prev.s) st.learn[l.id].s = prev.s;

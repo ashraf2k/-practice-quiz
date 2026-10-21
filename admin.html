@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-cfqECptN6/eZ6NIAE5aiPIB6ziSGtz23xIe/rNPDuy0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-iacNnpyD7yGmjU0zkPbFzM7aC4HYEvHBV9Q2i2j1H60='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -603,7 +603,7 @@
         <p class="admin-status" id="ilearnAS-status">Shows each 11BR student's progress through the AS Level (9618) iLearn journey, topics 1 to 12, ranked by topics completed, then by performance (share of lessons mastered first time). Only students who have started are listed. Click "Load AS Level iLearn progress" to fetch it. The preview opens in this same tab, using your admin sign-in, so you do not need a student account; try every lesson and nothing is saved online.</p>
         <div id="ilearnAS-summary"></div>
         <div class="table-scroll"><table class="admin-table" id="ilearnAS-table" style="display:none">
-          <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Topics completed</th><th>Mastered first time</th><th>XP</th><th>Topic tests</th><th>Last active</th><th></th></tr></thead>
+          <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Topics completed</th><th>Mastered first time</th><th>Past-paper marks</th><th>XP</th><th>Topic tests</th><th>Last active</th><th></th></tr></thead>
           <tbody></tbody></table></div>
         <h3 id="ilearnAS-hard-h" style="display:none;margin-top:20px">Lessons students found hardest</h3>
         <div class="table-scroll"><table class="admin-table" id="ilearnAS-hard" style="display:none">
@@ -1693,18 +1693,20 @@
     sel.value = seen[cur] ? cur : "";
   }
   function calcAS(rec){
-    var L = (rec && rec.learn) || {}, I = idxAS(), r = { done: 0, mastered: 0, skipped: 0, byTopic: {}, totalByTopic: {}, retried: [] };
+    var L = (rec && rec.learn) || {}, I = idxAS(), r = { done: 0, mastered: 0, skipped: 0, ppA: 0, ppM: 0, ppN: 0, ppLow: [], byTopic: {}, totalByTopic: {}, retried: [] };
     I.forEach(function(l){
       r.totalByTopic[l.topic] = (r.totalByTopic[l.topic] || 0) + 1;
       var x = L[l.id]; if(!x || !x.d) return;
       r.done++; r.byTopic[l.topic] = (r.byTopic[l.topic] || 0) + 1;
       if(x.f) r.mastered++; if(x.pre) r.skipped++;
+      if(x.pp && x.pp[1]){ r.ppA += x.pp[0]; r.ppM += x.pp[1]; r.ppN++; if(x.pp[0] / x.pp[1] < 0.6) r.ppLow.push({ l: l, a: x.pp[0], m: x.pp[1] }); }
       if(!x.f && !x.pre) r.retried.push({ l: l, a: Number(x.a) || 2 });
     });
     var tops = Object.keys(r.totalByTopic);
     r.topicsTotal = tops.length;
     r.topicsDone = tops.filter(function(t){ return r.byTopic[t] === r.totalByTopic[t]; }).length;
     r.perf = r.done ? r.mastered / r.done : 0;
+    r.ppPct = r.ppM ? Math.round(100 * r.ppA / r.ppM) : null;
     return r;
   }
   function renderILearnAS(){
@@ -1731,7 +1733,7 @@
       var doneTd = mk("td", null, c.done + " / " + total + " (" + pct + "%)"); var mp = mk("span", "miniprog"), mi = document.createElement("i"); mi.style.width = pct + "%"; mp.appendChild(mi); doneTd.appendChild(mp);
       tr.appendChild(nameTd); tr.appendChild(mk("td", null, r.s.className || "")); tr.appendChild(doneTd);
       tr.appendChild(mk("td", null, c.topicsDone + " / " + c.topicsTotal)); tr.appendChild(mk("td", null, c.mastered + " (" + Math.round(100 * c.perf) + "%)"));
-      tr.appendChild(mk("td", null, String(rec.xp || 0))); tr.appendChild(mk("td", null, tests)); tr.appendChild(mk("td", null, ilearnDate(r.lastActive)));
+      tr.appendChild(mk("td", null, c.ppN ? c.ppPct + "% (" + c.ppA + "/" + c.ppM + ")" : "-")); tr.appendChild(mk("td", null, String(rec.xp || 0))); tr.appendChild(mk("td", null, tests)); tr.appendChild(mk("td", null, ilearnDate(r.lastActive)));
       var tdv = mk("td"); tdv.appendChild(mk("span", "view-link", "View journey ›")); tr.appendChild(tdv);
       tr.addEventListener("click", function(){ openILearnASDetail(r); });
       tb.appendChild(tr);
@@ -1765,6 +1767,7 @@
     kr.appendChild(tile("Lessons done", c.done + " / " + total, Math.round(100 * c.done / (total || 1)) + "% of the journey"));
     kr.appendChild(tile("Topics completed", c.topicsDone + " / " + c.topicsTotal, "topics 1 to 12"));
     kr.appendChild(tile("Mastered first time", String(c.mastered), c.done ? Math.round(100 * c.perf) + "% of lessons done" : "-"));
+    kr.appendChild(tile("Past-paper marks", c.ppN ? c.ppPct + "%" : "-", c.ppN ? c.ppA + " / " + c.ppM + " marks over " + c.ppN + " question" + (c.ppN === 1 ? "" : "s") : "no past-paper questions yet"));
     kr.appendChild(tile("XP", String(rec.xp || 0)));
     kr.appendChild(tile("Skipped by test", String(c.skipped)));
     body.appendChild(kr);
@@ -1772,6 +1775,7 @@
     if(!c.done) fl.appendChild(mk("li", "warn", "Has not started the AS Level journey yet."));
     else {
       if(inactive != null && inactive >= 7) fl.appendChild(mk("li", "bad", "No AS Level iLearn activity for " + inactive + " days."));
+      if(c.ppLow.length) fl.appendChild(mk("li", "warn", "Scored under 60% on the past-paper question in " + c.ppLow.length + " lesson" + (c.ppLow.length === 1 ? "" : "s") + ": " + c.ppLow.slice(0, 4).map(function(x){ return x.l.id + " (" + x.a + "/" + x.m + ")"; }).join(", ") + ". These need revisiting."));
       c.retried.sort(function(a, b){ return b.a - a.a; });
       if(c.retried.length) fl.appendChild(mk("li", "warn", "Needed retries on " + c.retried.length + " lesson" + (c.retried.length === 1 ? "" : "s") + ". Hardest: " + c.retried.slice(0, 3).map(function(x){ return x.l.id + " " + x.l.title + " (" + x.a + " tries)"; }).join("; ") + "."));
       else if(!(inactive >= 7)) fl.appendChild(mk("li", "", "Nothing flagged. Learning steadily with no repeated struggles."));
@@ -1779,17 +1783,18 @@
     fb.appendChild(fl); body.appendChild(fb);
     var tb = box("Progress by topic and lesson", "✓ done · ★ mastered first time · number = attempts");
     var table = mk("table", "admin-table"), th = mk("thead"), htr = mk("tr");
-    ["Lesson", "Status"].forEach(function(h){ htr.appendChild(mk("th", null, h)); }); th.appendChild(htr); table.appendChild(th);
+    ["Lesson", "Status", "Past-paper question"].forEach(function(h){ htr.appendChild(mk("th", null, h)); }); th.appendChild(htr); table.appendChild(th);
     var tbd = mk("tbody"), lastTopic = null;
     I.forEach(function(l){
       if(l.topic !== lastTopic){
         lastTopic = l.topic;
         var hr = mk("tr"); hr.style.cursor = "default";
-        var td = mk("td", null, "Topic " + l.topic + " — " + (c.byTopic[l.topic] || 0) + " / " + c.totalByTopic[l.topic] + " done"); td.colSpan = 2; td.style.cssText = "font-weight:700;background:var(--bg)"; hr.appendChild(td); tbd.appendChild(hr);
+        var td = mk("td", null, "Topic " + l.topic + " — " + (c.byTopic[l.topic] || 0) + " / " + c.totalByTopic[l.topic] + " done"); td.colSpan = 3; td.style.cssText = "font-weight:700;background:var(--bg)"; hr.appendChild(td); tbd.appendChild(hr);
       }
       var x = L[l.id], tr = mk("tr"); tr.style.cursor = "default";
       tr.appendChild(mk("td", null, l.id + "  " + l.title));
       tr.appendChild(mk("td", null, !x || !x.d ? "—" : (x.pre ? "✓ skipped by test" : (x.f ? "★ mastered" : "✓ done, " + (Number(x.a) || 2) + " tries"))));
+      tr.appendChild(mk("td", null, x && x.pp ? x.pp[0] + " / " + x.pp[1] + " (" + Math.round(100 * x.pp[0] / x.pp[1]) + "%)" : "-"));
       tbd.appendChild(tr);
     });
     table.appendChild(tbd); var wrap = mk("div", "table-scroll"); wrap.appendChild(table); tb.appendChild(wrap); body.appendChild(tb);
