@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-c13PPzBoHCDqFYtv0xv/hwNdLT4APqYJz2k+wnUgJng='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-cfqECptN6/eZ6NIAE5aiPIB6ziSGtz23xIe/rNPDuy0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -595,9 +595,27 @@
 
       <div class="admin-panel" id="panel-ilearnAS">
         <div class="admin-toolbar no-print">
-          <a class="btn btn-primary" href="as.html">Try the AS Level journey as a student (admin preview) ›</a>
+          <select id="filter-class-ilearnAS"><option value="">All 11BR classes</option></select>
+          <input type="text" id="filter-search-ilearnAS" placeholder="Search by name or email" />
+          <button class="btn btn-primary" id="btn-ilearnAS-load" type="button">Load AS Level iLearn progress</button>
+          <a class="btn btn-secondary" href="as.html">Try the AS Level journey as a student (admin preview) ›</a>
         </div>
-        <p class="admin-status">Opens the AS Level (9618) iLearn journey exactly as an 11BR student sees it. Your progress there is kept only in your own browser; nothing is saved online and no student data is changed. The per-student progress report for 11BR will be added with the full set of lessons.</p>
+        <p class="admin-status" id="ilearnAS-status">Shows each 11BR student's progress through the AS Level (9618) iLearn journey, topics 1 to 12, ranked by topics completed, then by performance (share of lessons mastered first time). Only students who have started are listed. Click "Load AS Level iLearn progress" to fetch it. The preview opens in this same tab, using your admin sign-in, so you do not need a student account; try every lesson and nothing is saved online.</p>
+        <div id="ilearnAS-summary"></div>
+        <div class="table-scroll"><table class="admin-table" id="ilearnAS-table" style="display:none">
+          <thead><tr><th>#</th><th>Student</th><th>Class</th><th>Lessons done</th><th>Topics completed</th><th>Mastered first time</th><th>XP</th><th>Topic tests</th><th>Last active</th><th></th></tr></thead>
+          <tbody></tbody></table></div>
+        <h3 id="ilearnAS-hard-h" style="display:none;margin-top:20px">Lessons students found hardest</h3>
+        <div class="table-scroll"><table class="admin-table" id="ilearnAS-hard" style="display:none">
+          <thead><tr><th>Lesson</th><th>Topic</th><th>Students who needed retries</th></tr></thead><tbody></tbody></table></div>
+      </div>
+
+      <div class="admin-panel" id="panel-ilearnASDetail">
+        <div class="admin-toolbar no-print">
+          <button class="btn btn-secondary admin-detail-back" id="btn-back-ilearnAS" type="button">← Back to the AS Level list</button>
+          <a class="btn btn-secondary" href="as.html">Try the AS Level journey as a student (admin preview) ›</a>
+        </div>
+        <div id="ilearnAS-detail-body"></div>
       </div>
 
       <div class="admin-panel" id="panel-archive">
@@ -671,6 +689,7 @@
 <script src="learn-games-data.js?v=20261019j"></script>
 <script src="learn-engine.js?v=20261019j"></script>
 <script src="alevel-index.js?v=20261021b"></script>
+<script src="as-index.js?v=20261021a"></script>
 <script src="report-lib.js?v=20261019j"></script>
 <script src="syllabus-data.js?v=20261019j"></script>
 <script src="syllabus-report.js?v=20261019j"></script>
@@ -861,7 +880,7 @@
     document.querySelectorAll(".admin-tab").forEach(function(btn){
       btn.classList.toggle("active", btn.dataset.tab === name);
     });
-    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","archive"].forEach(function(id){
+    ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","archive"].forEach(function(id){
       document.getElementById("panel-" + id).classList.toggle("active", id === name);
     });
   }
@@ -1653,6 +1672,157 @@
     });
   });
   document.getElementById("btn-back-ilearn12").addEventListener("click", function(){ showTab("ilearn12"); });
+
+  // ------------------------------------------------------------
+  // 11BR AS Level iLearn report (progress key "ilearnAS"; lesson list from as-index.js).
+  // Same layout as the 10BR report: ranked list, then one student's full journey.
+  // ------------------------------------------------------------
+  var rowsAS = [];
+  function idxAS(){ return window.ILEARNAS_INDEX || []; }
+  function rosterAS(){
+    // Built straight from the registered-student list. (SyllabusData.analyse only covers 10BR quiz/exam students, so it never returned 11BR.)
+    if(!loaded) return [];
+    return (usersRoster || []).filter(function(u){ return u && u.uid && /^\s*11\s*BR/i.test(u.className || u.class || ""); }).map(function(u){
+      return { uid: u.uid, name: u.name || "(no name)", email: u.email || "", className: String(u.className || u.class || "").replace(/\s+/g, "") };
+    }).sort(function(a, b){ return (a.className + a.name).localeCompare(b.className + b.name); });
+  }
+  function fillClassesAS(list){
+    var sel = document.getElementById("filter-class-ilearnAS"), cur = sel.value, seen = {};
+    list.forEach(function(s){ if(s.className) seen[s.className] = 1; });
+    sel.innerHTML = '<option value="">All 11BR classes</option>' + Object.keys(seen).sort().map(function(c){ return '<option value="' + esc12(c) + '">' + esc12(c) + '</option>'; }).join("");
+    sel.value = seen[cur] ? cur : "";
+  }
+  function calcAS(rec){
+    var L = (rec && rec.learn) || {}, I = idxAS(), r = { done: 0, mastered: 0, skipped: 0, byTopic: {}, totalByTopic: {}, retried: [] };
+    I.forEach(function(l){
+      r.totalByTopic[l.topic] = (r.totalByTopic[l.topic] || 0) + 1;
+      var x = L[l.id]; if(!x || !x.d) return;
+      r.done++; r.byTopic[l.topic] = (r.byTopic[l.topic] || 0) + 1;
+      if(x.f) r.mastered++; if(x.pre) r.skipped++;
+      if(!x.f && !x.pre) r.retried.push({ l: l, a: Number(x.a) || 2 });
+    });
+    var tops = Object.keys(r.totalByTopic);
+    r.topicsTotal = tops.length;
+    r.topicsDone = tops.filter(function(t){ return r.byTopic[t] === r.totalByTopic[t]; }).length;
+    r.perf = r.done ? r.mastered / r.done : 0;
+    return r;
+  }
+  function renderILearnAS(){
+    var table = document.getElementById("ilearnAS-table"), tb = table.querySelector("tbody");
+    var cls = document.getElementById("filter-class-ilearnAS").value, q = document.getElementById("filter-search-ilearnAS").value.trim().toLowerCase();
+    var total = idxAS().length, struggle = {};
+    var shown = rowsAS.filter(function(r){
+      return (!cls || r.s.className === cls) && (!q || ((r.s.name || "") + " " + (r.s.email || "")).toLowerCase().indexOf(q) !== -1);
+    });
+    var startedN = shown.filter(function(r){ return r.c.done > 0; }).length;
+    shown.sort(function(a, b){
+      return (b.c.topicsDone - a.c.topicsDone) || (b.c.perf - a.c.perf) || (b.c.done - a.c.done) || ((b.lastActive || 0) - (a.lastActive || 0)) || String(a.s.name || "").localeCompare(String(b.s.name || ""));
+    });
+    table.style.display = shown.length ? "" : "none";
+    tb.innerHTML = "";
+    shown.forEach(function(r, i){
+      var rec = r.rec, c = r.c, tr = document.createElement("tr");
+      tr.title = "Open " + (r.s.name || "student") + "'s AS Level journey";
+      var rank = mk("span", "rank" + (i < 3 ? " r" + (i + 1) : ""), String(i + 1)), tdRank = mk("td"); tdRank.appendChild(rank); tr.appendChild(tdRank);
+      var pct = Math.round(100 * c.done / (total || 1));
+      var tests = Object.keys(rec.tests || {}).sort(function(a, b){ return a - b; }).map(function(k){ var t = rec.tests[k]; return "T" + k + " " + Math.round(100 * t.s / t.t) + "%"; }).join(", ") || "-";
+      var nameTd = mk("td", null, r.s.name || "(no name)");
+      if(r.s.email){ var em = mk("div", null, r.s.email); em.style.cssText = "font-size:.75rem;color:#64748b"; nameTd.appendChild(em); }
+      var doneTd = mk("td", null, c.done + " / " + total + " (" + pct + "%)"); var mp = mk("span", "miniprog"), mi = document.createElement("i"); mi.style.width = pct + "%"; mp.appendChild(mi); doneTd.appendChild(mp);
+      tr.appendChild(nameTd); tr.appendChild(mk("td", null, r.s.className || "")); tr.appendChild(doneTd);
+      tr.appendChild(mk("td", null, c.topicsDone + " / " + c.topicsTotal)); tr.appendChild(mk("td", null, c.mastered + " (" + Math.round(100 * c.perf) + "%)"));
+      tr.appendChild(mk("td", null, String(rec.xp || 0))); tr.appendChild(mk("td", null, tests)); tr.appendChild(mk("td", null, ilearnDate(r.lastActive)));
+      var tdv = mk("td"); tdv.appendChild(mk("span", "view-link", "View journey ›")); tr.appendChild(tdv);
+      tr.addEventListener("click", function(){ openILearnASDetail(r); });
+      tb.appendChild(tr);
+      c.retried.forEach(function(x){ struggle[x.l.id] = (struggle[x.l.id] || 0) + 1; });
+    });
+    document.getElementById("ilearnAS-summary").innerHTML = rowsAS.length ? '<p class="admin-status">' + startedN + " of " + shown.length + " registered 11BR student" + (shown.length === 1 ? " has" : "s have") + " started the AS Level journey (students who have not started are listed last).</p>" : "";
+    var byId = {}; idxAS().forEach(function(l){ byId[l.id] = l; });
+    var ids = Object.keys(struggle).sort(function(a, b){ return struggle[b] - struggle[a]; }).slice(0, 10);
+    var hb = document.querySelector("#ilearnAS-hard tbody"); hb.innerHTML = "";
+    ids.forEach(function(id){ var tr = document.createElement("tr"); tr.style.cursor = "default"; [id + " " + byId[id].title, "Topic " + byId[id].topic, struggle[id]].forEach(function(v){ tr.appendChild(mk("td", null, String(v))); }); hb.appendChild(tr); });
+    document.getElementById("ilearnAS-hard").style.display = ids.length ? "" : "none";
+    document.getElementById("ilearnAS-hard-h").style.display = ids.length ? "" : "none";
+  }
+  function openILearnASDetail(r){
+    var rec = r.rec, L = rec.learn || {}, c = r.c, I = idxAS(), total = I.length, body = document.getElementById("ilearnAS-detail-body");
+    body.textContent = "";
+    var inactive = daysAgo(r.lastActive), nm = (r.s.name || "?").trim();
+    var head = mk("div", "ij-head");
+    head.appendChild(mk("div", "ij-avatar", nm.split(/\s+/).slice(0, 2).map(function(w){ return w.charAt(0).toUpperCase(); }).join("") || "?"));
+    var hd = mk("div"); hd.appendChild(mk("h3", null, nm));
+    var meta = mk("div", "ij-meta"); meta.appendChild(mk("span", null, r.s.className || ""));
+    if(r.s.email) meta.appendChild(mk("span", null, r.s.email));
+    meta.appendChild(mk("span", null, "Last active: " + (r.lastActive ? fmtDay(r.lastActive) + (inactive > 0 ? " (" + inactive + " day" + (inactive === 1 ? "" : "s") + " ago)" : " (today)") : "never")));
+    hd.appendChild(meta); head.appendChild(hd);
+    var chips = mk("div"); chips.style.cssText = "margin-left:auto;display:flex;gap:6px;flex-wrap:wrap";
+    if(!c.done) chips.appendChild(mk("span", "chip", "Not started"));
+    else if(inactive != null && inactive >= 7) chips.appendChild(mk("span", "chip bad", "Inactive " + inactive + " days"));
+    else chips.appendChild(mk("span", "chip ok", "Active"));
+    head.appendChild(chips); body.appendChild(head);
+    var kr = mk("div", "kpi-row");
+    kr.appendChild(tile("Lessons done", c.done + " / " + total, Math.round(100 * c.done / (total || 1)) + "% of the journey"));
+    kr.appendChild(tile("Topics completed", c.topicsDone + " / " + c.topicsTotal, "topics 1 to 12"));
+    kr.appendChild(tile("Mastered first time", String(c.mastered), c.done ? Math.round(100 * c.perf) + "% of lessons done" : "-"));
+    kr.appendChild(tile("XP", String(rec.xp || 0)));
+    kr.appendChild(tile("Skipped by test", String(c.skipped)));
+    body.appendChild(kr);
+    var fb = box("What needs attention"), fl = mk("ul", "focus-list");
+    if(!c.done) fl.appendChild(mk("li", "warn", "Has not started the AS Level journey yet."));
+    else {
+      if(inactive != null && inactive >= 7) fl.appendChild(mk("li", "bad", "No AS Level iLearn activity for " + inactive + " days."));
+      c.retried.sort(function(a, b){ return b.a - a.a; });
+      if(c.retried.length) fl.appendChild(mk("li", "warn", "Needed retries on " + c.retried.length + " lesson" + (c.retried.length === 1 ? "" : "s") + ". Hardest: " + c.retried.slice(0, 3).map(function(x){ return x.l.id + " " + x.l.title + " (" + x.a + " tries)"; }).join("; ") + "."));
+      else if(!(inactive >= 7)) fl.appendChild(mk("li", "", "Nothing flagged. Learning steadily with no repeated struggles."));
+    }
+    fb.appendChild(fl); body.appendChild(fb);
+    var tb = box("Progress by topic and lesson", "✓ done · ★ mastered first time · number = attempts");
+    var table = mk("table", "admin-table"), th = mk("thead"), htr = mk("tr");
+    ["Lesson", "Status"].forEach(function(h){ htr.appendChild(mk("th", null, h)); }); th.appendChild(htr); table.appendChild(th);
+    var tbd = mk("tbody"), lastTopic = null;
+    I.forEach(function(l){
+      if(l.topic !== lastTopic){
+        lastTopic = l.topic;
+        var hr = mk("tr"); hr.style.cursor = "default";
+        var td = mk("td", null, "Topic " + l.topic + " — " + (c.byTopic[l.topic] || 0) + " / " + c.totalByTopic[l.topic] + " done"); td.colSpan = 2; td.style.cssText = "font-weight:700;background:var(--bg)"; hr.appendChild(td); tbd.appendChild(hr);
+      }
+      var x = L[l.id], tr = mk("tr"); tr.style.cursor = "default";
+      tr.appendChild(mk("td", null, l.id + "  " + l.title));
+      tr.appendChild(mk("td", null, !x || !x.d ? "—" : (x.pre ? "✓ skipped by test" : (x.f ? "★ mastered" : "✓ done, " + (Number(x.a) || 2) + " tries"))));
+      tbd.appendChild(tr);
+    });
+    table.appendChild(tbd); var wrap = mk("div", "table-scroll"); wrap.appendChild(table); tb.appendChild(wrap); body.appendChild(tb);
+    var tk = Object.keys(rec.tests || {}).sort(function(a, b){ return a - b; });
+    if(tk.length){
+      var tbx = box("Topic tests"), ul = mk("ul", "focus-list");
+      tk.forEach(function(k){ var t = rec.tests[k]; ul.appendChild(mk("li", "", "Topic " + k + ": " + t.s + " / " + t.t + " (" + Math.round(100 * t.s / t.t) + "%)")); });
+      tbx.appendChild(ul); body.appendChild(tbx);
+    }
+    showTab("ilearnASDetail");
+    window.scrollTo(0, 0);
+  }
+  document.getElementById("btn-ilearnAS-load").addEventListener("click", function(){
+    var status = document.getElementById("ilearnAS-status");
+    if(!idxAS().length){ status.textContent = "The AS Level lesson list did not load - refresh the page."; return; }
+    if(typeof PQFirebase.getMyProgress !== "function"){ status.textContent = "This browser has an older cached script - hard refresh and try again."; return; }
+    if(!loaded){ status.textContent = "Load the dashboard data first (open the Students tab), then try again."; return; }
+    var roster = rosterAS();
+    fillClassesAS(roster);
+    if(!roster.length){ status.textContent = "No 11BR students found yet."; rowsAS = []; renderILearnAS(); return; }
+    status.textContent = "Loading " + roster.length + " students…";
+    var readErrsAS = 0;
+    Promise.all(roster.map(function(s){
+      return PQFirebase.getMyProgress(s.uid, "ilearnAS").catch(function(){ readErrsAS++; return null; }).then(function(rec){
+        rec = rec || {}; return { s: s, rec: rec, c: calcAS(rec), lastActive: rec.lastActive || null };
+      });
+    })).then(function(rows){
+      rowsAS = rows;
+      status.textContent = "Loaded " + rows.length + " 11BR students." + (readErrsAS ? " WARNING: progress could not be read for " + readErrsAS + " of them (Firestore denied the request). Publish the latest firestore.rules in the Firebase console, then press Load again." : "");
+      renderILearnAS();
+    });
+  });
+  document.getElementById("btn-back-ilearnAS").addEventListener("click", function(){ showTab("ilearnAS"); });
   document.getElementById("filter-class-ilearn12").addEventListener("change", renderILearn12);
   document.getElementById("filter-search-ilearn12").addEventListener("input", renderILearn12);
   function esc12(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
