@@ -166,3 +166,6 @@
 .dcb.leaf{cursor:default;border-style:dashed;background:var(--bg);font-weight:500}
 .dcb.open{background:var(--accent-tint);border-color:var(--accent)}
 .dcb:hover:not(.leaf){border-color:var(--accent)}
+.ovl{text-decoration:overline;text-decoration-thickness:1.5px}
+.vpre{margin:6px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font:12.5px/1.45 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-x:auto}
+.vol{margin:6px 0 6px 18px;padding:0}.vol li{margin:3px 0}

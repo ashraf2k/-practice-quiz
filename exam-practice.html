@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-RLfFUNb0usJtInXjxI8Z5B7R4Dp/boBz5PW2usLXOFU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-xin57K9/wB6lr+QRtATIDhDbfpnUuWmO1e5Aw9n5YLw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261019j"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -23,6 +23,7 @@
 <title>Topical Exam Practice</title>
 <link rel="stylesheet" href="shared.css?v=20261019j" />
 <link rel="stylesheet" href="theme.css?v=20261019j" />
+<link rel="stylesheet" href="alevel-viz.css?v=20261021c" />
 </head>
 <body>
 <div class="wrap" id="wrap">
@@ -114,6 +115,7 @@
         <p id="q-explanation"></p>
       </div>
 
+      <div id="exam-viz"></div>
       <div id="exam-videos" class="exam-videos hidden"></div>
 
       <div id="level-banner"></div>
@@ -159,6 +161,16 @@
 <script src="as-exam-t11.js?v=20261021a"></script>
 <script src="as-exam-t12.js?v=20261021a"></script>
 <script src="as-exam-register.js?v=20261021a"></script>
+<script src="a2-exam.js?v=20261021a"></script>
+<script src="alevel-viz.js?v=20261021c"></script>
+<script src="alevel-viz-1.js?v=20261021c"></script>
+<script src="alevel-viz-2.js?v=20261021c"></script>
+<script src="alevel-viz-3.js?v=20261021c"></script>
+<script src="alevel-viz-4.js?v=20261021c"></script>
+<script src="alevel-viz-5.js?v=20261021c"></script>
+<script src="alevel-viz-6.js?v=20261021c"></script>
+<script src="alevel-viz-7.js?v=20261021c"></script>
+<script src="alevel-viz-8.js?v=20261021c"></script>
 <script src="syllabus-objectives.js?v=20261019j"></script>
 <script src="scratchpad.js?v=20261019j"></script>
 <script src="firebase-config.js?v=20261019j"></script>
@@ -405,7 +417,7 @@
     var q = currentQuestion();
     var total = state.paper.questions.length;
 
-    qTopicLabel.textContent = q.topic;
+    qTopicLabel.textContent = q.topic; var xv = document.getElementById("exam-viz"); if(xv) xv.innerHTML = "";
     qCount.textContent = "Question " + (state.index + 1) + " of " + total;
     qProgressFill.style.width = (state.index / total * 100) + "%";
 
@@ -870,6 +882,14 @@
     renderMarkPoints(q, text);
     if(penDraw) penDraw.showNote(!text.trim() && drawn);
     qExplanation.textContent = q.explanation;
+    (function(){ // optional "Try it" diagram (shown only after the answer is marked, so it cannot give the answer away)
+      var host = document.getElementById("exam-viz"); if(!host) return; host.innerHTML = "";
+      var V = window.ILEARN_VIZ; if(!q.viz || !V || !V.W[q.viz.w]) return;
+      var wrap = document.createElement("div"); wrap.className = "viz";
+      var h = document.createElement("div"); h.className = "viz-h"; h.textContent = "\uD83C\uDFAC Try it: " + q.viz.t;
+      var body = document.createElement("div"); body.className = "viz-b"; wrap.appendChild(h); wrap.appendChild(body); host.appendChild(wrap);
+      try { V.W[q.viz.w](body, q.viz.o || {}); } catch(e){ host.innerHTML = ""; }
+    })();
     checkArea.classList.remove("hidden");
     currentChecked = true;
     if(state.paper.strictMarks){
