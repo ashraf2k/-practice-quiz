@@ -55,3 +55,8 @@
 .enhack{position:absolute;left:50%;top:0;transform:translateX(-50%);text-align:center;font-size:12px;padding:3px 8px;border:2px dashed var(--line);border-radius:10px;min-width:110px}.enhack.hot{border-color:var(--incorrect);background:var(--incorrect-bg)}
 .enpkt{position:absolute;left:0;top:62px;padding:4px 8px;border-radius:8px;background:var(--accent-tint);border:2px solid var(--accent);font:700 13px ui-monospace,Menlo,monospace;white-space:nowrap;z-index:2}.enpkt.hot{background:var(--diff-moderate-bg);border-color:var(--diff-moderate)}
 @media (prefers-reduced-motion:reduce){.vsvg .live,.vsvg .vlamp.on,.vsvg .ubd{animation:none}.vsvg .vlever,.vsvg .lad,.nzchip,.lbar i{transition:none}}
+/* subroutine machine (topic 8.1.6) */
+@keyframes vspin{to{transform:rotate(360deg)}}
+.vsvg .gear.run{animation:vspin 1.6s linear infinite}.vsvg .gear.rev.run{animation-direction:reverse}
+.vsvg .smtok{transition:transform .7s cubic-bezier(.4,0,.2,1),opacity .4s}
+@media (prefers-reduced-motion:reduce){.vsvg .gear.run{animation:none}.vsvg .smtok{transition:none}}

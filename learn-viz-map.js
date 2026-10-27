@@ -61,3 +61,11 @@
   add("10.1", "gate", "Logic gates with switches", 1, { g: "AND" }); add("10.2a", "gate", "NOT, AND and OR", 1, { g: "AND" }); add("10.2b", "gate", "NAND, NOR and XOR", 1, { g: "NAND" });
   add("10.3a", "circ", "Build a circuit and flip the inputs", 1, { c: "c1" }); add("10.3b", "circ", "Complete a truth table", 1, { c: "c2" }); add("10.3c", "circ", "From circuit to expression", 1, { c: "c3" });
 })(typeof window !== "undefined" ? window : this);
+(function(root){
+  "use strict";
+  var M = root.ILEARN_VIZ.MAP;
+  function add(id, w, title, at, o, note){ (M[id] = M[id] || []).push({ w: w, title: title, at: at, o: o || {}, note: note || "" }); }
+  add("8.1.6a", "submachine", "A function is a machine: values in, one value out", 1, { kind: "func" });
+  add("8.1.6b1", "submachine", "Follow a procedure call", 1, { kind: "proc" });
+  add("8.1.6b2", "submachine", "Follow a function call and RETURN", 1, { kind: "func" });
+})(typeof window !== "undefined" ? window : this);
