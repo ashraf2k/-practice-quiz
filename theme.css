@@ -180,6 +180,29 @@
   --on-accent: #FFFFFF;
   --logo-plate: #FAFBF9;
 }
+:root[data-theme="sd"]{
+  /* Sudan flag theme */
+  color-scheme: light;
+  --bg: #EFF0EC; --bg-blob-1: rgba(0,114,41,0.06); --bg-blob-2: rgba(210,16,52,0.05);
+  --surface: #FAFBF9; --surface-soft: #F3F5F1;
+  --ink: #151515; --muted: #53574F; --line: #CDD3C8;
+  --accent: #007229; --accent-dark: #005A21; --accent-tint: rgba(0,114,41,0.11);
+  --correct: #1F5E37; --correct-bg: rgba(31,94,55,0.10); --correct-line: rgba(31,94,55,0.35);
+  --incorrect: #9A2F2A; --incorrect-bg: rgba(154,47,42,0.09); --incorrect-line: rgba(154,47,42,0.35);
+  --diff-easy: #1F6B52; --diff-easy-bg: rgba(31,107,82,0.10); --diff-easy-line: rgba(31,107,82,0.32);
+  --diff-moderate: #7A4D0C; --diff-moderate-bg: rgba(122,77,12,0.10); --diff-moderate-line: rgba(122,77,12,0.32);
+  --diff-hard: #5B4A93; --diff-hard-bg: rgba(91,74,147,0.10); --diff-hard-line: rgba(91,74,147,0.32);
+  --streak: #9A4414; --streak-bg: rgba(154,68,20,0.10); --streak-line: rgba(154,68,20,0.32);
+  --mastery: #2F5F8F; --mastery-bg: rgba(47,95,143,0.10); --mastery-line: rgba(47,95,143,0.32);
+  --input-bg: #FDFEFC; --code-bg: #1E2420; --code-text: #E8ECE6;
+  --card-1: #007229; --card-1-bg: rgba(0,114,41,0.09); --card-1-line: rgba(0,114,41,0.28);
+  --card-2: #D21034; --card-2-bg: rgba(210,16,52,0.09); --card-2-line: rgba(210,16,52,0.28);
+  --card-3: #1A1A1A; --card-3-bg: rgba(26,26,26,0.09); --card-3-line: rgba(26,26,26,0.28);
+  --card-4: #003D1A; --card-4-bg: rgba(0,77,38,0.09); --card-4-line: rgba(0,77,38,0.28);
+  --shadow: 0 1px 2px rgba(20,30,20,0.08), 0 10px 22px -14px rgba(20,30,20,0.22);
+  --on-accent: #FFFFFF;
+  --logo-plate: #FAFBF9;
+}
 :root[data-theme="sy"]{
   /* Syria flag theme */
   color-scheme: light;
@@ -270,6 +293,8 @@
 :root[data-theme="sy"]{ --stripe:linear-gradient(90deg,#007A3D 0 33%,#fff 33% 50%,#000 50% 83%,#CE1126 83%); --flag-2:#CE1126; --flag-3:#1A1A1A; --flag-sel:rgba(26,26,26,0.28); }
 .ap-sw-lb{ background:radial-gradient(circle at 50% 50%,#00A651 0 3.5px,transparent 4px),linear-gradient(#ED1C24 0 25%,#fff 25% 75%,#ED1C24 75%); }
 :root[data-theme="lb"]{ --stripe:linear-gradient(90deg,#ED1C24 0 30%,#fff 30% 45%,#00A651 45% 55%,#fff 55% 70%,#ED1C24 70%); --flag-2:#00A651; --flag-3:#ED1C24; --flag-sel:rgba(237,28,36,0.28); }
+.ap-sw-sd{ background:linear-gradient(to top right,#007229 50%,transparent 50%) 0 0/50% 50% no-repeat,linear-gradient(to bottom right,#007229 50%,transparent 50%) 0 100%/50% 50% no-repeat,linear-gradient(#D21034 0 33%,#fff 33% 67%,#000 67%); }
+:root[data-theme="sd"]{ --stripe:linear-gradient(90deg,#D21034 0 25%,#fff 25% 50%,#000 50% 75%,#007229 75%); --flag-2:#007229; --flag-3:#D21034; --flag-sel:rgba(0,114,41,0.28); }
 html[data-flag]{ accent-color: var(--flag-2); scrollbar-color: var(--flag-2) var(--bg); }
 html[data-flag] body::before{ content:""; position:fixed; top:0; left:0; right:0; height:6px; background:var(--stripe); z-index:300; pointer-events:none; }
 html[data-flag] header.top{ box-shadow: inset 0 -3px 0 var(--flag-2); }

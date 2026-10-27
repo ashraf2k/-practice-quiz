@@ -4,10 +4,10 @@
   "use strict";
   var KEY = "pq_appearance_v1", D = { theme: "auto", size: "md", font: "std" };
   var THEMES = [["auto", "Auto", "Follows your device"], ["light", "Light", "Bright and clean"], ["dark", "Dark", "Easy on the eyes at night"], ["blue", "Dark blue", "Deep navy with blue accents"], ["comfort", "Eye comfort", "Soft, low glare, calm"], ["kindle", "Kindle", "Paper-style reading"]];
-  var FLAGS = [["sa", "Saudi Arabia"], ["pk", "Pakistan"], ["eg", "Egypt"], ["in", "India"], ["jo", "Jordan"], ["sy", "Syria"], ["lb", "Lebanon"]];
+  var FLAGS = [["sa", "Saudi Arabia"], ["pk", "Pakistan"], ["eg", "Egypt"], ["in", "India"], ["jo", "Jordan"], ["sy", "Syria"], ["lb", "Lebanon"], ["sd", "Sudan"]];
   var SIZES = [["sm", "Small", 13], ["md", "Normal", 16], ["lg", "Large", 19], ["xl", "Extra large", 22]];
   var FONTS = [["std", "Standard"], ["easy", "Easy-read"]];
-  var META = { light: "#146C6A", dark: "#0D1420", blue: "#0A1630", sa: "#006C35", pk: "#04301B", eg: "#B3141F", "in": "#1A237E", jo: "#006B35", sy: "#0E4D2C", lb: "#A3121B", comfort: "#E6E9DC", kindle: "#F3E9D2" };
+  var META = { light: "#146C6A", dark: "#0D1420", blue: "#0A1630", sa: "#006C35", pk: "#04301B", eg: "#B3141F", "in": "#1A237E", jo: "#006B35", sy: "#0E4D2C", lb: "#A3121B", sd: "#007229", comfort: "#E6E9DC", kindle: "#F3E9D2" };
   var prefs = load(), root = document.documentElement;
   function load(){ var p = {}, k; try { p = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){} for(k in D) if(typeof p[k] !== "string") p[k] = D[k]; if(!THEMES.concat(FLAGS).some(function(t){ return t[0] === p.theme; })) p.theme = D.theme; if(!SIZES.some(function(t){ return t[0] === p.size; })) p.size = D.size; if(!FONTS.some(function(t){ return t[0] === p.font; })) p.font = D.font; return p; }
   function save(){ try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch(e){} }
