@@ -45,7 +45,7 @@ window.PP = (function(){
         });
         part.appendChild(w);
       } else {
-        if(p.work){ var wk = el("div", "pp-work", "<b>Working space</b>"); var wt = el("textarea"); wt.rows = p.work; wt.setAttribute("aria-label", "Working space for " + (p.label || "")); wk.appendChild(wt); part.appendChild(wk); }
+        if(p.work){ var wk = el("div", "pp-work", "<b>Working space</b>"); var wt = el("textarea"); wt.rows = p.work; wt.addEventListener("input", function(){ texts[p.id + "_w"] = wt.value; }); wt.setAttribute("aria-label", "Working space for " + (p.label || "")); wk.appendChild(wt); part.appendChild(wk); }
         var a = el("div", "pp-ans"), t = el("textarea", "pp-lines"); t.rows = p.lines || 2; t.setAttribute("aria-label", "Answer for " + (p.label || "")); t.setAttribute("data-pp", p.id);
         t.addEventListener("input", function(){ texts[p.id] = t.value; });
         a.appendChild(t); part.appendChild(a);
@@ -58,12 +58,12 @@ window.PP = (function(){
   // join the part answers into the one text the keyword grader reads, and remember each part for part-specific mark points
   function collect(ta){
     var q = window.__ppQ, out = [];
-    q.parts.forEach(function(p){ var v = p.options ? (ticks[p.id] || "") : (texts[p.id] || ""); out.push("answer_" + p.id + ": " + v); });
+    q.parts.forEach(function(p){ var v = p.options ? (ticks[p.id] || "") : (texts[p.id] || ""); out.push("answer_" + p.id + ": " + v + (texts[p.id + "_w"] ? "\nworking_" + p.id + ": " + texts[p.id + "_w"] : "")); });
     ta.value = out.join("\n");
-    return /\S/.test(out.join("").replace(/answer_\w+:/g, "")) ? ta.value : "";
+    return /\S/.test(out.join("").replace(/(answer|working)_\w+:/g, "")) ? ta.value : "";
   }
   function part(id){ return p_text(id); }
-  function p_text(id){ var q = window.__ppQ; if(!q) return ""; var p = q.parts.filter(function(x){ return x.id === id; })[0]; return p ? (p.options ? (ticks[id] || "") : (texts[id] || "")) : ""; }
+  function p_text(id){ var q = window.__ppQ; if(!q) return ""; if(/\+$/.test(id)){ var b = id.slice(0, -1); return (p_text(b) + "\n" + (texts[b + "_w"] || "")).trim(); } var p = q.parts.filter(function(x){ return x.id === id; })[0]; return p ? (p.options ? (ticks[id] || "") : (texts[id] || "")) : ""; }
   function showScheme(q, after){
     var old = document.getElementById("pp-ms"); if(old) old.remove();
     if(!q.ms) return;

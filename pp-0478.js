@@ -6,18 +6,23 @@
   var MSRC = "Cambridge IGCSE Computer Science 0478/11 Mark Scheme, May/June 2026 (Cambridge University Press & Assessment)";
   function kw(text, marks, part, groups, per){ var m = { type: "keywords", groups: groups, needCount: per ? marks : groups.length }; if(per) m.marksPerGroup = 1; return { text: text, marks: marks, part: part, match: m }; }
   function val(text, part, values){ return { text: text, marks: 1, part: part, match: { type: "value", values: values } }; }
-  function Q(id, no, topic, stem, parts, points, ms, expl){
+  var CTX = { label: SRC, msrc: MSRC };
+  function Q(id, no, topic, stem, parts, points, ms, expl, ctx){
+    ctx = ctx || CTX;
     var marks = points.reduce(function(a, p){ return a + p.marks; }, 0);
-    return { id: id, no: no, topic: topic, difficulty: "intermediate", marks: marks, calc: true, paperLabel: SRC, msSource: MSRC, stem: stem, parts: parts,
+    return { id: id, no: no, topic: topic, difficulty: "intermediate", marks: marks, calc: true, paperLabel: ctx.label, msSource: ctx.msrc, stem: stem, parts: parts,
       prompt: stem, markPoints: points, ms: ms, explanation: expl };
   }
-  function paper(key, topicNo, title, qs){
-    var total = qs.reduce(function(a, q){ return a + q.marks; }, 0);
-    EXAM_PAPERS[key] = { key: key, title: "Topic " + topicNo + ": " + title + " — Past-paper question", subtitle: "Cambridge 0478/11 May/June 2026 · " + total + " marks · mark your own answer with the published mark scheme",
+  // one past-paper set per syllabus sub-topic (e.g. code "1.1"), shown at the end of that sub-topic in iLearn
+  function paper(code, name, qs){
+    var key = "pp_" + code.replace(".", "_"), total = qs.reduce(function(a, q){ return a + q.marks; }, 0);
+    if(EXAM_PAPERS[key]){ var ex = EXAM_PAPERS[key]; qs.forEach(function(q){ ex.questions.push(q); }); ex.totalMarks += total; ex.subtitle = ex.subtitle.replace(/\d+ marks/, ex.totalMarks + " marks"); return; }
+    EXAM_PAPERS[key] = { key: key, code: code, title: code + " " + name + " \u2014 Past-paper question", subtitle: "Cambridge 0478 Paper 1 past paper \u00B7 " + total + " marks \u00B7 mark your own answer with the published mark scheme",
       classes: ["10BR1","10BR2","10BR3"], totalMarks: total, questions: qs };
     var e = EXAM_PAPER_CHOICES_BY_CLASS.filter(function(x){ return x.test.test("10BR1"); })[0];
-    if(e && !e.choices.some(function(c){ return c.key === key; })) e.choices.push({ key: key, label: "Topic " + topicNo + ": " + title + " — past-paper question" });
+    if(e && !e.choices.some(function(c){ return c.key === key; })) e.choices.push({ key: key, label: code + " " + name + " \u2014 past-paper question" });
   }
+  window.PPD = { Q: Q, kw: kw, val: val, paper: paper, ctx: function(label, msrc){ return { label: label, msrc: msrc }; } };
 
   /* ---------- Topic 1 ---------- */
   var q1 = Q("PP1", "1", "Data storage and binary",
@@ -72,7 +77,9 @@
       { q: "8(b)(i)", lead: "One mark for each correct term or definition.", ans: ["pixel — the smallest unit of an image that is made up of one colour", "sound sample — a (single) measure/representation of the amplitude/height of a sound wave", "(image) resolution — the dimensions of an image", "colour depth — the number of bits that are used for each/a colour/pixel (in an image) // the (maximum) number of colours that can be represented (in an image)", "Sample/sampling rate/frequency — the number of samples that are recorded each second"], marks: "5", guide: ["Colour depth – ‘the number of colours in the image’ is not accurate"] },
       { q: "8(b)(ii)", ans: ["Lossy // by example e.g. motion estimation", "Lossless // by example e.g. RLE"], marks: "2", guide: ["Mark the first answer given.", "Do not accept file formats e.g. MP4, ZIP", "BOD lossyless for lossless"] } ],
     "Text is stored using a character set such as ASCII or Unicode, where each character has its own binary value. A pixel is the smallest unit of an image; a sound sample measures the amplitude of the wave at one moment; resolution is the dimensions; colour depth is the number of bits per pixel; sample rate is samples per second. Video can be compressed with lossy (e.g. motion estimation) or lossless (e.g. RLE) methods.");
-  paper("pp_t1", 1, "Data representation", [q1, q2, q3]);
+  paper("1.1", "Number systems", [q2]);
+  paper("1.2", "Text, sound and images", [q3]);
+  paper("1.3", "Data storage and compression", [q1]);
 
   /* ---------- Topic 2 ---------- */
   var q4 = Q("PP4", "4", "USB and data transmission",
@@ -89,7 +96,7 @@
       { q: "4(b)", lead: "Four from:", ans: ["(Serial) transmits the data one bit at a time", "… down a single wire/channel/line", "(Half-duplex) transmits the data (between the computer and the mouse) in both directions/ways …", "… but only one direction/way at a time"], marks: "4", guide: ["MP1 – BOD bit by bit", "MP2 – cable/path is TV"] },
       { q: "4(c)", lead: "Two from:", ans: ["Cannot plug the cable in the wrong way round", "Different data transmission speeds are supported", "High/adequate speed of data transmission", "Universal connection/standard", "Connection is backwards compatible", "It will power the mouse // It will charge the mouse (if it has wireless capabilities)", "The mouse will be automatically detected // Mouse drivers will be automatically downloaded // plug and play", "Unlikely to have interference/crosstalk"], marks: "2", guide: ["Mark whole answer.", "Do not accept ‘can be used over long distance’; this is not relevant to the context.", "Do not accept reference to skewing/errors as this is given in the question.", "MP3 – BOD fast/faster transmission. Fast/faster alone is NE.", "MP8 – Mouse is automatically connected is TV"] } ],
     "Serial means the bits are sent one after another along one wire. Half-duplex means data can travel in both directions, but only one direction at a time. USB is a universal standard, can supply power, supports different speeds and is plug and play.");
-  paper("pp_t2", 2, "Data transmission", [q4]);
+  paper("2.1", "Types and methods of data transmission", [q4]);
 
   /* ---------- Topic 3 ---------- */
   var q5 = Q("PP5", "2", "CPU, FDE cycle and input/output devices",
@@ -117,5 +124,8 @@
       { q: "2(c)(i)", lead: "Two from, for example:", ans: ["Touchscreen", "Microphone", "Keyboard/keypad", "Button", "Sensor", "(Digital) camera"], marks: "2", guide: ["Mark the first answer given.", "Award any appropriate example of a sensor. Sensor can only be awarded once.", "Do not allow onscreen keyboard as this is software.", "Do not allow touchpad as it is not relevant to context."] },
       { q: "2(c)(ii)", lead: "Two from, for example:", ans: ["Screen // touchscreen", "Speaker", "LED // light", "Actuator"], marks: "2", guide: ["Mark the first answer given.", "Display alone is NE for screen."] } ],
     "(a)(i) The program counter holds the address of the next instruction. (ii) The instruction goes from the MDR to the CIR, the control unit decodes it into opcode and operand using the instruction set. (iii) For example the ALU. (b) Four cores can run four instructions at the same time. (c) Inputs: touchscreen, microphone, camera. Outputs: screen, speaker.");
-  paper("pp_t3", 3, "Hardware", [q5]);
+  var q5a = Q("PP5a", "2(a)\u2013(b)", "CPU and FDE cycle", q5.stem, q5.parts.slice(0, 4), q5.markPoints.slice(0, 4), q5.ms.slice(0, 4), q5.explanation);
+  var q5c = Q("PP5c", "2(c)", "Input and output devices", q5.stem, q5.parts.slice(4), q5.markPoints.slice(4), q5.ms.slice(4), q5.explanation);
+  paper("3.1", "Computer architecture", [q5a]);
+  paper("3.2", "Input and output devices", [q5c]);
 })();

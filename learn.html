@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-TYCK7C9+jgBxWw5SdZ3zdL8K/ZkAWeZCYSEdMpHNryI='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-ED/DNEf626qj9NJhvwYBM/kbr7BxtzWsdHKPI3tvYYc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -243,6 +243,7 @@
 <script src="learn-viz-3.js?v=20261019r"></script>
 <script src="learn-viz-4.js?v=20261021a"></script>
 <script src="learn-viz-5.js?v=20261027a"></script>
+<script src="pp-index.js?v=20261028a"></script>
 <script src="learn-viz-map.js?v=20261027a"></script>
 <script src="firebase-config.js?v=20261019j"></script>
 <script type="module" src="firebase-init.js?v=20261019j"></script>
@@ -255,7 +256,6 @@
     { id:2, title:"Paper 2", sub:"Programming and logic (topics 7–10)", topics:[7,8,9,10] }
   ];
   var PROGRESS_KEY = "ilearn";
-  var PP_TOPIC = { 1: ["pp_t1", "3 questions", 22], 2: ["pp_t2", "1 question", 7], 3: ["pp_t3", "1 question", 11] };   // past-paper sets shown at the end of topics 1 to 3 (pp-0478.js)
   var preview = false;   // an administrator trying the journey as a student: nothing is saved online
   var user = null, st = { learn:{}, days:{}, tests:{}, games:{} };
   var activeTab = 1, current = null, sess = null;
@@ -481,11 +481,11 @@
           }
           h += "</div>";
         });
+        var ppi = window.PP_INDEX && PP_INDEX[sec.name.split(" ")[0]];
+        if(ppi){
+          h += '<div class="ln-pp"><div><b>\uD83D\uDCC4 Past-paper practice</b> <small>(' + ppi.n + (ppi.n === 1 ? " question" : " questions") + ', ' + ppi.marks + ' marks)</small><br><span>Real Cambridge 0478 Paper 1 question' + (ppi.n === 1 ? "" : "s") + ' for ' + esc(sec.name) + '. Answer on a paper-style page, then mark yourself against the published mark scheme.</span></div><a class="btn btn-primary sm" style="text-decoration:none" href="exam-practice.html?topic=' + ppi.key + (preview ? "&preview=1" : "") + '">Start</a></div>';
+        }
       });
-      if(PP_TOPIC[tn]){
-        var ppx = PP_TOPIC[tn];
-        h += '<div class="ln-sec">Real exam practice</div><div class="ln-pp"><div><b>📄 Past-paper question</b><br><span>Cambridge 0478/11, May/June 2026 · ' + ppx[1] + ' · answer on a paper-style page, then mark yourself with the published mark scheme.' + (undone ? " Best after you finish the lessons above." : "") + '</span></div><a class="btn btn-primary sm" style="text-decoration:none" href="exam-practice.html?topic=' + ppx[0] + (preview ? "&preview=1" : "") + '">Start (' + ppx[2] + ' marks)</a></div>';
-      }
       h += "</details>";
     });
     $("topics").innerHTML = h;
