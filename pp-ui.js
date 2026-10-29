@@ -63,7 +63,7 @@ window.PP = (function(){
     return /\S/.test(out.join("").replace(/(answer|working)_\w+:/g, "")) ? ta.value : "";
   }
   function part(id){ return p_text(id); }
-  function p_text(id){ var q = window.__ppQ; if(!q) return ""; if(/\+$/.test(id)){ var b = id.slice(0, -1); return (p_text(b) + "\n" + (texts[b + "_w"] || "")).trim(); } var p = q.parts.filter(function(x){ return x.id === id; })[0]; return p ? (p.options ? (ticks[id] || "") : (texts[id] || "")) : ""; }
+  function p_text(id){ var q = window.__ppQ; if(!q) return ""; if(id.indexOf("|") > -1) return id.split("|").map(p_text).join("\n"); if(/\+$/.test(id)){ var b = id.slice(0, -1); return (p_text(b) + "\n" + (texts[b + "_w"] || "")).trim(); } var p = q.parts.filter(function(x){ return x.id === id; })[0]; return p ? (p.options ? (ticks[id] || "") : (texts[id] || "")) : ""; }
   function showScheme(q, after){
     var old = document.getElementById("pp-ms"); if(old) old.remove();
     if(!q.ms) return;
