@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-ED/DNEf626qj9NJhvwYBM/kbr7BxtzWsdHKPI3tvYYc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-zID/3+T10WStRbtjdNpMSg9KedOxfnK00QTSfzglAvU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -243,6 +243,7 @@
 <script src="learn-viz-3.js?v=20261019r"></script>
 <script src="learn-viz-4.js?v=20261021a"></script>
 <script src="learn-viz-5.js?v=20261027a"></script>
+<script src="exams/index.js?v=20261031a"></script>
 <script src="pp-index.js?v=20261028a"></script>
 <script src="learn-viz-map.js?v=20261027a"></script>
 <script src="firebase-config.js?v=20261019j"></script>
@@ -486,6 +487,13 @@
           h += '<div class="ln-pp"><div><b>\uD83D\uDCC4 Past-paper practice</b> <small>(' + ppi.n + (ppi.n === 1 ? " question" : " questions") + ', ' + ppi.marks + ' marks)</small><br><span>Real Cambridge 0478 Paper 1 question' + (ppi.n === 1 ? "" : "s") + ' for ' + esc(sec.name) + '. Answer on a paper-style page, then mark yourself against the published mark scheme.</span></div><a class="btn btn-primary sm" style="text-decoration:none" href="exam-practice.html?topic=' + ppi.key + (preview ? "&preview=1" : "") + '">Start</a></div>';
         }
       });
+      if(window.EXAMS && EXAMS["10BR"] && EXAMS["10BR"][tn]){
+        var ex = EXAMS["10BR"][tn];
+        h += '<div class="ln-pp"><div><b>\uD83D\uDCDD End-of-topic exam (PDF)</b> <small>(' + ex.marks + ' marks, ' + (ex.mins === 90 ? "1 h 30 min" : ex.mins + " min") + ', ' + ex.pages + ' pages)</small><br><span>A paper-style exam made from real Cambridge past-paper questions on this topic. Download, print, solve it by hand, then mark it with the official mark scheme.</span></div><a class="btn btn-primary sm" style="text-decoration:none" href="exams/' + ex.f + '" download target="_blank" rel="noopener">Download PDF</a></div>';
+        if(preview && window.EXAMS_MS && EXAMS_MS["10BR"] && EXAMS_MS["10BR"][tn]){
+          h += '<div class="ln-pp" style="border-style:dashed"><div><b>\uD83D\uDD12 Mark scheme (teacher only)</b><br><span>Official Cambridge mark scheme for the exam above, with matching question numbers. Visible to admins only.</span></div><a class="btn btn-secondary sm" style="text-decoration:none" href="exams-ms/' + EXAMS_MS["10BR"][tn] + '" target="_blank" rel="noopener">Open mark scheme PDF</a></div>';
+        }
+      }
       h += "</details>";
     });
     $("topics").innerHTML = h;
@@ -802,7 +810,7 @@
     if(/^10BR/i.test(cls)){ begin(); return; }
     var chk = PQFirebase.checkIsAdmin ? PQFirebase.checkIsAdmin(u.uid) : Promise.resolve(false);
     chk.then(function(adm){
-      if(adm){ preview = true; begin(); return; }
+      if(adm){ preview = true; var ms_ = document.createElement("script"); ms_.src = "exams-ms/index.js?v=20261031a"; ms_.onload = ms_.onerror = function(){ begin(); }; document.head.appendChild(ms_); return; }
       $("view-wait").innerHTML = '<p class="ln-notice">iLearn is opening for your class soon.</p><p style="text-align:center"><a class="link-btn" href="quiz.html">← Back to practice</a></p>'; show("view-wait");
     });
   });
