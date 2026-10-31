@@ -171,7 +171,7 @@ def render(course,ch,out,fname):
      f"• The total mark for this paper is {total}.",
      "• The number of marks for each question or part question is shown in brackets [ ].",
      f"• This paper contains {len(blocks)} questions, all drawn from Cambridge past papers on this chapter.",
-     "• After you finish, mark your work against the official Cambridge mark scheme (see the source list on the last page)."]
+     "• After you finish, your teacher will mark your work against the official mark scheme."]
     if mins<90:
         ins.append(f"• Only {total} marks of past-paper questions are available for this chapter, so the recommended time is {tstr} (1 min 12 s per mark).")
     y=505
@@ -224,19 +224,6 @@ def render(course,ch,out,fname):
     # end of paper
     if y+30>BOTY: start()
     pg.insert_text((W/2-60,y+20),"END OF QUESTION PAPER",fontname='hebo',fontsize=11)
-    # source page
-    sp=new_page(); yy=70
-    sp.insert_text((40,yy),"Source of each question (for marking)",fontname='hebo',fontsize=14); yy+=24
-    sp.insert_text((40,yy),"Find the matching official Cambridge mark scheme for the series/paper shown, to mark your answers.",fontname='helv',fontsize=9.5); yy+=24
-    sp.insert_text((40,yy),"Q",fontname='hebo',fontsize=10);sp.insert_text((80,yy),"Past paper",fontname='hebo',fontsize=10);sp.insert_text((260,yy),"Original question",fontname='hebo',fontsize=10);sp.insert_text((480,yy),"Marks",fontname='hebo',fontsize=10); yy+=6
-    sp.draw_line((40,yy),(555,yy),width=.6); yy+=16
-    for qn,key,no,labels,mk in source:
-        sp.insert_text((40,yy),str(qn),fontname='helv',fontsize=10)
-        sp.insert_text((80,yy),srcname(key),fontname='helv',fontsize=10)
-        sp.insert_text((260,yy),f"Q{no}"+(' '+','.join(labels) if labels else ''),fontname='helv',fontsize=10)
-        sp.insert_text((485,yy),str(mk),fontname='helv',fontsize=10); yy+=16
-    sp.draw_line((40,yy-6),(555,yy-6),width=.6)
-    sp.insert_text((40,yy+10),f"Total: {total} marks",fontname='hebo',fontsize=11)
     # headers/footers
     n=len(out_doc)
     for i,p in enumerate(out_doc):
