@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-6vsR7Sj/JwZpM/2VI4COu22ZvH5N0HAOIFkEAXu6YPM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-FUMcwgajASWZpEl5i4C8DzIUdRzawMESEDUmioQw2zI='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -43,6 +43,8 @@
   .ln-topic > summary{ list-style:none; cursor:pointer; padding:13px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; font-weight:800; background:var(--accent-tint); }
   .ln-topic > summary::-webkit-details-marker{ display:none; }
   .ln-topic > summary .cnt{ font-weight:600; font-size:12.5px; color:var(--muted); white-space:nowrap; }
+  .ln-pp{ display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin:6px 0 10px; padding:12px 14px; border:1.5px solid var(--accent); border-radius:10px; background:var(--accent-tint); font-size:14px; }
+  .ln-pp span{ color:var(--muted); font-size:13px; }
   .ln-sec{ padding:8px 16px 4px; font-size:12.5px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; border-top:1px solid var(--line); }
   .ln-unit{ padding:9px 16px; border-top:1px solid var(--line); }
   .ln-unit-head{ display:flex; gap:10px; align-items:baseline; font-size:13.5px; }
@@ -204,6 +206,7 @@
   <section id="view-wait" class="card"><p class="ln-notice">Loading your journey…</p></section>
 </div>
 
+<script src="pp-index-as.js?v=20261031a"></script>
 <script src="as-objectives.js?v=20261021a"></script>
 <script src="learn-helpers.js?v=20261021a"></script>
 <script src="as-author.js?v=20261021c"></script>
@@ -469,6 +472,10 @@
           if(away){
             var movedL = raw.filter(function(l){ return topicNum(l) !== tn; }), adone = movedL.filter(function(l){ return isDone(l.id); }).length;
             h += '<div class="ln-moved">📚 ' + esc(movedL[0].away || ("Taught in Topic " + topicNum(movedL[0]))) + " (" + adone + " of " + movedL.length + " lessons done).</div>";
+          }
+          var ppi = window.PP_INDEX_AS && PP_INDEX_AS[u.code];
+          if(ppi){
+            h += '<div class="ln-pp"><div><b>\uD83D\uDCC4 Past-paper question</b> <small>(' + ppi.n + (ppi.n === 1 ? " question" : " questions") + ', ' + ppi.marks + ' marks)</small><br><span>Real Cambridge 9618 Paper 1 question from ' + esc(ppi.paper.join("; ")) + '. Answer on a paper-style page, then mark yourself against the published mark scheme.</span></div><a class="btn btn-primary sm" style="text-decoration:none" href="exam-practice.html?topic=' + ppi.key + (preview ? "&preview=1" : "") + '">Start</a></div>';
           }
           h += "</div>";
         });
