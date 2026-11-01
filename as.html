@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-9CKVtb5iTghv7/GuS46lpEYVqspSEpiVRAlqYzmZFj8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-wWRJAGYgaP6iaC00SGJfFoTdnEJsDJ6eotIr/FvkPjY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -490,6 +490,9 @@
         h += '<div class="ln-pp"><div><b>\uD83D\uDCDD End-of-topic exam (PDF)</b> <small>(' + ex.marks + ' marks, ' + (ex.mins === 90 ? "1 h 30 min" : ex.mins + " min") + ', ' + ex.pages + ' pages)</small><br><span>A paper-style exam made from real Cambridge past-paper questions on this topic. Download, print, solve it by hand, then mark it with the official mark scheme.</span></div><a class="btn btn-primary sm" style="text-decoration:none" href="exams/' + ex.f + '" download target="_blank" rel="noopener">Download PDF</a></div>';
         if(preview && window.EXAMS_MS && EXAMS_MS["11BR"] && EXAMS_MS["11BR"][tn]){
           h += '<div class="ln-pp" style="border-style:dashed"><div><b>\uD83D\uDD12 Mark scheme (teacher only)</b><br><span>Official Cambridge mark scheme for the exam above, with matching question numbers. Visible to admins only.</span></div><a class="btn btn-secondary sm" style="text-decoration:none" href="exams-ms/' + EXAMS_MS["11BR"][tn] + '" target="_blank" rel="noopener">Open mark scheme PDF</a></div>';
+          if(window.EXAMS_SRC && EXAMS_SRC["11BR"] && EXAMS_SRC["11BR"][tn]){
+            h += '<details class="ln-pp" style="display:block;border-style:dashed"><summary><b>\uD83D\uDD12 Question sources (teacher only)</b></summary><table style="width:100%;font-size:13px;margin-top:8px;border-collapse:collapse"><tr><th align=left>Q</th><th align=left>Past paper</th><th align=left>Original question</th><th align=right>Marks</th></tr>' + EXAMS_SRC["11BR"][tn].map(function(r){ return '<tr><td>' + r[0] + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td><td align=right>' + r[3] + '</td></tr>'; }).join('') + '</table></details>';
+          }
         }
       }
       h += "</details>";
