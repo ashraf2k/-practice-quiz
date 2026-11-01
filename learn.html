@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-IMBYr3hJbp6Eye52sW6bgcQGQwAy/Gu9CnIc7VD1G6Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-2OZzRcV9imxaA+qeaP/XDJkWVljr75rdrLE403G2a14='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -114,6 +114,17 @@
   .ln-confetti{ position:absolute; top:-12px; width:8px; height:12px; opacity:.9; animation:lnfall 4.5s linear infinite; pointer-events:none; }
   @keyframes lnfall{ to{ transform:translateY(340px) rotate(540deg); opacity:0; } }
   @media (prefers-reduced-motion:reduce){ .ln-confetti{ display:none; } }
+  .ln-notes h2{ margin:0 0 4px; font-size:22px; } .ln-notes .nt-sub{ color:var(--muted); font-size:14px; margin:0 0 12px; }
+  .ln-notes .nt-cover{ display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 18px; } .ln-notes .nt-cover a{ font-size:12px; padding:3px 8px; border:1px solid var(--line); border-radius:999px; text-decoration:none; color:var(--ink); background:var(--surface-soft); }
+  .ln-notes .nt-sec{ margin:22px 0 6px; padding:6px 10px; border-left:5px solid var(--accent); background:var(--accent-tint); font-weight:700; }
+  .ln-notes .nt-obj{ margin:16px 0 4px; padding-top:10px; border-top:2px solid var(--line); font-weight:700; font-size:16px; }
+  .ln-notes .nt-obj .code{ display:inline-block; margin-right:8px; padding:1px 8px; border-radius:6px; background:var(--accent); color:var(--on-accent); font-size:13px; }
+  .ln-notes .nt-obj small{ display:block; font-weight:400; color:var(--muted); font-size:13px; margin-top:2px; }
+  .ln-notes h4{ margin:12px 0 4px; font-size:15px; } .ln-notes .nt-c{ font-size:14.5px; line-height:1.55; } .ln-notes .nt-c p{ margin:5px 0; } .ln-notes .nt-c ul,.ln-notes .nt-c ol{ margin:5px 0 5px 20px; padding:0; }
+  .ln-notes .nt-key{ margin:8px 0; padding:8px 11px; border-radius:8px; border:1px solid #B8923A; background:rgba(184,146,58,.12); font-size:14px; }
+  .ln-notes details{ margin:6px 0; } .ln-notes details summary{ cursor:pointer; font-size:13px; color:var(--muted); }
+  .ln-notes dl{ display:grid; grid-template-columns:minmax(120px,max-content) 1fr; gap:3px 12px; font-size:13.5px; } .ln-notes dt{ font-weight:700; } .ln-notes dd{ margin:0; }
+  @media print{ body *{ visibility:hidden; } #view-notes, #view-notes *{ visibility:visible; } #view-notes{ position:absolute; left:0; top:0; width:100%; box-shadow:none; border:0; } .no-print{ display:none !important; } .ln-notes h4,.ln-notes .nt-obj{ break-after:avoid; } .ln-notes .nt-key{ break-inside:avoid; } }
   .ln-badges{ display:flex; gap:7px; flex-wrap:wrap; margin:12px 0 0; }
   .ln-badge{ font-size:12.5px; font-weight:700; padding:4px 11px; border-radius:999px; border:1px solid var(--correct-line); background:var(--correct-bg); color:var(--correct); }
   .ln-badge.off{ border-color:var(--line); background:var(--bg); color:var(--muted); font-weight:600; filter:grayscale(1); }
@@ -199,6 +210,15 @@
     <div id="q-body"></div>
   </section>
 
+  <!-- ============ EXAM-NIGHT REVISION NOTES ============ -->
+  <section id="view-notes" class="card hidden">
+    <div class="ln-top no-print">
+      <h2 class="step-title" style="margin:0;">Exam-night revision notes</h2>
+      <span><button class="btn btn-secondary sm" id="n-print" type="button">🖨️ Print / save as PDF</button> <button class="link-btn" id="n-leave" type="button">← Back to journey</button></span>
+    </div>
+    <div class="ln-notes" id="n-body"></div>
+  </section>
+
   <!-- ============ GLOSSARY ============ -->
   <section id="view-gloss" class="card hidden">
     <div class="ln-top">
@@ -276,7 +296,7 @@
 
   function $(id){ return document.getElementById(id); }
   function esc(x){ return E.esc(x); }
-  var VIEWS = ["view-journey","view-lesson","view-quiz","view-gloss","view-arcade","view-wait"];
+  var VIEWS = ["view-journey","view-lesson","view-quiz","view-gloss","view-arcade","view-notes","view-wait"];
   function show(id){ VIEWS.forEach(function(v){ $(v).classList.toggle("hidden", v !== id); }); window.scrollTo(0, 0); }
 
   var LESSONS = E.LESSONS, LESSON_BY_ID = E.LESSON_BY_ID, CODES = E.CODES;
@@ -500,6 +520,9 @@
           h += '<div class="ln-pp"><div><b>\uD83D\uDCC4 Past-paper practice</b> <small>(' + ppi.n + (ppi.n === 1 ? " question" : " questions") + ', ' + ppi.marks + ' marks)</small><br><span>Real Cambridge 0478 Paper 1 question' + (ppi.n === 1 ? "" : "s") + ' for ' + esc(sec.name) + '. Answer on a paper-style page, then mark yourself against the published mark scheme.</span></div><a class="btn btn-primary sm" style="text-decoration:none" href="exam-practice.html?topic=' + ppi.key + (preview ? "&preview=1" : "") + '">Start</a></div>';
         }
       });
+      if(undone === 0 || preview){
+        h += '<div class="ln-pp"><div><b>\uD83D\uDCDD Exam-night revision notes</b><br><span>One complete summary of Topic ' + tn + ' that covers every syllabus objective. Read it the night before your exam.' + (undone ? ' <i>(Admin preview: students see it after finishing all lessons.)</i>' : '') + '</span></div><button class="btn btn-primary sm" data-notes="' + tn + '" type="button">Open notes</button></div>';
+      }
       if(window.EXAMS && EXAMS["10BR"] && EXAMS["10BR"][tn]){
         var ex = EXAMS["10BR"][tn];
         var exOk = preview || (undone === 0 && (!bank || (res && pct(res.s, res.t) >= 50)));
@@ -519,6 +542,7 @@
     $("topics").innerHTML = h;
     Array.prototype.forEach.call($("topics").querySelectorAll(".ln-lesson"), function(b){ b.addEventListener("click", function(){ openLesson(b.getAttribute("data-l")); }); });
     Array.prototype.forEach.call($("topics").querySelectorAll("[data-pre]"), function(b){ b.addEventListener("click", function(){ startTopicTest(Number(b.getAttribute("data-pre")), true); }); });
+    Array.prototype.forEach.call($("topics").querySelectorAll("[data-notes]"), function(b){ b.addEventListener("click", function(){ openNotes(Number(b.getAttribute("data-notes"))); }); });
     Array.prototype.forEach.call($("topics").querySelectorAll("[data-test]"), function(b){ b.addEventListener("click", function(){ startTopicTest(Number(b.getAttribute("data-test")), false); }); });
     show("view-journey");
   }
@@ -820,6 +844,32 @@
   }
 
   // ---------- glossary ----------
+  // ---------- exam-night revision notes (built from the lessons, one block per syllabus objective) ----------
+  function openNotes(tn){
+    var tree = E.topicTree(), t = tree[tn]; if(!t) return;
+    var codes = [], body = "", terms = (window.ILEARN_GLOSSARY || []).filter(function(g){ return g[2] === tn; });
+    t.secs.forEach(function(sec){
+      body += '<div class="nt-sec">' + esc(sec.name) + "</div>";
+      sec.units.forEach(function(u){
+        codes.push(u.code);
+        body += '<div class="nt-obj" id="nt-' + u.code + '"><span class="code">' + esc(u.code) + "</span>" + esc(u.text) + "</div>";
+        lessonsOf(u.code).forEach(function(l){
+          body += "<h4>" + esc(l.title) + '</h4><div class="nt-c">' + l.concept + "</div>";
+          var k = E.keyIdea(l); if(k) body += '<div class="nt-key"><b>Remember:</b> ' + k + "</div>";
+          if(l.example) body += '<details><summary>Worked example</summary><div class="nt-c">' + l.example + "</div></details>";
+        });
+      });
+    });
+    var cover = codes.map(function(c){ return '<a href="#nt-' + c + '">' + esc(c) + "</a>"; }).join("");
+    var kt = terms.length ? '<div class="nt-sec">Key terms to use in your answers</div><dl>' + terms.sort(function(a, b){ return a[0].localeCompare(b[0]); }).map(function(g){ return "<dt>" + esc(g[0]) + "</dt><dd>" + esc(g[1]) + "</dd>"; }).join("") + "</dl>" : "";
+    $("n-body").innerHTML = "<h2>Topic " + tn + " · " + esc(t.title) + '</h2><p class="nt-sub">Exam-night revision. This sheet covers all <b>' + codes.length + " syllabus objectives</b> of the topic, in syllabus order.</p>" + '<div class="nt-cover no-print">' + cover + "</div>" + body + kt;
+    show("view-notes");
+  }
+  $("n-leave").addEventListener("click", function(){ renderJourney(); });
+  $("n-print").addEventListener("click", function(){
+    Array.prototype.forEach.call($("n-body").querySelectorAll("details"), function(d){ d.open = true; });
+    window.print();
+  });
   function openGlossary(){
     $("g-search").value = ""; renderGloss(); show("view-gloss");
   }
