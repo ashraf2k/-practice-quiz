@@ -673,6 +673,44 @@ function deleteArchivedStudent(uid){
     .then(function(){ return { ok: true }; });
 }
 
+// ---------- Student feedback on the iLearn journey ----------
+// One document per student per journey (id = uid_ilearn10br). A student can
+// create it and later edit it; only admins can list every response.
+function feedbackId(uid, key){ return uid + "_" + key; }
+
+function getMyFeedback(uid, key){
+  return getDoc(doc(db, "feedback", feedbackId(uid, key))).then(function(snap){
+    return snap.exists() ? snap.data() : null;
+  });
+}
+
+function submitFeedback(uid, key, record){
+  var ref = doc(db, "feedback", feedbackId(uid, key));
+  return getDoc(ref).then(function(snap){
+    var payload = Object.assign({}, record, { uid: uid, journey: key, updatedAt: serverTimestamp() });
+    if(!snap.exists()) payload.createdAt = serverTimestamp();
+    else payload.createdAt = snap.data().createdAt;
+    return setDoc(ref, payload, { merge: false });
+  }).then(function(){ return { ok: true }; }).catch(function(err){
+    return { ok: false, code: (err && err.code) || "", error: (err && err.message) || "Could not send your feedback." };
+  });
+}
+
+// Admin-only (enforced by security rules): every feedback response, newest first.
+function listAllFeedback(){
+  return getDocs(query(collection(db, "feedback"), orderBy("createdAt", "desc"))).then(function(snap){
+    var out = [];
+    snap.forEach(function(d){
+      var x = d.data() || {};
+      var t = x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0;
+      var u = x.updatedAt && x.updatedAt.toMillis ? x.updatedAt.toMillis() : t;
+      x.id = d.id; x.createdMs = t; x.updatedMs = u; delete x.createdAt; delete x.updatedAt;
+      out.push(x);
+    });
+    return out;
+  });
+}
+
 // True only if admins/{uid} exists. The rules let a user read ONLY their own
 // admins doc, so this reveals nothing about anyone else.
 function checkIsAdmin(uid){
@@ -682,6 +720,9 @@ function checkIsAdmin(uid){
 
 window.PQFirebase = {
   checkIsAdmin: checkIsAdmin,
+  getMyFeedback: getMyFeedback,
+  submitFeedback: submitFeedback,
+  listAllFeedback: listAllFeedback,
   signUp: signUp,
   logIn: logIn,
   logOut: logOut,

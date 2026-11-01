@@ -117,6 +117,26 @@ service cloud.firestore {
     }
 
     // Resume checkpoints / iLearn state: owner-only, free-shaped but bounded.
+    // Student feedback on the iLearn journey (one doc per student: <uid>_<journey>).
+    function validFeedback(uid, id) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['uid','journey','cls','progress','overall','content','practice','tests','usability','motivation',
+                               'nps','pace','liked','improve','ideas','showName','createdAt','updatedAt'])
+        && d.keys().hasAll(['uid','journey','cls','progress','overall','content','practice','tests','usability','motivation',
+                            'nps','pace','liked','improve','ideas','showName','createdAt','updatedAt'])
+        && d.uid == uid && d.journey in ['ilearn10br']
+        && id == uid + '_' + d.journey
+        && validClass(d.cls)
+        && isCount(d.progress, 0, 100)
+        && isCount(d.overall, 1, 5) && isCount(d.content, 1, 5) && isCount(d.practice, 1, 5)
+        && isCount(d.tests, 1, 5) && isCount(d.usability, 1, 5) && isCount(d.motivation, 1, 5)
+        && isCount(d.nps, 0, 10)
+        && d.pace in ['slow','right','fast']
+        && safeText(d.liked, 0, 600) && safeText(d.improve, 0, 600) && safeText(d.ideas, 0, 600)
+        && d.showName is bool
+        && d.updatedAt == request.time;
+    }
+
     function validProgress(uid, id, keyField) {
       let d = request.resource.data;
       return d.uid == uid
@@ -220,6 +240,20 @@ service cloud.firestore {
       allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'paperKey') && verifiedOrLegacy();
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
       allow create, update, delete: if isAdmin();
+    }
+
+    // ---------- student feedback (admins read everything; a student can read/edit only their own) ----------
+    match /feedback/{feedbackId} {
+      allow get: if signedIn() && (feedbackId.split('_')[0] == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+      allow create: if signedIn() && verifiedOrLegacy()
+        && validFeedback(request.auth.uid, feedbackId)
+        && request.resource.data.createdAt == request.time;
+      allow update: if signedIn() && verifiedOrLegacy()
+        && resource.data.uid == request.auth.uid
+        && validFeedback(request.auth.uid, feedbackId)
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
     }
 
     // ---------- default deny ----------

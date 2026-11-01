@@ -67,6 +67,7 @@ by hand after publishing:
 * Student A `create /admins/{A}` → **deny**.
 * Student A `create /attempts/{A}_datarep` with `score` > `total` → **deny**; with extra field → **deny**; valid, `recordedAt = request.time` → allow.
 * As the admin (has `admins/{uid}` doc): `list /attempts` → allow.
+* Feedback (`feedback/{uid}_ilearn10br`): student A can create/update their own (ratings 1–5, `nps` 0–10, text without `< > &`, `updatedAt = request.time`) → allow; another student's id → **deny**; `list /feedback` as a student → **deny**; as the admin → allow. **Republish `firestore.rules` for the new Feedback form to save.**
 
 ## Known limitations
 

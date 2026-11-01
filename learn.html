@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-2OZzRcV9imxaA+qeaP/XDJkWVljr75rdrLE403G2a14='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-AkosJ7+/j4GZK8yMYIthQs3AqxXTLHJTJ2+EMTl2hzw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -148,6 +148,28 @@
   .ln-arc{ display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; margin:6px 0; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
   .ln-arc:hover:not(:disabled){ border-color:var(--accent); } .ln-arc:disabled{ opacity:.5; cursor:not-allowed; } .ln-arc .st{ margin-left:auto; white-space:nowrap; }
   @media (max-width:520px){ .ln-bar-row{ grid-template-columns:1fr; gap:4px; } }
+
+  /* ---- Student feedback ---- */
+  .fb-card{ border:1.5px solid var(--accent); background:linear-gradient(135deg,var(--accent-tint),var(--surface)); }
+  .fb-wrap{ max-width:720px; margin:0 auto; }
+  .fb-head{ text-align:center; margin:4px 0 14px; } .fb-head h2{ margin:0 0 4px; font-size:24px; } .fb-head p{ margin:0; color:var(--muted); font-size:14px; }
+  .fb-prog{ display:flex; gap:6px; margin:0 0 6px; } .fb-prog i{ flex:1; height:6px; border-radius:99px; background:var(--line); } .fb-prog i.on{ background:var(--accent); }
+  .fb-meta{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); margin:0 0 14px; }
+  .fb-q{ padding:12px 0; border-top:1px solid var(--line); } .fb-q:first-of-type{ border-top:0; }
+  .fb-q > label,.fb-q > .fb-l{ display:block; font-weight:700; margin:0 0 2px; } .fb-q small{ display:block; color:var(--muted); font-size:12.5px; margin:0 0 8px; }
+  .fb-stars{ display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+  .fb-stars button{ border:0; background:none; font-size:32px; line-height:1; cursor:pointer; color:var(--line); padding:2px 3px; border-radius:8px; }
+  .fb-stars button.on{ color:#E0A400; } .fb-stars button:hover{ transform:scale(1.12); } .fb-stars .fb-w{ margin-left:8px; font-size:13px; color:var(--muted); min-width:80px; }
+  .fb-nps{ display:grid; grid-template-columns:repeat(11,1fr); gap:5px; } .fb-nps button{ padding:10px 0; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; font:inherit; font-weight:700; cursor:pointer; }
+  .fb-nps button.on{ background:var(--accent); border-color:var(--accent); color:#fff; } .fb-ends{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:4px; }
+  .fb-opts{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:8px; } .fb-opts button{ padding:11px 12px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); border-radius:10px; font:inherit; cursor:pointer; text-align:left; }
+  .fb-opts button.on{ border-color:var(--accent); background:var(--accent-tint); font-weight:700; }
+  .fb-wrap textarea{ width:100%; box-sizing:border-box; min-height:84px; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font:inherit; background:var(--surface); color:var(--ink); resize:vertical; }
+  .fb-wrap textarea:focus{ outline:2px solid var(--accent); border-color:var(--accent); } .fb-cnt{ text-align:right; font-size:11.5px; color:var(--muted); }
+  .fb-chk{ display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--bg); font-size:14px; margin-top:6px; } .fb-chk input{ margin-top:3px; width:18px; height:18px; }
+  .fb-err{ color:#B3261E; font-size:13.5px; margin:10px 0 0; min-height:18px; } .fb-nav{ display:flex; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap; }
+  .fb-thanks{ text-align:center; padding:24px 8px; } .fb-thanks .big{ font-size:54px; }
+  @media(max-width:520px){ .fb-nps{ grid-template-columns:repeat(6,1fr); } .fb-stars button{ font-size:28px; } }
 </style>
 <link rel="stylesheet" href="theme.css?v=20261027a" />
 </head>
@@ -181,6 +203,7 @@
       <button class="btn btn-secondary" id="btn-arcade" type="button">🎮 Arcade</button>
     </div>
     <div id="celebrate"></div>
+    <div id="fbcard"></div>
     <div id="p1card"></div>
     <div id="p2card"></div>
     <div class="ln-badges" id="badges"></div>
@@ -221,6 +244,10 @@
     <div class="ln-notes" id="n-body"></div>
     <img class="print-mark" src="brand/stamp-light.png" alt=""><div class="print-brand"><img src="brand/logo.png" alt="iLearnCS"><div class="pb-t"><b>iLearnCS · Learn · Practice · Master</b></div><span>Scan to open the iLearnCS site</span><img src="brand/stamp.png" alt=""><img src="brand/qr.png" alt="QR code"></div>
   </section>
+
+
+  <!-- ============ FEEDBACK ============ -->
+  <section id="view-feedback" class="card hidden"><div class="fb-wrap" id="fb-body"></div></section>
 
   <!-- ============ GLOSSARY ============ -->
   <section id="view-gloss" class="card hidden">
@@ -301,7 +328,7 @@
 
   function $(id){ return document.getElementById(id); }
   function esc(x){ return E.esc(x); }
-  var VIEWS = ["view-journey","view-lesson","view-quiz","view-gloss","view-arcade","view-notes","view-wait"];
+  var VIEWS = ["view-journey","view-lesson","view-quiz","view-gloss","view-arcade","view-notes","view-feedback","view-wait"];
   function show(id){ VIEWS.forEach(function(v){ $(v).classList.toggle("hidden", v !== id); }); window.scrollTo(0, 0); }
 
   var LESSONS = E.LESSONS, LESSON_BY_ID = E.LESSON_BY_ID, CODES = E.CODES;
@@ -447,7 +474,7 @@
 
     $("badges").innerHTML = E.badges(st, tree).map(function(b){ return '<span class="ln-badge' + (b.on ? "" : " off") + '" title="' + esc(b.how) + '">' + b.icon + " " + esc(b.name) + "</span>"; }).join("");
 
-    renderP1Card(); renderP2Card(); renderCelebrate();
+    renderP1Card(); renderP2Card(); renderCelebrate(); renderFeedbackCard();
     var bars = "";
     PAPERS.forEach(function(p){
       var codes = CODES.filter(function(c){ return p.topics.indexOf(parseInt(O[c][0], 10)) !== -1; });
@@ -580,6 +607,102 @@
           lessons: ps.done, lessonsTotal: ps.total, mastered: ps.mastered, testsPassed: ps.passed, testsTaken: ps.taken,
           course: "Cambridge IGCSE Computer Science (0478)", topics: "All 10 topics across Paper 1 (Theory) and Paper 2 (Problem-solving and Programming)" });
       }catch(e){ alert("Sorry, the certificate could not be created. Please try again."); }
+    });
+  }
+
+  // ---------------- Student feedback (shown from 50% of the journey) ----------------
+  var FB_KEY = "ilearn10br", fbSaved = null, fb = null, fbStep = 0, fbBusy = false;
+  var FB_RATE = [
+    ["overall", "Overall, how would you rate iLearn?", "Your general impression of the whole journey."],
+    ["content", "Lessons and explanations", "Were they clear, in the right order and easy to follow?"],
+    ["practice", "Practice questions and games", "Did they help you remember and understand?"],
+    ["tests", "Topic tests, past papers and revision notes", "Did they prepare you for the real exam?"],
+    ["usability", "Ease of use", "Finding things, speed, and working on your phone or computer."],
+    ["motivation", "Keeping you motivated", "Progress, badges, celebrations and feeling in control."]
+  ];
+  var FB_WORDS = ["", "Poor", "Fair", "Good", "Very good", "Excellent"];
+  function fbDraftKey(){ return "ilearn_fb_" + (preview ? "pv_" : "") + (user && user.uid); }
+  function fbBlank(){ return { overall:0, content:0, practice:0, tests:0, usability:0, motivation:0, nps:-1, pace:"", liked:"", improve:"", ideas:"", showName:false }; }
+  function fbLoad(){
+    var base = fbBlank();
+    if(fbSaved){ for(var k in base){ if(fbSaved[k] !== undefined) base[k] = fbSaved[k]; } return base; }
+    try{ var d = JSON.parse(localStorage.getItem(fbDraftKey()) || "null"); if(d) for(var k2 in base){ if(d[k2] !== undefined) base[k2] = d[k2]; } }catch(e){}
+    return base;
+  }
+  function fbDraft(){ try{ localStorage.setItem(fbDraftKey(), JSON.stringify(fb)); }catch(e){} }
+  function fbClean(t){ return String(t || "").replace(/<[^>]*>/g, " ").replace(/&/g, " and ").replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, 600); }
+  function renderFeedbackCard(){
+    var box = $("fbcard"); if(!box) return;
+    var ps = perfSummary(), p = pct(ps.done, ps.total);
+    if(p < 50 && !preview){ box.innerHTML = ""; return; }
+    box.innerHTML = '<div class="ln-card2 fb-card"><div><b>💬 ' + (fbSaved ? 'Thank you for your feedback' : 'Help us improve iLearn') + '</b><p>' +
+      (fbSaved ? 'Your answers reached your teacher. You can update them any time.' : 'You are over halfway! Share your honest opinion in about 3 minutes. It is used to make the learning experience better for you and for the next students.') +
+      (preview ? ' <i>(Admin preview: you can fill the form, but nothing is sent.)</i>' : '') + '</p></div><button class="btn btn-primary sm" id="btn-fb" type="button">' + (fbSaved ? 'Update my feedback' : 'Give feedback') + '</button></div>';
+    $("btn-fb").addEventListener("click", openFeedback);
+  }
+  function openFeedback(){ fb = fbLoad(); fbStep = 0; renderFeedback(); show("view-feedback"); }
+  function fbStars(key){
+    var h = '<div class="fb-stars" role="radiogroup" aria-label="' + esc(key) + '">';
+    for(var i = 1; i <= 5; i++) h += '<button type="button" role="radio" aria-checked="' + (fb[key] === i) + '" aria-label="' + i + ' of 5, ' + FB_WORDS[i] + '" class="' + (fb[key] >= i ? "on" : "") + '" data-star="' + key + '" data-v="' + i + '">★</button>';
+    return h + '<span class="fb-w">' + (fb[key] ? FB_WORDS[fb[key]] : "") + '</span></div>';
+  }
+  function renderFeedback(err){
+    var body = $("fb-body"), n = 3, h = "";
+    h += '<div class="fb-head"><h2>Your honest feedback</h2><p>3 short steps, about 3 minutes. Be frank: it is the best way to help us improve.</p></div>';
+    h += '<div class="fb-prog">' + [0,1,2].map(function(i){ return '<i class="' + (i <= fbStep ? "on" : "") + '"></i>'; }).join("") + '</div>';
+    h += '<div class="fb-meta"><span>Step ' + (fbStep + 1) + ' of ' + n + ' · ' + ["Rate your experience", "Pace and recommendation", "In your own words"][fbStep] + '</span><span>' + ["~2 min", "~1 min", "optional"][fbStep] + '</span></div>';
+    if(fbStep === 0){
+      FB_RATE.forEach(function(r){ h += '<div class="fb-q"><span class="fb-l">' + r[1] + '</span><small>' + r[2] + '</small>' + fbStars(r[0]) + '</div>'; });
+    }else if(fbStep === 1){
+      h += '<div class="fb-q"><span class="fb-l">How likely are you to recommend iLearn to a friend?</span><small>0 = not at all likely, 10 = extremely likely.</small><div class="fb-nps" role="radiogroup" aria-label="Recommendation score">';
+      for(var i = 0; i <= 10; i++) h += '<button type="button" role="radio" aria-checked="' + (fb.nps === i) + '" class="' + (fb.nps === i ? "on" : "") + '" data-nps="' + i + '">' + i + '</button>';
+      h += '</div><div class="fb-ends"><span>Not likely</span><span>Extremely likely</span></div></div>';
+      h += '<div class="fb-q"><span class="fb-l">How is the pace of the lessons?</span><small>Think about how fast you move through a lesson and a topic.</small><div class="fb-opts" role="radiogroup" aria-label="Pace">' +
+        [["slow", "Too slow"], ["right", "About right"], ["fast", "Too fast"]].map(function(o){ return '<button type="button" role="radio" aria-checked="' + (fb.pace === o[0]) + '" class="' + (fb.pace === o[0] ? "on" : "") + '" data-pace="' + o[0] + '">' + o[1] + '</button>'; }).join("") + '</div></div>';
+    }else{
+      [["liked", "What did you like most?", "e.g. a lesson, a game, the revision notes, the exam PDFs"], ["improve", "What should we improve or fix?", "Anything confusing, boring, too hard or not working"], ["ideas", "Any idea or feature you would love to see?", "Be creative. We read every comment."]].forEach(function(t){
+        h += '<div class="fb-q"><label for="fb-' + t[0] + '">' + t[1] + ' <span style="font-weight:400;color:var(--muted)">(optional)</span></label><small>' + t[2] + '</small><textarea id="fb-' + t[0] + '" maxlength="600" data-txt="' + t[0] + '">' + esc(fb[t[0]]) + '</textarea><div class="fb-cnt"><span id="fbc-' + t[0] + '">' + fb[t[0]].length + '</span> / 600</div></div>';
+      });
+      h += '<label class="fb-chk"><input type="checkbox" id="fb-name"' + (fb.showName ? " checked" : "") + '><span><b>Share my name with my teacher</b><br><span style="color:var(--muted);font-size:13px">Leave unticked to send it without your name. Your teacher will then see only your class. Either way it never affects your marks.</span></span></label>';
+    }
+    h += '<p class="fb-err" id="fb-err" role="alert">' + esc(err || "") + '</p>';
+    h += '<div class="fb-nav"><span>' + (fbStep === 0 ? '<button class="link-btn" id="fb-leave" type="button">← Back to journey</button>' : '<button class="btn btn-secondary" id="fb-prev" type="button">Back</button>') + '</span>' +
+      (fbStep < 2 ? '<button class="btn btn-primary" id="fb-next" type="button">Next</button>' : '<button class="btn btn-primary" id="fb-send" type="button"' + (preview ? " disabled" : "") + '>' + (preview ? "Send (disabled in preview)" : (fbSaved ? "Update feedback" : "Send feedback")) + '</button>') + '</div>';
+    body.innerHTML = h;
+    Array.prototype.forEach.call(body.querySelectorAll("[data-star]"), function(b){ b.addEventListener("click", function(){ fb[b.getAttribute("data-star")] = Number(b.getAttribute("data-v")); fbDraft(); renderFeedback(); }); });
+    Array.prototype.forEach.call(body.querySelectorAll("[data-nps]"), function(b){ b.addEventListener("click", function(){ fb.nps = Number(b.getAttribute("data-nps")); fbDraft(); renderFeedback(); }); });
+    Array.prototype.forEach.call(body.querySelectorAll("[data-pace]"), function(b){ b.addEventListener("click", function(){ fb.pace = b.getAttribute("data-pace"); fbDraft(); renderFeedback(); }); });
+    Array.prototype.forEach.call(body.querySelectorAll("[data-txt]"), function(t){ t.addEventListener("input", function(){ var k = t.getAttribute("data-txt"); fb[k] = t.value.slice(0, 600); $("fbc-" + k).textContent = fb[k].length; fbDraft(); }); });
+    if($("fb-name")) $("fb-name").addEventListener("change", function(){ fb.showName = $("fb-name").checked; fbDraft(); });
+    if($("fb-leave")) $("fb-leave").addEventListener("click", function(){ show("view-journey"); });
+    if($("fb-prev")) $("fb-prev").addEventListener("click", function(){ fbStep--; renderFeedback(); window.scrollTo(0, 0); });
+    if($("fb-next")) $("fb-next").addEventListener("click", function(){
+      var msg = "";
+      if(fbStep === 0 && FB_RATE.some(function(r){ return !fb[r[0]]; })) msg = "Please give a star rating for each of the 6 items.";
+      if(fbStep === 1 && (fb.nps < 0 || !fb.pace)) msg = "Please choose a recommendation score and the pace.";
+      if(msg){ renderFeedback(msg); return; }
+      fbStep++; renderFeedback(); window.scrollTo(0, 0);
+    });
+    if($("fb-send")) $("fb-send").addEventListener("click", sendFeedback);
+  }
+  function sendFeedback(){
+    if(preview || fbBusy) return;
+    var ps = perfSummary(), rec = { cls: String(user.class || "").slice(0, 20), progress: Math.max(0, Math.min(100, pct(ps.done, ps.total))),
+      overall: fb.overall, content: fb.content, practice: fb.practice, tests: fb.tests, usability: fb.usability, motivation: fb.motivation,
+      nps: fb.nps, pace: fb.pace, liked: fbClean(fb.liked), improve: fbClean(fb.improve), ideas: fbClean(fb.ideas), showName: !!fb.showName };
+    if(!PQFirebase.submitFeedback){ renderFeedback("Feedback is not available right now. Please try again later."); return; }
+    fbBusy = true; $("fb-send").disabled = true; $("fb-send").textContent = "Sending…";
+    PQFirebase.submitFeedback(user.uid, FB_KEY, rec).then(function(r){
+      fbBusy = false;
+      if(!r || !r.ok){
+        var denied = r && /permission|denied/i.test((r.code || "") + " " + (r.error || ""));
+        renderFeedback(denied ? "Your feedback could not be saved yet because the teacher's setup is not finished. Your answers are kept on this device. Please try again later."
+                              : "Sorry, we could not send your feedback. Please check your connection and try again.");
+        return;
+      }
+      fbSaved = rec; try{ localStorage.removeItem(fbDraftKey()); }catch(e){}
+      $("fb-body").innerHTML = '<div class="fb-thanks"><div class="big">🙏</div><h2>Thank you, ' + esc(user.name || "") + '!</h2><p class="ln-muted" style="font-size:15px">Your feedback has been sent to your teacher. Every comment is read and helps shape the next version of iLearn.</p><p><button class="btn btn-primary" id="fb-done" type="button">Back to my journey</button></p></div>';
+      $("fb-done").addEventListener("click", function(){ renderFeedbackCard(); show("view-journey"); });
     });
   }
   function p1Lessons(){ return LESSONS.filter(function(l){ return topicNum(l) <= 6; }); }
@@ -907,6 +1030,7 @@
       });
     }
     loadState().then(function(s){ st = s; renderJourney(); });
+    if(!preview && PQFirebase.getMyFeedback){ PQFirebase.getMyFeedback(user.uid, FB_KEY).then(function(r){ if(r){ fbSaved = r; renderFeedbackCard(); } }).catch(function(){}); }
   }
   PQFirebase.onAuthChange(function(u){
     if(!u){ window.location.href = "quiz.html"; return; }
