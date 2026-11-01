@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-mPHVt1/Vn7+bduYsysehShAeHxC2ezkx9dJvMY9y9bw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-IMBYr3hJbp6Eye52sW6bgcQGQwAy/Gu9CnIc7VD1G6Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -105,6 +105,15 @@
   .ln-card2 p{ margin:0; font-size:14px; } .ln-card2 b{ font-size:15px; }
   .ln-card2.warm{ border-left:5px solid var(--diff-moderate); background:var(--diff-moderate-bg); }
   .ln-tools{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 0; }
+  .ln-celebrate{ position:relative; overflow:hidden; margin:14px 0 0; padding:22px 20px; text-align:center; border-radius:14px; border:1.5px solid #B8923A; background:linear-gradient(135deg, var(--accent-tint), var(--surface) 55%, rgba(184,146,58,.14)); }
+  .ln-celebrate h3{ margin:4px 0 6px; font-size:24px; letter-spacing:.2px; }
+  .ln-celebrate p{ margin:4px auto; max-width:560px; font-size:15px; }
+  .ln-celebrate .ln-perf{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:14px 0; }
+  .ln-celebrate .ln-perf div{ min-width:120px; padding:8px 12px; border:1px solid #B8923A; border-radius:10px; background:var(--surface); }
+  .ln-celebrate .ln-perf b{ display:block; font-size:21px; } .ln-celebrate .ln-perf small{ color:var(--muted); font-size:11px; letter-spacing:.6px; text-transform:uppercase; }
+  .ln-confetti{ position:absolute; top:-12px; width:8px; height:12px; opacity:.9; animation:lnfall 4.5s linear infinite; pointer-events:none; }
+  @keyframes lnfall{ to{ transform:translateY(340px) rotate(540deg); opacity:0; } }
+  @media (prefers-reduced-motion:reduce){ .ln-confetti{ display:none; } }
   .ln-badges{ display:flex; gap:7px; flex-wrap:wrap; margin:12px 0 0; }
   .ln-badge{ font-size:12.5px; font-weight:700; padding:4px 11px; border-radius:999px; border:1px solid var(--correct-line); background:var(--correct-bg); color:var(--correct); }
   .ln-badge.off{ border-color:var(--line); background:var(--bg); color:var(--muted); font-weight:600; filter:grayscale(1); }
@@ -158,6 +167,7 @@
       <button class="btn btn-secondary" id="btn-gloss" type="button">📖 Glossary</button>
       <button class="btn btn-secondary" id="btn-arcade" type="button">🎮 Arcade</button>
     </div>
+    <div id="celebrate"></div>
     <div id="p1card"></div>
     <div id="p2card"></div>
     <div class="ln-badges" id="badges"></div>
@@ -217,6 +227,8 @@
 
 <script src="syllabus-objectives.js?v=20261019j"></script>
 <script src="learn-helpers.js?v=20261019j"></script>
+<script src="jspdf.min.js"></script>
+<script src="certificate.js?v=20261101a"></script>
 <script src="learn-data.js?v=20261019j"></script>
 <script src="learn-t1.js?v=20261019j"></script>
 <script src="learn-t2.js?v=20261019j"></script>
@@ -409,7 +421,7 @@
 
     $("badges").innerHTML = E.badges(st, tree).map(function(b){ return '<span class="ln-badge' + (b.on ? "" : " off") + '" title="' + esc(b.how) + '">' + b.icon + " " + esc(b.name) + "</span>"; }).join("");
 
-    renderP1Card(); renderP2Card();
+    renderP1Card(); renderP2Card(); renderCelebrate();
     var bars = "";
     PAPERS.forEach(function(p){
       var codes = CODES.filter(function(c){ return p.topics.indexOf(parseInt(O[c][0], 10)) !== -1; });
@@ -508,6 +520,37 @@
     Array.prototype.forEach.call($("topics").querySelectorAll("[data-pre]"), function(b){ b.addEventListener("click", function(){ startTopicTest(Number(b.getAttribute("data-pre")), true); }); });
     Array.prototype.forEach.call($("topics").querySelectorAll("[data-test]"), function(b){ b.addEventListener("click", function(){ startTopicTest(Number(b.getAttribute("data-test")), false); }); });
     show("view-journey");
+  }
+  // ---------- completion celebration + certificate ----------
+  function perfSummary(){
+    var done = LESSONS.filter(function(l){ return isDone(l.id); }).length;
+    var mastered = LESSONS.filter(function(l){ return isDone(l.id) && st.learn[l.id] && st.learn[l.id].f; }).length;
+    var taken = 0, passed = 0, sum = 0;
+    for(var tn = 1; tn <= 10; tn++){ var r = st.tests[tn]; if(r && r.t){ taken++; var p = r.s / r.t * 100; sum += p; if(p >= 50) passed++; } }
+    var overall = taken ? Math.round(sum / taken) : pct(mastered, LESSONS.length);
+    var grade = overall >= 85 ? "Distinction" : overall >= 70 ? "Merit" : "Pass";
+    return { done: done, total: LESSONS.length, mastered: mastered, taken: taken, passed: passed, overall: overall, grade: grade };
+  }
+  function renderCelebrate(){
+    var box = $("celebrate"); if(!box) return;
+    var ps = perfSummary(), complete = ps.done === ps.total && ps.total > 0;
+    if(!complete && !preview){ box.innerHTML = ""; return; }
+    var colors = ["#B8923A", "#285F54", "#E0634E", "#4A7BD0", "#8E5CC4"], conf = "";
+    if(complete) for(var i = 0; i < 26; i++) conf += '<span class="ln-confetti" style="left:' + (i * 3.9 + 1) + '%;background:' + colors[i % 5] + ';animation-delay:' + ((i * 0.37) % 4).toFixed(2) + 's;animation-duration:' + (3.6 + (i % 5) * 0.5) + 's"></span>';
+    box.innerHTML = '<div class="ln-celebrate">' + conf + '<div style="font-size:42px">\uD83C\uDF93</div>' +
+      (complete ? '<h3>Congratulations, ' + esc(user.name) + '!</h3><p>You have completed the <b>whole iLearn journey</b>: every lesson in all 10 topics, across Paper 1 and Paper 2. That takes real commitment, and it shows.</p>'
+                : '<h3>Certificate of completion <small style="font-size:13px;color:var(--muted)">(admin preview)</small></h3><p>Students receive this when they finish every lesson in the journey. Preview it with your own progress.</p>') +
+      '<div class="ln-perf"><div><b>' + ps.overall + '%</b><small>Overall performance</small></div><div><b>' + ps.done + ' / ' + ps.total + '</b><small>Lessons completed</small></div><div><b>' + ps.passed + ' / ' + ps.taken + '</b><small>Topic tests passed</small></div><div><b>' + ps.grade + '</b><small>Achievement</small></div></div>' +
+      '<button class="btn btn-primary" id="btn-cert" type="button">\uD83C\uDFC5 Download my certificate (PDF)</button>' +
+      '<p class="ln-muted" style="font-size:12px;margin-top:8px">Signed by Mr. Ashraf Elbialy, Computer Science Teacher.</p></div>';
+    $("btn-cert").addEventListener("click", function(){
+      var d = new Date(), months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      try{
+        Cert.download({ name: user.name || "Student", dateText: d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear(), pct: ps.overall, grade: ps.grade,
+          lessons: ps.done, lessonsTotal: ps.total, mastered: ps.mastered, testsPassed: ps.passed, testsTaken: ps.taken,
+          course: "Cambridge IGCSE Computer Science (0478)", topics: "All 10 topics across Paper 1 (Theory) and Paper 2 (Problem-solving and Programming)" });
+      }catch(e){ alert("Sorry, the certificate could not be created. Please try again."); }
+    });
   }
   function p1Lessons(){ return LESSONS.filter(function(l){ return topicNum(l) <= 6; }); }
   function renderP1Card(){
