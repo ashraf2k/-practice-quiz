@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-zID/3+T10WStRbtjdNpMSg9KedOxfnK00QTSfzglAvU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-q3H/rOyre918gsL0JqL16NFmodE2GDaZHTeLhP8eGIw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -489,6 +489,10 @@
       });
       if(window.EXAMS && EXAMS["10BR"] && EXAMS["10BR"][tn]){
         var ex = EXAMS["10BR"][tn];
+        var exOk = preview || (undone === 0 && (!bank || (res && pct(res.s, res.t) >= 50)));
+        if(!exOk){
+          h += '<div class="ln-pp" style="opacity:.85"><div><b>\uD83D\uDD12 End-of-topic exam (PDF)</b> <small>(' + ex.marks + ' marks)</small><br><span>' + (undone ? 'Finish all ' + undone + ' remaining lesson' + (undone === 1 ? '' : 's') + ' in this topic' : 'Take the topic test') + (bank ? ' and score at least 50% in the topic test' : '') + ' to unlock the downloadable exam.' + (res ? ' Your best so far: ' + pct(res.s, res.t) + '%.' : '') + '</span></div></div>';
+        } else
         h += '<div class="ln-pp"><div><b>\uD83D\uDCDD End-of-topic exam (PDF)</b> <small>(' + ex.marks + ' marks, ' + (ex.mins === 90 ? "1 h 30 min" : ex.mins + " min") + ', ' + ex.pages + ' pages)</small><br><span>A paper-style exam made from real Cambridge past-paper questions on this topic. Download, print, solve it by hand, then mark it with the official mark scheme.</span></div><a class="btn btn-primary sm" style="text-decoration:none" href="exams/' + ex.f + '" download target="_blank" rel="noopener">Download PDF</a></div>';
         if(preview && window.EXAMS_MS && EXAMS_MS["10BR"] && EXAMS_MS["10BR"][tn]){
           h += '<div class="ln-pp" style="border-style:dashed"><div><b>\uD83D\uDD12 Mark scheme (teacher only)</b><br><span>Official Cambridge mark scheme for the exam above, with matching question numbers. Visible to admins only.</span></div><a class="btn btn-secondary sm" style="text-decoration:none" href="exams-ms/' + EXAMS_MS["10BR"][tn] + '" target="_blank" rel="noopener">Open mark scheme PDF</a></div>';
