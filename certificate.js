@@ -96,7 +96,8 @@
     doc.setDrawColor.apply(doc, INK); doc.setLineWidth(0.7); doc.line(70, fy, 230, fy);
     doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(110, 116, 130); doc.text("DATE", 150, fy + 13, { align: "center" });
     seal(doc, cx, fy - 12);
-    signature(doc, W - 255, fy - 24);
+    if(root.CERT_SIG){ try{ doc.addImage(root.CERT_SIG, "PNG", W - 152 - 45, fy - 44, 90, 90 * 361 / 700); }catch(e){ signature(doc, W - 255, fy - 24); } }
+    else signature(doc, W - 255, fy - 24);
     doc.setDrawColor.apply(doc, INK); doc.setLineWidth(0.7); doc.line(W - 235, fy, W - 70, fy);
     doc.setFont("times", "bold"); doc.setFontSize(12.5); doc.setTextColor.apply(doc, INK); doc.text("Mr. Ashraf Elbialy", W - 152, fy + 14, { align: "center" });
     doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(110, 116, 130); doc.text("Computer Science Teacher", W - 152, fy + 26, { align: "center" });
