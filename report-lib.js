@@ -352,7 +352,7 @@
     var PAGE_W = doc.internal.pageSize.getWidth();
     var PAGE_H = doc.internal.pageSize.getHeight();
     var MARGIN = 40;
-    var BOTTOM = PAGE_H - MARGIN;
+    var BOTTOM = PAGE_H - 54;
     var CONTENT_W = PAGE_W - MARGIN * 2;
     var y = MARGIN;
     var pageNum = 1;
@@ -648,15 +648,9 @@
       y += rowH + 7;
     }
 
-    // ---------- Footer: page numbers ----------
-    var totalPages = doc.internal.getNumberOfPages();
-    for(var p = 1; p <= totalPages; p++){
-      doc.setPage(p);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(8);
-      pdfColor(doc, PDF_MUTED);
-      doc.text("Page " + p + " of " + totalPages, PAGE_W - MARGIN, PAGE_H - 20, { align: "right" });
-    }
+    // ---------- Footer: iLearnCS logo, stamp, QR and page numbers on every page ----------
+    if(window.BrandFooter) window.BrandFooter.apply(doc, { numbers: true });
+    else { var totalPages = doc.internal.getNumberOfPages(); for(var p = 1; p <= totalPages; p++){ doc.setPage(p); doc.setFont("helvetica", "normal"); doc.setFontSize(8); pdfColor(doc, PDF_MUTED); doc.text("Page " + p + " of " + totalPages, PAGE_W - MARGIN, PAGE_H - 20, { align: "right" }); } }
 
     return doc.output("blob");
   }

@@ -124,7 +124,9 @@
   .ln-notes .nt-key{ margin:8px 0; padding:8px 11px; border-radius:8px; border:1px solid #B8923A; background:rgba(184,146,58,.12); font-size:14px; }
   .ln-notes details{ margin:6px 0; } .ln-notes details summary{ cursor:pointer; font-size:13px; color:var(--muted); }
   .ln-notes dl{ display:grid; grid-template-columns:minmax(120px,max-content) 1fr; gap:3px 12px; font-size:13.5px; } .ln-notes dt{ font-weight:700; } .ln-notes dd{ margin:0; }
-  @media print{ body *{ visibility:hidden; } #view-notes, #view-notes *{ visibility:visible; } #view-notes{ position:absolute; left:0; top:0; width:100%; box-shadow:none; border:0; } .no-print{ display:none !important; } .ln-notes h4,.ln-notes .nt-obj{ break-after:avoid; } .ln-notes .nt-key{ break-inside:avoid; } }
+  @page{ margin:12mm 12mm 28mm; }
+  .print-brand,.print-mark{ display:none; }
+  @media print{ .print-mark{ display:block; position:fixed; top:50%; left:50%; width:90mm; height:90mm; margin:-45mm 0 0 -45mm; z-index:0; } .print-brand{ display:flex; position:fixed; left:0; right:0; bottom:-23mm; align-items:center; gap:12px; padding-top:6px; border-top:1px solid #bbb; font-size:10px; color:#556; background:#fff; } .print-brand img{ height:34px; } .print-brand .pb-t{ flex:1; } body *{ visibility:hidden; } #view-notes, #view-notes *{ visibility:visible; } #view-notes{ position:absolute; left:0; top:0; width:100%; box-shadow:none; border:0; } .no-print{ display:none !important; } .ln-notes h4,.ln-notes .nt-obj{ break-after:avoid; } .ln-notes .nt-key{ break-inside:avoid; } }
   .ln-badges{ display:flex; gap:7px; flex-wrap:wrap; margin:12px 0 0; }
   .ln-badge{ font-size:12.5px; font-weight:700; padding:4px 11px; border-radius:999px; border:1px solid var(--correct-line); background:var(--correct-bg); color:var(--correct); }
   .ln-badge.off{ border-color:var(--line); background:var(--bg); color:var(--muted); font-weight:600; filter:grayscale(1); }
@@ -217,6 +219,7 @@
       <span><button class="btn btn-secondary sm" id="n-print" type="button">🖨️ Print / save as PDF</button> <button class="link-btn" id="n-leave" type="button">← Back to journey</button></span>
     </div>
     <div class="ln-notes" id="n-body"></div>
+    <img class="print-mark" src="brand/stamp-light.png" alt=""><div class="print-brand"><img src="brand/logo.png" alt="iLearnCS"><div class="pb-t"><b>iLearnCS · Learn · Practice · Master</b></div><span>Scan to open the iLearnCS site</span><img src="brand/stamp.png" alt=""><img src="brand/qr.png" alt="QR code"></div>
   </section>
 
   <!-- ============ GLOSSARY ============ -->
@@ -248,6 +251,8 @@
 <script src="syllabus-objectives.js?v=20261019j"></script>
 <script src="learn-helpers.js?v=20261019j"></script>
 <script src="jspdf.min.js"></script>
+<script src="brand-assets.js?v=20261101a"></script>
+<script src="brand-footer.js?v=20261101a"></script>
 <script src="certificate-sig.js?v=20261101b"></script>
 <script src="certificate.js?v=20261101b"></script>
 <script src="learn-data.js?v=20261019j"></script>

@@ -144,12 +144,13 @@
   }
   PDF.prototype.setTitle = function(t){ this.title = ascii(t); };
   PDF.prototype.footer = function(){
-    var d = this.doc; d.setFont("helvetica", "normal"); d.setFontSize(8); d.setTextColor(130, 138, 150);
-    d.text("iLearnCS  |  IGCSE Computer Science 0478 syllabus report  |  " + this.title, this.M, this.H - 22);
-    d.text("Page " + this.page, this.W - this.M, this.H - 22, { align:"right" });
+    var d = this.doc; d.setFont("helvetica", "normal"); d.setFontSize(7); d.setTextColor(130, 138, 150);
+    d.text("IGCSE Computer Science 0478 syllabus report  |  " + this.title, this.M, this.H - 48);
+    if(root.BrandFooter){ root.BrandFooter.watermark(d); root.BrandFooter.band(d, { x0: this.M, x1: this.W - this.M, y0: this.H - 42, band: 40, center: "Page " + this.page }); }
+    else { d.setFontSize(8); d.text("Page " + this.page, this.W - this.M, this.H - 22, { align:"right" }); }
   };
   PDF.prototype.newPage = function(){ this.footer(); this.doc.addPage(); this.page++; this.y = this.M; };
-  PDF.prototype.need = function(h){ if(this.y + h > this.H - 46) this.newPage(); };
+  PDF.prototype.need = function(h){ if(this.y + h > this.H - 58) this.newPage(); };
   PDF.prototype.text = function(str, o){
     o = o || {}; var d = this.doc, size = o.size || 10, x = (o.x == null ? this.M : o.x), w = o.w || (this.W - this.M - x);
     d.setFont("helvetica", o.bold ? "bold" : "normal"); d.setFontSize(size);
