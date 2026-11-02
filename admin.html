@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-YCKcJn0zozP0ZutIEYlVLRcfOkDb71Y+KMwWYWWFDEU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-28tqQta7MLULJ7FJem2fjPkssGcFgzk/y/IFKUtIKE8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -806,7 +806,7 @@
 <script src="syllabus-report.js?v=20261019j"></script>
 <script src="parent-report.js?v=20261021a"></script>
 <script src="firebase-config.js?v=20261019j"></script>
-<script type="module" src="firebase-init.js?v=20261019j"></script>
+<script type="module" src="firebase-init.js?v=20261102b"></script>
 <script type="module">
 (function(){
 
@@ -2500,6 +2500,7 @@
   }
   document.getElementById("btn-fb-load").addEventListener("click", function(){
     var st = document.getElementById("fb-status"); st.textContent = "Loading feedback...";
+    if(typeof PQFirebase.listAllFeedback !== "function"){ st.textContent = "This page is using an old cached script. Please refresh with Ctrl+Shift+R (or clear the browser cache) and try again."; return; }
     PQFirebase.listAllFeedback().then(function(rows){
       fbRows = rows; fbFillClasses(); document.getElementById("btn-fb-csv").disabled = !rows.length;
       if(!rows.length){ document.getElementById("fb-body").innerHTML = ""; st.textContent = "No feedback yet. Students see the form once they finish 50% of the iLearn journey."; return; }
@@ -2507,7 +2508,7 @@
     }).catch(function(err){
       st.textContent = /permission|denied/i.test((err && (err.code + " " + err.message)) || "")
         ? "Permission denied. Publish the latest firestore.rules in the Firebase console (see SECURITY.md), then try again."
-        : "Could not load feedback. Please try again.";
+        : "Could not load feedback (" + ((err && (err.code || err.message)) || "unknown error") + "). Please try again.";
     });
   });
   document.getElementById("filter-class-fb").addEventListener("change", renderFeedbackAdmin);

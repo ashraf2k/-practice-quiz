@@ -698,7 +698,7 @@ function submitFeedback(uid, key, record){
 
 // Admin-only (enforced by security rules): every feedback response, newest first.
 function listAllFeedback(){
-  return getDocs(query(collection(db, "feedback"), orderBy("createdAt", "desc"))).then(function(snap){
+  return getDocs(collection(db, "feedback")).then(function(snap){
     var out = [];
     snap.forEach(function(d){
       var x = d.data() || {};
@@ -707,6 +707,7 @@ function listAllFeedback(){
       x.id = d.id; x.createdMs = t; x.updatedMs = u; delete x.createdAt; delete x.updatedAt;
       out.push(x);
     });
+    out.sort(function(a, b){ return (b.updatedMs || b.createdMs) - (a.updatedMs || a.createdMs); });
     return out;
   });
 }
