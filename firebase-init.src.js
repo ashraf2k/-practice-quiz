@@ -8,7 +8,7 @@
 // so the rest of the site's existing classic <script> code (quiz.html,
 // admin.html) can call it without itself becoming an ES module.
 // ============================================================
-import { initializeApp } from "firebase/app";
+import { initializeApp, deleteApp } from "firebase/app";
 import {
   getAuth,
   setPersistence,
@@ -19,7 +19,9 @@ import {
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
-  sendEmailVerification
+  sendEmailVerification,
+  initializeAuth,
+  inMemoryPersistence
 } from "firebase/auth";
 import {
   initializeFirestore,
@@ -167,7 +169,13 @@ function logIn(email, password, remember){
           setRemembered(false);
           return signOut(auth).then(function(){ throw new Error(ARCHIVED_MESSAGE); });
         }
-        return getMyProfile(cred.user.uid);
+        return getMyProfile(cred.user.uid).then(function(p){
+          if(p && p.blocked){
+            setRemembered(false);
+            return signOut(auth).then(function(){ throw new Error(BLOCKED_MESSAGE); });
+          }
+          return p;
+        });
       });
     })
     .then(function(r){ authBusy = false; return r; }, function(err){ authBusy = false; throw new Error(friendlyAuthError(err)); });
@@ -198,6 +206,7 @@ function onAuthChange(callback){
     isArchived(user.uid).then(function(archived){
       if(archived){ setRemembered(false); return signOut(auth).then(function(){ callback(null); }); }
       return getMyProfile(user.uid).then(function(profile){
+        if(profile && profile.blocked){ setRemembered(false); return signOut(auth).then(function(){ callback(null); }); }
         callback(profile || { uid: user.uid, email: user.email, name: "", class: "" });
       });
     }).catch(function(){
@@ -226,9 +235,11 @@ function getMyProfile(uid){
   return getDoc(doc(db, "users", uid)).then(function(snap){
     if(!snap.exists()) return null;
     var d = snap.data();
-    return { uid: uid, name: d.name, email: d.email, class: d.class };
+    return { uid: uid, name: d.name, email: d.email, class: d.class, blocked: d.blocked === true };
   });
 }
+
+var BLOCKED_MESSAGE = "This account has been blocked. Please speak to your teacher.";
 
 // ---------- Attempts (replaces the Apps Script backend) ----------
 
@@ -315,7 +326,7 @@ function recordAttempt(uid, examKey, record){
 function listAllUsers(){
   return getDocs(collection(db, "users")).then(function(snap){
     var out = [];
-    snap.forEach(function(d){ var x = d.data() || {}; out.push({ uid: d.id, name: x.name || "", email: x.email || "", className: x["class"] || "" }); });
+    snap.forEach(function(d){ var x = d.data() || {}; out.push({ uid: d.id, name: x.name || "", email: x.email || "", className: x["class"] || "", blocked: x.blocked === true, createdMs: x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0 }); });
     return out;
   });
 }
@@ -622,10 +633,66 @@ function archiveStudent(uid, adminEmail){
   });
 }
 
+// ---------- Admin: manage students (add / edit / block / delete) ----------
+function cleanAdminName(v){
+  return String(v || "").replace(/<[^>]*>/g, " ").replace(/[<>&]/g, "").replace(/\s+/g, " ").trim().slice(0, 80);
+}
+
+// Admin: rename a student (profile only; results keep the name they were saved with).
+function adminRenameStudent(uid, name){
+  name = cleanAdminName(name);
+  if(!uid || !name) return Promise.reject(new Error("Please enter a name."));
+  return setDoc(doc(db, "users", uid), { name: name }, { merge: true }).then(function(){ return { uid: uid, name: name }; });
+}
+
+// Admin: block / unblock. A blocked student is signed out at the next login
+// check and (via firestore.rules) cannot write anything. Data is kept.
+function setStudentBlocked(uid, blocked){
+  if(!uid) return Promise.reject(new Error("Missing student."));
+  var p = blocked ? { blocked: true } : { blocked: deleteField() };
+  return updateDoc(doc(db, "users", uid), p).then(function(){ return { uid: uid, blocked: !!blocked }; });
+}
+
+// Admin: create a student account. Uses a SECOND, throw-away Firebase app so
+// the admin stays signed in. The student gets a verification e-mail and can
+// also use "Forgot password" to choose their own password.
+function adminCreateStudent(name, email, cls, password){
+  name = cleanAdminName(name); cls = String(cls || "").trim(); email = String(email || "").trim();
+  if(!name) return Promise.reject(new Error("Please enter the student's name."));
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return Promise.reject(new Error("Please enter a valid e-mail address."));
+  if(!/^[A-Za-z0-9 ._-]{1,20}$/.test(cls)) return Promise.reject(new Error("Please choose the class."));
+  if(!password || String(password).length < MIN_PASSWORD) return Promise.reject(new Error("The password needs at least " + MIN_PASSWORD + " characters."));
+  var sec = initializeApp(firebaseConfig, "adminCreate" + Date.now());
+  var secAuth = initializeAuth(sec, { persistence: inMemoryPersistence });
+  var uid = "", sent = false;
+  return createUserWithEmailAndPassword(secAuth, email, password).then(function(cred){
+    uid = cred.user.uid;
+    return setDoc(doc(db, "users", uid), { name: name, email: email, class: cls, createdAt: serverTimestamp() }).then(function(){
+      return sendEmailVerification(cred.user).then(function(){ sent = true; }, function(){ sent = false; });
+    });
+  }).then(function(){
+    return signOut(secAuth).catch(function(){});
+  }).then(function(){
+    return deleteApp(sec).catch(function(){});
+  }).then(function(){ return { uid: uid, name: name, email: email, class: cls, verificationSent: sent }; },
+  function(err){ deleteApp(sec).catch(function(){}); throw new Error(friendlyAuthError(err)); });
+}
+
+// Admin: remove a student for good. Their data is erased and a tiny marker is
+// left in archive/{uid} so the old login keeps being turned away.
+function adminDeleteStudent(uid, adminEmail){
+  return archiveStudent(uid, adminEmail).then(function(r){
+    return deleteArchivedStudent(uid).then(function(){
+      return setDoc(doc(db, "archive", uid), { uid: uid, name: r.name || "", class: "", email: "", deleted: true,
+        archivedAt: new Date().toISOString(), archivedBy: adminEmail || null, itemCount: 0 });
+    });
+  }).then(function(){ return { ok: true }; });
+}
+
 function listArchivedStudents(){
   return getDocs(collection(db, "archive")).then(function(snap){
     var out = [];
-    snap.forEach(function(d){ out.push(d.data()); });
+    snap.forEach(function(d){ var x = d.data(); if(x && !x.deleted) out.push(x); });
     return out;
   });
 }
@@ -882,5 +949,9 @@ window.PQFirebase = {
   archiveStudent: archiveStudent,
   listArchivedStudents: listArchivedStudents,
   restoreStudent: restoreStudent,
-  deleteArchivedStudent: deleteArchivedStudent
+  deleteArchivedStudent: deleteArchivedStudent,
+  adminRenameStudent: adminRenameStudent,
+  setStudentBlocked: setStudentBlocked,
+  adminCreateStudent: adminCreateStudent,
+  adminDeleteStudent: adminDeleteStudent
 };

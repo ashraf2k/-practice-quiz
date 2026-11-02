@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-q8DN/OwbG4wbzeeHLjvzXHYtfYnN8xhnYNbRKMz4Oyc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-qlH2vaatIKXUfsBZb6NuPueJRwMgd+z5WPpFDwxq+lM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -377,6 +377,41 @@
   .rs-list .rs-paper{ font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 6px 8px 0; }
   .flash{ border: 1px solid var(--correct-line); background: var(--correct-bg); color: var(--correct); border-radius: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
   .flash.bad{ border-color: var(--incorrect-line); background: var(--incorrect-bg); color: var(--incorrect); }
+
+  /* ---- Reorganised navigation ---- */
+  .level-bar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 12px; }
+  .level-bar-label{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-right:2px; }
+  .admin-tabs{ flex-wrap:wrap !important; overflow:visible !important; gap:6px 18px !important; padding:8px 10px !important; }
+  .tab-group{ display:flex; align-items:center; gap:2px; flex-wrap:wrap; }
+  .tab-glabel{ font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); opacity:.8; margin-right:6px; }
+  .tab-group + .tab-group{ border-left:1px solid var(--line); padding-left:16px; }
+  @media (max-width:700px){ .tab-group + .tab-group{ border-left:0; padding-left:0; } .tab-group{ width:100%; } }
+  /* the shared Level bar replaces the per-menu switchers */
+  .lvl-sw{ display:none !important; }
+  #pp-level{ display:none; }
+  /* ---- Manage students ---- */
+  .mg-kpis{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .mg-kpi{ border:1px solid var(--line); background:var(--surface); border-radius:12px; padding:10px 16px; min-width:110px; }
+  .mg-kpi b{ display:block; font-size:22px; color:var(--ink); }
+  .mg-kpi span{ font-size:12px; color:var(--muted); }
+  .mg-add, #mg-dialog{ border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:14px; padding:16px 18px; margin-bottom:14px; }
+  #mg-dialog{ max-width:420px; width:92vw; }
+  #mg-dialog::backdrop{ background:rgba(0,0,0,.45); }
+  .mg-add h3, #mg-dialog h3{ margin:0 0 10px; font-size:16px; }
+  .mg-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
+  .mg-add label, #mg-dialog label{ display:flex; flex-direction:column; gap:4px; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:8px; }
+  .mg-add input, .mg-add select, #mg-dialog input, #mg-dialog select{ padding:9px 11px; border-radius:7px; border:1px solid var(--line); background:var(--input-bg); color:var(--ink); font-size:14px; font-weight:400; }
+  .mg-pw{ display:flex; gap:6px; } .mg-pw input{ flex:1; min-width:0; }
+  .mg-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+  .mg-bulk{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px 12px; margin-bottom:10px; border:1px solid var(--accent); border-radius:12px; background:var(--surface); }
+  .mg-bulk select{ padding:7px 9px; border-radius:7px; border:1px solid var(--line); background:var(--input-bg); color:var(--ink); }
+  .mg-bulk .btn, .mg-row-actions .btn{ font-size:12px; padding:0 10px; height:30px; border-radius:8px; }
+  .mg-row-actions{ display:flex; gap:5px; flex-wrap:wrap; }
+  .mg-chip{ display:inline-block; padding:2px 9px; border-radius:999px; font-size:11.5px; font-weight:700; color:#fff; }
+  .mg-chip.ok{ background:#16a34a; } .mg-chip.bad{ background:#dc2626; }
+  .mg-lvl{ font-size:11px; font-weight:700; color:var(--muted); margin-left:6px; }
+  tr.mg-blocked td{ opacity:.65; }
+  .mg-bulk[hidden], .mg-add[hidden]{ display:none; }
 </style>
 <link rel="stylesheet" href="theme.css?v=20261027a" />
 </head>
@@ -432,21 +467,87 @@
 
     <div class="kpi-row no-print" id="kpi-row" aria-label="Overview"></div>
 
+    <div class="level-bar no-print" id="level-bar" role="group" aria-label="Level">
+      <span class="level-bar-label">Level</span>
+      <button type="button" class="lvl-btn on" data-gl="">All</button>
+      <button type="button" class="lvl-btn" data-gl="10">10BR · IGCSE</button>
+      <button type="button" class="lvl-btn" data-gl="11">11BR · AS Level</button>
+      <button type="button" class="lvl-btn" data-gl="12">12BR · A Level</button>
+    </div>
+
     <div class="admin-tabs no-print" id="admin-tabs">
-      <button class="admin-tab active" data-tab="byStudent">By student</button>
-      <button class="admin-tab" data-tab="syllabus">Syllabus report</button>
-      <button class="admin-tab" data-tab="ilearn">iLearn</button>
-      <button class="admin-tab" data-tab="isolve">iSolve</button>
-      <button class="admin-tab" data-tab="archive">Archive</button>
-      <button class="admin-tab" data-tab="attention">Needs attention</button>
-      <button class="admin-tab" data-tab="feedback">Feedback</button>
-      <button class="admin-tab" data-tab="tuition">Tuition</button>
-      <button class="admin-tab" data-tab="ppPerf">Past papers</button>
-      <button class="admin-tab" data-tab="classes">Class overview</button>
-      <button class="admin-tab" data-tab="students">Quiz log</button>
+      <div class="tab-group"><span class="tab-glabel">Overview</span>
+        <button class="admin-tab" data-tab="attention">Needs attention</button>
+        <button class="admin-tab" data-tab="classes">Class overview</button>
+      </div>
+      <div class="tab-group"><span class="tab-glabel">Students</span>
+        <button class="admin-tab active" data-tab="manage">Manage students</button>
+        <button class="admin-tab" data-tab="byStudent">By student</button>
+        <button class="admin-tab" data-tab="archive">Archive</button>
+      </div>
+      <div class="tab-group"><span class="tab-glabel">Learning</span>
+        <button class="admin-tab" data-tab="ilearn">iLearn</button>
+        <button class="admin-tab" data-tab="isolve">iSolve</button>
+        <button class="admin-tab" data-tab="syllabus">Syllabus report</button>
+        <button class="admin-tab" data-tab="ppPerf">Past papers</button>
+        <button class="admin-tab" data-tab="students">Quiz log</button>
+      </div>
+      <div class="tab-group"><span class="tab-glabel">Teaching</span>
+        <button class="admin-tab" data-tab="tuition">Tuition</button>
+        <button class="admin-tab" data-tab="feedback">Feedback</button>
+      </div>
     </div>
 
     <div id="admin-panels">
+      <div class="admin-panel active" id="panel-manage">
+        <div class="mg-kpis" id="mg-kpis"></div>
+        <div class="admin-toolbar no-print">
+          <input type="text" id="mg-search" placeholder="Search name or email" aria-label="Search students">
+          <select id="mg-class" aria-label="Class"><option value="">All classes</option></select>
+          <select id="mg-status" aria-label="Status"><option value="">Active + blocked</option><option value="active">Active only</option><option value="blocked">Blocked only</option></select>
+          <button class="btn btn-primary" id="mg-add-toggle" type="button">+ Add student</button>
+          <button class="btn btn-secondary" id="mg-csv" type="button">Download CSV</button>
+        </div>
+        <div class="mg-add" id="mg-add" hidden>
+          <h3>Add a student</h3>
+          <div class="mg-grid">
+            <label>Full name<input type="text" id="mg-a-name" maxlength="80" autocomplete="off"></label>
+            <label>E-mail<input type="text" id="mg-a-email" autocomplete="off"></label>
+            <label>Class<select id="mg-a-class"></select></label>
+            <label>Temporary password<span class="mg-pw"><input type="text" id="mg-a-pw" autocomplete="off"><button type="button" class="btn btn-secondary" id="mg-a-gen">New</button></span></label>
+          </div>
+          <p class="admin-status">The student receives a verification e-mail and can choose their own password with &ldquo;Forgot password&rdquo; on the login page. Give them the temporary password yourself.</p>
+          <div class="mg-actions"><button class="btn btn-primary" id="mg-a-save" type="button">Create account</button><button class="btn btn-secondary" id="mg-a-cancel" type="button">Close</button></div>
+          <p class="admin-status" id="mg-a-status" aria-live="polite"></p>
+        </div>
+        <div class="mg-bulk no-print" id="mg-bulk" hidden>
+          <strong id="mg-bulk-n"></strong>
+          <select id="mg-bulk-class" aria-label="Move to class"><option value="">Move to class…</option></select>
+          <button class="btn btn-secondary" data-bulk="move" type="button">Move</button>
+          <button class="btn btn-secondary" data-bulk="block" type="button">Block</button>
+          <button class="btn btn-secondary" data-bulk="unblock" type="button">Unblock</button>
+          <button class="btn btn-danger" data-bulk="archive" type="button">Archive</button>
+          <button class="btn btn-secondary" data-bulk="clear" type="button">Clear</button>
+        </div>
+        <p class="admin-status" id="mg-status-line" aria-live="polite"></p>
+        <div class="table-scroll">
+          <table class="admin-table" id="mg-table">
+            <thead><tr><th style="width:28px"><input type="checkbox" id="mg-all" aria-label="Select all"></th><th>Student</th><th>Class</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <dialog id="mg-dialog">
+          <form method="dialog" id="mg-form">
+            <h3>Edit student</h3>
+            <label>Full name<input type="text" id="mg-e-name" maxlength="80"></label>
+            <label>Class<select id="mg-e-class"></select></label>
+            <p class="admin-status">Changing the class also updates all of the student&rsquo;s saved results and progress.</p>
+            <div class="mg-actions"><button class="btn btn-primary" id="mg-e-save" type="button">Save</button><button class="btn btn-secondary" value="cancel">Cancel</button></div>
+            <p class="admin-status" id="mg-e-status"></p>
+          </form>
+        </dialog>
+      </div>
+
       <div class="admin-panel" id="panel-students">
         <div class="admin-toolbar no-print">
           <select id="filter-class">
@@ -462,7 +563,7 @@
         </div>
       </div>
 
-      <div class="admin-panel active" id="panel-byStudent">
+      <div class="admin-panel" id="panel-byStudent">
         <div class="admin-toolbar no-print">
           <select id="filter-class-bystudent">
             <option value="">All classes</option>
@@ -831,7 +932,7 @@
 <script src="syllabus-report.js?v=20261019j"></script>
 <script src="parent-report.js?v=20261021a"></script>
 <script src="firebase-config.js?v=20261019j"></script>
-<script type="module" src="firebase-init.js?v=20261102c"></script>
+<script type="module" src="firebase-init.js?v=20261103a"></script>
 <script type="module">
 (function(){
 
@@ -985,7 +1086,7 @@
     screenLogin.classList.add("hidden");
     screenDashboard.classList.remove("hidden");
     document.getElementById("wrap").classList.add("wrap-wide");
-    showTab("byStudent");
+    showTab("manage");
     loadData();
   }
 
@@ -1013,7 +1114,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","tuition","ppPerf","archive"];
+  var PANELS = ["manage","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
@@ -1024,7 +1125,8 @@
     PANELS.forEach(function(id){
       var el = document.getElementById("panel-" + id); if(el) el.classList.toggle("active", id === name);
     });
-    if(name === "ppPerf" && window.__renderPP) window.__renderPP();
+    if(name === "manage" && window.__renderManage) window.__renderManage();
+    if(name === "ppPerf"){ var ppl = document.getElementById("pp-level"); if(ppl && window.__curLevel) ppl.value = window.__curLevel(); if(window.__renderPP) window.__renderPP(); }
   }
 
   document.getElementById("admin-tabs").addEventListener("click", function(e){
@@ -1183,6 +1285,7 @@
     renderSyllabus();
     renderArchive();
     renderKpis();
+    if(window.__renderManage) window.__renderManage();
     if(window.__renderMenus) window.__renderMenus();
   }
 
@@ -2013,6 +2116,8 @@
   // 9618 (11BR/12BR) syllabus report and the "Needs attention" list.
   // ------------------------------------------------------------
   var LV = { ilearn: "10", syllabus: "10", isolve: "10" };
+  var GLV = "";   // shared level filter: "" = all, else "10" / "11" / "12"
+  window.__curLevel = function(){ return GLV || LV.ilearn || "10"; };
   var LV_NAMES = ["10", "11", "12"];
   var TOPIC_NAMES = { 1:"Information representation", 2:"Communication", 3:"Hardware", 4:"Processor fundamentals", 5:"System software", 6:"Security, privacy and data integrity", 7:"Ethics and ownership", 8:"Databases", 9:"Algorithm design and problem-solving", 10:"Data types and structures", 11:"Programming", 12:"Software development",
     13:"Data representation", 14:"Communication and internet technologies", 15:"Hardware and virtual machines", 16:"System software", 17:"Security", 18:"Artificial intelligence", 19:"Computational thinking and problem solving", 20:"Further programming" };
@@ -2435,7 +2540,7 @@
     var cSel = document.getElementById("filter-class-attn"), cls = cSel.value, seen = {};
     var list = [];
     (usersRoster || []).forEach(function(u){
-      if(!u || !u.uid) return; var c = String(u.className || u.class || "").replace(/\s+/g, ""); if(!levelOf(c)) return; seen[c] = 1;
+      if(!u || !u.uid) return; var c = String(u.className || u.class || "").replace(/\s+/g, ""); if(!levelOf(c)) return; if(GLV && levelOf(c) !== GLV) return; seen[c] = 1;
       if(cls && c !== cls) return;
       var why = [], d = last[u.uid] ? daysAgo(last[u.uid]) : null;
       if(d == null) why.push("No activity recorded yet");
@@ -2894,6 +2999,221 @@
   document.getElementById("filter-class-ilearn").addEventListener("change", renderILearn);
   document.getElementById("filter-search-ilearn").addEventListener("input", renderILearn);
 
+
+  // ============================================================
+  // Shared level bar + Manage students
+  // ============================================================
+  function setGlobalLevel(l){
+    GLV = l || "";
+    Array.prototype.forEach.call(document.querySelectorAll("#level-bar .lvl-btn"), function(b){ b.classList.toggle("on", b.getAttribute("data-gl") === GLV); });
+    if(GLV){ LV.ilearn = GLV; LV.syllabus = GLV; LV.isolve = GLV; markSwitchers(); }
+    var cur = document.querySelector(".admin-tab.active"); var tab = cur ? cur.dataset.tab : "";
+    if(GLV && (tab === "ilearn" || tab === "syllabus" || tab === "isolve")) setLevel(tab, GLV);
+    if(tab === "ppPerf"){ if(GLV) document.getElementById("pp-level").value = GLV; if(window.__renderPP) window.__renderPP(); }
+    if(tab === "byStudent") renderByStudent();
+    if(tab === "attention") renderAttention();
+    fillMgClasses(); renderManage(); renderArchive && renderArchive();
+  }
+  document.getElementById("level-bar").addEventListener("click", function(e){
+    var b = e.target.closest(".lvl-btn"); if(b) setGlobalLevel(b.getAttribute("data-gl"));
+  });
+
+  function allClassNames(){
+    var set = {}, out = [];
+    Array.prototype.forEach.call(document.querySelectorAll("#sel-class-profile option"), function(o){ if(o.value || (o.textContent && o.textContent.indexOf("…") < 0)) set[(o.value || o.textContent).trim()] = 1; });
+    (usersRoster || []).forEach(function(u){ if(u.className) set[String(u.className).trim()] = 1; });
+    Object.keys(set).forEach(function(c){ if(c) out.push(c); });
+    return out.sort();
+  }
+  function fillMgClasses(){
+    var all = allClassNames().filter(function(c){ return !GLV || levelOf(c) === GLV || !levelOf(c); });
+    function fill(id, first, keep){
+      var sel = document.getElementById(id), cur = sel.value; sel.innerHTML = "";
+      if(first != null){ var o0 = mk("option", null, first); o0.value = ""; sel.appendChild(o0); }
+      all.forEach(function(c){ var o = mk("option", null, c); o.value = c; sel.appendChild(o); });
+      if(keep && cur && all.indexOf(cur) >= 0) sel.value = cur;
+    }
+    fill("mg-class", "All classes", true); fill("mg-a-class", null, true); fill("mg-e-class", null, true); fill("mg-bulk-class", "Move to class…", false);
+  }
+  var mgSel = {};
+  function mgStatus(msg, warn){ var el = document.getElementById("mg-status-line"); el.textContent = msg || ""; el.classList.toggle("warn", !!warn); }
+  function mgFiltered(){
+    var q = document.getElementById("mg-search").value.trim().toLowerCase(), c = document.getElementById("mg-class").value, st = document.getElementById("mg-status").value;
+    return (usersRoster || []).filter(function(u){
+      var cls = String(u.className || "").replace(/\s+/g, "");
+      if(GLV && levelOf(cls) !== GLV) return false;
+      if(c && cls !== c.replace(/\s+/g, "")) return false;
+      if(st === "blocked" && !u.blocked) return false;
+      if(st === "active" && u.blocked) return false;
+      if(q && (String(u.name || "") + " " + String(u.email || "")).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    }).sort(function(a, b){ return String(a.className || "").localeCompare(String(b.className || "")) || String(a.name || "").localeCompare(String(b.name || "")); });
+  }
+  function renderManage(){
+    var tb = document.querySelector("#mg-table tbody"); if(!tb) return;
+    var base = (usersRoster || []).filter(function(u){ return !GLV || levelOf(u.className) === GLV; });
+    var nBlocked = base.filter(function(u){ return u.blocked; }).length;
+    var nArch = (archived || []).filter(function(a){ return !GLV || levelOf(a.class) === GLV; }).length;
+    var kp = document.getElementById("mg-kpis"); kp.innerHTML = "";
+    [[base.length - nBlocked, "Active"], [nBlocked, "Blocked"], [nArch, "Archived"]].forEach(function(k){
+      var d = mk("div", "mg-kpi"); d.appendChild(mk("b", null, String(k[0]))); d.appendChild(mk("span", null, k[1])); kp.appendChild(d);
+    });
+    var list = mgFiltered(); tb.innerHTML = "";
+    if(!list.length){
+      var tr0 = mk("tr"), td0 = mk("td", "wrap-cell", loaded ? "No students match these filters." : "Loading…"); td0.colSpan = 6; tr0.appendChild(td0); tb.appendChild(tr0);
+    }
+    list.forEach(function(u){
+      var tr = mk("tr", u.blocked ? "mg-blocked" : "");
+      var c0 = mk("td"), cb = mk("input"); cb.type = "checkbox"; cb.checked = !!mgSel[u.uid]; cb.setAttribute("data-uid", u.uid); cb.setAttribute("aria-label", "Select " + (u.name || "student"));
+      cb.addEventListener("change", function(){ if(cb.checked) mgSel[u.uid] = 1; else delete mgSel[u.uid]; mgBulkBar(); }); c0.appendChild(cb); tr.appendChild(c0);
+      var c1 = mk("td"); c1.appendChild(mk("div", null, u.name || "(no name)")); var em = mk("div", null, u.email || ""); em.style.cssText = "font-size:.75rem;color:var(--muted)"; c1.appendChild(em); tr.appendChild(c1);
+      var c2 = mk("td", null, String(u.className || "").replace(/\s+/g, "") || "-"); var lv = levelOf(u.className); if(lv) c2.appendChild(mk("span", "mg-lvl", lv + "BR")); tr.appendChild(c2);
+      var c3 = mk("td"); c3.appendChild(mk("span", "mg-chip " + (u.blocked ? "bad" : "ok"), u.blocked ? "Blocked" : "Active")); tr.appendChild(c3);
+      tr.appendChild(mk("td", null, u.createdMs ? fmtDay(u.createdMs) : "-"));
+      var c5 = mk("td"), act = mk("div", "mg-row-actions");
+      [["edit", "Edit", "btn btn-secondary"], ["block", u.blocked ? "Unblock" : "Block", "btn btn-secondary"], ["reset", "Reset password", "btn btn-secondary"], ["archive", "Archive", "btn btn-secondary"], ["delete", "Delete", "btn btn-danger"]].forEach(function(a){
+        var b = mk("button", a[2], a[1]); b.type = "button"; b.setAttribute("data-act", a[0]); b.setAttribute("data-uid", u.uid); act.appendChild(b);
+      });
+      c5.appendChild(act); tr.appendChild(c5); tb.appendChild(tr);
+    });
+    document.getElementById("mg-all").checked = list.length > 0 && list.every(function(u){ return mgSel[u.uid]; });
+    mgBulkBar();
+  }
+  window.__renderManage = function(){ fillMgClasses(); renderManage(); };
+  function mgBulkBar(){
+    var n = Object.keys(mgSel).length, bar = document.getElementById("mg-bulk");
+    bar.hidden = !n; document.getElementById("mg-bulk-n").textContent = n + " selected";
+  }
+  function mgUser(uid){ return (usersRoster || []).filter(function(u){ return u.uid === uid; })[0]; }
+  function mgDropData(uid){
+    attempts = attempts.filter(function(a){ return a.uid !== uid; });
+    examAttempts = examAttempts.filter(function(a){ return a.uid !== uid; });
+    ilearnRows = ilearnRows.filter(function(r){ return r.s.uid !== uid; });
+    usersRoster = usersRoster.filter(function(u){ return u.uid !== uid; });
+    delete mgSel[uid];
+  }
+  function mgNeed(fn){ if(typeof PQFirebase[fn] !== "function"){ window.alert("This browser has an older cached script. Hard refresh (Ctrl+Shift+R) and try again."); return false; } return true; }
+  function mgErr(err, what){ return "Could not " + what + ": " + ((err && (err.code || err.message)) || "unknown error") + ((err && err.code === "permission-denied") ? " (publish the latest firestore.rules)" : ""); }
+  function mgAfterChange(){ return loadArchiveList().then(function(){ renderAll(); renderManage(); }); }
+
+  function mgDoOne(act, uid){
+    var u = mgUser(uid); if(!u) return Promise.resolve();
+    var nm = u.name || "this student";
+    if(act === "edit"){
+      document.getElementById("mg-e-name").value = u.name || "";
+      var cs = document.getElementById("mg-e-class"), cl = String(u.className || "").replace(/\s+/g, "");
+      if(cl && !Array.prototype.some.call(cs.options, function(o){ return o.value === cl; })){ var o = mk("option", null, cl); o.value = cl; cs.appendChild(o); }
+      cs.value = cl; document.getElementById("mg-e-status").textContent = ""; document.getElementById("mg-dialog").setAttribute("data-uid", uid);
+      var dlg = document.getElementById("mg-dialog"); if(dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+      return Promise.resolve();
+    }
+    if(act === "block"){
+      if(!mgNeed("setStudentBlocked")) return Promise.resolve();
+      var to = !u.blocked;
+      if(to && !window.confirm("Block " + nm + "?\n\nThey will be signed out and cannot log in or save anything until you unblock them. Their data is kept.")) return Promise.resolve();
+      return PQFirebase.setStudentBlocked(uid, to).then(function(){ u.blocked = to; mgStatus((to ? "Blocked " : "Unblocked ") + nm + "."); renderManage(); }).catch(function(e){ mgStatus(mgErr(e, "update " + nm), true); });
+    }
+    if(act === "reset"){
+      if(!u.email){ mgStatus("This student has no e-mail on file.", true); return Promise.resolve(); }
+      if(!window.confirm("Send a password-reset e-mail to " + u.email + "?")) return Promise.resolve();
+      return PQFirebase.resetPassword(u.email).then(function(){ mgStatus("Password-reset e-mail sent to " + u.email + "."); }).catch(function(e){ mgStatus(mgErr(e, "send the reset e-mail"), true); });
+    }
+    if(act === "archive"){
+      if(!archiveSupported()){ window.alert("This browser has an older cached script. Hard refresh and try again."); return Promise.resolve(); }
+      if(!window.confirm("Archive " + nm + "?\n\nTheir results, progress and profile move to the Archive tab, they disappear from every list and cannot log in. You can restore them at any time.")) return Promise.resolve();
+      mgStatus("Archiving " + nm + "…");
+      return PQFirebase.archiveStudent(uid, currentAdminEmail).then(function(){ mgDropData(uid); mgStatus("Archived " + nm + ". Find them in the Archive tab."); return mgAfterChange(); }).catch(function(e){ mgStatus(archiveError(e, "archive " + nm), true); });
+    }
+    if(act === "delete"){
+      if(!mgNeed("adminDeleteStudent")) return Promise.resolve();
+      if(!window.confirm("PERMANENTLY DELETE " + nm + "?\n\nTheir results, progress and profile are erased and can NOT be restored. Their login is closed. (Archive them instead if you may need the data.)")) return Promise.resolve();
+      if(!window.confirm("Last check: delete " + nm + " for good?")) return Promise.resolve();
+      mgStatus("Deleting " + nm + "…");
+      return PQFirebase.adminDeleteStudent(uid, currentAdminEmail).then(function(){ mgDropData(uid); mgStatus("Deleted " + nm + "."); return mgAfterChange(); }).catch(function(e){ mgStatus(archiveError(e, "delete " + nm), true); });
+    }
+    return Promise.resolve();
+  }
+  document.querySelector("#mg-table tbody").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-act]"); if(!b) return;
+    b.disabled = true; mgDoOne(b.getAttribute("data-act"), b.getAttribute("data-uid")).then(function(){ b.disabled = false; });
+  });
+  document.getElementById("mg-all").addEventListener("change", function(){
+    var on = this.checked; mgFiltered().forEach(function(u){ if(on) mgSel[u.uid] = 1; else delete mgSel[u.uid]; }); renderManage();
+  });
+  ["mg-search"].forEach(function(id){ document.getElementById(id).addEventListener("input", renderManage); });
+  ["mg-class", "mg-status"].forEach(function(id){ document.getElementById(id).addEventListener("change", renderManage); });
+
+  // edit dialog
+  document.getElementById("mg-e-save").addEventListener("click", function(){
+    var dlg = document.getElementById("mg-dialog"), uid = dlg.getAttribute("data-uid"), u = mgUser(uid), st = document.getElementById("mg-e-status");
+    if(!u) return;
+    var name = document.getElementById("mg-e-name").value.trim(), cls = document.getElementById("mg-e-class").value;
+    if(!name){ st.textContent = "Please enter a name."; return; }
+    if(!mgNeed("adminRenameStudent")) return;
+    var jobs = Promise.resolve(); st.textContent = "Saving…";
+    if(name !== (u.name || "")) jobs = jobs.then(function(){ return PQFirebase.adminRenameStudent(uid, name).then(function(r){ u.name = r.name; }); });
+    if(cls && cls !== String(u.className || "").replace(/\s+/g, "")) jobs = jobs.then(function(){ return PQFirebase.changeStudentClass(uid, cls).then(function(){ u.className = cls; }); });
+    jobs.then(function(){ dlg.close ? dlg.close() : dlg.removeAttribute("open"); mgStatus("Saved " + u.name + "."); renderAll(); renderManage(); })
+      .catch(function(e){ st.textContent = mgErr(e, "save"); });
+  });
+
+  // add student
+  function genPw(){ var c = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789", o = ""; var a = new Uint32Array(10); crypto.getRandomValues(a); for(var i = 0; i < 10; i++) o += c[a[i] % c.length]; return o; }
+  document.getElementById("mg-add-toggle").addEventListener("click", function(){
+    var box = document.getElementById("mg-add"); box.hidden = !box.hidden;
+    if(!box.hidden){ document.getElementById("mg-a-pw").value = genPw(); document.getElementById("mg-a-status").textContent = ""; document.getElementById("mg-a-name").focus(); }
+  });
+  document.getElementById("mg-a-cancel").addEventListener("click", function(){ document.getElementById("mg-add").hidden = true; });
+  document.getElementById("mg-a-gen").addEventListener("click", function(){ document.getElementById("mg-a-pw").value = genPw(); });
+  document.getElementById("mg-a-save").addEventListener("click", function(){
+    var st = document.getElementById("mg-a-status"), btn = this;
+    if(!mgNeed("adminCreateStudent")) return;
+    var name = document.getElementById("mg-a-name").value, email = document.getElementById("mg-a-email").value, cls = document.getElementById("mg-a-class").value, pw = document.getElementById("mg-a-pw").value;
+    btn.disabled = true; st.textContent = "Creating…";
+    PQFirebase.adminCreateStudent(name, email, cls, pw).then(function(r){
+      usersRoster.push({ uid: r.uid, name: r.name, email: r.email, className: r.class, blocked: false, createdMs: Date.now() });
+      st.textContent = "Created " + r.name + " (" + r.class + "). Temporary password: " + pw + (r.verificationSent ? " · verification e-mail sent." : " · verification e-mail could not be sent; they can use Resend on the login page.");
+      document.getElementById("mg-a-name").value = ""; document.getElementById("mg-a-email").value = ""; document.getElementById("mg-a-pw").value = genPw();
+      renderAll(); renderManage();
+    }).catch(function(e){ st.textContent = (e && e.message) || "Could not create the account."; }).then(function(){ btn.disabled = false; });
+  });
+
+  // bulk
+  document.getElementById("mg-bulk").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-bulk]"); if(!b) return;
+    var kind = b.getAttribute("data-bulk"), uids = Object.keys(mgSel);
+    if(kind === "clear"){ mgSel = {}; renderManage(); return; }
+    if(!uids.length) return;
+    var cls = document.getElementById("mg-bulk-class").value;
+    if(kind === "move" && !cls){ mgStatus("Choose a class to move to first.", true); return; }
+    if(kind === "archive"){ if(!archiveSupported()){ window.alert("Hard refresh and try again."); return; } if(!window.confirm("Archive " + uids.length + " student(s)? You can restore them from the Archive tab.")) return; }
+    if(kind === "block" && !window.confirm("Block " + uids.length + " student(s)?")) return;
+    if(kind === "block" || kind === "unblock"){ if(!mgNeed("setStudentBlocked")) return; }
+    var done = 0, failed = 0, last = "";
+    Array.prototype.forEach.call(document.querySelectorAll("#mg-bulk button"), function(x){ x.disabled = true; });
+    uids.reduce(function(chain, uid){
+      return chain.then(function(){
+        mgStatus("Working… " + (done + failed + 1) + " of " + uids.length);
+        var u = mgUser(uid), p;
+        if(kind === "move") p = PQFirebase.changeStudentClass(uid, cls).then(function(){ if(u) u.className = cls; });
+        else if(kind === "block" || kind === "unblock") p = PQFirebase.setStudentBlocked(uid, kind === "block").then(function(){ if(u) u.blocked = kind === "block"; });
+        else p = PQFirebase.archiveStudent(uid, currentAdminEmail).then(function(){ mgDropData(uid); });
+        return p.then(function(){ done++; delete mgSel[uid]; }, function(err){ failed++; last = mgErr(err, kind); });
+      });
+    }, Promise.resolve()).then(function(){ return loadArchiveList(); }).then(function(){
+      Array.prototype.forEach.call(document.querySelectorAll("#mg-bulk button"), function(x){ x.disabled = false; });
+      renderAll(); renderManage();
+      mgStatus("Done: " + done + " student(s) updated" + (failed ? "; " + failed + " failed (" + last + ")" : "") + ".", !!failed);
+    });
+  });
+
+  // CSV
+  document.getElementById("mg-csv").addEventListener("click", function(){
+    var rows = [["Name", "Email", "Class", "Level", "Status"]].concat(mgFiltered().map(function(u){ return [u.name, u.email, String(u.className || "").replace(/\s+/g, ""), levelOf(u.className), u.blocked ? "Blocked" : "Active"]; }));
+    var csv = rows.map(function(r){ return r.map(function(v){ v = String(v == null ? "" : v); if(/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }).join(","); }).join("\r\n");
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" })); a.download = "students.csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+
   // ============================================================
   // Archive (remove a student from the live database, restorable)
   // ============================================================
@@ -2927,13 +3247,13 @@
     note.classList.toggle("warn", !!archiveNote);
     if(archiveNote) note.textContent = archiveNote;
     tbody.innerHTML = "";
-    if(!archived.length){
+    if(!archived.filter(function(a){ return !GLV || levelOf(a.class) === GLV; }).length){
       var tr0 = document.createElement("tr");
       tr0.innerHTML = '<td colspan="6" class="wrap-cell">' + (loaded ? "No archived students." : "") + "</td>";
       tbody.appendChild(tr0);
       return;
     }
-    archived.slice().sort(function(a, b){ return String(b.archivedAt).localeCompare(String(a.archivedAt)); }).forEach(function(s){
+    archived.filter(function(a){ return !GLV || levelOf(a.class) === GLV; }).slice().sort(function(a, b){ return String(b.archivedAt).localeCompare(String(a.archivedAt)); }).forEach(function(s){
       var tr = document.createElement("tr");
       tr.style.cursor = "default";
       tr.innerHTML =
@@ -3222,7 +3542,7 @@
   function renderByStudent(){
     var tbody = document.querySelector("#bystudent-table tbody");
     tbody.innerHTML = "";
-    var groups = groupByStudent(filteredAttemptsForByStudent()).sort(function(a, b){
+    var groups = groupByStudent(filteredAttemptsForByStudent()).filter(function(g){ return !GLV || levelOf(g.className) === GLV; }).sort(function(a, b){
       return (a.name || "").localeCompare(b.name || "");
     });
 

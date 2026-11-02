@@ -79,3 +79,8 @@ by hand after publishing:
   throttling cover brute-force and bulk-write abuse.
 * Rules cannot validate every element inside lists (e.g. `perQuestion`); the
   dashboard therefore treats all stored data as untrusted (coerce + escape + CSP).
+
+## Student management (admin)
+- Rules Playground: as a signed-in admin, `update` on `/users/{uid}` with `blocked: true` must be allowed.
+- As a student whose `users/{uid}.blocked == true`, any write (e.g. `create` on `/attempts/...`) must be denied; reads of own profile stay allowed.
+- As a normal student, `update` on own `/users/{uid}` must stay denied (cannot unblock self).
