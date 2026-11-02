@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8" /><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-cbUcV9D8JuYThT/FREmWKhroAyii5rBusETdYICd4WA='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Free sample · iLearn &amp; iSolve</title>
+<link rel="stylesheet" href="shared.css?v=20261103f" />
+<style>
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0}
+.top a{color:var(--accent-dark);font-weight:600;text-decoration:none}
+.banner{background:var(--accent-tint);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0 14px;font-size:.95rem}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.card h2,.card h3{margin:.2em 0 .5em}
+.ex{background:var(--bg);border-radius:10px;padding:10px 12px;margin:10px 0}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border:1px solid var(--line);background:var(--surface);border-radius:10px;font:inherit;cursor:pointer;color:var(--ink)}
+.opt.ok{background:var(--correct-bg);border-color:var(--correct-line)}.opt.bad{background:var(--incorrect-bg);border-color:var(--incorrect-line)}
+.fb{margin-top:8px;font-size:.93rem}
+textarea{width:100%;box-sizing:border-box;min-height:110px;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit}
+.btn{display:inline-block;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;margin-top:8px}
+.btn.alt{background:var(--surface);color:var(--accent-dark);border:1px solid var(--accent)}
+.mp{margin:4px 0;padding:6px 10px;border-radius:8px}.mp.y{background:var(--correct-bg)}.mp.n{background:var(--incorrect-bg)}
+.cta{text-align:center}
+</style></head><body><div class="wrap">
+<div class="top"><a href="index.html">&larr; Home</a><span><a href="quiz.html">Log in</a> · <a href="quiz.html">Sign up</a></span></div>
+<h1 style="margin:.2em 0">Free sample</h1>
+<div class="tabs" id="lv"></div>
+<div class="tabs" id="vw"></div>
+<div class="banner" id="banner"></div>
+<div id="out"></div>
+<div class="card cta"><h3>Want the whole course?</h3><p>Create a free account to unlock every lesson, practice question and your progress tracking.</p>
+<a class="btn" href="quiz.html">Sign up</a> <a class="btn alt" href="quiz.html">Log in</a></div>
+</div>
+<script src="sample-data.js?v=1"></script>
+<script>
+(function(){
+var D=window.PQ_SAMPLE,p=new URLSearchParams(location.search);
+var lvl=D[p.get("level")]?p.get("level"):"igcse",view=p.get("view")==="solve"?"solve":"learn";
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function tabs(){
+ $("lv").innerHTML=Object.keys(D).map(function(k){return '<button data-l="'+k+'" class="'+(k===lvl?"on":"")+'">'+esc(D[k].name)+'</button>'}).join("");
+ $("vw").innerHTML=[["learn","iLearn · lessons"],["solve","iSolve · practice"]].map(function(v){return '<button data-v="'+v[0]+'" class="'+(v[0]===view?"on":"")+'">'+v[1]+'</button>'}).join("");
+}
+function go(){history.replaceState(null,"","?level="+lvl+"&view="+view);tabs();render()}
+$("lv").onclick=function(e){var k=e.target.dataset.l;if(k){lvl=k;go()}};
+$("vw").onclick=function(e){var k=e.target.dataset.v;if(k){view=k;go()}};
+function render(){
+ var d=D[lvl];
+ $("banner").innerHTML='<b>Free sample of '+esc(d.name)+':</b> '+d.lessons.length+' of '+d.lessonTotal+' lessons and '+d.questions.length+' of '+d.questionTotal+' practice questions (about 2%). Sign up to unlock the rest.';
+ var o=$("out");o.innerHTML="";
+ if(view==="learn")d.lessons.forEach(function(l){o.appendChild(lesson(l))});
+ else d.questions.forEach(function(q,i){o.appendChild(q.type==="mcq"?mcq(q,i):paper(q,i))});
+}
+function el(h){var t=document.createElement("div");t.innerHTML=h;return t.firstElementChild}
+function quiz(c,box){
+ var h=el('<div class="q"><p><b>'+esc(c.q)+'</b></p></div>');
+ c.options.forEach(function(t,i){var b=el('<button class="opt"></button>');b.textContent=t;b.onclick=function(){
+  if(h.dataset.done)return;h.dataset.done=1;var os=h.querySelectorAll(".opt");
+  os[c.correct].classList.add("ok");if(i!==c.correct)b.classList.add("bad");
+  h.appendChild(el('<div class="fb"><b>'+(i===c.correct?"Correct. ":"Not quite. ")+'</b>'+esc(c.explain||"")+'</div>'))};h.appendChild(b)});
+ return h}
+function lesson(l){
+ var c=el('<div class="card"><h2>'+esc(l.code||"")+' '+esc(l.title)+'</h2><div>'+l.concept+'</div><div class="ex"><b>Worked example</b><div>'+l.example+'</div></div><h3>Check yourself</h3></div>');
+ (l.checks||[]).forEach(function(k){c.appendChild(quiz(k))});return c}
+function mcq(q,i){var c=el('<div class="card"><small>Question '+(i+1)+(q.topic?' · '+esc(q.topic):'')+'</small></div>');c.appendChild(quiz(q));return c}
+function norm(s){return s.toLowerCase().replace(/\s+/g," ")}
+function paper(q,i){
+ var c=el('<div class="card"><small>'+esc(q.topic||"")+' · '+q.marks+' marks</small><p style="white-space:pre-wrap"><b>'+esc(q.prompt)+'</b></p><textarea placeholder="Type your answer…"></textarea><button class="btn">Mark my answer</button><div class="fb"></div></div>');
+ c.querySelector(".btn").onclick=function(){
+  var a=norm(c.querySelector("textarea").value),tot=0,h="";
+  q.markPoints.forEach(function(m){var g=m.match.groups,n=0;g.forEach(function(gr){if(gr.some(function(w){return a.indexOf(norm(w))>-1}))n++});
+   var ok=n>=(m.match.needCount||g.length);if(ok)tot+=m.marks;h+='<div class="mp '+(ok?"y":"n")+'">'+(ok?"✓ ":"✗ ")+esc(m.text)+'</div>'});
+  c.querySelector(".fb").innerHTML='<p><b>Score: '+tot+' / '+q.marks+'</b> <small>(automatic keyword marking)</small></p>'+h+'<p>'+esc(q.explanation||"")+'</p>'};
+ return c}
+go();
+})();
+</script></body></html>
