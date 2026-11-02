@@ -1780,3 +1780,10 @@
 .hub-desc{ font-size:14.5px; color:var(--muted); line-height:1.5; }
 .hub-meta{ margin-top:auto; padding-top:6px; font-size:13px; font-weight:700; color:var(--accent-dark); }
 @media (max-width:620px){ .hub-grid{ grid-template-columns:1fr; } }
+
+/* Sign in with Google */
+.auth-or{ display:flex; align-items:center; gap:10px; margin:14px 0 10px; color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.auth-or::before, .auth-or::after{ content:""; flex:1; height:1px; background:var(--line); }
+.btn-google{ width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:#fff; color:#1f2937; border:1.5px solid #d1d5db; border-radius:12px; padding:12px 16px; font:inherit; font-weight:700; cursor:pointer; }
+.btn-google:hover{ background:#f3f4f6; }
+.btn-google:disabled{ opacity:.6; cursor:wait; }

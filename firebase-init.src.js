@@ -21,7 +21,10 @@ import {
   sendPasswordResetEmail,
   sendEmailVerification,
   initializeAuth,
-  inMemoryPersistence
+  inMemoryPersistence,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect
 } from "firebase/auth";
 import {
   initializeFirestore,
@@ -156,6 +159,58 @@ function signUp(email, password, name, cls, remember){
     .then(function(r){ authBusy = false; return r; }, function(err){ authBusy = false; throw new Error(friendlyAuthError(err)); });
 }
 
+// ---------- Sign in with Google ----------
+// Needs: Firebase console -> Authentication -> Sign-in method -> Google -> Enable.
+// A returning student (or an old e-mail/password student who uses the same Gmail
+// address) gets their existing profile. A brand-new Google user has no profile yet and
+// must pick IGCSE / AS / A2 (completeGoogleProfile) before continuing.
+var STUDENT_LEVELS = ["IGCSE", "AS", "A2"];
+function isGoogleUser(user){
+  return !!(user && user.providerData && user.providerData.some(function(p){ return p && p.providerId === "google.com"; }));
+}
+function googleSignIn(remember){
+  authBusy = true;
+  var provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  return authReady
+    .then(function(){ return applyPersistence(remember); })
+    .then(function(){
+      return signInWithPopup(auth, provider).catch(function(err){
+        if(err && (err.code === "auth/popup-blocked" || err.code === "auth/operation-not-supported-in-this-environment")){
+          return signInWithRedirect(auth, provider).then(function(){ return new Promise(function(){}); });
+        }
+        throw err;
+      });
+    })
+    .then(function(cred){
+      return isArchived(cred.user.uid).then(function(archived){
+        if(archived){ setRemembered(false); return signOut(auth).then(function(){ throw new Error(ARCHIVED_MESSAGE); }); }
+        return getMyProfile(cred.user.uid).then(function(p){
+          if(p && p.blocked){ setRemembered(false); return signOut(auth).then(function(){ throw new Error(BLOCKED_MESSAGE); }); }
+          return p ? { profile: p } : { needsProfile: true, uid: cred.user.uid, email: cred.user.email, name: cleanName(cred.user.displayName || "") };
+        });
+      });
+    })
+    .then(function(r){ authBusy = false; return r; }, function(err){
+      authBusy = false;
+      if(err && (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request")) throw new Error("Google sign-in was cancelled.");
+      if(err && err.code === "auth/operation-not-allowed") throw new Error("Google sign-in is not switched on yet. Please tell your teacher.");
+      if(err && err.code === "auth/unauthorized-domain") throw new Error("This website address is not yet allowed for Google sign-in. Please tell your teacher.");
+      throw new Error(err && err.message && !err.code ? err.message : friendlyAuthError(err));
+    });
+}
+// Creates the profile of a first-time Google user. The class is the level
+// (IGCSE / AS / A2) until a teacher approves a class code.
+function completeGoogleProfile(name, level){
+  name = cleanName(name); level = String(level || "");
+  if(!name) return Promise.reject(new Error("Please enter your full name."));
+  if(STUDENT_LEVELS.indexOf(level) < 0) return Promise.reject(new Error("Please choose IGCSE, AS or A2."));
+  var u = auth.currentUser;
+  if(!u) return Promise.reject(new Error("Please sign in again."));
+  return setDoc(doc(db, "users", u.uid), { name: name, email: u.email, class: level, createdAt: serverTimestamp() })
+    .then(function(){ return getMyProfile(u.uid); });
+}
+
 function logIn(email, password, remember){
   authBusy = true;
   return authReady
@@ -207,7 +262,7 @@ function onAuthChange(callback){
       if(archived){ setRemembered(false); return signOut(auth).then(function(){ callback(null); }); }
       return getMyProfile(user.uid).then(function(profile){
         if(profile && profile.blocked){ setRemembered(false); return signOut(auth).then(function(){ callback(null); }); }
-        callback(profile || { uid: user.uid, email: user.email, name: "", class: "" });
+        callback(profile || { uid: user.uid, email: user.email, name: cleanName(user.displayName || ""), class: "", needsProfile: isGoogleUser(user) });
       });
     }).catch(function(){
       callback({ uid: user.uid, email: user.email, name: "", class: "" });
@@ -1056,6 +1111,8 @@ window.PQFirebase = {
   setStudentBlocked: setStudentBlocked,
   adminCreateStudent: adminCreateStudent,
   adminDeleteStudent: adminDeleteStudent,
+  googleSignIn: googleSignIn,
+  completeGoogleProfile: completeGoogleProfile,
   listGroups: listGroups,
   saveGroup: saveGroup,
   deleteGroup: deleteGroup,

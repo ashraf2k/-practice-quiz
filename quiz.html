@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-GHdhz/OCDXhBIJ+GDqaYI7PZugEc/XxuPR9yFPsnczM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-kWlMtewEaCy1zBEHDKTLRWIofwuivyR+un/zDxeyOFM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -16,7 +16,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261019j" />
+<link rel="stylesheet" href="shared.css?v=20261103f" />
 <link rel="stylesheet" href="theme.css?v=20261027a" />
 </head>
 <body>
@@ -31,6 +31,19 @@
       <p id="header-sub">Log in to begin.</p>
     </div>
   </header>
+
+  <!-- ============ FINISH GOOGLE SIGN-UP ============ -->
+  <section id="screen-profile" class="card hidden">
+    <h2 class="step-title">One last step</h2>
+    <p class="step-sub">Welcome! Tell us your name and level. Your teacher will add you to a class afterwards.</p>
+    <div class="field" id="field-gp-name"><label for="input-gp-name">Full name</label><input type="text" id="input-gp-name" autocomplete="name" /><div class="err">Please enter your full name.</div></div>
+    <div class="field" id="field-gp-level"><label for="input-gp-level">Your level</label>
+      <select id="input-gp-level"><option value="" disabled selected>Choose your level</option><option value="IGCSE">IGCSE Computer Science (0478)</option><option value="AS">AS Level Computer Science (9618)</option><option value="A2">A Level (A2) Computer Science (9618)</option></select>
+      <div class="err">Please choose your level.</div></div>
+    <div class="btn-row"><button class="btn btn-primary" id="btn-gp-save" type="button">Continue</button></div>
+    <p class="cohort-note" id="gp-status" aria-live="polite"></p>
+    <p class="cohort-note"><button class="link-btn" id="btn-gp-logout" type="button">Use a different account</button></p>
+  </section>
 
   <!-- ============ AUTH SCREEN (signed out) ============ -->
   <section id="screen-auth" class="card">
@@ -49,30 +62,14 @@
     </div>
 
     <div class="field hidden" id="field-signup-class">
-      <label for="input-signup-class">Class</label>
+      <label for="input-signup-class">Your level</label>
       <select id="input-signup-class">
-        <option value="" disabled selected>Choose your class</option>
-        <optgroup label="Data Privacy — 10AM">
-          <option>10AM1</option>
-          <option>10AM2</option>
-          <option>10AM3</option>
-          <option>10AM4</option>
-          <option>10AM5</option>
-          <option>10AM6</option>
-        </optgroup>
-        <optgroup label="IGCSE Computer Science 0478 — 10BR">
-          <option>10BR1</option>
-          <option>10BR2</option>
-          <option>10BR3</option>
-        </optgroup>
-        <optgroup label="AS Level Computer Science 9618 — 11BR">
-          <option>11BR</option>
-        </optgroup>
-        <optgroup label="AS &amp; A Level Computer Science 9618 — 12BR">
-          <option>12BR</option>
-        </optgroup>
+        <option value="" disabled selected>Choose your level</option>
+        <option value="IGCSE">IGCSE Computer Science (0478)</option>
+        <option value="AS">AS Level Computer Science (9618)</option>
+        <option value="A2">A Level (A2) Computer Science (9618)</option>
       </select>
-      <div class="err">Please choose your class.</div>
+      <div class="err">Please choose your level.</div>
     </div>
 
     <div class="field" id="field-email">
@@ -99,6 +96,8 @@
       <button class="btn btn-primary" id="btn-auth-submit">Log in</button>
     </div>
 
+    <div class="auth-or" id="auth-or" aria-hidden="true"><span>or</span></div>
+    <button class="btn btn-google" id="btn-google" type="button"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span id="btn-google-label">Continue with Google</span></button>
     <p class="cohort-note"><button class="link-btn" id="link-forgot-password" type="button">Forgot your password?</button></p>
     <p class="cohort-note" id="auth-status" aria-live="polite">Checking your account…</p>
   </section>
@@ -346,8 +345,8 @@
 <script src="brand-footer.js?v=20261101a"></script>
 <script src="report-lib.js?v=20261019j"></script>
 <script src="scratchpad.js?v=20261019j"></script>
-<script src="firebase-config.js?v=20261103b"></script>
-<script type="module" src="firebase-init.js?v=20261103c"></script>
+<script src="firebase-config.js?v=20261103e"></script>
+<script type="module" src="firebase-init.js?v=20261103d"></script>
 <script type="module">
 (function(){
 
@@ -364,7 +363,7 @@
   // ============================================================
   // Screen management
   // ============================================================
-  var SCREEN_IDS = ["screen-auth","screen-verify","screen-hub","screen-start","screen-quiz","screen-results","screen-progress"];
+  var SCREEN_IDS = ["screen-auth","screen-profile","screen-verify","screen-hub","screen-start","screen-quiz","screen-results","screen-progress"];
   function showScreen(name){
     SCREEN_IDS.forEach(function(id){
       var el = document.getElementById(id);
@@ -2279,6 +2278,28 @@
     showScreen("start");
   }
 
+  // ---------- Sign in with Google ----------
+  var btnGoogle = document.getElementById("btn-google");
+  btnGoogle.addEventListener("click", function(){
+    if(typeof PQFirebase.googleSignIn !== "function"){ authStatus.textContent = "Please refresh the page (Ctrl+Shift+R) and try again."; return; }
+    btnGoogle.disabled = true; authStatus.textContent = "Opening Google…";
+    PQFirebase.googleSignIn(inputRemember.checked).then(function(){ authStatus.textContent = ""; })
+      .catch(function(err){ authStatus.textContent = err.message || "Google sign-in did not work. Please try again."; })
+      .then(function(){ btnGoogle.disabled = false; });
+  });
+  document.getElementById("btn-gp-save").addEventListener("click", function(){
+    var f1 = document.getElementById("field-gp-name"), f2 = document.getElementById("field-gp-level"), st = document.getElementById("gp-status");
+    var name = document.getElementById("input-gp-name").value.trim(), lv = document.getElementById("input-gp-level").value;
+    f1.classList.toggle("invalid", !name); f2.classList.toggle("invalid", !lv);
+    if(!name || !lv) return;
+    var b = this; b.disabled = true; st.textContent = "Saving…";
+    PQFirebase.completeGoogleProfile(name, lv).then(function(p){
+      st.textContent = ""; state.currentUser = p;
+      if(isBR(p)) showHub(); else goToStartScreen();
+    }).catch(function(err){ st.textContent = (err && err.message) || "Could not save. Please try again."; }).then(function(){ b.disabled = false; });
+  });
+  document.getElementById("btn-gp-logout").addEventListener("click", function(){ doLogout(); });
+
   PQFirebase.onAuthChange(function(user){
     if(!user){
       state.currentUser = null;
@@ -2291,6 +2312,15 @@
       inputSignupClass.value = "";
       setAuthMode(/signup/.test(window.location.hash) ? "signup" : "login");
       showScreen("auth");
+      return;
+    }
+    if(user.needsProfile){
+      state.currentUser = null;
+      document.getElementById("input-gp-name").value = user.name || "";
+      document.getElementById("input-gp-level").value = "";
+      document.getElementById("gp-status").textContent = "";
+      setHeader("Practice Questions", "Finish creating your account.");
+      showScreen("profile");
       return;
     }
     state.currentUser = user;

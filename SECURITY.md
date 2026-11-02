@@ -90,3 +90,8 @@ by hand after publishing:
 - Student: `create` /joinRequests/{uid}_{CODE} with status 'pending' and own name allowed only if the group exists and is open; `update` to status 'approved' denied.
 - Student: write to /parentLinks or /admins denied. Admin: `create` /admins/{otherUid} allowed; `delete` /admins/{ownUid} denied.
 - Parent: `get` /parentLinks/{parentUid}_{childUid} allowed for own uid only.
+
+## Google sign-in
+- Firebase console -> Authentication -> Sign-in method -> Google -> Enable (set a support e-mail).
+- Authentication -> Settings -> Authorized domains must include `ashraf2k.github.io`.
+- A first-time Google user creates their own profile (name, e-mail from the token, class = IGCSE / AS / A2); the existing `users` create rule already covers it.

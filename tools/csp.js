@@ -18,13 +18,13 @@ for (const f of pages) {
   });
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net " + hashes.join(" "),
+    "script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com " + hashes.join(" "),
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
     "media-src 'self' blob:",
     "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co",
-    "frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com",
+    "frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com",
     "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",

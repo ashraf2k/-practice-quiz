@@ -25,6 +25,7 @@ window.FIREBASE_CONFIG = {
 // class names (10BR*, 11BR, 12BR); this maps the new codes onto them.
 window.PQ_LEGACY_CLASS = function(c){
   c = String(c || "").replace(/\s+/g, "");
+  if(/^IGCSE/i.test(c)) return "10BR";
   if(/^AS/i.test(c)) return "11BR";
   if(/^A2/i.test(c)) return "12BR";
   return c;

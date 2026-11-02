@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-yA8s6Hbl5ehA8FMGfZrs0oHC3iot3i+tWet8mItKX1U='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-yA8s6Hbl5ehA8FMGfZrs0oHC3iot3i+tWet8mItKX1U='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -11,7 +11,7 @@
 <meta name="theme-color" content="#146C6A" />
 <link rel="icon" href="icons/icon-192.png" />
 <title>Book a tuition slot</title>
-<link rel="stylesheet" href="shared.css?v=20261019j" />
+<link rel="stylesheet" href="shared.css?v=20261103f" />
 <style>
   .bk-note{ margin:0 0 14px; padding:12px 14px; border-radius:12px; background:var(--accent-tint); border:1px solid var(--accent); color:var(--ink); font-size:14px; }
   .bk-note b{ color:var(--accent-dark); }
@@ -83,8 +83,8 @@
   <section id="s-wait" class="card"><p class="step-sub">Loading…</p></section>
 </div>
 
-<script src="firebase-config.js?v=20261103b"></script>
-<script type="module" src="firebase-init.js?v=20261103c"></script>
+<script src="firebase-config.js?v=20261103e"></script>
+<script type="module" src="firebase-init.js?v=20261103d"></script>
 <script type="module">
 (function(){
   "use strict";
