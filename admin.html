@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-/XV6wH3r3UsdfVVIZwSOFMr+4gHWjqak1e0rnwAoYx8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-0zDy5+FoV658V0QMAonvgcZLKUwFVZqqCzJ83CGMswo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -389,6 +389,26 @@
   /* the shared Level bar replaces the per-menu switchers */
   .lvl-sw{ display:none !important; }
   #pp-level{ display:none; }
+
+  .db-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:900px){ .db-grid{ grid-template-columns:1fr; } }
+  .db-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .db-actions .btn{ height:38px; font-size:13px; }
+  .db-todo-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; margin-bottom:8px; background:var(--surface-soft); font-size:14px; }
+  .db-todo-row b{ background:#dc2626; color:#fff; border-radius:999px; padding:1px 9px; font-size:12px; margin-right:8px; }
+  .db-todo-row.ok b{ background:#16a34a; }
+  .db-bar{ display:grid; grid-template-columns:110px 1fr 36px; gap:8px; align-items:center; font-size:13px; margin:6px 0; }
+  .db-bar i{ display:block; height:10px; border-radius:99px; background:linear-gradient(90deg,#38bdf8,#34d399); min-width:3px; }
+  .va-ring{ display:flex; gap:12px; flex-wrap:wrap; margin:10px 0; }
+  .va-tiles{ display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; margin:10px 0; }
+  .va-tile{ border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:12.5px; font-weight:700; background:var(--surface-soft); }
+  .va-tile small{ display:block; color:var(--muted); font-weight:600; }
+  .va-tile.done{ border-color:#34d399; }
+  /* roles: collaborators are view-only, only admins change roles */
+  body.is-collab .mg-row-actions, body.is-collab #mg-add-toggle, body.is-collab .mg-bulk, body.is-collab #gr-new-toggle, body.is-collab #gr-req-table .mg-row-actions, body.is-collab #gr-table .mg-row-actions, body.is-collab #gr-mig-go, body.is-collab #mg-all, body.is-collab #mg-table input[type=checkbox]{ display:none !important; }
+  body:not(.is-admin) .mg-role{ pointer-events:none; opacity:.7; }
+  .ro-note{ display:none; padding:8px 12px; border-radius:10px; background:var(--diff-moderate-bg); border:1px solid var(--diff-moderate); font-size:13px; margin-bottom:10px; }
+  body.is-collab .ro-note{ display:block; }
   /* ---- Manage students ---- */
   .mg-kpis{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
   .mg-kpi{ border:1px solid var(--line); background:var(--surface); border-radius:12px; padding:10px 16px; min-width:110px; }
@@ -473,6 +493,7 @@
 
     <div class="kpi-row no-print" id="kpi-row" aria-label="Overview"></div>
 
+    <p class="ro-note no-print">View-only access: you can see every report, but not change anything.</p>
     <div class="level-bar no-print" id="level-bar" role="group" aria-label="Level">
       <span class="level-bar-label">Level</span>
       <button type="button" class="lvl-btn on" data-gl="">All</button>
@@ -483,13 +504,15 @@
 
     <div class="admin-tabs no-print" id="admin-tabs">
       <div class="tab-group"><span class="tab-glabel">Overview</span>
+        <button class="admin-tab active" data-tab="dashboard">Dashboard</button>
         <button class="admin-tab" data-tab="attention">Needs attention</button>
         <button class="admin-tab" data-tab="classes">Class overview</button>
       </div>
       <div class="tab-group"><span class="tab-glabel">Students</span>
-        <button class="admin-tab active" data-tab="manage">Manage students</button>
+        <button class="admin-tab" data-tab="manage">Manage students</button>
         <button class="admin-tab" data-tab="groups">Classes &amp; requests</button>
         <button class="admin-tab" data-tab="byStudent">By student</button>
+        <button class="admin-tab" data-tab="viewas">View as student</button>
         <button class="admin-tab" data-tab="archive">Archive</button>
       </div>
       <div class="tab-group"><span class="tab-glabel">Learning</span>
@@ -506,7 +529,35 @@
     </div>
 
     <div id="admin-panels">
-      <div class="admin-panel active" id="panel-manage">
+      <div class="admin-panel active" id="panel-dashboard">
+        <div class="mg-kpis" id="db-kpis"></div>
+        <div class="db-grid">
+          <div class="gr-card"><h3>To do</h3><div id="db-todo"></div></div>
+          <div class="gr-card"><h3>Quick actions</h3><div class="db-actions" id="db-actions"></div></div>
+        </div>
+        <div class="db-grid">
+          <div class="gr-card"><h3>Students by class</h3><div id="db-classes"></div></div>
+          <div class="gr-card"><h3>Latest activity</h3><div class="table-scroll"><table class="admin-table" id="db-recent"><thead><tr><th>Student</th><th>What</th><th>Result</th><th>When</th></tr></thead><tbody></tbody></table></div></div>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="panel-viewas">
+        <div class="gr-card">
+          <h3>Open the site as a student</h3>
+          <p class="admin-status">Nothing you do in these previews is saved. Pick a level, then open any part of the site exactly as a student sees it.</p>
+          <div class="level-bar" id="va-level"><span class="level-bar-label">Level</span>
+            <button type="button" class="lvl-btn on" data-v="igcse">IGCSE</button><button type="button" class="lvl-btn" data-v="as">AS Level</button><button type="button" class="lvl-btn" data-v="a2">A Level (A2)</button></div>
+          <div class="db-actions" id="va-links"></div>
+        </div>
+        <div class="gr-card">
+          <h3>See a student's own view</h3>
+          <p class="admin-status">Choose a student to see what they see: their progress, topics and every result.</p>
+          <div class="admin-toolbar"><input type="text" id="va-search" placeholder="Search a student by name or email" aria-label="Search student"><select id="va-student" aria-label="Student"><option value="">Choose a student…</option></select></div>
+          <div id="va-body"></div>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="panel-manage">
         <div class="mg-kpis" id="mg-kpis"></div>
         <div class="admin-toolbar no-print">
           <input type="text" id="mg-search" placeholder="Search name or email" aria-label="Search students">
@@ -979,7 +1030,7 @@
 <script src="syllabus-report.js?v=20261019j"></script>
 <script src="parent-report.js?v=20261021a"></script>
 <script src="firebase-config.js?v=20261103e"></script>
-<script type="module" src="firebase-init.js?v=20261103d"></script>
+<script type="module" src="firebase-init.js?v=20261103g"></script>
 <script type="module">
 (function(){
 
@@ -1133,7 +1184,7 @@
     screenLogin.classList.add("hidden");
     screenDashboard.classList.remove("hidden");
     document.getElementById("wrap").classList.add("wrap-wide");
-    showTab("manage");
+    showTab("dashboard");
     loadData();
   }
 
@@ -1147,7 +1198,10 @@
       showLoginScreen();
       return;
     }
-    PQFirebase.checkIsAdmin(user.uid).then(function(ok){
+    (PQFirebase.getStaffRole ? PQFirebase.getStaffRole(user.uid) : PQFirebase.checkIsAdmin(user.uid).then(function(o){ return o ? "admin" : ""; })).then(function(role){
+      var ok = !!role; staffRole = role;
+      document.body.classList.toggle("is-admin", role === "admin");
+      document.body.classList.toggle("is-collab", role === "collaborator");
       if(!ok){
         pendingLoginStatus = "That account doesn't have teacher access. Please log in with your teacher account.";
         PQFirebase.logOut();
@@ -1161,7 +1215,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","tuition","ppPerf","archive"];
+  var PANELS = ["dashboard","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
@@ -1172,6 +1226,8 @@
     PANELS.forEach(function(id){
       var el = document.getElementById("panel-" + id); if(el) el.classList.toggle("active", id === name);
     });
+    if(name === "dashboard" && window.__renderDashboard) window.__renderDashboard();
+    if(name === "viewas" && window.__renderViewAs) window.__renderViewAs();
     if(name === "manage" && window.__renderManage) window.__renderManage();
     if(name === "groups" && window.__renderGroups) window.__renderGroups();
     if(name === "ppPerf"){ var ppl = document.getElementById("pp-level"); if(ppl && window.__curLevel) ppl.value = window.__curLevel(); if(window.__renderPP) window.__renderPP(); }
@@ -1194,7 +1250,7 @@
   var loaded = false;
   // Set once per sign-in (below), so a saved regrade can be stamped with
   // who made it.
-  var currentAdminEmail = null, currentAdminUid = "", currentAdminName = "";
+  var currentAdminEmail = null, currentAdminUid = "", currentAdminName = "", staffRole = "";
   var adminStatus = document.getElementById("admin-status");
 
   // Firestore attempt docs are keyed by uid/examKey and use `examKey` /
@@ -1302,7 +1358,7 @@
       var examAttemptsLoaded = results[1] !== null;
       examAttempts = examAttemptsLoaded ? results[1].map(normalizeExamAttempt) : [];
       loaded = true;
-      loadGroupsData().then(function(){ renderGroups(); fillMgClasses(); renderManage(); });
+      loadGroupsData().then(function(){ renderGroups(); fillMgClasses(); renderManage(); renderDashboard(); });
       adminStatus.textContent = "Loaded " + attempts.length + " submitted attempt" + (attempts.length === 1 ? "" : "s") +
         (examAttemptsLoaded
           ? " and " + examAttempts.length + " exam-practice result" + (examAttempts.length === 1 ? "" : "s")
@@ -1335,6 +1391,7 @@
     renderArchive();
     renderKpis();
     if(window.__renderManage) window.__renderManage();
+    if(window.__renderDashboard) window.__renderDashboard();
     if(window.__renderMenus) window.__renderMenus();
   }
 
@@ -3120,7 +3177,7 @@
       var c2 = mk("td", null, String(u.className || "").replace(/\s+/g, "") || "-"); var lv = levelOf(u.className); if(lv) c2.appendChild(mk("span", "mg-lvl", lv + "BR")); tr.appendChild(c2);
       var cR = mk("td"), rs = mk("select", "mg-role"); rs.setAttribute("aria-label", "Role of " + (u.name || "student")); rs.setAttribute("data-uid", u.uid);
       ["student", "parent", "collaborator", "teacher", "admin"].forEach(function(r){ var o = mk("option", null, r.charAt(0).toUpperCase() + r.slice(1)); o.value = r; rs.appendChild(o); });
-      rs.value = adminFlags[u.uid] ? "admin" : (u.role || "student"); cR.appendChild(rs);
+      rs.value = adminFlags[u.uid] ? "admin" : (u.role || "student"); if(staffRole !== "admin") rs.disabled = true; cR.appendChild(rs);
       if(rs.value === "parent"){ var kids = parentKids(u.uid); var lb = mk("button", "btn btn-secondary", "Children (" + kids.length + ")"); lb.type = "button"; lb.setAttribute("data-act", "link"); lb.setAttribute("data-uid", u.uid); lb.style.cssText = "margin-top:4px;height:26px;font-size:11px;padding:0 8px"; cR.appendChild(lb); }
       tr.appendChild(cR);
       var c3 = mk("td"); c3.appendChild(mk("span", "mg-chip " + (u.blocked ? "bad" : "ok"), u.blocked ? "Blocked" : "Active")); tr.appendChild(c3);
@@ -3418,12 +3475,107 @@
   document.getElementById("mg-link-search").addEventListener("input", drawLinkList);
   document.getElementById("mg-link-save").addEventListener("click", function(){
     var dlg = document.getElementById("mg-link-dialog"), puid = dlg.getAttribute("data-uid"), st = document.getElementById("mg-link-status"), kids = Object.keys(dlg._have || {});
+    var kidObjs = kids.map(function(c){ var u = mgUser(c) || {}; return { uid: c, name: u.name || "", class: String(u.className || "").replace(/\s+/g, "") }; });
     if(typeof PQFirebase.setParentLinks !== "function"){ st.textContent = "Hard refresh and try again."; return; }
     st.textContent = "Saving…";
-    PQFirebase.setParentLinks(puid, kids).then(function(){
+    PQFirebase.setParentLinks(puid, kidObjs).then(function(){
       parentLinks = parentLinks.filter(function(l){ return l.parentUid !== puid; }).concat(kids.map(function(c){ return { parentUid: puid, childUid: c }; }));
       dlg.close ? dlg.close() : dlg.removeAttribute("open"); mgStatus("Saved " + kids.length + " linked child" + (kids.length === 1 ? "" : "ren") + "."); renderManage();
     }).catch(function(err){ st.textContent = mgErr(err, "save the links"); });
+  });
+
+
+  // ============================================================
+  // Dashboard overview + View as student
+  // ============================================================
+  function dbWhen(ts){ var t = new Date(ts).getTime(); return t ? fmtDateTime(t) : ""; }
+  function renderDashboard(){
+    var kp = document.getElementById("db-kpis"); if(!kp) return;
+    var roster = (usersRoster || []).filter(function(u){ return !GLV || levelOf(u.className) === GLV; });
+    var pend = joinReqs.filter(function(r){ return r.status === "pending"; });
+    var blocked = roster.filter(function(u){ return u.blocked; }).length;
+    kp.innerHTML = "";
+    [[roster.length, "Students"], [groupsList.length, "Classes"], [pend.length, "Join requests"], [blocked, "Blocked"], [(archived || []).length, "Archived"]].forEach(function(k){
+      var d = mk("div", "mg-kpi"); d.appendChild(mk("b", null, String(k[0]))); d.appendChild(mk("span", null, k[1])); kp.appendChild(d); });
+    // to do
+    var td = document.getElementById("db-todo"); td.innerHTML = "";
+    function row(n, text, tab){ var r = mk("div", "db-todo-row" + (n ? "" : " ok")); var l = mk("span"); l.appendChild(mk("b", null, String(n))); l.appendChild(document.createTextNode(text)); r.appendChild(l); var b = mk("button", "btn btn-secondary", "Open"); b.type = "button"; b.addEventListener("click", function(){ showTab(tab); }); r.appendChild(b); td.appendChild(r); }
+    row(pend.length, pend.length ? " join request" + (pend.length === 1 ? "" : "s") + " waiting for approval" : " join requests waiting", "groups");
+    var noClass = roster.filter(function(u){ return !/\d/.test(String(u.className || "")) || /^(IGCSE|AS|A2)$/i.test(String(u.className || "").trim()); }).length;
+    row(noClass, " student" + (noClass === 1 ? " has" : "s have") + " not been placed in a class yet", "manage");
+    row(blocked, " blocked account" + (blocked === 1 ? "" : "s"), "manage");
+    // actions
+    var ac = document.getElementById("db-actions"); ac.innerHTML = "";
+    [["+ Add student", function(){ showTab("manage"); var b = document.getElementById("mg-add"); if(b.hidden) document.getElementById("mg-add-toggle").click(); }], ["+ New class", function(){ showTab("groups"); var b = document.getElementById("gr-new"); if(b.hidden) document.getElementById("gr-new-toggle").click(); }], ["Needs attention", function(){ showTab("attention"); renderAttention(); }], ["Past papers", function(){ showTab("ppPerf"); }], ["Tuition", function(){ showTab("tuition"); }], ["View as student", function(){ showTab("viewas"); }]].forEach(function(a){
+      var b = mk("button", "btn btn-secondary", a[0]); b.type = "button"; b.addEventListener("click", a[1]); if(/^\+/.test(a[0])) b.className = "btn btn-primary"; ac.appendChild(b); });
+    // class bars
+    var cb = document.getElementById("db-classes"); cb.innerHTML = ""; var by = {};
+    roster.forEach(function(u){ var c = String(u.className || "").replace(/\s+/g, "") || "(none)"; by[c] = (by[c] || 0) + 1; });
+    var keys = Object.keys(by).sort(), mx = Math.max.apply(null, keys.map(function(k){ return by[k]; }).concat([1]));
+    if(!keys.length) cb.appendChild(mk("p", "admin-status", loaded ? "No students yet." : "Loading…"));
+    keys.forEach(function(k){ var r = mk("div", "db-bar"); r.appendChild(mk("span", null, k)); var i = mk("i"); i.style.width = Math.round(100 * by[k] / mx) + "%"; var w = mk("div"); w.appendChild(i); r.appendChild(w); r.appendChild(mk("span", null, String(by[k]))); cb.appendChild(r); });
+    // recent activity
+    var rt = document.querySelector("#db-recent tbody"); rt.innerHTML = ""; var ev = [];
+    attempts.forEach(function(a){ ev.push({ n: a.name, w: (EXAMS[a.exam] && EXAMS[a.exam].title) || a.exam, r: a.score + "/" + a.total, t: a.timestamp, c: a.className }); });
+    examAttempts.forEach(function(a){ ev.push({ n: a.name, w: (EXAM_PAPERS[a.paperKey] && EXAM_PAPERS[a.paperKey].title) || a.paperKey, r: Math.round(pctOf(a)) + "%", t: a.timestamp, c: a.className }); });
+    ev = ev.filter(function(e){ return !GLV || levelOf(e.c) === GLV; }).sort(function(a, b){ return new Date(b.t) - new Date(a.t); }).slice(0, 8);
+    if(!ev.length){ var tr0 = mk("tr"), t0 = mk("td", "wrap-cell", loaded ? "No submissions yet." : "Loading…"); t0.colSpan = 4; tr0.appendChild(t0); rt.appendChild(tr0); }
+    ev.forEach(function(e){ var tr = mk("tr"); [e.n || "", e.w || "", e.r, dbWhen(e.t)].forEach(function(v){ tr.appendChild(mk("td", null, v)); }); rt.appendChild(tr); });
+  }
+  window.__renderDashboard = renderDashboard;
+
+  // ---- View as student ----
+  var VA_LV = "igcse", VA_PAGES = { igcse: "learn.html", as: "as.html", a2: "alevel.html" };
+  function drawVaLinks(){
+    var box = document.getElementById("va-links"); box.innerHTML = "";
+    var list = [["iLearn journey", VA_PAGES[VA_LV]], ["iSolve practice", "exam-practice.html?preview=1"], ["Home page", "index.html"]];
+    if(VA_LV === "igcse") list.push(["Mock exam: Paper 1", "paper1.html"], ["Mock exam: Paper 2", "paper2.html"]);
+    if(VA_LV === "as") list.push(["AS syllabus guide", "as-guide.html"]);
+    list.forEach(function(x){ var a = mk("a", "btn btn-primary", x[0] + " ›"); a.href = x[1]; a.target = "_blank"; a.rel = "noopener"; a.style.textDecoration = "none"; box.appendChild(a); });
+  }
+  document.getElementById("va-level").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-v]"); if(!b) return; VA_LV = b.getAttribute("data-v");
+    Array.prototype.forEach.call(this.querySelectorAll(".lvl-btn"), function(x){ x.classList.toggle("on", x === b); }); drawVaLinks();
+  });
+  function fillVaStudents(){
+    var sel = document.getElementById("va-student"), cur = sel.value, q = document.getElementById("va-search").value.trim().toLowerCase();
+    sel.innerHTML = '<option value="">Choose a student…</option>';
+    (usersRoster || []).filter(function(u){ return (!u.role || u.role === "student") && (!q || (String(u.name) + " " + String(u.email)).toLowerCase().indexOf(q) >= 0); })
+      .sort(function(a, b){ return String(a.name).localeCompare(String(b.name)); }).slice(0, 300)
+      .forEach(function(u){ var o = mk("option", null, (u.name || "(no name)") + " · " + String(u.className || "").replace(/\s+/g, "")); o.value = u.uid; sel.appendChild(o); });
+    sel.value = cur;
+  }
+  window.__renderViewAs = function(){ drawVaLinks(); fillVaStudents(); };
+  document.getElementById("va-search").addEventListener("input", fillVaStudents);
+  function vaScript(src){ return new Promise(function(res){ var s = document.createElement("script"); s.src = src; s.onload = function(){ res(true); }; s.onerror = function(){ res(false); }; document.head.appendChild(s); }); }
+  var VA_IDX = {};
+  function vaIndex(key){
+    if(VA_IDX[key]) return Promise.resolve(VA_IDX[key]);
+    var f = key === "ilearnAS" ? ["as-index.js", "ILEARNAS_INDEX"] : key === "ilearn12" ? ["alevel-index.js", "ILEARN12_INDEX"] : ["learn-index.js", "ILEARN10_INDEX"];
+    return vaScript(f[0] + "?v=1").then(function(){ return (VA_IDX[key] = window[f[1]] || []); });
+  }
+  document.getElementById("va-student").addEventListener("change", function(){
+    var uid = this.value, box = document.getElementById("va-body"); box.innerHTML = "";
+    if(!uid) return; var u = mgUser(uid) || {}; box.appendChild(mk("p", "admin-status", "Loading " + (u.name || "student") + "…"));
+    var lv = levelOf(u.className), key = lv === "11" ? "ilearnAS" : lv === "12" ? "ilearn12" : "ilearn";
+    Promise.all([PQFirebase.getMyProgress(uid, key).catch(function(){ return null; }), vaIndex(key)]).then(function(r){
+      var rec = r[0], idx = r[1] || [], h = '<h4 style="margin:10px 0 4px">' + esc12(u.name || "") + ' · ' + esc12(String(u.className || "").replace(/\s+/g, "")) + '</h4>';
+      if(rec && rec.learn){
+        var done = idx.filter(function(l){ return rec.learn[l.id] && rec.learn[l.id].d; }).length, tot = idx.length || rec.learnTotal || 0, by = {};
+        idx.forEach(function(l){ var b = by[l.topic] = by[l.topic] || { n: 0, d: 0 }; b.n++; if(rec.learn[l.id] && rec.learn[l.id].d) b.d++; });
+        var last = null, lt = -1; idx.forEach(function(l){ var q = rec.learn[l.id]; if(q && q.d){ var t = q.rv || q.t || 0; if(t >= lt){ lt = t; last = l; } } });
+        h += '<div class="va-ring"><div class="mg-kpi"><b>' + (tot ? Math.round(100 * done / tot) : 0) + '%</b><span>iLearn complete</span></div><div class="mg-kpi"><b>' + done + ' / ' + tot + '</b><span>Lessons</span></div>' + (typeof rec.xp === "number" ? '<div class="mg-kpi"><b>' + rec.xp + '</b><span>XP</span></div>' : '') + (rec.lastActive ? '<div class="mg-kpi"><b style="font-size:15px">' + fmtDay(rec.lastActive) + '</b><span>Last active</span></div>' : '') + '</div>';
+        if(last) h += '<p class="admin-status">Last completed lesson: ' + esc12(last.title) + '</p>';
+        h += '<div class="va-tiles">' + Object.keys(by).map(Number).sort(function(a, b){ return a - b; }).map(function(t){ var b = by[t]; return '<div class="va-tile ' + (b.d === b.n ? "done" : "") + '">Topic ' + t + '<small>' + b.d + ' / ' + b.n + ' lessons</small></div>'; }).join("") + '</div>';
+      } else h += '<p class="admin-status">No iLearn progress saved for this student yet.</p>';
+      var mine = attempts.filter(function(a){ return a.uid === uid; }), ex = examAttempts.filter(function(a){ return a.uid === uid; });
+      h += '<h4 style="margin:14px 0 6px">Quizzes (' + mine.length + ')</h4><div class="table-scroll"><table class="admin-table"><thead><tr><th>Quiz</th><th>Score</th><th>Attempt</th><th>Date</th></tr></thead><tbody>' +
+        (mine.length ? mine.map(function(a){ return '<tr><td>' + esc12((EXAMS[a.exam] && EXAMS[a.exam].title) || a.exam) + '</td><td>' + a.score + ' / ' + a.total + '</td><td>' + (a.attemptNumber || 1) + '</td><td>' + esc12(dbWhen(a.timestamp)) + '</td></tr>'; }).join("") : '<tr><td colspan="4" class="wrap-cell">None yet.</td></tr>') + '</tbody></table></div>';
+      h += '<h4 style="margin:14px 0 6px">Exam papers (' + ex.length + ')</h4><div class="table-scroll"><table class="admin-table" id="va-ex"><thead><tr><th>Paper</th><th>Marks</th><th>%</th><th>Date</th></tr></thead><tbody>' +
+        (ex.length ? ex.map(function(a, i){ return '<tr data-i="' + i + '" style="cursor:pointer"><td>' + esc12((EXAM_PAPERS[a.paperKey] && EXAM_PAPERS[a.paperKey].title) || a.paperKey) + '</td><td>' + a.totalEarned + ' / ' + a.totalMarks + '</td><td>' + Math.round(pctOf(a)) + '%</td><td>' + esc12(dbWhen(a.timestamp)) + '</td></tr>'; }).join("") : '<tr><td colspan="4" class="wrap-cell">None yet.</td></tr>') + '</tbody></table></div><p class="admin-status">Click an exam paper to review the answers and change marks.</p>';
+      box.innerHTML = h;
+      var tb = document.querySelector("#va-ex tbody"); if(tb) tb.addEventListener("click", function(e){ var tr = e.target.closest("tr[data-i]"); if(!tr) return; examBackTarget = "viewas"; openExamDetail(ex[+tr.getAttribute("data-i")]); });
+    });
   });
 
   // ============================================================
@@ -4392,7 +4544,7 @@
 
   var examBackTarget = "examPractice";
   document.getElementById("btn-back-examdetail").addEventListener("click", function(){
-    if(examBackTarget === "isolveDetail" && window.__isoBack) window.__isoBack(); else showTab(examBackTarget === "ppPerf" ? "ppPerf" : "examPractice");
+    if(examBackTarget === "isolveDetail" && window.__isoBack) window.__isoBack(); else showTab(examBackTarget === "ppPerf" ? "ppPerf" : examBackTarget === "viewas" ? "viewas" : "examPractice");
   });
 
   // Lets the admin correct a question's awarded mark after re-reading the

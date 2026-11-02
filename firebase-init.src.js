@@ -836,14 +836,37 @@ function checkAdminUids(uids){
 function listParentLinks(){
   return getDocs(collection(db, "parentLinks")).then(function(snap){ var out = []; snap.forEach(function(d){ out.push(d.data()); }); return out; });
 }
-function setParentLinks(parentUid, childUids){
+// children: [{ uid, name, class }]  (the name/class are copied so a parent can show them)
+function setParentLinks(parentUid, children){
+  var ids = children.map(function(c){ return c.uid; });
   return getDocs(query(collection(db, "parentLinks"), where("parentUid", "==", parentUid))).then(function(snap){
     var b = writeBatch(db), have = {};
     snap.forEach(function(d){ have[d.data().childUid] = d.ref; });
-    Object.keys(have).forEach(function(c){ if(childUids.indexOf(c) < 0) b.delete(have[c]); });
-    childUids.forEach(function(c){ if(!have[c]) b.set(doc(db, "parentLinks", parentUid + "_" + c), { parentUid: parentUid, childUid: c, createdAt: new Date().toISOString() }); });
+    Object.keys(have).forEach(function(c){ if(ids.indexOf(c) < 0) b.delete(have[c]); });
+    children.forEach(function(c){ b.set(doc(db, "parentLinks", parentUid + "_" + c.uid), { parentUid: parentUid, childUid: c.uid, childName: cleanAdminName(c.name), childClass: String(c.class || "").slice(0, 20), createdAt: new Date().toISOString() }); });
     return b.commit();
   }).then(function(){ return { ok: true }; });
+}
+
+// Parent: the children a teacher linked to this account.
+function listMyChildren(parentUid){
+  return getDocs(query(collection(db, "parentLinks"), where("parentUid", "==", parentUid))).then(function(snap){
+    var out = []; snap.forEach(function(d){ out.push(d.data()); });
+    return out.sort(function(a, b){ return String(a.childName).localeCompare(String(b.childName)); });
+  });
+}
+// Parent / staff: everything saved for one student (rules allow it only for a linked parent or staff).
+function getChildData(childUid){
+  var keys = ["ilearn", "ilearnAS", "ilearn12"];
+  return Promise.all([
+    getDocs(query(collection(db, "attempts"), where("uid", "==", childUid))),
+    getDocs(query(collection(db, "examAttempts"), where("uid", "==", childUid))),
+    Promise.all(keys.map(function(k){ return getMyProgress(childUid, k).catch(function(){ return null; }); }))
+  ]).then(function(r){
+    var a = [], e = []; r[0].forEach(function(d){ a.push(d.data()); }); r[1].forEach(function(d){ e.push(d.data()); });
+    var prog = {}; keys.forEach(function(k, i){ if(r[2][i]) prog[k] = r[2][i]; });
+    return { attempts: a, examAttempts: e, progress: prog };
+  });
 }
 
 function listArchivedStudents(){
@@ -1057,12 +1080,26 @@ function tuitionLedgerSave(owner, data){
 // True only if admins/{uid} exists. The rules let a user read ONLY their own
 // admins doc, so this reveals nothing about anyone else.
 function checkIsAdmin(uid){
-  return getDoc(doc(db, "admins", uid)).then(function(snap){ return snap.exists(); })
-    .catch(function(){ return false; });
+  // Teachers and collaborators also get the dashboard / preview pages (what they can
+  // actually read or change is decided by firestore.rules, not by this check).
+  return getStaffRole(uid).then(function(r){ return !!r; });
+}
+// "admin" | "teacher" | "collaborator" | "" (not staff)
+function getStaffRole(uid){
+  return getDoc(doc(db, "admins", uid)).then(function(snap){
+    if(snap.exists()) return "admin";
+    return getDoc(doc(db, "users", uid)).then(function(u){
+      var r = u.exists() ? u.data().role : "";
+      return (r === "teacher" || r === "collaborator") ? r : "";
+    });
+  }).catch(function(){ return ""; });
 }
 
 window.PQFirebase = {
   checkIsAdmin: checkIsAdmin,
+  getStaffRole: getStaffRole,
+  listMyChildren: listMyChildren,
+  getChildData: getChildData,
   getMyFeedback: getMyFeedback,
   submitFeedback: submitFeedback,
   listAllFeedback: listAllFeedback,

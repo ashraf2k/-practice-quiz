@@ -56,6 +56,27 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    // Staff roles (users/{uid}.role, set only by an admin):
+    //   teacher      = reads and writes everything the dashboard needs (not roles / admins),
+    //   collaborator = read-only view of the dashboard data.
+    function staffRole() {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'student') : 'student';
+    }
+    function canRead() { return isAdmin() || staffRole() in ['teacher', 'collaborator']; }
+    function canWrite() { return isAdmin() || staffRole() == 'teacher'; }
+    // Teachers may edit student profiles but never change anyone's role.
+    function canWriteUser() {
+      return isAdmin() || (staffRole() == 'teacher'
+        && (request.method == 'delete'
+            || (request.method == 'create' && !('role' in request.resource.data))
+            || (request.method == 'update' && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))));
+    }
+    // A parent linked (by a teacher) to this student: parentLinks/{parentUid}_{childUid}.
+    function parentOf(childUid) {
+      return signedIn() && childUid is string && exists(/databases/$(database)/documents/parentLinks/$(request.auth.uid + '_' + childUid));
+    }
+
     // Plain text: bounded length, and none of < > & (HTML metacharacters).
     function safeText(v, minLen, maxLen) {
       return v is string && v.size() >= minLen && v.size() <= maxLen
@@ -224,8 +245,8 @@ service cloud.firestore {
     match /groups/{code} {
       // Any signed-in user can look up ONE group by its code (to join); only admins can list.
       allow get: if signedIn();
-      allow list: if isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow list: if canRead();
+      allow create, update, delete: if canWrite();
     }
 
     // ---------- join requests (student -> teacher approves) ----------
@@ -243,28 +264,28 @@ service cloud.firestore {
         && d.createdAt == request.time;
     }
     match /joinRequests/{rid} {
-      allow get: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
-      allow list: if signedIn() && (isAdmin() || resource.data.uid == request.auth.uid);
+      allow get: if signedIn() && (resource.data.uid == request.auth.uid || canRead());
+      allow list: if signedIn() && (canRead() || resource.data.uid == request.auth.uid);
       allow create: if signedIn() && verifiedOrLegacy() && validJoin(request.auth.uid, rid);
       allow update: if signedIn() && verifiedOrLegacy() && resource.data.uid == request.auth.uid
         && resource.data.status == 'declined' && validJoin(request.auth.uid, rid);
       allow delete: if signedIn() && resource.data.uid == request.auth.uid && resource.data.status in ['pending','declined'];
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if canWrite();
     }
 
     // ---------- parent <-> student links (admin writes; a parent reads their own) ----------
     match /parentLinks/{id} {
-      allow get: if signedIn() && (id.split('_')[0] == request.auth.uid || isAdmin());
-      allow list: if signedIn() && (isAdmin() || resource.data.parentUid == request.auth.uid);
-      allow create, update, delete: if isAdmin();
+      allow get: if signedIn() && (id.split('_')[0] == request.auth.uid || canRead());
+      allow list: if signedIn() && (canRead() || resource.data.parentUid == request.auth.uid);
+      allow create, update, delete: if canWrite();
     }
 
     // ---------- users ----------
     match /users/{uid} {
-      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow get: if signedIn() && (request.auth.uid == uid || canRead());
       // Teacher roster: lets the dashboard list every registered student
       // (including those who have not submitted a quiz yet).
-      allow list: if isAdmin();
+      allow list: if canRead();
       // One-time profile creation by the owner. No later self-edit (so the
       // class / name / e-mail cannot be tampered with), no self-delete.
       allow create: if signedIn() && request.auth.uid == uid
@@ -277,7 +298,7 @@ service cloud.firestore {
                     && request.resource.data.email.lower() == request.auth.token.email.lower()
                     && request.resource.data.createdAt == request.time;
       // Archive / restore / change class (teacher).
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if canWriteUser();
     }
 
     // ---------- archive (teacher) ----------
@@ -285,17 +306,19 @@ service cloud.firestore {
       // A student may read ONLY their own summary doc (login uses it to
       // turn archived accounts away).
       allow get: if signedIn() && request.auth.uid == uid;
-      allow get, list, create, update, delete: if isAdmin();
+      allow get, list: if canRead();
+      allow create, update, delete: if canWrite();
 
       match /items/{itemId} {
-        allow get, list, create, update, delete: if isAdmin();
+        allow get, list: if canRead();
+        allow create, update, delete: if canWrite();
       }
     }
 
     // ---------- MCQ attempts (max 2; comm9618 max 1) ----------
     match /attempts/{attemptId} {
-      allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
-      allow list: if isAdmin();
+      allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid || canRead() || parentOf(attemptId.split('_')[0]));
+      allow list: if canRead() || (signedIn() && parentOf(resource.data.uid));
 
       allow create: if signedIn() && verifiedOrLegacy()
                     && validAttempt(request.auth.uid, attemptId)
@@ -310,13 +333,13 @@ service cloud.firestore {
                     && request.resource.data.attemptNumber == 2
                     && resource.data.examKey != 'comm9618';
 
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if canWrite();
     }
 
     // ---------- topical exam papers (unlimited retakes; comm9618_exam once) ----------
     match /examAttempts/{attemptId} {
-      allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
-      allow list: if isAdmin();
+      allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid || canRead() || parentOf(attemptId.split('_')[0]));
+      allow list: if canRead() || (signedIn() && parentOf(resource.data.uid));
 
       allow create: if signedIn() && verifiedOrLegacy() && validExamAttempt(request.auth.uid, attemptId);
 
@@ -327,30 +350,30 @@ service cloud.firestore {
                     && resource.data.paperKey != 'comm9618_exam';
 
       // Teacher regrade / restore / reset (no paperKey exception).
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if canWrite();
     }
 
     // ---------- resume checkpoints + iLearn state ----------
     match /practiceProgress/{progressId} {
-      allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid || isAdmin());
-      allow list: if isAdmin();
+      allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid || canRead() || parentOf(progressId.split('_')[0]));
+      allow list: if canRead() || (signedIn() && parentOf(resource.data.uid));
       allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'examKey') && verifiedOrLegacy();
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if canWrite();
     }
 
     match /examProgress/{progressId} {
-      allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid || isAdmin());
-      allow list: if isAdmin();
+      allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid || canRead() || parentOf(progressId.split('_')[0]));
+      allow list: if canRead() || (signedIn() && parentOf(resource.data.uid));
       allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'paperKey') && verifiedOrLegacy();
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if canWrite();
     }
 
     // ---------- student feedback (admins read everything; a student can read/edit only their own) ----------
     match /feedback/{feedbackId} {
-      allow get: if signedIn() && (feedbackId.split('_')[0] == request.auth.uid || isAdmin());
-      allow list: if isAdmin();
+      allow get: if signedIn() && (feedbackId.split('_')[0] == request.auth.uid || canRead());
+      allow list: if canRead();
       allow create: if signedIn() && verifiedOrLegacy()
         && validFeedback(request.auth.uid, feedbackId)
         && request.resource.data.createdAt == request.time;
@@ -358,13 +381,13 @@ service cloud.firestore {
         && resource.data.uid == request.auth.uid
         && validFeedback(request.auth.uid, feedbackId)
         && request.resource.data.createdAt == resource.data.createdAt;
-      allow delete: if isAdmin();
+      allow delete: if canWrite();
     }
 
     // ---------- tuition booking (hidden page) ----------
     match /tuitionConfig/{id} {
       allow get: if signedIn();
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if canWrite();
     }
 
     // Public "slot is taken" markers: no names, so students cannot see each other.
@@ -380,12 +403,12 @@ service cloud.firestore {
       allow delete: if signedIn() && tuOwnsBefore(slotKey)
         && !(existsAfter(tuBooking(request.auth.uid + '_1')) && getAfter(tuBooking(request.auth.uid + '_1')).data.slotKey == slotKey)
         && !(existsAfter(tuBooking(request.auth.uid + '_2')) && getAfter(tuBooking(request.auth.uid + '_2')).data.slotKey == slotKey);
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if canWrite();
     }
 
     match /tuitionBookings/{bid} {
-      allow get: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
-      allow list: if signedIn() && (isAdmin() || resource.data.uid == request.auth.uid);
+      allow get: if signedIn() && (resource.data.uid == request.auth.uid || canRead());
+      allow list: if signedIn() && (canRead() || resource.data.uid == request.auth.uid);
       allow create: if signedIn() && verifiedOrLegacy() && validTuitionBooking(request.auth.uid, bid);
       // Re-book on a seat whose previous request was declined.
       allow update: if signedIn() && verifiedOrLegacy() && resource.data.uid == request.auth.uid
@@ -398,12 +421,13 @@ service cloud.firestore {
         && (!('changeTo' in request.resource.data) || validTuitionChange(request.resource.data.changeTo));
       // Withdraw a pending request or dismiss a declined one (approved ones: ask the teacher).
       allow delete: if signedIn() && resource.data.uid == request.auth.uid && resource.data.status in ['pending','declined'];
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if canWrite();
     }
 
     // Paid / sessions completed / notes: teacher only, students can never read it.
     match /tuitionLedger/{owner} {
-      allow read, write: if isAdmin();
+      allow read: if canRead();
+      allow write: if canWrite();
     }
 
     // ---------- default deny ----------

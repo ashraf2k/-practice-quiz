@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-lDggm457/izEddFxJxWjdAwCS9HXVyuFUroXzbdML4E='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261019j"></script>
+<script src="theme.js?v=20261027a"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta name="theme-color" content="#146C6A" />
+<link rel="icon" href="icons/icon-192.png" />
+<title>My children</title>
+<link rel="stylesheet" href="shared.css?v=20261103f" />
+<style>
+  .ch{ margin:0 0 18px; }
+  .ch h3{ margin:0 0 2px; font-size:20px; } .ch .sub{ color:var(--muted); font-size:13px; margin:0 0 12px; }
+  .kp{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 12px; }
+  .kp div{ border:1px solid var(--line); background:var(--surface-soft); border-radius:12px; padding:9px 14px; min-width:110px; }
+  .kp b{ display:block; font-size:21px; } .kp span{ font-size:12px; color:var(--muted); }
+  .tt{ width:100%; border-collapse:collapse; font-size:13.5px; margin:6px 0 12px; }
+  .tt th,.tt td{ text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); } .tt th{ color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; }
+  .tp{ display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; margin:8px 0 12px; }
+  .tp div{ border:1px solid var(--line); border-radius:10px; padding:7px 9px; font-size:12.5px; font-weight:700; background:var(--surface-soft); } .tp small{ display:block; color:var(--muted); font-weight:600; }
+  .tp .done{ border-color:#34d399; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card" id="p-card">
+    <h2 class="step-title">My children</h2>
+    <p class="step-sub" id="p-sub">Loading…</p>
+    <div id="p-body"></div>
+    <p><a class="btn btn-secondary" href="index.html" style="text-decoration:none">Home</a> <button class="btn btn-secondary" id="p-out" type="button">Log out</button></p>
+  </section>
+</div>
+<script src="firebase-config.js?v=20261103e"></script>
+<script src="quiz-data.js?v=20261019j"></script>
+<script src="exam-data.js?v=20261019j"></script>
+<script type="module" src="firebase-init.js?v=20261103g"></script>
+<script type="module">
+(function(){
+  "use strict";
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function day(t){ var d = new Date(t); return isNaN(d) ? "" : d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }); }
+  function loadScript(src){ return new Promise(function(res){ var s = document.createElement("script"); s.src = src; s.onload = function(){ res(true); }; s.onerror = function(){ res(false); }; document.head.appendChild(s); }); }
+  var KEYS = { ilearn: ["IGCSE iLearn", "learn-index.js", "ILEARN10_INDEX"], ilearnAS: ["AS Level iLearn", "as-index.js", "ILEARNAS_INDEX"], ilearn12: ["A Level iLearn", "alevel-index.js", "ILEARN12_INDEX"] };
+  function paper(k){
+    var t = window.EXAM_PAPERS && EXAM_PAPERS[k] && EXAM_PAPERS[k].title; if(t) return t;
+    var m = /^pp(11|12)?_(.+)$/.exec(k); return m ? "Past-paper practice " + m[2].replace(/_/g, ".") + (m[1] ? " (" + (m[1] === "11" ? "AS" : "A2") + ")" : "") : k;
+  }
+  function quiz(k){ return (window.EXAMS && EXAMS[k] && EXAMS[k].title) || k; }
+  function drawChild(c, d){
+    var h = '<div class="ch"><h3>' + esc(c.childName || "Student") + '</h3><p class="sub">' + esc(c.childClass || "") + '</p>';
+    var keys = Object.keys(d.progress);
+    if(!keys.length) h += '<p class="step-sub">No iLearn lessons completed yet.</p>';
+    return Promise.all(keys.map(function(k){ var f = KEYS[k]; return loadScript(f[1] + "?v=1").then(function(){ return window[f[2]] || []; }); })).then(function(idxs){
+      keys.forEach(function(k, i){
+        var rec = d.progress[k], idx = idxs[i], done = idx.filter(function(l){ return rec.learn && rec.learn[l.id] && rec.learn[l.id].d; }).length, tot = idx.length || rec.learnTotal || 0, by = {};
+        idx.forEach(function(l){ var b = by[l.topic] = by[l.topic] || { n: 0, d: 0 }; b.n++; if(rec.learn && rec.learn[l.id] && rec.learn[l.id].d) b.d++; });
+        h += '<h4 style="margin:10px 0 4px">' + KEYS[k][0] + '</h4><div class="kp"><div><b>' + (tot ? Math.round(100 * done / tot) : 0) + '%</b><span>complete</span></div><div><b>' + done + ' / ' + tot + '</b><span>lessons</span></div>' + (typeof rec.xp === "number" ? '<div><b>' + rec.xp + '</b><span>XP</span></div>' : '') + (rec.lastActive ? '<div><b style="font-size:15px">' + day(rec.lastActive) + '</b><span>last active</span></div>' : '') + '</div>';
+        h += '<div class="tp">' + Object.keys(by).map(Number).sort(function(a, b){ return a - b; }).map(function(t){ var b = by[t]; return '<div class="' + (b.d === b.n ? "done" : "") + '">Topic ' + t + '<small>' + b.d + ' / ' + b.n + '</small></div>'; }).join("") + '</div>';
+      });
+      var a = d.attempts.sort(function(x, y){ return String(y.completedAt).localeCompare(String(x.completedAt)); }), e = d.examAttempts.sort(function(x, y){ return String(y.completedAt).localeCompare(String(x.completedAt)); });
+      h += '<h4 style="margin:10px 0 4px">Quiz results</h4><table class="tt"><thead><tr><th>Quiz</th><th>Score</th><th>Date</th></tr></thead><tbody>' + (a.length ? a.map(function(x){ return '<tr><td>' + esc(quiz(x.examKey)) + '</td><td>' + x.score + ' / ' + x.total + '</td><td>' + esc(day(x.completedAt)) + '</td></tr>'; }).join("") : '<tr><td colspan="3">None yet.</td></tr>') + '</tbody></table>';
+      h += '<h4 style="margin:10px 0 4px">Exam paper results</h4><table class="tt"><thead><tr><th>Paper</th><th>Marks</th><th>%</th><th>Date</th></tr></thead><tbody>' + (e.length ? e.map(function(x){ return '<tr><td>' + esc(paper(x.paperKey)) + '</td><td>' + x.totalEarned + ' / ' + x.totalMarks + '</td><td>' + Math.round(x.pct) + '%</td><td>' + esc(day(x.completedAt)) + '</td></tr>'; }).join("") : '<tr><td colspan="4">None yet.</td></tr>') + '</tbody></table></div>';
+      return h;
+    });
+  }
+  $("p-out").addEventListener("click", function(){ PQFirebase.logOut().then(function(){ location.href = "index.html"; }); });
+  PQFirebase.onAuthChange(function(u){
+    if(!u){ location.href = "quiz.html"; return; }
+    $("p-sub").textContent = "Hello " + (u.name || "") + ". Here is how your children are doing.";
+    PQFirebase.listMyChildren(u.uid).then(function(kids){
+      if(!kids.length){ $("p-body").innerHTML = '<p class="step-sub">No student is linked to your account yet. Please ask the teacher to link your child.</p>'; return; }
+      $("p-body").innerHTML = '<p class="step-sub">Loading…</p>';
+      return kids.reduce(function(chain, c){ return chain.then(function(acc){
+        return PQFirebase.getChildData(c.childUid).then(function(d){ return drawChild(c, d); }).catch(function(){ return '<div class="ch"><h3>' + esc(c.childName) + '</h3><p class="step-sub">Could not load results right now.</p></div>'; }).then(function(h){ return acc + h; });
+      }); }, Promise.resolve("")).then(function(h){ $("p-body").innerHTML = h; });
+    }).catch(function(){ $("p-sub").textContent = "Could not load your children. Please try again."; });
+  });
+})();
+</script>
+</body>
+</html>

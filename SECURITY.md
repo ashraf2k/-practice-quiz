@@ -95,3 +95,9 @@ by hand after publishing:
 - Firebase console -> Authentication -> Sign-in method -> Google -> Enable (set a support e-mail).
 - Authentication -> Settings -> Authorized domains must include `ashraf2k.github.io`.
 - A first-time Google user creates their own profile (name, e-mail from the token, class = IGCSE / AS / A2); the existing `users` create rule already covers it.
+
+## Staff roles and parents (users/{uid}.role)
+- `teacher`: can read and write the dashboard data (results, classes, join requests, tuition, archive) but cannot change roles or create/delete admins.
+- `collaborator`: read-only access to the same data.
+- `parent`: can read attempts / examAttempts / practiceProgress only for students linked in /parentLinks/{parentUid}_{childUid}.
+- Rules Playground checks: as a teacher, `update` /users/{other} setting `role` -> denied; `create` /admins/{x} -> denied. As a collaborator, any write -> denied. As a parent, `get` /attempts/{childUid}_x allowed only when the link exists.
