@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-MLaO/4s46DNsEJR00QNKKZKTtdJyN1cTgUoE5xdMMts='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261019j"></script>
+<script src="theme.js?v=20261027a"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta name="theme-color" content="#146C6A" />
+<link rel="icon" href="icons/icon-192.png" />
+<title>Join a class</title>
+<link rel="stylesheet" href="shared.css?v=20261019j" />
+<style>
+  .jn-row{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+  .jn-row input{ flex:1; min-width:180px; padding:12px 14px; border-radius:12px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font:inherit; font-size:16px; text-transform:uppercase; letter-spacing:.06em; }
+  .jn-list{ display:grid; gap:8px; margin:12px 0; }
+  .jn-list > div{ display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; padding:11px 14px; border:1.5px solid var(--line); border-radius:12px; background:var(--surface); }
+  .jn-chip{ display:inline-block; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:800; border:1px solid var(--line); }
+  .jn-chip.pending{ background:var(--diff-moderate-bg); border-color:var(--diff-moderate); }
+  .jn-chip.approved{ background:var(--correct-bg); border-color:var(--correct); }
+  .jn-chip.declined{ background:var(--incorrect-bg); border-color:var(--incorrect); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card" id="jn-card">
+    <h2 class="step-title">Join a class</h2>
+    <p class="step-sub" id="jn-cur">Loading…</p>
+    <div id="jn-form" class="hidden">
+      <p class="step-sub">Enter the class code your teacher gave you. Your teacher will approve the request.</p>
+      <div class="jn-row"><input type="text" id="jn-code" maxlength="20" placeholder="CLASS CODE" autocomplete="off" aria-label="Class code"><button class="btn btn-primary" id="jn-go" type="button">Ask to join</button></div>
+      <p class="step-sub" id="jn-msg" aria-live="polite"></p>
+      <div class="jn-list" id="jn-list"></div>
+    </div>
+    <p id="jn-login" class="hidden step-sub">Please <a href="quiz.html">log in</a> first, then come back to this page.</p>
+    <p><a class="btn btn-secondary" href="quiz.html" style="text-decoration:none">Back</a></p>
+  </section>
+</div>
+<script src="firebase-config.js?v=20261103b"></script>
+<script type="module" src="firebase-init.js?v=20261103c"></script>
+<script type="module">
+(function(){
+  "use strict";
+  var user = null;
+  function $(id){ return document.getElementById(id); }
+  function paint(){
+    PQFirebase.getMyJoinRequests(user.uid).then(function(rs){
+      var box = $("jn-list"); box.innerHTML = "";
+      rs.forEach(function(r){
+        var d = document.createElement("div"), a = document.createElement("span"), c = document.createElement("span");
+        a.textContent = r.code; c.className = "jn-chip " + r.status; c.textContent = r.status === "pending" ? "Waiting for your teacher" : r.status === "approved" ? "Approved" : "Declined";
+        d.appendChild(a); d.appendChild(c);
+        if(r.status === "pending"){ var x = document.createElement("button"); x.type = "button"; x.className = "btn btn-secondary"; x.textContent = "Withdraw"; x.addEventListener("click", function(){ PQFirebase.cancelJoin(user.uid, r.code).then(paint); }); d.appendChild(x); }
+        box.appendChild(d);
+      });
+    }).catch(function(){});
+  }
+  $("jn-go").addEventListener("click", function(){
+    var msg = $("jn-msg"); msg.textContent = "Sending…";
+    PQFirebase.requestJoin(user.uid, $("jn-code").value).then(function(r){
+      msg.textContent = r.already ? "You already asked to join " + r.group.name + ". Please wait for your teacher." : "Request sent for " + r.group.name + ". Your teacher will approve it; check back here.";
+      $("jn-code").value = ""; paint();
+    }).catch(function(e){ msg.textContent = (e && e.message && !e.code) ? e.message : "Could not send the request. Please try again."; });
+  });
+  PQFirebase.onAuthChange(function(u){
+    if(!u){ $("jn-cur").textContent = ""; $("jn-form").classList.add("hidden"); $("jn-login").classList.remove("hidden"); return; }
+    user = u; $("jn-login").classList.add("hidden"); $("jn-form").classList.remove("hidden");
+    $("jn-cur").textContent = "Hi " + (u.name || "") + (u["class"] ? " — your class is " + u["class"] + "." : ".");
+    paint();
+  });
+})();
+</script>
+</body>
+</html>

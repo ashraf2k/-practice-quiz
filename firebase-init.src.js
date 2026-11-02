@@ -235,7 +235,7 @@ function getMyProfile(uid){
   return getDoc(doc(db, "users", uid)).then(function(snap){
     if(!snap.exists()) return null;
     var d = snap.data();
-    return { uid: uid, name: d.name, email: d.email, class: d.class, blocked: d.blocked === true };
+    return { uid: uid, name: d.name, email: d.email, class: d.class, blocked: d.blocked === true, role: d.role || "student" };
   });
 }
 
@@ -326,7 +326,7 @@ function recordAttempt(uid, examKey, record){
 function listAllUsers(){
   return getDocs(collection(db, "users")).then(function(snap){
     var out = [];
-    snap.forEach(function(d){ var x = d.data() || {}; out.push({ uid: d.id, name: x.name || "", email: x.email || "", className: x["class"] || "", blocked: x.blocked === true, createdMs: x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0 }); });
+    snap.forEach(function(d){ var x = d.data() || {}; out.push({ uid: d.id, name: x.name || "", email: x.email || "", className: x["class"] || "", blocked: x.blocked === true, role: x.role || "student", createdMs: x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0 }); });
     return out;
   });
 }
@@ -689,6 +689,108 @@ function adminDeleteStudent(uid, adminEmail){
   }).then(function(){ return { ok: true }; });
 }
 
+// ---------- Groups (classes with a code), join requests, roles, parent links ----------
+// groups/{CODE}: { code, name, level: "10"|"11"|"12", teacherUid, teacherName, open, createdAt }
+// The code starts with 10BR (IGCSE), AS (AS Level) or A2 (A Level): older pages use that
+// prefix to decide what a student may open (see PQ_LEGACY_CLASS in firebase-config.js).
+var GROUP_PREFIX = { "10": "10BR", "11": "AS", "12": "A2" };
+function cleanGroupCode(c){ return String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20); }
+
+function listGroups(){
+  return getDocs(collection(db, "groups")).then(function(snap){
+    var out = []; snap.forEach(function(d){ var x = d.data() || {}; x.code = x.code || d.id; out.push(x); });
+    return out.sort(function(a, b){ return String(a.code).localeCompare(String(b.code)); });
+  });
+}
+function saveGroup(g){
+  var code = cleanGroupCode(g && g.code), lv = String(g && g.level || "");
+  if(!GROUP_PREFIX[lv]) return Promise.reject(new Error("Choose a level (IGCSE, AS or A2)."));
+  if(code.indexOf(GROUP_PREFIX[lv]) !== 0) return Promise.reject(new Error("The code for this level must start with " + GROUP_PREFIX[lv] + "."));
+  if(code.length < 5) return Promise.reject(new Error("The code is too short."));
+  var name = cleanAdminName(g.name) || code;
+  var rec = { code: code, name: name, level: lv, teacherUid: String(g.teacherUid || ""), teacherName: cleanAdminName(g.teacherName), open: g.open !== false, createdAt: g.createdAt || new Date().toISOString() };
+  return setDoc(doc(db, "groups", code), rec).then(function(){ return rec; });
+}
+function deleteGroup(code){ return deleteDoc(doc(db, "groups", cleanGroupCode(code))); }
+function getGroup(code){
+  code = cleanGroupCode(code); if(!code) return Promise.resolve(null);
+  return getDoc(doc(db, "groups", code)).then(function(snap){ return snap.exists() ? snap.data() : null; }).catch(function(){ return null; });
+}
+
+// Student: ask to join a class by its code. The teacher approves in the dashboard.
+function requestJoin(uid, code){
+  code = cleanGroupCode(code);
+  if(!code) return Promise.reject(new Error("Please enter the class code."));
+  return getGroup(code).then(function(g){
+    if(!g) throw new Error("No class has that code. Please check it with your teacher.");
+    if(g.open === false) throw new Error("This class is not accepting new students.");
+    return getDoc(doc(db, "users", uid)).then(function(me){
+      var rid = uid + "_" + code, ref = doc(db, "joinRequests", rid);
+      return getDoc(ref).then(function(old){
+        if(old.exists() && old.data().status === "pending") return { ok: true, already: true, group: g };
+        var rec = { uid: uid, code: code, name: me.data().name, status: "pending", createdAt: serverTimestamp() };
+        return setDoc(ref, rec).then(function(){ return { ok: true, group: g }; });
+      });
+    });
+  });
+}
+function getMyJoinRequests(uid){
+  return getDocs(query(collection(db, "joinRequests"), where("uid", "==", uid))).then(function(snap){
+    var out = []; snap.forEach(function(d){ var x = d.data(); x.id = d.id; x.createdMs = x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0; delete x.createdAt; out.push(x); });
+    return out.sort(function(a, b){ return b.createdMs - a.createdMs; });
+  });
+}
+function cancelJoin(uid, code){ return deleteDoc(doc(db, "joinRequests", uid + "_" + cleanGroupCode(code))); }
+function listJoinRequests(){
+  return getDocs(collection(db, "joinRequests")).then(function(snap){
+    var out = []; snap.forEach(function(d){ var x = d.data(); x.id = d.id; x.createdMs = x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0; delete x.createdAt; out.push(x); });
+    return out.sort(function(a, b){ return b.createdMs - a.createdMs; });
+  });
+}
+// Admin/teacher: approve (moves the student into the group, results included) or decline.
+function decideJoin(req, approve, adminEmail){
+  var ref = doc(db, "joinRequests", req.id);
+  var go = approve ? changeStudentClass(req.uid, req.code) : Promise.resolve();
+  return go.then(function(){
+    return updateDoc(ref, { status: approve ? "approved" : "declined", decidedBy: adminEmail || null });
+  }).then(function(){ return { ok: true }; });
+}
+
+// Admin: set a person's role. admin = a document at admins/{uid}; the others are users/{uid}.role.
+var ROLES = ["student", "parent", "collaborator", "teacher", "admin"];
+function setUserRole(uid, role, myUid){
+  if(ROLES.indexOf(role) < 0) return Promise.reject(new Error("Unknown role."));
+  if(uid === myUid && role !== "admin") return Promise.reject(new Error("You cannot remove your own admin access."));
+  var ops = [];
+  if(role === "admin") ops.push(setDoc(doc(db, "admins", uid), { since: new Date().toISOString() }));
+  else if(uid !== myUid) ops.push(deleteDoc(doc(db, "admins", uid)));
+  return Promise.all(ops).then(function(){
+    return updateDoc(doc(db, "users", uid), role === "student" ? { role: deleteField() } : { role: role });
+  }).then(function(){ return { uid: uid, role: role }; });
+}
+function listAdminUids(){
+  // Admin documents can be read one by one only; the roster tells us who to check.
+  return Promise.resolve([]);
+}
+function checkAdminUids(uids){
+  return Promise.all(uids.map(function(u){ return getDoc(doc(db, "admins", u)).then(function(s){ return s.exists(); }, function(){ return false; }); }))
+    .then(function(flags){ var out = {}; uids.forEach(function(u, i){ out[u] = flags[i]; }); return out; });
+}
+
+// Parents <-> students (admin links them; a parent will only see linked children).
+function listParentLinks(){
+  return getDocs(collection(db, "parentLinks")).then(function(snap){ var out = []; snap.forEach(function(d){ out.push(d.data()); }); return out; });
+}
+function setParentLinks(parentUid, childUids){
+  return getDocs(query(collection(db, "parentLinks"), where("parentUid", "==", parentUid))).then(function(snap){
+    var b = writeBatch(db), have = {};
+    snap.forEach(function(d){ have[d.data().childUid] = d.ref; });
+    Object.keys(have).forEach(function(c){ if(childUids.indexOf(c) < 0) b.delete(have[c]); });
+    childUids.forEach(function(c){ if(!have[c]) b.set(doc(db, "parentLinks", parentUid + "_" + c), { parentUid: parentUid, childUid: c, createdAt: new Date().toISOString() }); });
+    return b.commit();
+  }).then(function(){ return { ok: true }; });
+}
+
 function listArchivedStudents(){
   return getDocs(collection(db, "archive")).then(function(snap){
     var out = [];
@@ -953,5 +1055,18 @@ window.PQFirebase = {
   adminRenameStudent: adminRenameStudent,
   setStudentBlocked: setStudentBlocked,
   adminCreateStudent: adminCreateStudent,
-  adminDeleteStudent: adminDeleteStudent
+  adminDeleteStudent: adminDeleteStudent,
+  listGroups: listGroups,
+  saveGroup: saveGroup,
+  deleteGroup: deleteGroup,
+  getGroup: getGroup,
+  requestJoin: requestJoin,
+  getMyJoinRequests: getMyJoinRequests,
+  cancelJoin: cancelJoin,
+  listJoinRequests: listJoinRequests,
+  decideJoin: decideJoin,
+  setUserRole: setUserRole,
+  checkAdminUids: checkAdminUids,
+  listParentLinks: listParentLinks,
+  setParentLinks: setParentLinks
 };

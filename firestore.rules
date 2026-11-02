@@ -213,8 +213,50 @@ service cloud.firestore {
     // ---------- admins (read-only marker docs; written from console only) ----------
     match /admins/{uid} {
       // A signed-in user may check ONLY whether they themselves are an admin.
-      allow get: if signedIn() && request.auth.uid == uid;
-      allow list, create, update, delete: if false;
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // An admin can promote another person to admin or remove another admin (never themselves).
+      allow create: if isAdmin();
+      allow delete: if isAdmin() && request.auth.uid != uid;
+      allow list, update: if false;
+    }
+
+    // ---------- groups (classes with a code) ----------
+    match /groups/{code} {
+      // Any signed-in user can look up ONE group by its code (to join); only admins can list.
+      allow get: if signedIn();
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ---------- join requests (student -> teacher approves) ----------
+    function validJoin(uid, rid) {
+      let d = request.resource.data;
+      let g = get(/databases/$(database)/documents/groups/$(d.code)).data;
+      return d.keys().hasOnly(['uid','code','name','status','createdAt'])
+        && d.keys().hasAll(['uid','code','name','status','createdAt'])
+        && d.uid == uid && d.code is string && d.code.matches('[A-Z0-9]{5,20}')
+        && rid == uid + '_' + d.code
+        && exists(/databases/$(database)/documents/groups/$(d.code))
+        && g.get('open', true) == true
+        && d.status == 'pending'
+        && d.name == get(/databases/$(database)/documents/users/$(uid)).data.name
+        && d.createdAt == request.time;
+    }
+    match /joinRequests/{rid} {
+      allow get: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow list: if signedIn() && (isAdmin() || resource.data.uid == request.auth.uid);
+      allow create: if signedIn() && verifiedOrLegacy() && validJoin(request.auth.uid, rid);
+      allow update: if signedIn() && verifiedOrLegacy() && resource.data.uid == request.auth.uid
+        && resource.data.status == 'declined' && validJoin(request.auth.uid, rid);
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid && resource.data.status in ['pending','declined'];
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ---------- parent <-> student links (admin writes; a parent reads their own) ----------
+    match /parentLinks/{id} {
+      allow get: if signedIn() && (id.split('_')[0] == request.auth.uid || isAdmin());
+      allow list: if signedIn() && (isAdmin() || resource.data.parentUid == request.auth.uid);
+      allow create, update, delete: if isAdmin();
     }
 
     // ---------- users ----------

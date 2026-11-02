@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-HDN/EYUZndsFbmY5dLI8tXItW27w2b3XVelJNkxSMIk='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-GHdhz/OCDXhBIJ+GDqaYI7PZugEc/XxuPR9yFPsnczM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -107,6 +107,7 @@
   <!-- ============ HOME MENU (10BR): iLearn / iSolve ============ -->
   <section id="screen-hub" class="card hidden">
     <h2 class="step-title" id="hub-greeting" style="margin-bottom:4px;">Welcome</h2>
+    <p style="margin:0 0 8px;font-size:13px"><a href="join.html">Join a class with a code</a></p>
     <p class="step-sub">What would you like to do today?</p>
     <div class="hub-grid">
       <a class="hub-card" id="hub-learn" href="learn.html">
@@ -345,8 +346,8 @@
 <script src="brand-footer.js?v=20261101a"></script>
 <script src="report-lib.js?v=20261019j"></script>
 <script src="scratchpad.js?v=20261019j"></script>
-<script src="firebase-config.js?v=20261019j"></script>
-<script type="module" src="firebase-init.js?v=20261103a"></script>
+<script src="firebase-config.js?v=20261103b"></script>
+<script type="module" src="firebase-init.js?v=20261103c"></script>
 <script type="module">
 (function(){
 
@@ -2243,7 +2244,7 @@
     examProgressSectionEl.classList.add("hidden");
     sylProgressEl.classList.add("hidden");
     sylProgressEl.innerHTML = "";
-    var isBR = /^10BR/i.test(state.currentUser && state.currentUser.class || "");
+    var isBR = /^10BR/i.test(window.PQ_LEGACY_CLASS(state.currentUser && state.currentUser.class || ""));
     quizProgressTitleEl.classList.toggle("hidden", !isBR);
     showScreen("progress");
     var pQuiz = fetchProgressRecords(), pPaper = fetchExamProgressRecords();
@@ -2297,9 +2298,9 @@
   });
 
   // ---------- 10BR home menu: iLearn / iSolve ----------
-  function isBR(user){ return /^(10BR|11BR|12BR)/i.test(String((user && user.class) || "")); }
-  function is11(user){ return /^11BR/i.test(String((user && user.class) || "")); }
-  function is12(user){ return /^12BR/i.test(String((user && user.class) || "")); }
+  function isBR(user){ return /^(10BR|11BR|12BR)/i.test(window.PQ_LEGACY_CLASS(String((user && user.class) || ""))); }
+  function is11(user){ return /^11BR/i.test(window.PQ_LEGACY_CLASS(String((user && user.class) || ""))); }
+  function is12(user){ return /^12BR/i.test(window.PQ_LEGACY_CLASS(String((user && user.class) || ""))); }
   function showHub(){
     var user = state.currentUser;
     setHeader("iLearnCS", "Choose how you want to work today.");

@@ -84,3 +84,9 @@ by hand after publishing:
 - Rules Playground: as a signed-in admin, `update` on `/users/{uid}` with `blocked: true` must be allowed.
 - As a student whose `users/{uid}.blocked == true`, any write (e.g. `create` on `/attempts/...`) must be denied; reads of own profile stay allowed.
 - As a normal student, `update` on own `/users/{uid}` must stay denied (cannot unblock self).
+
+## Classes, join requests, roles, parent links
+- Student: `get` /groups/{CODE} allowed; `list` /groups denied; any write to /groups denied.
+- Student: `create` /joinRequests/{uid}_{CODE} with status 'pending' and own name allowed only if the group exists and is open; `update` to status 'approved' denied.
+- Student: write to /parentLinks or /admins denied. Admin: `create` /admins/{otherUid} allowed; `delete` /admins/{ownUid} denied.
+- Parent: `get` /parentLinks/{parentUid}_{childUid} allowed for own uid only.

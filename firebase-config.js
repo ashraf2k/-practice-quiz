@@ -19,3 +19,20 @@ window.FIREBASE_CONFIG = {
 
 // NOTE: no admin e-mail is kept here. Admin access is granted server-side by
 // an admins/{uid} document (see SECURITY.md) -- never by a value in the page.
+
+// Group codes (classes) are named by level: 10BR... = IGCSE, AS... = AS Level,
+// A2... = A Level. Older pages decide what a student may open from the old
+// class names (10BR*, 11BR, 12BR); this maps the new codes onto them.
+window.PQ_LEGACY_CLASS = function(c){
+  c = String(c || "").replace(/\s+/g, "");
+  if(/^AS/i.test(c)) return "11BR";
+  if(/^A2/i.test(c)) return "12BR";
+  return c;
+};
+window.PQ_LEVEL_OF = function(c){
+  var m = /^(10)BR/i.exec(String(c || "").replace(/\s+/g, ""));
+  if(m) return "10";
+  var l = window.PQ_LEGACY_CLASS(c);
+  var n = /^(11|12)BR/i.exec(l);
+  return n ? n[1] : "";
+};

@@ -2380,6 +2380,7 @@
   ];
 
   function examPaperChoicesForClass(cls){
+    if(window.PQ_LEGACY_CLASS) cls = window.PQ_LEGACY_CLASS(cls);
     for(var i = 0; i < EXAM_PAPER_CHOICES_BY_CLASS.length; i++){
       if(EXAM_PAPER_CHOICES_BY_CLASS[i].test.test(cls)) return EXAM_PAPER_CHOICES_BY_CLASS[i].choices;
     }

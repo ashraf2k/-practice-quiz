@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-qlH2vaatIKXUfsBZb6NuPueJRwMgd+z5WPpFDwxq+lM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-/XV6wH3r3UsdfVVIZwSOFMr+4gHWjqak1e0rnwAoYx8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -395,7 +395,13 @@
   .mg-kpi b{ display:block; font-size:22px; color:var(--ink); }
   .mg-kpi span{ font-size:12px; color:var(--muted); }
   .mg-add, #mg-dialog{ border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:14px; padding:16px 18px; margin-bottom:14px; }
-  #mg-dialog{ max-width:420px; width:92vw; }
+  #mg-dialog, #mg-link-dialog{ max-width:420px; width:92vw; }
+  #mg-link-dialog{ border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:14px; padding:16px 18px; }
+  #mg-link-dialog::backdrop{ background:rgba(0,0,0,.45); }
+  .gr-card{ border:1px solid var(--line); background:var(--surface); border-radius:14px; padding:14px 16px; margin-bottom:16px; }
+  .gr-card h3{ margin:0 0 6px; font-size:16px; } .gr-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .gr-badge{ background:#dc2626; color:#fff; border-radius:999px; padding:1px 9px; font-size:12px; margin-left:6px; } .gr-badge:empty{ display:none; }
+  .mg-role{ padding:5px 7px; border-radius:7px; border:1px solid var(--line); background:var(--input-bg); color:var(--ink); font-size:12px; }
   #mg-dialog::backdrop{ background:rgba(0,0,0,.45); }
   .mg-add h3, #mg-dialog h3{ margin:0 0 10px; font-size:16px; }
   .mg-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
@@ -482,6 +488,7 @@
       </div>
       <div class="tab-group"><span class="tab-glabel">Students</span>
         <button class="admin-tab active" data-tab="manage">Manage students</button>
+        <button class="admin-tab" data-tab="groups">Classes &amp; requests</button>
         <button class="admin-tab" data-tab="byStudent">By student</button>
         <button class="admin-tab" data-tab="archive">Archive</button>
       </div>
@@ -532,10 +539,19 @@
         <p class="admin-status" id="mg-status-line" aria-live="polite"></p>
         <div class="table-scroll">
           <table class="admin-table" id="mg-table">
-            <thead><tr><th style="width:28px"><input type="checkbox" id="mg-all" aria-label="Select all"></th><th>Student</th><th>Class</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+            <thead><tr><th style="width:28px"><input type="checkbox" id="mg-all" aria-label="Select all"></th><th>Student</th><th>Class</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
+        <dialog id="mg-link-dialog">
+          <form method="dialog">
+            <h3 id="mg-link-title">Link children</h3>
+            <input type="text" id="mg-link-search" placeholder="Search students" style="width:100%;margin-bottom:8px;padding:9px 11px;border-radius:7px;border:1px solid var(--line);background:var(--input-bg);color:var(--ink)">
+            <div id="mg-link-list" style="max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 10px"></div>
+            <div class="mg-actions"><button class="btn btn-primary" id="mg-link-save" type="button">Save links</button><button class="btn btn-secondary" value="cancel">Cancel</button></div>
+            <p class="admin-status" id="mg-link-status"></p>
+          </form>
+        </dialog>
         <dialog id="mg-dialog">
           <form method="dialog" id="mg-form">
             <h3>Edit student</h3>
@@ -546,6 +562,37 @@
             <p class="admin-status" id="mg-e-status"></p>
           </form>
         </dialog>
+      </div>
+
+      <div class="admin-panel" id="panel-groups">
+        <div class="mg-kpis" id="gr-kpis"></div>
+        <div class="gr-card" id="gr-req-card">
+          <h3>Join requests <span class="gr-badge" id="gr-req-n"></span></h3>
+          <p class="admin-status">Students ask to join a class with its code. Approve to move them (and all their results) into that class.</p>
+          <div class="table-scroll"><table class="admin-table" id="gr-req-table"><thead><tr><th>Student</th><th>Class</th><th>Asked</th><th></th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="gr-card">
+          <div class="gr-head"><h3>Classes</h3><button class="btn btn-primary" id="gr-new-toggle" type="button">+ New class</button></div>
+          <div class="mg-add" id="gr-new" hidden>
+            <div class="mg-grid">
+              <label>Level<select id="gr-n-level"><option value="10">IGCSE (10BR…)</option><option value="11">AS Level (AS…)</option><option value="12">A Level (A2…)</option></select></label>
+              <label>Class code<input type="text" id="gr-n-code" maxlength="20" autocomplete="off" placeholder="e.g. 10BR4MJ2027"></label>
+              <label>Display name<input type="text" id="gr-n-name" maxlength="60" autocomplete="off"></label>
+              <label>Teacher<input type="text" id="gr-n-teacher" maxlength="60" autocomplete="off"></label>
+            </div>
+            <p class="admin-status">The code starts with 10BR (IGCSE), AS (AS Level) or A2 (A Level). Students use the code to join.</p>
+            <div class="mg-actions"><button class="btn btn-primary" id="gr-n-save" type="button">Create class</button><button class="btn btn-secondary" id="gr-n-cancel" type="button">Close</button></div>
+          </div>
+          <p class="admin-status" id="gr-status" aria-live="polite"></p>
+          <div class="table-scroll"><table class="admin-table" id="gr-table"><thead><tr><th>Code</th><th>Name</th><th>Level</th><th>Teacher</th><th>Students</th><th>Joining</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="gr-card">
+          <h3>Move the old classes into the new codes</h3>
+          <p class="admin-status">Creates the classes below under the teacher shown, then moves every student in the old class (profile, results and progress) to the new code. Safe to press again: students already moved are skipped.</p>
+          <div class="table-scroll"><table class="admin-table" id="gr-mig-table"><thead><tr><th>Old class</th><th>New code</th><th>Students still to move</th></tr></thead><tbody></tbody></table></div>
+          <div class="mg-actions"><label style="display:flex;gap:6px;align-items:center;font-size:.85rem">Teacher <input type="text" id="gr-mig-teacher" value="Mr. Ashraf" style="padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--input-bg);color:var(--ink)"></label><button class="btn btn-primary" id="gr-mig-go" type="button">Move students now</button></div>
+          <p class="admin-status" id="gr-mig-status" aria-live="polite"></p>
+        </div>
       </div>
 
       <div class="admin-panel" id="panel-students">
@@ -931,8 +978,8 @@
 <script src="syllabus-data.js?v=20261019j"></script>
 <script src="syllabus-report.js?v=20261019j"></script>
 <script src="parent-report.js?v=20261021a"></script>
-<script src="firebase-config.js?v=20261019j"></script>
-<script type="module" src="firebase-init.js?v=20261103a"></script>
+<script src="firebase-config.js?v=20261103b"></script>
+<script type="module" src="firebase-init.js?v=20261103c"></script>
 <script type="module">
 (function(){
 
@@ -1106,7 +1153,7 @@
         PQFirebase.logOut();
         return;
       }
-      currentAdminEmail = user.email || null;
+      currentAdminEmail = user.email || null; currentAdminUid = user.uid; currentAdminName = user.name || "";
       showDashboard();
     });
   });
@@ -1114,7 +1161,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["manage","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","tuition","ppPerf","archive"];
+  var PANELS = ["manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
@@ -1126,6 +1173,7 @@
       var el = document.getElementById("panel-" + id); if(el) el.classList.toggle("active", id === name);
     });
     if(name === "manage" && window.__renderManage) window.__renderManage();
+    if(name === "groups" && window.__renderGroups) window.__renderGroups();
     if(name === "ppPerf"){ var ppl = document.getElementById("pp-level"); if(ppl && window.__curLevel) ppl.value = window.__curLevel(); if(window.__renderPP) window.__renderPP(); }
   }
 
@@ -1146,7 +1194,7 @@
   var loaded = false;
   // Set once per sign-in (below), so a saved regrade can be stamped with
   // who made it.
-  var currentAdminEmail = null;
+  var currentAdminEmail = null, currentAdminUid = "", currentAdminName = "";
   var adminStatus = document.getElementById("admin-status");
 
   // Firestore attempt docs are keyed by uid/examKey and use `examKey` /
@@ -1254,6 +1302,7 @@
       var examAttemptsLoaded = results[1] !== null;
       examAttempts = examAttemptsLoaded ? results[1].map(normalizeExamAttempt) : [];
       loaded = true;
+      loadGroupsData().then(function(){ renderGroups(); fillMgClasses(); renderManage(); });
       adminStatus.textContent = "Loaded " + attempts.length + " submitted attempt" + (attempts.length === 1 ? "" : "s") +
         (examAttemptsLoaded
           ? " and " + examAttempts.length + " exam-practice result" + (examAttempts.length === 1 ? "" : "s")
@@ -1338,7 +1387,7 @@
   var ilearnRows = [];
   // Every 10BR student: class typed in any form ("10br1", "10 BR 1", " 10BR2"), from the registered-student list AND from quiz/exam records.
   // The tick box also adds students whose class is blank or something else (not 12BR), e.g. someone who picked the wrong class.
-  function is10BR(c){ return /^\s*10\s*BR/i.test(c || ""); }
+  function is10BR(c){ return /^\s*10\s*BR/i.test(window.PQ_LEGACY_CLASS(c || "")); }
   function normClass(c){ c = String(c || "").replace(/\s+/g, "").toUpperCase(); return c || "(no class)"; }
   function ilearnRoster(){
     if(!loaded) return [];
@@ -1348,11 +1397,11 @@
     var seen = {}, out = [];
     function add(s){ if(!s || !s.uid || seen[s.uid]) return; seen[s.uid] = 1; out.push(s); }
     if(window.SyllabusData) SyllabusData.analyse(attempts, examAttempts, EXAMS, EXAM_PAPERS, new Date(), usersRoster).forEach(function(s){
-      if(is10BR(s.className) || (all && !/^\s*12\s*BR/i.test(s.className || ""))){ s.className = normClass(s.className); add(s); }
+      if(is10BR(s.className) || (all && !/^\s*12\s*BR/i.test(window.PQ_LEGACY_CLASS(s.className || "")))){ s.className = normClass(s.className); add(s); }
     });
     (usersRoster || []).forEach(function(u){
       var c = u && (u.className || u.class) || "";
-      if(u && u.uid && (is10BR(c) || (all && !/^\s*12\s*BR/i.test(c)))) add({ uid: u.uid, name: u.name || "(no name)", email: u.email || "", className: normClass(c), quizzes: [], papers: [], overallPct: 0 });
+      if(u && u.uid && (is10BR(c) || (all && !/^\s*12\s*BR/i.test(window.PQ_LEGACY_CLASS(c))))) add({ uid: u.uid, name: u.name || "(no name)", email: u.email || "", className: normClass(c), quizzes: [], papers: [], overallPct: 0 });
     });
     return out.filter(function(s){ return (!cls || s.className === cls) && (!q || ((s.name || "") + " " + (s.email || "")).toLowerCase().indexOf(q) !== -1); })
       .sort(function(a, b){ return (a.className + a.name).localeCompare(b.className + b.name); });
@@ -1785,7 +1834,7 @@
   function roster12(){
     // Built straight from the registered-student list. (SyllabusData.analyse only covers 10BR quiz/exam students, so it never returned 12BR.)
     if(!loaded) return [];
-    return (usersRoster || []).filter(function(u){ return u && u.uid && /^\s*12\s*BR/i.test(u.className || u.class || ""); }).map(function(u){
+    return (usersRoster || []).filter(function(u){ return u && u.uid && /^\s*12\s*BR/i.test(window.PQ_LEGACY_CLASS(u.className || u.class || "")); }).map(function(u){
       return { uid: u.uid, name: u.name || "(no name)", email: u.email || "", className: String(u.className || u.class || "").replace(/\s+/g, "") };
     }).sort(function(a, b){ return (a.className + a.name).localeCompare(b.className + b.name); });
   }
@@ -1936,7 +1985,7 @@
   function rosterAS(){
     // Built straight from the registered-student list. (SyllabusData.analyse only covers 10BR quiz/exam students, so it never returned 11BR.)
     if(!loaded) return [];
-    return (usersRoster || []).filter(function(u){ return u && u.uid && /^\s*11\s*BR/i.test(u.className || u.class || ""); }).map(function(u){
+    return (usersRoster || []).filter(function(u){ return u && u.uid && /^\s*11\s*BR/i.test(window.PQ_LEGACY_CLASS(u.className || u.class || "")); }).map(function(u){
       return { uid: u.uid, name: u.name || "(no name)", email: u.email || "", className: String(u.className || u.class || "").replace(/\s+/g, "") };
     }).sort(function(a, b){ return (a.className + a.name).localeCompare(b.className + b.name); });
   }
@@ -2121,7 +2170,7 @@
   var LV_NAMES = ["10", "11", "12"];
   var TOPIC_NAMES = { 1:"Information representation", 2:"Communication", 3:"Hardware", 4:"Processor fundamentals", 5:"System software", 6:"Security, privacy and data integrity", 7:"Ethics and ownership", 8:"Databases", 9:"Algorithm design and problem-solving", 10:"Data types and structures", 11:"Programming", 12:"Software development",
     13:"Data representation", 14:"Communication and internet technologies", 15:"Hardware and virtual machines", 16:"System software", 17:"Security", 18:"Artificial intelligence", 19:"Computational thinking and problem solving", 20:"Further programming" };
-  function levelOf(cls){ var m = /^\s*(\d+)\s*BR/i.exec(cls || ""); return m ? m[1] : ""; }
+  function levelOf(cls){ var m = /^\s*(\d+)\s*BR/i.exec(window.PQ_LEGACY_CLASS(cls || "")); return m ? m[1] : ""; }
   function rosterFor(level){
     return (usersRoster || []).filter(function(u){ return u && u.uid && levelOf(u.className || u.class) === level; }).map(function(u){
       return { uid: u.uid, name: u.name || "(no name)", email: u.email || "", className: String(u.className || u.class || "").replace(/\s+/g, "") };
@@ -3012,7 +3061,7 @@
     if(tab === "ppPerf"){ if(GLV) document.getElementById("pp-level").value = GLV; if(window.__renderPP) window.__renderPP(); }
     if(tab === "byStudent") renderByStudent();
     if(tab === "attention") renderAttention();
-    fillMgClasses(); renderManage(); renderArchive && renderArchive();
+    fillMgClasses(); renderManage(); renderGroups(); renderArchive();
   }
   document.getElementById("level-bar").addEventListener("click", function(e){
     var b = e.target.closest(".lvl-btn"); if(b) setGlobalLevel(b.getAttribute("data-gl"));
@@ -3022,6 +3071,7 @@
     var set = {}, out = [];
     Array.prototype.forEach.call(document.querySelectorAll("#sel-class-profile option"), function(o){ if(o.value || (o.textContent && o.textContent.indexOf("…") < 0)) set[(o.value || o.textContent).trim()] = 1; });
     (usersRoster || []).forEach(function(u){ if(u.className) set[String(u.className).trim()] = 1; });
+    (groupsList || []).forEach(function(g){ set[g.code] = 1; });
     Object.keys(set).forEach(function(c){ if(c) out.push(c); });
     return out.sort();
   }
@@ -3060,7 +3110,7 @@
     });
     var list = mgFiltered(); tb.innerHTML = "";
     if(!list.length){
-      var tr0 = mk("tr"), td0 = mk("td", "wrap-cell", loaded ? "No students match these filters." : "Loading…"); td0.colSpan = 6; tr0.appendChild(td0); tb.appendChild(tr0);
+      var tr0 = mk("tr"), td0 = mk("td", "wrap-cell", loaded ? "No students match these filters." : "Loading…"); td0.colSpan = 7; tr0.appendChild(td0); tb.appendChild(tr0);
     }
     list.forEach(function(u){
       var tr = mk("tr", u.blocked ? "mg-blocked" : "");
@@ -3068,6 +3118,11 @@
       cb.addEventListener("change", function(){ if(cb.checked) mgSel[u.uid] = 1; else delete mgSel[u.uid]; mgBulkBar(); }); c0.appendChild(cb); tr.appendChild(c0);
       var c1 = mk("td"); c1.appendChild(mk("div", null, u.name || "(no name)")); var em = mk("div", null, u.email || ""); em.style.cssText = "font-size:.75rem;color:var(--muted)"; c1.appendChild(em); tr.appendChild(c1);
       var c2 = mk("td", null, String(u.className || "").replace(/\s+/g, "") || "-"); var lv = levelOf(u.className); if(lv) c2.appendChild(mk("span", "mg-lvl", lv + "BR")); tr.appendChild(c2);
+      var cR = mk("td"), rs = mk("select", "mg-role"); rs.setAttribute("aria-label", "Role of " + (u.name || "student")); rs.setAttribute("data-uid", u.uid);
+      ["student", "parent", "collaborator", "teacher", "admin"].forEach(function(r){ var o = mk("option", null, r.charAt(0).toUpperCase() + r.slice(1)); o.value = r; rs.appendChild(o); });
+      rs.value = adminFlags[u.uid] ? "admin" : (u.role || "student"); cR.appendChild(rs);
+      if(rs.value === "parent"){ var kids = parentKids(u.uid); var lb = mk("button", "btn btn-secondary", "Children (" + kids.length + ")"); lb.type = "button"; lb.setAttribute("data-act", "link"); lb.setAttribute("data-uid", u.uid); lb.style.cssText = "margin-top:4px;height:26px;font-size:11px;padding:0 8px"; cR.appendChild(lb); }
+      tr.appendChild(cR);
       var c3 = mk("td"); c3.appendChild(mk("span", "mg-chip " + (u.blocked ? "bad" : "ok"), u.blocked ? "Blocked" : "Active")); tr.appendChild(c3);
       tr.appendChild(mk("td", null, u.createdMs ? fmtDay(u.createdMs) : "-"));
       var c5 = mk("td"), act = mk("div", "mg-row-actions");
@@ -3107,6 +3162,7 @@
       var dlg = document.getElementById("mg-dialog"); if(dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
       return Promise.resolve();
     }
+    if(act === "link"){ openLinkDialog(uid); return Promise.resolve(); }
     if(act === "block"){
       if(!mgNeed("setStudentBlocked")) return Promise.resolve();
       var to = !u.blocked;
@@ -3212,6 +3268,162 @@
     var rows = [["Name", "Email", "Class", "Level", "Status"]].concat(mgFiltered().map(function(u){ return [u.name, u.email, String(u.className || "").replace(/\s+/g, ""), levelOf(u.className), u.blocked ? "Blocked" : "Active"]; }));
     var csv = rows.map(function(r){ return r.map(function(v){ v = String(v == null ? "" : v); if(/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }).join(","); }).join("\r\n");
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" })); a.download = "students.csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+
+
+  // ============================================================
+  // Groups (classes with codes), join requests, roles, parent links, migration
+  // ============================================================
+  var groupsList = [], joinReqs = [], parentLinks = [], adminFlags = {};
+  var MIGRATION = [["10BR1", "10BR1MJ2027", "10"], ["10BR2", "10BR2MJ2027", "10"], ["10BR3", "10BR3MJ2027", "10"], ["11BR", "AS9618MJ2027", "11"], ["12BR", "A29618MJ2027", "12"]];
+  var LV_LABEL = { "10": "IGCSE", "11": "AS Level", "12": "A Level" };
+  function parentKids(puid){ return parentLinks.filter(function(l){ return l.parentUid === puid; }); }
+  function loadGroupsData(){
+    if(typeof PQFirebase.listGroups !== "function") return Promise.resolve();
+    return Promise.all([
+      PQFirebase.listGroups().catch(function(){ return []; }),
+      PQFirebase.listJoinRequests().catch(function(){ return []; }),
+      PQFirebase.listParentLinks().catch(function(){ return []; }),
+      PQFirebase.checkAdminUids((usersRoster || []).map(function(u){ return u.uid; })).catch(function(){ return {}; })
+    ]).then(function(r){ groupsList = r[0]; joinReqs = r[1]; parentLinks = r[2]; adminFlags = r[3] || {}; });
+  }
+  function grStatus(msg, warn){ var el = document.getElementById("gr-status"); el.textContent = msg || ""; el.classList.toggle("warn", !!warn); }
+  function countIn(code){ var c = String(code).replace(/\s+/g, ""); return (usersRoster || []).filter(function(u){ return String(u.className || "").replace(/\s+/g, "") === c; }).length; }
+  function renderGroups(){
+    var gt = document.querySelector("#gr-table tbody"); if(!gt) return;
+    var pend = joinReqs.filter(function(r){ return r.status === "pending"; });
+    var kp = document.getElementById("gr-kpis"); kp.innerHTML = "";
+    [[groupsList.length, "Classes"], [(usersRoster || []).length, "Students"], [pend.length, "Join requests"]].forEach(function(k){ var d = mk("div", "mg-kpi"); d.appendChild(mk("b", null, String(k[0]))); d.appendChild(mk("span", null, k[1])); kp.appendChild(d); });
+    document.getElementById("gr-req-n").textContent = pend.length ? String(pend.length) : "";
+    var rt = document.querySelector("#gr-req-table tbody"); rt.innerHTML = "";
+    if(!pend.length){ var t0 = mk("tr"), d0 = mk("td", "wrap-cell", "No requests waiting."); d0.colSpan = 4; t0.appendChild(d0); rt.appendChild(t0); }
+    pend.forEach(function(r){
+      var u = mgUser(r.uid), tr = mk("tr");
+      var c0 = mk("td"); c0.appendChild(mk("div", null, r.name || (u && u.name) || "(student)")); if(u && u.email){ var em = mk("div", null, u.email); em.style.cssText = "font-size:.75rem;color:var(--muted)"; c0.appendChild(em); } tr.appendChild(c0);
+      var g = groupsList.filter(function(x){ return x.code === r.code; })[0];
+      tr.appendChild(mk("td", null, r.code + (g ? " · " + g.name : ""))); tr.appendChild(mk("td", null, r.createdMs ? fmtDateTime(r.createdMs) : "-"));
+      var ca = mk("td"), act = mk("div", "mg-row-actions");
+      [["ok", "Approve", "btn btn-primary"], ["no", "Decline", "btn btn-secondary"]].forEach(function(a){ var b = mk("button", a[2], a[1]); b.type = "button"; b.setAttribute("data-req", r.id); b.setAttribute("data-do", a[0]); act.appendChild(b); });
+      ca.appendChild(act); tr.appendChild(ca); rt.appendChild(tr);
+    });
+    gt.innerHTML = "";
+    var list = groupsList.filter(function(g){ return !GLV || g.level === GLV; });
+    if(!list.length){ var t1 = mk("tr"), d1 = mk("td", "wrap-cell", "No classes yet. Create one, or move the old classes below."); d1.colSpan = 7; t1.appendChild(d1); gt.appendChild(t1); }
+    list.forEach(function(g){
+      var tr = mk("tr"), n = countIn(g.code);
+      tr.appendChild(mk("td", null, g.code)); tr.appendChild(mk("td", null, g.name || "")); tr.appendChild(mk("td", null, LV_LABEL[g.level] || "")); tr.appendChild(mk("td", null, g.teacherName || ""));
+      tr.appendChild(mk("td", null, String(n)));
+      tr.appendChild(mk("td", null, g.open === false ? "Closed" : "Open"));
+      var ca = mk("td"), act = mk("div", "mg-row-actions");
+      [["members", "Students", "btn btn-secondary"], ["copy", "Copy code", "btn btn-secondary"], ["toggle", g.open === false ? "Open joining" : "Close joining", "btn btn-secondary"], ["del", "Delete", "btn btn-danger"]].forEach(function(a){ var b = mk("button", a[2], a[1]); b.type = "button"; b.setAttribute("data-g", g.code); b.setAttribute("data-do", a[0]); act.appendChild(b); });
+      ca.appendChild(act); tr.appendChild(ca); gt.appendChild(tr);
+    });
+    // migration table
+    var mt = document.querySelector("#gr-mig-table tbody"); mt.innerHTML = "";
+    MIGRATION.forEach(function(m){
+      var tr = mk("tr"), left = (usersRoster || []).filter(function(u){ return String(u.className || "").replace(/\s+/g, "").toUpperCase() === m[0]; }).length;
+      tr.appendChild(mk("td", null, m[0])); tr.appendChild(mk("td", null, m[1])); tr.appendChild(mk("td", null, String(left))); mt.appendChild(tr);
+    });
+  }
+  window.__renderGroups = function(){ loadGroupsData().then(function(){ renderGroups(); renderManage(); }); renderGroups(); };
+
+  document.querySelector("#gr-req-table tbody").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-req]"); if(!b) return;
+    var r = joinReqs.filter(function(x){ return x.id === b.getAttribute("data-req"); })[0]; if(!r) return;
+    var ok = b.getAttribute("data-do") === "ok"; b.disabled = true;
+    PQFirebase.decideJoin(r, ok, currentAdminEmail).then(function(){
+      r.status = ok ? "approved" : "declined";
+      if(ok){ var u = mgUser(r.uid); if(u) u.className = r.code; }
+      grStatus((ok ? "Approved " : "Declined ") + (r.name || "student") + "."); renderGroups(); renderManage(); renderAll();
+    }).catch(function(err){ b.disabled = false; grStatus(mgErr(err, "update the request"), true); });
+  });
+  document.querySelector("#gr-table tbody").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-g]"); if(!b) return;
+    var code = b.getAttribute("data-g"), g = groupsList.filter(function(x){ return x.code === code; })[0], what = b.getAttribute("data-do"); if(!g) return;
+    if(what === "members"){ document.getElementById("mg-class").value = code; setGlobalLevel(""); showTab("manage"); document.getElementById("mg-class").value = code; renderManage(); return; }
+    if(what === "copy"){ try { navigator.clipboard.writeText(code); grStatus("Code " + code + " copied."); } catch(x){ grStatus("Code: " + code); } return; }
+    if(what === "toggle"){ var to = g.open === false; PQFirebase.saveGroup(Object.assign({}, g, { open: to })).then(function(r){ g.open = r.open; grStatus((to ? "Joining opened for " : "Joining closed for ") + code + "."); renderGroups(); }).catch(function(err){ grStatus(mgErr(err, "update the class"), true); }); return; }
+    if(what === "del"){
+      if(countIn(code)){ grStatus("Move the " + countIn(code) + " student(s) out of " + code + " before deleting it.", true); return; }
+      if(!window.confirm("Delete the class " + code + "?")) return;
+      PQFirebase.deleteGroup(code).then(function(){ groupsList = groupsList.filter(function(x){ return x.code !== code; }); grStatus("Deleted " + code + "."); renderGroups(); fillMgClasses(); }).catch(function(err){ grStatus(mgErr(err, "delete the class"), true); });
+    }
+  });
+  document.getElementById("gr-new-toggle").addEventListener("click", function(){
+    var box = document.getElementById("gr-new"); box.hidden = !box.hidden;
+    if(!box.hidden){ document.getElementById("gr-n-teacher").value = currentAdminName || "Mr. Ashraf"; var lv = document.getElementById("gr-n-level"); if(GLV) lv.value = GLV; document.getElementById("gr-n-code").value = ({ "10": "10BR", "11": "AS", "12": "A2" })[lv.value]; }
+  });
+  document.getElementById("gr-n-level").addEventListener("change", function(){ var c = document.getElementById("gr-n-code"); if(!/\d{2,}/.test(c.value) || c.value.length <= 4) c.value = ({ "10": "10BR", "11": "AS", "12": "A2" })[this.value]; });
+  document.getElementById("gr-n-cancel").addEventListener("click", function(){ document.getElementById("gr-new").hidden = true; });
+  document.getElementById("gr-n-save").addEventListener("click", function(){
+    if(typeof PQFirebase.saveGroup !== "function"){ window.alert("Hard refresh and try again."); return; }
+    var rec = { code: document.getElementById("gr-n-code").value, level: document.getElementById("gr-n-level").value, name: document.getElementById("gr-n-name").value, teacherName: document.getElementById("gr-n-teacher").value, teacherUid: currentAdminUid };
+    PQFirebase.saveGroup(rec).then(function(g){ groupsList.push(g); grStatus("Created class " + g.code + ". Give students this code so they can join."); document.getElementById("gr-new").hidden = true; renderGroups(); fillMgClasses(); })
+      .catch(function(err){ grStatus((err && err.message) || mgErr(err, "create the class"), true); });
+  });
+
+  // migration
+  document.getElementById("gr-mig-go").addEventListener("click", function(){
+    var st = document.getElementById("gr-mig-status"), btn = this, teacher = document.getElementById("gr-mig-teacher").value.trim() || "Mr. Ashraf";
+    if(typeof PQFirebase.saveGroup !== "function"){ window.alert("Hard refresh and try again."); return; }
+    var todo = []; MIGRATION.forEach(function(m){ (usersRoster || []).forEach(function(u){ if(String(u.className || "").replace(/\s+/g, "").toUpperCase() === m[0]) todo.push({ u: u, code: m[1] }); }); });
+    if(!window.confirm("Create the 5 classes under " + teacher + " and move " + todo.length + " student(s) to their new class code?\n\nTheir results and progress move with them.")) return;
+    btn.disabled = true; var moved = 0, failed = 0, last = "";
+    MIGRATION.reduce(function(chain, m){
+      return chain.then(function(){
+        var have = groupsList.filter(function(g){ return g.code === m[1]; })[0];
+        if(have) return;
+        return PQFirebase.saveGroup({ code: m[1], level: m[2], name: m[1], teacherName: teacher, teacherUid: currentAdminUid }).then(function(g){ groupsList.push(g); });
+      });
+    }, Promise.resolve()).then(function(){
+      return todo.reduce(function(chain, t){
+        return chain.then(function(){
+          st.textContent = "Moving " + (moved + failed + 1) + " of " + todo.length + "…";
+          return PQFirebase.changeStudentClass(t.u.uid, t.code).then(function(){ t.u.className = t.code; moved++; }, function(err){ failed++; last = mgErr(err, "move " + (t.u.name || "a student")); });
+        });
+      }, Promise.resolve());
+    }).then(function(){
+      btn.disabled = false; st.classList.toggle("warn", !!failed);
+      st.textContent = "Classes ready. Moved " + moved + " student(s)" + (failed ? "; " + failed + " failed (" + last + ") - press again to retry" : ".");
+      renderGroups(); renderManage(); fillMgClasses(); renderAll();
+    }).catch(function(err){ btn.disabled = false; st.classList.add("warn"); st.textContent = mgErr(err, "create the classes"); });
+  });
+
+  // roles
+  document.querySelector("#mg-table tbody").addEventListener("change", function(e){
+    var sel = e.target.closest("select.mg-role"); if(!sel) return;
+    var uid = sel.getAttribute("data-uid"), u = mgUser(uid), role = sel.value;
+    if(!mgNeed("setUserRole")){ renderManage(); return; }
+    if(role === "admin" && !window.confirm("Make " + (u && u.name || "this person") + " an ADMIN? They get full control of the dashboard.")){ renderManage(); return; }
+    PQFirebase.setUserRole(uid, role, currentAdminUid).then(function(){
+      if(u) u.role = role === "admin" ? "admin" : role; adminFlags[uid] = role === "admin";
+      mgStatus((u && u.name || "Person") + " is now " + role + "."); renderManage();
+    }).catch(function(err){ mgStatus((err && err.message && !err.code) ? err.message : mgErr(err, "change the role"), true); renderManage(); });
+  });
+
+  // parent links dialog
+  function openLinkDialog(puid){
+    var p = mgUser(puid), dlg = document.getElementById("mg-link-dialog"), have = {}; parentKids(puid).forEach(function(l){ have[l.childUid] = 1; });
+    dlg.setAttribute("data-uid", puid); document.getElementById("mg-link-title").textContent = "Children of " + (p && p.name || "parent"); document.getElementById("mg-link-search").value = ""; document.getElementById("mg-link-status").textContent = "";
+    dlg._have = have; drawLinkList(); if(dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  }
+  function drawLinkList(){
+    var dlg = document.getElementById("mg-link-dialog"), q = document.getElementById("mg-link-search").value.trim().toLowerCase(), box = document.getElementById("mg-link-list"), puid = dlg.getAttribute("data-uid"); box.innerHTML = "";
+    (usersRoster || []).filter(function(u){ return u.uid !== puid && (!u.role || u.role === "student") && (!q || (String(u.name) + " " + String(u.email) + " " + String(u.className)).toLowerCase().indexOf(q) >= 0); }).slice(0, 200).forEach(function(u){
+      var lb = mk("label"); lb.style.cssText = "display:flex;gap:8px;align-items:center;padding:4px 0;font-size:13px;font-weight:400;color:var(--ink);margin:0";
+      var cb = mk("input"); cb.type = "checkbox"; cb.checked = !!dlg._have[u.uid]; cb.addEventListener("change", function(){ if(cb.checked) dlg._have[u.uid] = 1; else delete dlg._have[u.uid]; });
+      lb.appendChild(cb); lb.appendChild(mk("span", null, (u.name || "(no name)") + " · " + String(u.className || "").replace(/\s+/g, ""))); box.appendChild(lb);
+    });
+  }
+  document.getElementById("mg-link-search").addEventListener("input", drawLinkList);
+  document.getElementById("mg-link-save").addEventListener("click", function(){
+    var dlg = document.getElementById("mg-link-dialog"), puid = dlg.getAttribute("data-uid"), st = document.getElementById("mg-link-status"), kids = Object.keys(dlg._have || {});
+    if(typeof PQFirebase.setParentLinks !== "function"){ st.textContent = "Hard refresh and try again."; return; }
+    st.textContent = "Saving…";
+    PQFirebase.setParentLinks(puid, kids).then(function(){
+      parentLinks = parentLinks.filter(function(l){ return l.parentUid !== puid; }).concat(kids.map(function(c){ return { parentUid: puid, childUid: c }; }));
+      dlg.close ? dlg.close() : dlg.removeAttribute("open"); mgStatus("Saved " + kids.length + " linked child" + (kids.length === 1 ? "" : "ren") + "."); renderManage();
+    }).catch(function(err){ st.textContent = mgErr(err, "save the links"); });
   });
 
   // ============================================================
