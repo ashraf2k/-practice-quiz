@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-KVZ1YDUHnK+C93AlS51yKaPL3F7ZnimVRiCYymXQMLo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-YCKcJn0zozP0ZutIEYlVLRcfOkDb71Y+KMwWYWWFDEU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -2444,7 +2444,7 @@
     mobile: { excellent:"Excellent", good:"Good", ok:"Acceptable", poor:"Poor", none:"Not used on a phone" },
     recommend: { definitely:"Definitely", probably:"Probably", unsure:"Not sure", probnot:"Probably not", defnot:"Definitely not" }
   };
-  function fbName(x){ return x.name ? x.name : "Anonymous"; }
+  function fbName(x){ return x.name || "(unknown)"; }
   function fbAvg(rows, k){ var n = 0, t = 0; rows.forEach(function(r){ if(typeof r[k] === "number"){ n++; t += r[k]; } }); return n ? t / n : 0; }
   function fbStarsHtml(v){ var h = ""; for(var i = 1; i <= 5; i++) h += '<span style="color:' + (i <= v ? "#E0A400" : "#cbd5e1") + '">★</span>'; return h; }
   function fbList(r, k){ return Array.isArray(r[k]) ? r[k] : []; }
@@ -2488,7 +2488,7 @@
     if(others.length) h += '<p class="admin-status"><b>Other useful features mentioned:</b> ' + others.map(esc12).join("; ") + '</p>';
     h += '<h4 style="margin:0 0 8px">What students wrote</h4><div class="table-scroll"><table class="admin-table"><thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Overall</th><th>Recommend</th><th>Best thing</th><th>Biggest weakness</th><th>Feature wanted</th><th>Other</th></tr></thead><tbody>';
     rows.forEach(function(r){
-      h += '<tr style="cursor:default"><td>' + esc12(fmtDay(r.updatedMs || r.createdMs)) + '</td><td>' + esc12(fbName(r)) + '</td><td>' + esc12(r.cls || "") + '</td><td>' + fbStarsHtml(r.overall) + '</td><td>' + esc12(FBA.recommend[r.recommend] || "") + '</td><td>' + esc12(r.best || "") + '</td><td>' + esc12(r.weakness || "") + '</td><td>' + esc12(r.feature || "") + '</td><td>' + esc12(r.other || "") + '</td></tr>';
+      h += '<tr style="cursor:default"><td>' + esc12(fmtDay(r.updatedMs || r.createdMs)) + '</td><td>' + esc12(fbName(r)) + (r.email ? '<div style="font-size:.75rem;color:#64748b">' + esc12(r.email) + '</div>' : '') + '</td><td>' + esc12(r.cls || "") + '</td><td>' + fbStarsHtml(r.overall) + '</td><td>' + esc12(FBA.recommend[r.recommend] || "") + '</td><td>' + esc12(r.best || "") + '</td><td>' + esc12(r.weakness || "") + '</td><td>' + esc12(r.feature || "") + '</td><td>' + esc12(r.other || "") + '</td></tr>';
     });
     box.innerHTML = h + '</tbody></table></div>';
   }
@@ -2514,10 +2514,10 @@
   document.getElementById("fb-only-comments").addEventListener("change", renderFeedbackAdmin);
   document.getElementById("btn-fb-csv").addEventListener("click", function(){
     var rows = fbFiltered(), q = function(v){ var t = String(v == null ? "" : v); if(/^[=+\-@\t\r]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g, '""') + '"'; };
-    var head = ["Date","Student","Class","Progress %","Course/level","Level (other)","Device","Frequency"].concat(FBA.rate.map(function(a){ return a[1]; }),
+    var head = ["Date","Student","E-mail","Class","Progress %","Course/level","Level (other)","Device","Frequency"].concat(FBA.rate.map(function(a){ return a[1]; }),
       ["Useful features","Useful (other)","Problems","Finding resources","Mobile experience","Best thing","Biggest weakness","Feature wanted","Other comments","Would recommend"]);
     var lines = [head.map(q).join(",")].concat(rows.map(function(r){
-      return [new Date(r.updatedMs || r.createdMs).toISOString().slice(0, 10), fbName(r), r.cls, r.progress, FBA.level[r.level] || r.level, r.levelOther, FBA.device[r.device] || r.device, FBA.freq[r.freq] || r.freq]
+      return [new Date(r.updatedMs || r.createdMs).toISOString().slice(0, 10), fbName(r), r.email, r.cls, r.progress, FBA.level[r.level] || r.level, r.levelOther, FBA.device[r.device] || r.device, FBA.freq[r.freq] || r.freq]
         .concat(FBA.rate.map(function(a){ return r[a[0]]; }),
           [fbList(r, "useful").map(function(c){ return FBA.useful[c] || c; }).join("; "), r.usefulOther, fbList(r, "problems").map(function(c){ return FBA.problems[c] || c; }).join("; "),
            FBA.findEase[r.findEase] || r.findEase, FBA.mobile[r.mobile] || r.mobile, r.best, r.weakness, r.feature, r.other, FBA.recommend[r.recommend] || r.recommend]).map(q).join(",");

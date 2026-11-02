@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-NUr0vpmVKJUqPJdSV8TZgz0tymAtxYTgrqpwkjLFFiI='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-3GcGLBDiQLym7NjGhfInvNI3pwKStSBhWGmHbDG6qQc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -646,7 +646,7 @@
     ["feature", "What new feature or improvement would you most like us to add?"], ["other", "Any other comments or suggestions?"]];
   var FB_RATE_WORDS = ["Very poor", "Poor", "Acceptable", "Good", "Excellent"];
   function fbDraftKey(){ return "ilearn_fb2_" + (preview ? "pv_" : "") + (user && user.uid); }
-  function fbBlank(){ return { name:"", level:"", levelOther:"", device:"", freq:"", overall:0, ease:0, design:0, materials:0, practice:0, exam:0,
+  function fbBlank(){ return { level:"", levelOther:"", device:"", freq:"", overall:0, ease:0, design:0, materials:0, practice:0, exam:0,
     useful:[], usefulOther:"", problems:[], findEase:"", mobile:"", best:"", weakness:"", feature:"", other:"", recommend:"" }; }
   function fbLoad(){
     var base = fbBlank(), src = fbSaved;
@@ -681,7 +681,7 @@
     h += '<div class="fb-prog">' + FB_TITLE.map(function(t, i){ return '<i class="' + (i <= fbStep ? "on" : "") + '"></i>'; }).join("") + '</div>';
     h += '<div class="fb-meta"><span>Section ' + (fbStep + 1) + ' of ' + n + ' · ' + FB_TITLE[fbStep] + '</span><span>' + Math.round(fbStep / n * 100) + '% done</span></div>';
     if(fbStep === 0){
-      h += fbQ("Student name <span class='fb-opt'>(optional)</span>", "Leave it blank to stay anonymous. Your teacher will then see only your class.", '<input type="text" id="fb-name" maxlength="80" autocomplete="off" value="' + esc(fb.name) + '">');
+      h += '<p class="ln-muted">This form is linked to your account (' + esc(user.name || "") + (user.email ? ", " + esc(user.email) : "") + '), so you do not need to type your name. Your answers go only to your teacher and never affect your marks.</p>';
       h += fbQ("Course / level", "", fbRadios("level", FB_LEVEL, "Course or level") + (fb.level === "other" ? '<input type="text" id="fb-levelOther" maxlength="40" placeholder="Please specify" style="margin-top:8px" value="' + esc(fb.levelOther) + '">' : ""));
       h += fbQ("Which device do you usually use?", "", fbRadios("device", FB_DEVICE, "Device"));
       h += fbQ("How often do you use the website?", "", fbRadios("freq", FB_FREQ, "Frequency"));
@@ -706,7 +706,6 @@
       });
     }else{
       h += fbQ("Would you recommend this website to another student?", "", fbRadios("recommend", FB_REC, "Recommendation"));
-      h += '<p class="ln-muted" style="margin-top:12px">Your answers go only to your teacher and never affect your marks.</p>';
     }
     h += '<p class="fb-err" id="fb-err" role="alert">' + esc(err || "") + '</p>';
     h += '<div class="fb-nav"><span>' + (fbStep === 0 ? '<button class="link-btn" id="fb-leave" type="button">← Back to journey</button>' : '<button class="btn btn-secondary" id="fb-prev" type="button">Back</button>') + '</span>' +
@@ -721,7 +720,7 @@
       fb[k] = a; fbDraft(); if(k === "problems") renderFeedback();
     }); });
     q("[data-txt]", function(t){ t.addEventListener("input", function(){ var k = t.getAttribute("data-txt"); fb[k] = t.value.slice(0, 600); $("fbc-" + k).textContent = fb[k].length; fbDraft(); }); });
-    ["name", "levelOther", "usefulOther"].forEach(function(k){ var el = $("fb-" + k); if(el) el.addEventListener("input", function(){ fb[k] = el.value; fbDraft(); }); });
+    ["levelOther", "usefulOther"].forEach(function(k){ var el = $("fb-" + k); if(el) el.addEventListener("input", function(){ fb[k] = el.value; fbDraft(); }); });
     if($("fb-leave")) $("fb-leave").addEventListener("click", function(){ show("view-journey"); });
     if($("fb-prev")) $("fb-prev").addEventListener("click", function(){ fbStep--; renderFeedback(); window.scrollTo(0, 0); });
     if($("fb-next")) $("fb-next").addEventListener("click", function(){
@@ -738,7 +737,7 @@
     if(preview || fbBusy) return;
     if(!fb.recommend){ renderFeedback("Please tell us whether you would recommend the website."); return; }
     var ps = perfSummary(), rec = { cls: String(user.class || "").slice(0, 20), progress: Math.max(0, Math.min(100, pct(ps.done, ps.total))),
-      name: fbClean(fb.name, 80), level: fb.level, levelOther: fb.level === "other" ? fbClean(fb.levelOther, 40) : "", device: fb.device, freq: fb.freq,
+      name: fbClean(user.name, 80), email: String(user.email || "").slice(0, 120), level: fb.level, levelOther: fb.level === "other" ? fbClean(fb.levelOther, 40) : "", device: fb.device, freq: fb.freq,
       overall: fb.overall, ease: fb.ease, design: fb.design, materials: fb.materials, practice: fb.practice, exam: fb.exam,
       useful: fb.useful.slice(), usefulOther: fbClean(fb.usefulOther, 100), problems: fb.problems.slice(), findEase: fb.findEase, mobile: fb.mobile,
       best: fbClean(fb.best), weakness: fbClean(fb.weakness), feature: fbClean(fb.feature), other: fbClean(fb.other), recommend: fb.recommend };

@@ -119,11 +119,11 @@ service cloud.firestore {
     // Student feedback on the iLearn journey (one doc per student: <uid>_<journey>).
     function validFeedback(uid, id) {
       let d = request.resource.data;
-      return d.keys().hasOnly(['uid','journey','cls','progress','name','level','levelOther','device','freq',
+      return d.keys().hasOnly(['uid','journey','cls','progress','name','email','level','levelOther','device','freq',
                                'overall','ease','design','materials','practice','exam',
                                'useful','usefulOther','problems','findEase','mobile',
                                'best','weakness','feature','other','recommend','createdAt','updatedAt'])
-        && d.keys().hasAll(['uid','journey','cls','progress','name','level','levelOther','device','freq',
+        && d.keys().hasAll(['uid','journey','cls','progress','name','email','level','levelOther','device','freq',
                             'overall','ease','design','materials','practice','exam',
                             'useful','usefulOther','problems','findEase','mobile',
                             'best','weakness','feature','other','recommend','createdAt','updatedAt'])
@@ -131,7 +131,11 @@ service cloud.firestore {
         && id == uid + '_' + d.journey
         && validClass(d.cls)
         && isCount(d.progress, 0, 100)
-        && safeText(d.name, 0, 80)
+        // Identity comes from the account, never from the form.
+        && safeText(d.name, 1, 80)
+        && d.name == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name
+        && d.email is string && request.auth.token.email != null
+        && d.email.lower() == request.auth.token.email.lower()
         && d.level in ['igcse','as','a','other'] && safeText(d.levelOther, 0, 40)
         && d.device in ['mobile','tablet','laptop','desktop']
         && d.freq in ['daily','few','weekly','less']
