@@ -3,6 +3,10 @@
   "use strict";
   var M = root.ILEARN_VIZ.MAP;
   function add(id, w, title, at, o, note){ (M[id] = M[id] || []).push({ w: w, title: title, at: at, o: o || {}, note: note || "" }); }
+  /* 17 quantum cryptography */
+  var QK = "Quantum key distribution: send photons and spot an eavesdropper";
+  add("17.1e", "qkd", QK, 1, null, "Run it once without Eve, then add her. Photons are measured by the receiver with a random beam splitter; Eve has to measure too, which changes the photons (the no-cloning idea), so errors appear and the key is thrown away. This is a simplified version of the BB84 method.");
+  add("17.p3a", "qkd", QK, 1, null, "Paper 33 Q8: the purpose is a virtually unbreakable key where eavesdropping can be detected, because measuring a photon changes its state.");
   /* 13 user-defined types */
   add("13.1a", "udt", "Enumerated, pointer, record and set types", 1, { tab: "enum" });
   add("13.1b", "udt", "Enumerated types: ordered names, not strings", 1, { tab: "enum" });
