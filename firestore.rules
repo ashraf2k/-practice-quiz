@@ -116,27 +116,41 @@ service cloud.firestore {
         && d.recordedAt == request.time;
     }
 
-    // Resume checkpoints / iLearn state: owner-only, free-shaped but bounded.
     // Student feedback on the iLearn journey (one doc per student: <uid>_<journey>).
     function validFeedback(uid, id) {
       let d = request.resource.data;
-      return d.keys().hasOnly(['uid','journey','cls','progress','overall','content','practice','tests','usability','motivation',
-                               'nps','pace','liked','improve','ideas','showName','createdAt','updatedAt'])
-        && d.keys().hasAll(['uid','journey','cls','progress','overall','content','practice','tests','usability','motivation',
-                            'nps','pace','liked','improve','ideas','showName','createdAt','updatedAt'])
+      return d.keys().hasOnly(['uid','journey','cls','progress','name','level','levelOther','device','freq',
+                               'overall','ease','design','materials','practice','exam',
+                               'useful','usefulOther','problems','findEase','mobile',
+                               'best','weakness','feature','other','recommend','createdAt','updatedAt'])
+        && d.keys().hasAll(['uid','journey','cls','progress','name','level','levelOther','device','freq',
+                            'overall','ease','design','materials','practice','exam',
+                            'useful','usefulOther','problems','findEase','mobile',
+                            'best','weakness','feature','other','recommend','createdAt','updatedAt'])
         && d.uid == uid && d.journey in ['ilearn10br']
         && id == uid + '_' + d.journey
         && validClass(d.cls)
         && isCount(d.progress, 0, 100)
-        && isCount(d.overall, 1, 5) && isCount(d.content, 1, 5) && isCount(d.practice, 1, 5)
-        && isCount(d.tests, 1, 5) && isCount(d.usability, 1, 5) && isCount(d.motivation, 1, 5)
-        && isCount(d.nps, 0, 10)
-        && d.pace in ['slow','right','fast']
-        && safeText(d.liked, 0, 600) && safeText(d.improve, 0, 600) && safeText(d.ideas, 0, 600)
-        && d.showName is bool
+        && safeText(d.name, 0, 80)
+        && d.level in ['igcse','as','a','other'] && safeText(d.levelOther, 0, 40)
+        && d.device in ['mobile','tablet','laptop','desktop']
+        && d.freq in ['daily','few','weekly','less']
+        && isCount(d.overall, 1, 5) && isCount(d.ease, 1, 5) && isCount(d.design, 1, 5)
+        && isCount(d.materials, 1, 5) && isCount(d.practice, 1, 5) && isCount(d.exam, 1, 5)
+        && d.useful is list && d.useful.size() <= 7
+        && d.useful.hasOnly(['explain','quiz','instant','organised','nav','progress','interactive'])
+        && safeText(d.usefulOther, 0, 100)
+        && d.problems is list && d.problems.size() <= 8
+        && d.problems.hasOnly(['find','tech','unclear','fewq','layout','mobile','missing','none'])
+        && d.findEase in ['veasy','easy','neutral','hard','vhard']
+        && d.mobile in ['excellent','good','ok','poor','none']
+        && safeText(d.best, 0, 600) && safeText(d.weakness, 0, 600)
+        && safeText(d.feature, 0, 600) && safeText(d.other, 0, 600)
+        && d.recommend in ['definitely','probably','unsure','probnot','defnot']
         && d.updatedAt == request.time;
     }
 
+    // Resume checkpoints / iLearn state: owner-only, free-shaped but bounded.
     function validProgress(uid, id, keyField) {
       let d = request.resource.data;
       return d.uid == uid

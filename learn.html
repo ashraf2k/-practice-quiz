@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-AkosJ7+/j4GZK8yMYIthQs3AqxXTLHJTJ2+EMTl2hzw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-NUr0vpmVKJUqPJdSV8TZgz0tymAtxYTgrqpwkjLFFiI='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -169,7 +169,24 @@
   .fb-chk{ display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--bg); font-size:14px; margin-top:6px; } .fb-chk input{ margin-top:3px; width:18px; height:18px; }
   .fb-err{ color:#B3261E; font-size:13.5px; margin:10px 0 0; min-height:18px; } .fb-nav{ display:flex; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap; }
   .fb-thanks{ text-align:center; padding:24px 8px; } .fb-thanks .big{ font-size:54px; }
-  @media(max-width:520px){ .fb-nps{ grid-template-columns:repeat(6,1fr); } .fb-stars button{ font-size:28px; } }
+  .fb-in{ width:100%; box-sizing:border-box; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font:inherit; background:var(--surface); color:var(--ink); } .fb-in:focus{ outline:2px solid var(--accent); border-color:var(--accent); }
+  .fb-req{ color:#B3261E; font-weight:700; } .fb-note{ font-size:13.5px; color:var(--muted); margin:0 0 10px; }
+  .fb-grid{ border:1px solid var(--line); border-radius:12px; overflow:hidden; } .fb-gh,.fb-gr{ display:grid; grid-template-columns:minmax(0,1fr) repeat(5,46px); align-items:center; gap:4px; padding:8px 10px; }
+  .fb-gh{ background:var(--bg); font-weight:800; text-align:center; font-size:13px; } .fb-gr{ border-top:1px solid var(--line); } .fb-gl{ font-weight:600; font-size:14px; }
+  .fb-gr button{ height:38px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); border-radius:50%; font:inherit; font-weight:700; cursor:pointer; width:38px; justify-self:center; } .fb-gr button.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  @media(max-width:520px){ .fb-gh,.fb-gr{ grid-template-columns:minmax(0,1fr) repeat(5,34px); gap:2px; padding:8px 6px; } .fb-gr button{ width:32px; height:32px; } .fb-nps{ grid-template-columns:repeat(6,1fr); } .fb-stars button{ font-size:28px; } }
+
+  .fb-opt{ font-weight:400; color:var(--muted); font-size:13px; }
+  .fb-wrap input[type=text]{ width:100%; box-sizing:border-box; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; font:inherit; background:var(--surface); color:var(--ink); }
+  .fb-wrap input[type=text]:focus{ outline:2px solid var(--accent); border-color:var(--accent); }
+  .fb-checks{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:8px; }
+  .fb-ck{ display:flex; gap:10px; align-items:center; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--surface); cursor:pointer; font-size:14.5px; } .fb-ck:has(input:checked){ border-color:var(--accent); background:var(--accent-tint); } .fb-ck input{ width:18px; height:18px; flex:0 0 auto; }
+  .fb-grid{ border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .fb-gr{ display:grid; grid-template-columns:1fr repeat(5,48px); align-items:center; gap:4px; padding:8px 10px; border-top:1px solid var(--line); } .fb-gr:first-child{ border-top:0; }
+  .fb-gh{ background:var(--bg); font-size:12.5px; font-weight:800; color:var(--muted); text-align:center; } .fb-gl{ font-weight:600; font-size:14.5px; }
+  .fb-dot{ width:38px; height:38px; margin:0 auto; border-radius:50%; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font:inherit; font-weight:700; cursor:pointer; }
+  .fb-dot:hover{ border-color:var(--accent); } .fb-dot.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  @media(max-width:520px){ .fb-gr{ grid-template-columns:repeat(5,1fr); } .fb-gl{ grid-column:1 / -1; } .fb-gh span:first-child{ display:none; } }
 </style>
 <link rel="stylesheet" href="theme.css?v=20261027a" />
 </head>
@@ -612,74 +629,106 @@
 
   // ---------------- Student feedback (shown from 50% of the journey) ----------------
   var FB_KEY = "ilearn10br", fbSaved = null, fb = null, fbStep = 0, fbBusy = false;
-  var FB_RATE = [
-    ["overall", "Overall, how would you rate iLearn?", "Your general impression of the whole journey."],
-    ["content", "Lessons and explanations", "Were they clear, in the right order and easy to follow?"],
-    ["practice", "Practice questions and games", "Did they help you remember and understand?"],
-    ["tests", "Topic tests, past papers and revision notes", "Did they prepare you for the real exam?"],
-    ["usability", "Ease of use", "Finding things, speed, and working on your phone or computer."],
-    ["motivation", "Keeping you motivated", "Progress, badges, celebrations and feeling in control."]
-  ];
-  var FB_WORDS = ["", "Poor", "Fair", "Good", "Very good", "Excellent"];
-  function fbDraftKey(){ return "ilearn_fb_" + (preview ? "pv_" : "") + (user && user.uid); }
-  function fbBlank(){ return { overall:0, content:0, practice:0, tests:0, usability:0, motivation:0, nps:-1, pace:"", liked:"", improve:"", ideas:"", showName:false }; }
+  var FB_TITLE = ["About you", "Rate your experience", "What works well?", "Problems and improvements", "Your comments", "Overall"];
+  var FB_LEVEL = [["igcse", "IGCSE"], ["as", "AS Level"], ["a", "A Level"], ["other", "Other"]];
+  var FB_DEVICE = [["mobile", "Mobile phone"], ["tablet", "Tablet"], ["laptop", "Laptop"], ["desktop", "Desktop computer"]];
+  var FB_FREQ = [["daily", "Every day"], ["few", "A few times a week"], ["weekly", "About once a week"], ["less", "Less than once a week"]];
+  var FB_RATE = [["overall", "Overall experience"], ["ease", "Ease of use and navigation"], ["design", "Website design and appearance"],
+    ["materials", "Quality and clarity of learning materials"], ["practice", "Practice questions and activities"], ["exam", "Helpfulness for exam preparation"]];
+  var FB_USEFUL = [["explain", "Clear explanations"], ["quiz", "Quizzes and practice questions"], ["instant", "Instant feedback on answers"], ["organised", "Well-organised learning materials"],
+    ["nav", "Easy navigation"], ["progress", "Progress tracking"], ["interactive", "Interactive activities"]];
+  var FB_PROB = [["find", "Difficult to find what I need"], ["tech", "Technical errors or pages not loading"], ["unclear", "Explanations are sometimes unclear"], ["fewq", "Not enough practice questions"],
+    ["layout", "Page layout or design issues"], ["mobile", "Difficult to use on mobile"], ["missing", "A feature I need is missing"], ["none", "No major problems"]];
+  var FB_FIND = [["veasy", "Very easy"], ["easy", "Easy"], ["neutral", "Neither easy nor difficult"], ["hard", "Difficult"], ["vhard", "Very difficult"]];
+  var FB_MOB = [["excellent", "Excellent"], ["good", "Good"], ["ok", "Acceptable"], ["poor", "Poor"], ["none", "I have not used it on a phone"]];
+  var FB_REC = [["definitely", "Definitely"], ["probably", "Probably"], ["unsure", "Not sure"], ["probnot", "Probably not"], ["defnot", "Definitely not"]];
+  var FB_TXT = [["best", "What is the best thing about the website?"], ["weakness", "What is the biggest weakness or most frustrating part?"],
+    ["feature", "What new feature or improvement would you most like us to add?"], ["other", "Any other comments or suggestions?"]];
+  var FB_RATE_WORDS = ["Very poor", "Poor", "Acceptable", "Good", "Excellent"];
+  function fbDraftKey(){ return "ilearn_fb2_" + (preview ? "pv_" : "") + (user && user.uid); }
+  function fbBlank(){ return { name:"", level:"", levelOther:"", device:"", freq:"", overall:0, ease:0, design:0, materials:0, practice:0, exam:0,
+    useful:[], usefulOther:"", problems:[], findEase:"", mobile:"", best:"", weakness:"", feature:"", other:"", recommend:"" }; }
   function fbLoad(){
-    var base = fbBlank();
-    if(fbSaved){ for(var k in base){ if(fbSaved[k] !== undefined) base[k] = fbSaved[k]; } return base; }
-    try{ var d = JSON.parse(localStorage.getItem(fbDraftKey()) || "null"); if(d) for(var k2 in base){ if(d[k2] !== undefined) base[k2] = d[k2]; } }catch(e){}
+    var base = fbBlank(), src = fbSaved;
+    if(!src){ try{ src = JSON.parse(localStorage.getItem(fbDraftKey()) || "null"); }catch(e){} }
+    if(src) for(var k in base){ if(src[k] !== undefined) base[k] = src[k]; }
     return base;
   }
   function fbDraft(){ try{ localStorage.setItem(fbDraftKey(), JSON.stringify(fb)); }catch(e){} }
-  function fbClean(t){ return String(t || "").replace(/<[^>]*>/g, " ").replace(/&/g, " and ").replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, 600); }
+  function fbClean(t, n){ return String(t || "").replace(/<[^>]*>/g, " ").replace(/&/g, " and ").replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, n || 600); }
   function renderFeedbackCard(){
     var box = $("fbcard"); if(!box) return;
     var ps = perfSummary(), p = pct(ps.done, ps.total);
     if(p < 50 && !preview){ box.innerHTML = ""; return; }
-    box.innerHTML = '<div class="ln-card2 fb-card"><div><b>💬 ' + (fbSaved ? 'Thank you for your feedback' : 'Help us improve iLearn') + '</b><p>' +
-      (fbSaved ? 'Your answers reached your teacher. You can update them any time.' : 'You are over halfway! Share your honest opinion in about 3 minutes. It is used to make the learning experience better for you and for the next students.') +
+    box.innerHTML = '<div class="ln-card2 fb-card"><div><b>💬 ' + (fbSaved ? 'Thank you for your feedback' : 'Help us improve iLearnCS') + '</b><p>' +
+      (fbSaved ? 'Your answers reached your teacher. You can update them any time.' : 'You are over halfway! Share your honest opinion in about 5 to 7 minutes. It is used to improve the learning experience for you and for the next students.') +
       (preview ? ' <i>(Admin preview: you can fill the form, but nothing is sent.)</i>' : '') + '</p></div><button class="btn btn-primary sm" id="btn-fb" type="button">' + (fbSaved ? 'Update my feedback' : 'Give feedback') + '</button></div>';
     $("btn-fb").addEventListener("click", openFeedback);
   }
   function openFeedback(){ fb = fbLoad(); fbStep = 0; renderFeedback(); show("view-feedback"); }
-  function fbStars(key){
-    var h = '<div class="fb-stars" role="radiogroup" aria-label="' + esc(key) + '">';
-    for(var i = 1; i <= 5; i++) h += '<button type="button" role="radio" aria-checked="' + (fb[key] === i) + '" aria-label="' + i + ' of 5, ' + FB_WORDS[i] + '" class="' + (fb[key] >= i ? "on" : "") + '" data-star="' + key + '" data-v="' + i + '">★</button>';
-    return h + '<span class="fb-w">' + (fb[key] ? FB_WORDS[fb[key]] : "") + '</span></div>';
+  function fbRadios(key, opts, label){
+    return '<div class="fb-opts" role="radiogroup" aria-label="' + esc(label) + '">' + opts.map(function(o){
+      return '<button type="button" role="radio" aria-checked="' + (fb[key] === o[0]) + '" class="' + (fb[key] === o[0] ? "on" : "") + '" data-radio="' + key + '" data-v="' + o[0] + '">' + esc(o[1]) + '</button>'; }).join("") + '</div>';
   }
+  function fbChecks(key, opts){
+    return '<div class="fb-checks">' + opts.map(function(o){
+      return '<label class="fb-ck"><input type="checkbox" data-check="' + key + '" value="' + o[0] + '"' + (fb[key].indexOf(o[0]) >= 0 ? " checked" : "") + '><span>' + esc(o[1]) + '</span></label>'; }).join("") + '</div>';
+  }
+  function fbQ(title, small, inner){ return '<div class="fb-q"><span class="fb-l">' + title + '</span>' + (small ? '<small>' + small + '</small>' : "") + inner + '</div>'; }
   function renderFeedback(err){
-    var body = $("fb-body"), n = 3, h = "";
-    h += '<div class="fb-head"><h2>Your honest feedback</h2><p>3 short steps, about 3 minutes. Be frank: it is the best way to help us improve.</p></div>';
-    h += '<div class="fb-prog">' + [0,1,2].map(function(i){ return '<i class="' + (i <= fbStep ? "on" : "") + '"></i>'; }).join("") + '</div>';
-    h += '<div class="fb-meta"><span>Step ' + (fbStep + 1) + ' of ' + n + ' · ' + ["Rate your experience", "Pace and recommendation", "In your own words"][fbStep] + '</span><span>' + ["~2 min", "~1 min", "optional"][fbStep] + '</span></div>';
+    var body = $("fb-body"), n = FB_TITLE.length, h = "";
+    h += '<div class="fb-head"><h2>iLearnCS – Student website feedback</h2><p>Your feedback helps us improve the learning experience. Please answer honestly; this should take about 5–7 minutes.</p></div>';
+    h += '<div class="fb-prog">' + FB_TITLE.map(function(t, i){ return '<i class="' + (i <= fbStep ? "on" : "") + '"></i>'; }).join("") + '</div>';
+    h += '<div class="fb-meta"><span>Section ' + (fbStep + 1) + ' of ' + n + ' · ' + FB_TITLE[fbStep] + '</span><span>' + Math.round(fbStep / n * 100) + '% done</span></div>';
     if(fbStep === 0){
-      FB_RATE.forEach(function(r){ h += '<div class="fb-q"><span class="fb-l">' + r[1] + '</span><small>' + r[2] + '</small>' + fbStars(r[0]) + '</div>'; });
+      h += fbQ("Student name <span class='fb-opt'>(optional)</span>", "Leave it blank to stay anonymous. Your teacher will then see only your class.", '<input type="text" id="fb-name" maxlength="80" autocomplete="off" value="' + esc(fb.name) + '">');
+      h += fbQ("Course / level", "", fbRadios("level", FB_LEVEL, "Course or level") + (fb.level === "other" ? '<input type="text" id="fb-levelOther" maxlength="40" placeholder="Please specify" style="margin-top:8px" value="' + esc(fb.levelOther) + '">' : ""));
+      h += fbQ("Which device do you usually use?", "", fbRadios("device", FB_DEVICE, "Device"));
+      h += fbQ("How often do you use the website?", "", fbRadios("freq", FB_FREQ, "Frequency"));
     }else if(fbStep === 1){
-      h += '<div class="fb-q"><span class="fb-l">How likely are you to recommend iLearn to a friend?</span><small>0 = not at all likely, 10 = extremely likely.</small><div class="fb-nps" role="radiogroup" aria-label="Recommendation score">';
-      for(var i = 0; i <= 10; i++) h += '<button type="button" role="radio" aria-checked="' + (fb.nps === i) + '" class="' + (fb.nps === i ? "on" : "") + '" data-nps="' + i + '">' + i + '</button>';
-      h += '</div><div class="fb-ends"><span>Not likely</span><span>Extremely likely</span></div></div>';
-      h += '<div class="fb-q"><span class="fb-l">How is the pace of the lessons?</span><small>Think about how fast you move through a lesson and a topic.</small><div class="fb-opts" role="radiogroup" aria-label="Pace">' +
-        [["slow", "Too slow"], ["right", "About right"], ["fast", "Too fast"]].map(function(o){ return '<button type="button" role="radio" aria-checked="' + (fb.pace === o[0]) + '" class="' + (fb.pace === o[0] ? "on" : "") + '" data-pace="' + o[0] + '">' + o[1] + '</button>'; }).join("") + '</div></div>';
-    }else{
-      [["liked", "What did you like most?", "e.g. a lesson, a game, the revision notes, the exam PDFs"], ["improve", "What should we improve or fix?", "Anything confusing, boring, too hard or not working"], ["ideas", "Any idea or feature you would love to see?", "Be creative. We read every comment."]].forEach(function(t){
-        h += '<div class="fb-q"><label for="fb-' + t[0] + '">' + t[1] + ' <span style="font-weight:400;color:var(--muted)">(optional)</span></label><small>' + t[2] + '</small><textarea id="fb-' + t[0] + '" maxlength="600" data-txt="' + t[0] + '">' + esc(fb[t[0]]) + '</textarea><div class="fb-cnt"><span id="fbc-' + t[0] + '">' + fb[t[0]].length + '</span> / 600</div></div>';
+      h += '<p class="ln-muted">Choose one rating for each item: <b>1</b> = Very poor, <b>2</b> = Poor, <b>3</b> = Acceptable, <b>4</b> = Good, <b>5</b> = Excellent.</p>';
+      h += '<div class="fb-grid" role="table"><div class="fb-gr fb-gh" role="row"><span></span>' + [1,2,3,4,5].map(function(i){ return '<span title="' + FB_RATE_WORDS[i - 1] + '">' + i + '</span>'; }).join("") + '</div>';
+      FB_RATE.forEach(function(r){
+        h += '<div class="fb-gr" role="radiogroup" aria-label="' + esc(r[1]) + '"><span class="fb-gl">' + esc(r[1]) + '</span>' + [1,2,3,4,5].map(function(i){
+          return '<button type="button" role="radio" aria-checked="' + (fb[r[0]] === i) + '" aria-label="' + i + ', ' + FB_RATE_WORDS[i - 1] + '" class="fb-dot' + (fb[r[0]] === i ? " on" : "") + '" data-rate="' + r[0] + '" data-v="' + i + '">' + i + '</button>'; }).join("") + '</div>';
       });
-      h += '<label class="fb-chk"><input type="checkbox" id="fb-name"' + (fb.showName ? " checked" : "") + '><span><b>Share my name with my teacher</b><br><span style="color:var(--muted);font-size:13px">Leave unticked to send it without your name. Your teacher will then see only your class. Either way it never affects your marks.</span></span></label>';
+      h += '</div>';
+    }else if(fbStep === 2){
+      h += fbQ("Which features do you find most useful?", "Select all that apply.", fbChecks("useful", FB_USEFUL) +
+        '<div style="margin-top:8px"><label for="fb-usefulOther" class="fb-opt">Other (optional)</label><input type="text" id="fb-usefulOther" maxlength="100" value="' + esc(fb.usefulOther) + '"></div>');
+    }else if(fbStep === 3){
+      h += fbQ("Have you experienced any of these problems?", "Select all that apply.", fbChecks("problems", FB_PROB));
+      h += fbQ("How easy is it to find the lesson or resource you need?", "", fbRadios("findEase", FB_FIND, "Finding resources"));
+      h += fbQ("How would you rate your experience using the website on a mobile phone?", "If applicable.", fbRadios("mobile", FB_MOB, "Mobile experience"));
+    }else if(fbStep === 4){
+      FB_TXT.forEach(function(t){
+        h += '<div class="fb-q"><label for="fb-' + t[0] + '" class="fb-l">' + t[1] + ' <span class="fb-opt">(optional)</span></label><textarea id="fb-' + t[0] + '" maxlength="600" data-txt="' + t[0] + '">' + esc(fb[t[0]]) + '</textarea><div class="fb-cnt"><span id="fbc-' + t[0] + '">' + fb[t[0]].length + '</span> / 600</div></div>';
+      });
+    }else{
+      h += fbQ("Would you recommend this website to another student?", "", fbRadios("recommend", FB_REC, "Recommendation"));
+      h += '<p class="ln-muted" style="margin-top:12px">Your answers go only to your teacher and never affect your marks.</p>';
     }
     h += '<p class="fb-err" id="fb-err" role="alert">' + esc(err || "") + '</p>';
     h += '<div class="fb-nav"><span>' + (fbStep === 0 ? '<button class="link-btn" id="fb-leave" type="button">← Back to journey</button>' : '<button class="btn btn-secondary" id="fb-prev" type="button">Back</button>') + '</span>' +
-      (fbStep < 2 ? '<button class="btn btn-primary" id="fb-next" type="button">Next</button>' : '<button class="btn btn-primary" id="fb-send" type="button"' + (preview ? " disabled" : "") + '>' + (preview ? "Send (disabled in preview)" : (fbSaved ? "Update feedback" : "Send feedback")) + '</button>') + '</div>';
+      (fbStep < n - 1 ? '<button class="btn btn-primary" id="fb-next" type="button">Next</button>' : '<button class="btn btn-primary" id="fb-send" type="button"' + (preview ? " disabled" : "") + '>' + (preview ? "Submit (disabled in preview)" : (fbSaved ? "Update feedback" : "Submit feedback")) + '</button>') + '</div>';
     body.innerHTML = h;
-    Array.prototype.forEach.call(body.querySelectorAll("[data-star]"), function(b){ b.addEventListener("click", function(){ fb[b.getAttribute("data-star")] = Number(b.getAttribute("data-v")); fbDraft(); renderFeedback(); }); });
-    Array.prototype.forEach.call(body.querySelectorAll("[data-nps]"), function(b){ b.addEventListener("click", function(){ fb.nps = Number(b.getAttribute("data-nps")); fbDraft(); renderFeedback(); }); });
-    Array.prototype.forEach.call(body.querySelectorAll("[data-pace]"), function(b){ b.addEventListener("click", function(){ fb.pace = b.getAttribute("data-pace"); fbDraft(); renderFeedback(); }); });
-    Array.prototype.forEach.call(body.querySelectorAll("[data-txt]"), function(t){ t.addEventListener("input", function(){ var k = t.getAttribute("data-txt"); fb[k] = t.value.slice(0, 600); $("fbc-" + k).textContent = fb[k].length; fbDraft(); }); });
-    if($("fb-name")) $("fb-name").addEventListener("change", function(){ fb.showName = $("fb-name").checked; fbDraft(); });
+    var q = function(sel, fn){ Array.prototype.forEach.call(body.querySelectorAll(sel), fn); };
+    q("[data-radio]", function(b){ b.addEventListener("click", function(){ fb[b.getAttribute("data-radio")] = b.getAttribute("data-v"); fbDraft(); renderFeedback(); }); });
+    q("[data-rate]", function(b){ b.addEventListener("click", function(){ fb[b.getAttribute("data-rate")] = Number(b.getAttribute("data-v")); fbDraft(); renderFeedback(); }); });
+    q("[data-check]", function(c){ c.addEventListener("change", function(){
+      var k = c.getAttribute("data-check"), v = c.value, a = fb[k].filter(function(x){ return x !== v; });
+      if(c.checked){ a.push(v); if(k === "problems"){ if(v === "none") a = ["none"]; else a = a.filter(function(x){ return x !== "none"; }); } }
+      fb[k] = a; fbDraft(); if(k === "problems") renderFeedback();
+    }); });
+    q("[data-txt]", function(t){ t.addEventListener("input", function(){ var k = t.getAttribute("data-txt"); fb[k] = t.value.slice(0, 600); $("fbc-" + k).textContent = fb[k].length; fbDraft(); }); });
+    ["name", "levelOther", "usefulOther"].forEach(function(k){ var el = $("fb-" + k); if(el) el.addEventListener("input", function(){ fb[k] = el.value; fbDraft(); }); });
     if($("fb-leave")) $("fb-leave").addEventListener("click", function(){ show("view-journey"); });
     if($("fb-prev")) $("fb-prev").addEventListener("click", function(){ fbStep--; renderFeedback(); window.scrollTo(0, 0); });
     if($("fb-next")) $("fb-next").addEventListener("click", function(){
       var msg = "";
-      if(fbStep === 0 && FB_RATE.some(function(r){ return !fb[r[0]]; })) msg = "Please give a star rating for each of the 6 items.";
-      if(fbStep === 1 && (fb.nps < 0 || !fb.pace)) msg = "Please choose a recommendation score and the pace.";
+      if(fbStep === 0 && (!fb.level || !fb.device || !fb.freq)) msg = "Please choose your course, your device and how often you use the website.";
+      if(fbStep === 1 && FB_RATE.some(function(r){ return !fb[r[0]]; })) msg = "Please choose a rating (1 to 5) for each of the 6 items.";
+      if(fbStep === 3 && (!fb.problems.length || !fb.findEase || !fb.mobile)) msg = "Please answer all three questions (choose “No major problems” if there were none).";
       if(msg){ renderFeedback(msg); return; }
       fbStep++; renderFeedback(); window.scrollTo(0, 0);
     });
@@ -687,9 +736,12 @@
   }
   function sendFeedback(){
     if(preview || fbBusy) return;
+    if(!fb.recommend){ renderFeedback("Please tell us whether you would recommend the website."); return; }
     var ps = perfSummary(), rec = { cls: String(user.class || "").slice(0, 20), progress: Math.max(0, Math.min(100, pct(ps.done, ps.total))),
-      overall: fb.overall, content: fb.content, practice: fb.practice, tests: fb.tests, usability: fb.usability, motivation: fb.motivation,
-      nps: fb.nps, pace: fb.pace, liked: fbClean(fb.liked), improve: fbClean(fb.improve), ideas: fbClean(fb.ideas), showName: !!fb.showName };
+      name: fbClean(fb.name, 80), level: fb.level, levelOther: fb.level === "other" ? fbClean(fb.levelOther, 40) : "", device: fb.device, freq: fb.freq,
+      overall: fb.overall, ease: fb.ease, design: fb.design, materials: fb.materials, practice: fb.practice, exam: fb.exam,
+      useful: fb.useful.slice(), usefulOther: fbClean(fb.usefulOther, 100), problems: fb.problems.slice(), findEase: fb.findEase, mobile: fb.mobile,
+      best: fbClean(fb.best), weakness: fbClean(fb.weakness), feature: fbClean(fb.feature), other: fbClean(fb.other), recommend: fb.recommend };
     if(!PQFirebase.submitFeedback){ renderFeedback("Feedback is not available right now. Please try again later."); return; }
     fbBusy = true; $("fb-send").disabled = true; $("fb-send").textContent = "Sending…";
     PQFirebase.submitFeedback(user.uid, FB_KEY, rec).then(function(r){
@@ -701,7 +753,7 @@
         return;
       }
       fbSaved = rec; try{ localStorage.removeItem(fbDraftKey()); }catch(e){}
-      $("fb-body").innerHTML = '<div class="fb-thanks"><div class="big">🙏</div><h2>Thank you, ' + esc(user.name || "") + '!</h2><p class="ln-muted" style="font-size:15px">Your feedback has been sent to your teacher. Every comment is read and helps shape the next version of iLearn.</p><p><button class="btn btn-primary" id="fb-done" type="button">Back to my journey</button></p></div>';
+      $("fb-body").innerHTML = '<div class="fb-thanks"><div class="big">🙏</div><h2>Thank you for helping us improve iLearnCS!</h2><p class="ln-muted" style="font-size:15px">Your feedback has been sent to your teacher. Every comment is read and helps shape the next version.</p><p><button class="btn btn-primary" id="fb-done" type="button">Back to my journey</button></p></div>';
       $("fb-done").addEventListener("click", function(){ renderFeedbackCard(); show("view-journey"); });
     });
   }

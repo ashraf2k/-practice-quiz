@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-UQDbqA+WJL6dFpAQhEwL6NTsHo8KMRCvHzkh7bYRRso='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-KVZ1YDUHnK+C93AlS51yKaPL3F7ZnimVRiCYymXQMLo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -2433,40 +2433,62 @@
 
   // ---------------- Student feedback ----------------
   var fbRows = [];
-  var FB_LABELS = [["overall","Overall"],["content","Lessons and explanations"],["practice","Practice and games"],["tests","Tests, papers and notes"],["usability","Ease of use"],["motivation","Motivation"]];
-  var FB_PACE = { slow: "Too slow", right: "About right", fast: "Too fast" };
-  function fbName(x){
-    if(!x.showName) return "Anonymous";
-    var uid = String(x.uid || x.id || "").split("_")[0], u = (usersRoster || []).filter(function(r){ return r.uid === uid; })[0];
-    return (u && u.name) || "(name not found)";
-  }
+  var FBA = {
+    rate: [["overall","Overall experience"],["ease","Ease of use and navigation"],["design","Design and appearance"],["materials","Learning materials"],["practice","Practice and activities"],["exam","Exam preparation"]],
+    level: { igcse:"IGCSE", as:"AS Level", a:"A Level", other:"Other" },
+    device: { mobile:"Mobile phone", tablet:"Tablet", laptop:"Laptop", desktop:"Desktop computer" },
+    freq: { daily:"Every day", few:"A few times a week", weekly:"About once a week", less:"Less than once a week" },
+    useful: { explain:"Clear explanations", quiz:"Quizzes and practice questions", instant:"Instant feedback", organised:"Well-organised materials", nav:"Easy navigation", progress:"Progress tracking", interactive:"Interactive activities" },
+    problems: { find:"Difficult to find what I need", tech:"Technical errors / pages not loading", unclear:"Explanations sometimes unclear", fewq:"Not enough practice questions", layout:"Layout or design issues", mobile:"Difficult to use on mobile", missing:"A feature I need is missing", none:"No major problems" },
+    findEase: { veasy:"Very easy", easy:"Easy", neutral:"Neither easy nor difficult", hard:"Difficult", vhard:"Very difficult" },
+    mobile: { excellent:"Excellent", good:"Good", ok:"Acceptable", poor:"Poor", none:"Not used on a phone" },
+    recommend: { definitely:"Definitely", probably:"Probably", unsure:"Not sure", probnot:"Probably not", defnot:"Definitely not" }
+  };
+  function fbName(x){ return x.name ? x.name : "Anonymous"; }
   function fbAvg(rows, k){ var n = 0, t = 0; rows.forEach(function(r){ if(typeof r[k] === "number"){ n++; t += r[k]; } }); return n ? t / n : 0; }
   function fbStarsHtml(v){ var h = ""; for(var i = 1; i <= 5; i++) h += '<span style="color:' + (i <= v ? "#E0A400" : "#cbd5e1") + '">★</span>'; return h; }
+  function fbList(r, k){ return Array.isArray(r[k]) ? r[k] : []; }
   function fbFiltered(){
     var c = document.getElementById("filter-class-fb").value, only = document.getElementById("fb-only-comments").checked;
-    return fbRows.filter(function(r){ return (!c || r.cls === c) && (!only || r.liked || r.improve || r.ideas); });
+    return fbRows.filter(function(r){ return (!c || r.cls === c) && (!only || r.best || r.weakness || r.feature || r.other); });
+  }
+  function fbBars(title, pairs, total, color){
+    var h = '<div><h4 style="margin:0 0 8px">' + esc12(title) + '</h4>';
+    pairs.forEach(function(a){ var p = total ? Math.round(a[1] / total * 100) : 0;
+      h += '<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.85rem"><span style="flex:0 0 170px">' + esc12(a[0]) + '</span><span style="flex:1;height:10px;border-radius:99px;background:#e2e8f0;overflow:hidden"><span style="display:block;height:100%;width:' + p + '%;background:' + color + '"></span></span><b style="flex:0 0 66px;text-align:right">' + a[1] + ' (' + p + '%)</b></div>'; });
+    return h + '</div>';
+  }
+  function fbCount(rows, k, map, isList){
+    return Object.keys(map).map(function(code){ return [map[code], rows.filter(function(r){ return isList ? fbList(r, k).indexOf(code) >= 0 : r[k] === code; }).length]; });
   }
   function renderFeedbackAdmin(){
     var box = document.getElementById("fb-body"), st = document.getElementById("fb-status"), rows = fbFiltered();
     if(!fbRows.length){ box.innerHTML = ""; return; }
     if(!rows.length){ box.innerHTML = ""; st.textContent = "No feedback matches this filter."; return; }
     st.textContent = rows.length + " response" + (rows.length === 1 ? "" : "s") + (rows.length !== fbRows.length ? " (of " + fbRows.length + ")" : "") + ".";
-    var prom = rows.filter(function(r){ return r.nps >= 9; }).length, det = rows.filter(function(r){ return r.nps <= 6; }).length, nps = Math.round((prom - det) / rows.length * 100);
+    var yes = rows.filter(function(r){ return r.recommend === "definitely" || r.recommend === "probably"; }).length;
+    var avgAll = FBA.rate.reduce(function(t, a){ return t + fbAvg(rows, a[0]); }, 0) / FBA.rate.length;
     var h = '<div class="kpi-row">' +
       '<div class="kpi"><div class="k-label">Responses</div><div class="k-value">' + rows.length + '</div><div class="k-sub">avg progress ' + Math.round(fbAvg(rows, "progress")) + '%</div></div>' +
-      '<div class="kpi"><div class="k-label">Overall rating</div><div class="k-value">' + fbAvg(rows, "overall").toFixed(1) + ' / 5</div><div class="k-sub">' + fbStarsHtml(Math.round(fbAvg(rows, "overall"))) + '</div></div>' +
-      '<div class="kpi"><div class="k-label">Net Promoter Score</div><div class="k-value">' + (nps > 0 ? "+" : "") + nps + '</div><div class="k-sub">' + prom + ' promoters, ' + det + ' detractors</div></div>' +
-      '<div class="kpi"><div class="k-label">Average "recommend"</div><div class="k-value">' + fbAvg(rows, "nps").toFixed(1) + ' / 10</div><div class="k-sub">0 to 10 scale</div></div></div>';
-    h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:0 0 20px"><div><h4 style="margin:0 0 8px">Average rating by area</h4>';
-    FB_LABELS.slice().map(function(l){ return [l[1], fbAvg(rows, l[0])]; }).forEach(function(a){
-      h += '<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.85rem"><span style="flex:0 0 150px">' + esc12(a[0]) + '</span><span style="flex:1;height:10px;border-radius:99px;background:#e2e8f0;overflow:hidden"><span style="display:block;height:100%;width:' + (a[1] / 5 * 100).toFixed(0) + '%;background:#285F54"></span></span><b style="flex:0 0 36px;text-align:right">' + a[1].toFixed(1) + '</b></div>';
-    });
-    h += '</div><div><h4 style="margin:0 0 8px">Pace of the lessons</h4>';
-    ["slow","right","fast"].forEach(function(k){ var n = rows.filter(function(r){ return r.pace === k; }).length, p = Math.round(n / rows.length * 100);
-      h += '<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.85rem"><span style="flex:0 0 100px">' + FB_PACE[k] + '</span><span style="flex:1;height:10px;border-radius:99px;background:#e2e8f0;overflow:hidden"><span style="display:block;height:100%;width:' + p + '%;background:#B8923A"></span></span><b style="flex:0 0 70px;text-align:right">' + n + ' (' + p + '%)</b></div>'; });
-    h += '</div></div><h4 style="margin:0 0 8px">What students wrote</h4><div class="table-scroll"><table class="admin-table"><thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Rating</th><th>Recommend</th><th>Liked most</th><th>To improve</th><th>Ideas</th></tr></thead><tbody>';
+      '<div class="kpi"><div class="k-label">Overall experience</div><div class="k-value">' + fbAvg(rows, "overall").toFixed(1) + ' / 5</div><div class="k-sub">' + fbStarsHtml(Math.round(fbAvg(rows, "overall"))) + '</div></div>' +
+      '<div class="kpi"><div class="k-label">Average of all 6 ratings</div><div class="k-value">' + avgAll.toFixed(1) + ' / 5</div><div class="k-sub">all items combined</div></div>' +
+      '<div class="kpi"><div class="k-label">Would recommend</div><div class="k-value">' + Math.round(yes / rows.length * 100) + '%</div><div class="k-sub">"Definitely" or "Probably"</div></div></div>';
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin:0 0 20px"><div><h4 style="margin:0 0 8px">Average rating by item (1 to 5)</h4>';
+    FBA.rate.forEach(function(a){ var v = fbAvg(rows, a[0]);
+      h += '<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.85rem"><span style="flex:0 0 170px">' + esc12(a[1]) + '</span><span style="flex:1;height:10px;border-radius:99px;background:#e2e8f0;overflow:hidden"><span style="display:block;height:100%;width:' + (v / 5 * 100).toFixed(0) + '%;background:#285F54"></span></span><b style="flex:0 0 36px;text-align:right">' + v.toFixed(1) + '</b></div>'; });
+    h += '</div>' + fbBars("Most useful features", fbCount(rows, "useful", FBA.useful, true), rows.length, "#285F54") +
+      fbBars("Problems experienced", fbCount(rows, "problems", FBA.problems, true), rows.length, "#E0634E") +
+      fbBars("Finding the lesson or resource needed", fbCount(rows, "findEase", FBA.findEase), rows.length, "#4A7BD0") +
+      fbBars("Experience on a mobile phone", fbCount(rows, "mobile", FBA.mobile), rows.length, "#4A7BD0") +
+      fbBars("Would recommend", fbCount(rows, "recommend", FBA.recommend), rows.length, "#B8923A") +
+      fbBars("Course / level", fbCount(rows, "level", FBA.level), rows.length, "#8E5CC4") +
+      fbBars("Usual device", fbCount(rows, "device", FBA.device), rows.length, "#8E5CC4") +
+      fbBars("How often they use the site", fbCount(rows, "freq", FBA.freq), rows.length, "#8E5CC4") + '</div>';
+    var others = rows.filter(function(r){ return r.usefulOther; }).map(function(r){ return r.usefulOther; });
+    if(others.length) h += '<p class="admin-status"><b>Other useful features mentioned:</b> ' + others.map(esc12).join("; ") + '</p>';
+    h += '<h4 style="margin:0 0 8px">What students wrote</h4><div class="table-scroll"><table class="admin-table"><thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Overall</th><th>Recommend</th><th>Best thing</th><th>Biggest weakness</th><th>Feature wanted</th><th>Other</th></tr></thead><tbody>';
     rows.forEach(function(r){
-      h += '<tr style="cursor:default"><td>' + esc12(fmtDay(r.updatedMs || r.createdMs)) + '</td><td>' + esc12(fbName(r)) + '</td><td>' + esc12(r.cls || "") + '</td><td>' + fbStarsHtml(r.overall) + '</td><td>' + r.nps + ' / 10</td><td>' + esc12(r.liked || "") + '</td><td>' + esc12(r.improve || "") + '</td><td>' + esc12(r.ideas || "") + '</td></tr>';
+      h += '<tr style="cursor:default"><td>' + esc12(fmtDay(r.updatedMs || r.createdMs)) + '</td><td>' + esc12(fbName(r)) + '</td><td>' + esc12(r.cls || "") + '</td><td>' + fbStarsHtml(r.overall) + '</td><td>' + esc12(FBA.recommend[r.recommend] || "") + '</td><td>' + esc12(r.best || "") + '</td><td>' + esc12(r.weakness || "") + '</td><td>' + esc12(r.feature || "") + '</td><td>' + esc12(r.other || "") + '</td></tr>';
     });
     box.innerHTML = h + '</tbody></table></div>';
   }
@@ -2492,9 +2514,13 @@
   document.getElementById("fb-only-comments").addEventListener("change", renderFeedbackAdmin);
   document.getElementById("btn-fb-csv").addEventListener("click", function(){
     var rows = fbFiltered(), q = function(v){ var t = String(v == null ? "" : v); if(/^[=+\-@\t\r]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g, '""') + '"'; };
-    var head = ["Date","Student","Class","Progress %","Overall","Lessons","Practice","Tests and notes","Ease of use","Motivation","Recommend 0-10","Pace","Liked most","To improve","Ideas"];
+    var head = ["Date","Student","Class","Progress %","Course/level","Level (other)","Device","Frequency"].concat(FBA.rate.map(function(a){ return a[1]; }),
+      ["Useful features","Useful (other)","Problems","Finding resources","Mobile experience","Best thing","Biggest weakness","Feature wanted","Other comments","Would recommend"]);
     var lines = [head.map(q).join(",")].concat(rows.map(function(r){
-      return [new Date(r.updatedMs || r.createdMs).toISOString().slice(0, 10), fbName(r), r.cls, r.progress, r.overall, r.content, r.practice, r.tests, r.usability, r.motivation, r.nps, FB_PACE[r.pace] || r.pace, r.liked, r.improve, r.ideas].map(q).join(",");
+      return [new Date(r.updatedMs || r.createdMs).toISOString().slice(0, 10), fbName(r), r.cls, r.progress, FBA.level[r.level] || r.level, r.levelOther, FBA.device[r.device] || r.device, FBA.freq[r.freq] || r.freq]
+        .concat(FBA.rate.map(function(a){ return r[a[0]]; }),
+          [fbList(r, "useful").map(function(c){ return FBA.useful[c] || c; }).join("; "), r.usefulOther, fbList(r, "problems").map(function(c){ return FBA.problems[c] || c; }).join("; "),
+           FBA.findEase[r.findEase] || r.findEase, FBA.mobile[r.mobile] || r.mobile, r.best, r.weakness, r.feature, r.other, FBA.recommend[r.recommend] || r.recommend]).map(q).join(",");
     }));
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" })); a.download = "ilearn-feedback.csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
   });
