@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-aJZxqkVnOdYiMMtNUN3rk5kw5Aw3F0nez8CP9ODP2C4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-q8DN/OwbG4wbzeeHLjvzXHYtfYnN8xhnYNbRKMz4Oyc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -441,6 +441,7 @@
       <button class="admin-tab" data-tab="attention">Needs attention</button>
       <button class="admin-tab" data-tab="feedback">Feedback</button>
       <button class="admin-tab" data-tab="tuition">Tuition</button>
+      <button class="admin-tab" data-tab="ppPerf">Past papers</button>
       <button class="admin-tab" data-tab="classes">Class overview</button>
       <button class="admin-tab" data-tab="students">Quiz log</button>
     </div>
@@ -712,6 +713,18 @@
         <div id="tu-body"></div>
       </div>
 
+      <div class="admin-panel" id="panel-ppPerf">
+        <div class="admin-toolbar no-print">
+          <select id="pp-level" aria-label="Level"><option value="10">10BR (IGCSE)</option><option value="11">11BR (AS Level)</option><option value="12">12BR (A Level)</option></select>
+          <select id="pp-class" aria-label="Class"><option value="">All classes</option></select>
+          <input type="text" id="pp-search" placeholder="Search student" aria-label="Search student">
+          <label style="display:flex;gap:6px;align-items:center;font-size:.85rem"><input type="checkbox" id="pp-only"> Only students who attempted</label>
+          <button class="btn btn-secondary" id="pp-csv" type="button">Download CSV</button>
+        </div>
+        <p class="admin-status" id="pp-status"></p>
+        <div id="pp-body"></div>
+      </div>
+
       <div class="admin-panel" id="panel-archive">
         <p class="admin-status">Archived students are removed from every list and cannot sign in. Their data is kept here and can be restored at any time.</p>
         <p class="admin-status no-print" id="archive-status"></p>
@@ -818,7 +831,7 @@
 <script src="syllabus-report.js?v=20261019j"></script>
 <script src="parent-report.js?v=20261021a"></script>
 <script src="firebase-config.js?v=20261019j"></script>
-<script type="module" src="firebase-init.js?v=20261102b"></script>
+<script type="module" src="firebase-init.js?v=20261102c"></script>
 <script type="module">
 (function(){
 
@@ -1000,7 +1013,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","tuition","archive"];
+  var PANELS = ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
@@ -1011,6 +1024,7 @@
     PANELS.forEach(function(id){
       var el = document.getElementById("panel-" + id); if(el) el.classList.toggle("active", id === name);
     });
+    if(name === "ppPerf" && window.__renderPP) window.__renderPP();
   }
 
   document.getElementById("admin-tabs").addEventListener("click", function(e){
@@ -2612,6 +2626,10 @@
     // add manually
     var opts = slots.map(function(k){ return '<option value="' + k + '">' + esc12(tuDayName(k) + " " + tuRange(k, L)) + (tu.taken[k] ? " (taken)" : "") + '</option>'; }).join("");
     h += '<div class="admin-toolbar no-print" style="margin-top:12px"><b>Add a student by hand</b> <input type="text" id="tu-add-name" placeholder="Name" maxlength="80"> <input type="text" id="tu-add-grade" placeholder="Grade (e.g. IG, AS)" maxlength="20" style="width:130px"> <select id="tu-add-slot">' + opts + '</select> <button class="btn btn-secondary" id="tu-add-btn" type="button">Add (approved)</button></div>';
+    // assign a registered student
+    var rcls = {}; (usersRoster || []).forEach(function(u){ var c = String(u.className || u["class"] || "").replace(/\s+/g, ""); if(u && u.uid && c) rcls[c] = 1; });
+    var freeOpts = slots.filter(function(k){ return !tu.taken[k]; }).map(function(k){ return '<option value="' + k + '">' + esc12(tuDayName(k) + " " + tuRange(k, L)) + '</option>'; }).join("");
+    h += '<div class="admin-toolbar no-print" style="margin-top:8px"><b>Assign a registered student to a free slot</b> <select id="tu-as-class"><option value="">Choose class</option>' + Object.keys(rcls).sort().map(function(c){ return '<option value="' + esc12(c) + '">' + esc12(c) + '</option>'; }).join("") + '</select> <select id="tu-as-student" disabled><option value="">Choose student</option></select> <select id="tu-as-slot">' + (freeOpts || '<option value="">No free slots</option>') + '</select> <button class="btn btn-primary" id="tu-as-btn" type="button">Assign (approved)</button></div><p class="admin-status">The booking appears at once in the student\u2019s own account as approved. A student can have at most 2 slots.</p>';
     var seeds = [["M.Aun", "AS", "sat_1730"], ["Faris", "IG", "mon_1530"], ["Ibrahim", "IG", "tue_1730"], ["Adham", "IG", "wed_1530"]];
     if(tu.config && !tu.bookings.length) h += '<p class="admin-status"><button class="btn btn-secondary" id="tu-seed" type="button">Add the 4 current students from your schedule</button> (M.Aun AS Sat 5:30, Faris IG Mon 3:30, Ibrahim IG Tue 5:30, Adham IG Wed 3:30)</p>';
     // weekly timetable
@@ -2653,6 +2671,24 @@
     q("[data-sess]", function(b){ b.addEventListener("click", function(){ var o = b.dataset.o, cur = Number((tu.ledger[o] || {}).sessionsDone) || 0, nx = Math.max(0, cur + Number(b.dataset.sess));
       PQFirebase.tuitionLedgerSave(o, { sessionsDone: nx }).then(function(r){ if(!r.ok) alert(tuErr(r)); else tuReload(); }); }); });
     q(".tu-note", function(i){ i.addEventListener("change", function(){ PQFirebase.tuitionLedgerSave(i.dataset.o, { note: i.value.replace(/[<>&]/g, " ").slice(0, 200) }).then(function(r){ if(!r.ok) alert(tuErr(r)); else tu.ledger[i.dataset.o] = Object.assign(tu.ledger[i.dataset.o] || {}, { note: i.value }); }); }); });
+    var asCls = document.getElementById("tu-as-class");
+    if(asCls){
+      var asStu = document.getElementById("tu-as-student");
+      asCls.addEventListener("change", function(){
+        var c = asCls.value, list = (usersRoster || []).filter(function(u){ return u && u.uid && String(u.className || u["class"] || "").replace(/\s+/g, "") === c; }).sort(function(x, y){ return (x.name || "").localeCompare(y.name || ""); });
+        asStu.innerHTML = '<option value="">Choose student</option>' + list.map(function(u){ return '<option value="' + esc12(u.uid) + '">' + esc12(u.name || "(no name)") + (u.email ? " \u2013 " + esc12(u.email) : "") + '</option>'; }).join("");
+        asStu.disabled = !c;
+      });
+      document.getElementById("tu-as-btn").addEventListener("click", function(){
+        var L = Number((tu.config || TU_DEFAULT).slotMinutes) || 90, uid = asStu.value, k = document.getElementById("tu-as-slot").value, u = (usersRoster || []).filter(function(x){ return x.uid === uid; })[0];
+        if(!uid || !k || !u){ alert("Please choose a class, a student and a free slot."); return; }
+        var mine = tu.bookings.filter(function(b){ return b.uid === uid; }), seat = null;
+        ["1", "2"].forEach(function(n){ if(seat) return; var b = mine.filter(function(x){ return x.id === uid + "_" + n; })[0]; if(!b || b.status === "declined") seat = n; });
+        if(!seat){ alert(u.name + " already has 2 slots. Remove one first."); return; }
+        if(tu.taken[k]){ alert("That slot is already taken."); return; }
+        PQFirebase.tuitionAdminAssign({ uid: uid, seat: seat, slotKey: k, name: u.name || "", grade: String(u.className || u["class"] || "").replace(/\s+/g, "") }).then(function(r){ if(!r.ok) alert(tuErr(r)); else tuReload(u.name + " was assigned to " + tuDayName(k) + " " + tuRange(k, L) + "."); });
+      });
+    }
     var add = document.getElementById("tu-add-btn");
     if(add) add.addEventListener("click", function(){
       var n = document.getElementById("tu-add-name").value.replace(/[<>&]/g, " ").trim(), g = document.getElementById("tu-add-grade").value.replace(/[<>&]/g, " ").trim(), k = document.getElementById("tu-add-slot").value;
@@ -2679,6 +2715,87 @@
   document.getElementById("tu-link").value = new URL(TU_PAGE, location.href).href;
   document.getElementById("btn-tu-copy").addEventListener("click", function(){ var i = document.getElementById("tu-link"); i.select(); try{ navigator.clipboard.writeText(i.value); }catch(e){ document.execCommand("copy"); } this.textContent = "Copied ✔"; var b = this; setTimeout(function(){ b.textContent = "Copy link"; }, 1500); });
   document.getElementById("btn-tu-load").addEventListener("click", function(){ document.getElementById("tu-status").textContent = "Loading..."; tuReload(); });
+
+
+  // ---------------- Past-paper practice performance (end of every sub-topic) ----------------
+  var PP_RE = { "10": /^pp_\d+_\d+$/, "11": /^pp11_/, "12": /^pp12_/ };
+  function ppKeys(level){
+    var re = PP_RE[level];
+    return Object.keys(EXAM_PAPERS).filter(function(k){ return re.test(k); }).sort(function(x, y){
+      var a = String(EXAM_PAPERS[x].code || x).split(".").map(Number), b = String(EXAM_PAPERS[y].code || y).split(".").map(Number);
+      for(var i = 0; i < Math.max(a.length, b.length); i++){ var d = (a[i] || 0) - (b[i] || 0); if(d) return d; }
+      return 0;
+    });
+  }
+  function ppModel(){
+    var level = document.getElementById("pp-level").value, keys = ppKeys(level), byUid = {}, cls = document.getElementById("pp-class").value, q = document.getElementById("pp-search").value.trim().toLowerCase();
+    var roster = rosterFor(level);
+    roster.forEach(function(s){ byUid[s.uid] = { uid: s.uid, name: s.name, className: s.className, att: {} }; });
+    examAttempts.forEach(function(a){
+      if(keys.indexOf(a.paperKey) < 0) return;
+      var r = byUid[a.uid]; if(!r) r = byUid[a.uid] = { uid: a.uid, name: a.name || "(no name)", className: String(a.className || "").replace(/\s+/g, ""), att: {} };
+      r.att[a.paperKey] = a;
+    });
+    var rows = Object.keys(byUid).map(function(u){ return byUid[u]; });
+    var classes = {}; rows.forEach(function(r){ if(r.className) classes[r.className] = 1; });
+    rows = rows.filter(function(r){ return (!cls || r.className === cls) && (!q || (r.name || "").toLowerCase().indexOf(q) >= 0) && (!document.getElementById("pp-only").checked || Object.keys(r.att).length); });
+    rows.sort(function(x, y){ return (x.className || "").localeCompare(y.className || "") || (x.name || "").localeCompare(y.name || ""); });
+    return { level: level, keys: keys, rows: rows, classes: Object.keys(classes).sort() };
+  }
+  function ppPct(a){ return typeof a.pct === "number" && a.totalMarks ? a.pct : (a.totalMarks ? Math.round(a.totalEarned / a.totalMarks * 100) : 0); }
+  function ppCls(p){ return p >= 70 ? "ok" : p >= 50 ? "wa" : "no"; }
+  function ppBg(p){ return p >= 70 ? "var(--correct-bg)" : p >= 50 ? "var(--diff-moderate-bg)" : "var(--incorrect-bg)"; }
+  function renderPP(){
+    var m = ppModel(), box = document.getElementById("pp-body"), st = document.getElementById("pp-status"), sel = document.getElementById("pp-class"), cur = sel.value;
+    if(sel.dataset.level !== m.level){ sel.innerHTML = '<option value="">All classes</option>' + m.classes.map(function(c){ return '<option value="' + esc12(c) + '">' + esc12(c) + '</option>'; }).join(""); sel.dataset.level = m.level; sel.value = ""; if(cur){ m = ppModel(); } }
+    if(!loaded){ st.textContent = "Data is still loading..."; box.innerHTML = ""; return; }
+    if(!examAttemptsSupported()){ st.textContent = "This tab needs a newer script this browser hasn't loaded yet. Try a hard refresh (Ctrl/Cmd+Shift+R)."; return; }
+    if(!m.keys.length){ st.textContent = "No past-paper sets are available for this level."; box.innerHTML = ""; return; }
+    var all = [], attemptedStudents = 0, low = 0, sum = 0;
+    m.rows.forEach(function(r){ var n = Object.keys(r.att).length; if(n) attemptedStudents++; Object.keys(r.att).forEach(function(k){ var p = ppPct(r.att[k]); all.push(p); sum += p; if(p < 50) low++; }); });
+    st.textContent = m.rows.length + " student" + (m.rows.length === 1 ? "" : "s") + " shown. Click any mark to read the student's answer, compare it with the mark scheme and add or remove marks.";
+    var h = '<div class="kpi-row">' +
+      '<div class="kpi"><div class="k-label">Students shown</div><div class="k-value">' + m.rows.length + '</div><div class="k-sub">' + attemptedStudents + ' have attempted at least one</div></div>' +
+      '<div class="kpi"><div class="k-label">Attempts</div><div class="k-value">' + all.length + '</div><div class="k-sub">across ' + m.keys.length + ' sub-topics</div></div>' +
+      '<div class="kpi"><div class="k-label">Average score</div><div class="k-value">' + (all.length ? Math.round(sum / all.length) + "%" : "-") + '</div><div class="k-sub">of attempted sets</div></div>' +
+      '<div class="kpi"><div class="k-label">Below 50%</div><div class="k-value">' + low + '</div><div class="k-sub">worth reviewing</div></div></div>';
+    h += '<div class="table-scroll"><table class="admin-table" style="font-size:.82rem"><thead><tr><th style="position:sticky;left:0;background:var(--bg);z-index:2">Student</th><th>Class</th>';
+    m.keys.forEach(function(k){ var p = EXAM_PAPERS[k]; h += '<th title="' + esc12((p.title || k).replace(/ — Past-paper question$/, "")) + '" style="text-align:center;white-space:nowrap">' + esc12(p.code || k) + '</th>'; });
+    h += '<th style="text-align:center">Done</th><th style="text-align:center">Avg</th></tr></thead><tbody>';
+    m.rows.forEach(function(r){
+      var keysDone = Object.keys(r.att), avg = keysDone.length ? Math.round(keysDone.reduce(function(s, k){ return s + ppPct(r.att[k]); }, 0) / keysDone.length) : null;
+      h += '<tr style="cursor:default"><td style="position:sticky;left:0;background:var(--surface);white-space:nowrap">' + esc12(r.name) + '</td><td>' + esc12(r.className) + '</td>';
+      m.keys.forEach(function(k){
+        var a = r.att[k];
+        if(!a){ h += '<td style="text-align:center;color:var(--muted)">–</td>'; return; }
+        h += '<td class="' + ppCls(ppPct(a)) + '" style="text-align:center;white-space:nowrap;cursor:pointer;font-weight:700;background:' + ppBg(ppPct(a)) + '" data-uid="' + esc12(r.uid) + '" data-key="' + esc12(k) + '" title="Review answer and marks">' + a.totalEarned + "/" + a.totalMarks + (a.regradedBy ? " ✎" : "") + '</td>';
+      });
+      h += '<td style="text-align:center">' + keysDone.length + "/" + m.keys.length + '</td><td style="text-align:center;font-weight:700">' + (avg == null ? "–" : avg + "%") + '</td></tr>';
+    });
+    h += '</tbody><tfoot><tr><th style="position:sticky;left:0;background:var(--bg)">Class average</th><th></th>';
+    m.keys.forEach(function(k){ var ps = m.rows.filter(function(r){ return r.att[k]; }).map(function(r){ return ppPct(r.att[k]); }); h += '<th style="text-align:center" title="' + ps.length + ' attempt(s)">' + (ps.length ? Math.round(ps.reduce(function(a, b){ return a + b; }, 0) / ps.length) + "%" : "–") + '</th>'; });
+    h += '<th></th><th></th></tr></tfoot></table></div><p class="admin-status">✎ = marks changed by a teacher. Green 70% and above, amber 50–69%, red below 50%. Students mark their own answer against the published scheme, so this is where you can correct it.</p>';
+    box.innerHTML = h;
+    Array.prototype.forEach.call(box.querySelectorAll("td[data-key]"), function(td){
+      td.addEventListener("click", function(){
+        var a = examAttempts.filter(function(x){ return x.uid === td.dataset.uid && x.paperKey === td.dataset.key; })[0]; if(!a) return;
+        examBackTarget = "ppPerf"; openExamDetail(a);
+        document.querySelectorAll(".admin-tab").forEach(function(b){ b.classList.toggle("active", b.dataset.tab === "ppPerf"); });
+      });
+    });
+  }
+  window.__renderPP = renderPP;
+  ["pp-level", "pp-class", "pp-only"].forEach(function(id){ document.getElementById(id).addEventListener("change", renderPP); });
+  document.getElementById("pp-search").addEventListener("input", renderPP);
+  document.getElementById("pp-csv").addEventListener("click", function(){
+    var m = ppModel(), q = function(v){ var t = String(v == null ? "" : v); if(/^[=+\-@\t\r]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g, '""') + '"'; };
+    var lines = [["Student", "Class"].concat(m.keys.map(function(k){ return EXAM_PAPERS[k].code || k; }), ["Sets done", "Average %"]).map(q).join(",")];
+    m.rows.forEach(function(r){
+      var done = Object.keys(r.att), avg = done.length ? Math.round(done.reduce(function(s, k){ return s + ppPct(r.att[k]); }, 0) / done.length) : "";
+      lines.push([r.name, r.className].concat(m.keys.map(function(k){ var a = r.att[k]; return a ? a.totalEarned + "/" + a.totalMarks : ""; }), [done.length, avg]).map(q).join(","));
+    });
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" })); a.download = "past-paper-performance-" + m.level + "BR.csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
 
   document.getElementById("filter-class-attn").addEventListener("change", renderAttention);
   document.getElementById("btn-attn-load").addEventListener("click", function(){
@@ -3743,7 +3860,7 @@
 
   var examBackTarget = "examPractice";
   document.getElementById("btn-back-examdetail").addEventListener("click", function(){
-    if(examBackTarget === "isolveDetail" && window.__isoBack) window.__isoBack(); else showTab("examPractice");
+    if(examBackTarget === "isolveDetail" && window.__isoBack) window.__isoBack(); else showTab(examBackTarget === "ppPerf" ? "ppPerf" : "examPractice");
   });
 
   // Lets the admin correct a question's awarded mark after re-reading the

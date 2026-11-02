@@ -731,7 +731,7 @@ function tuitionLoad(uid){
   ]).then(function(r){
     var taken = {}, mine = [];
     r[1].forEach(function(d){ taken[d.id] = true; });
-    r[2].forEach(function(d){ var x = d.data() || {}; mine.push({ id: d.id, slotKey: x.slotKey, status: x.status, name: x.name, grade: x.grade, changeTo: x.changeTo || "", changeResult: x.changeResult || "" }); });
+    r[2].forEach(function(d){ var x = d.data() || {}; mine.push({ id: d.id, slotKey: x.slotKey, status: x.status, name: x.name, grade: x.grade, assigned: !!x.assigned, changeTo: x.changeTo || "", changeResult: x.changeResult || "" }); });
     return { config: r[0], taken: taken, mine: mine };
   });
 }
@@ -817,6 +817,14 @@ function tuitionAdminAdd(rec){
   batch.set(doc(db, "tuitionLedger", owner), { name: rec.name, grade: rec.grade, paid: false, sessionsDone: 0, note: "", updatedAt: serverTimestamp() });
   return batch.commit().then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
 }
+// Admin: put a REGISTERED student into a slot (approved at once). It appears in that student's own bookings.
+function tuitionAdminAssign(rec){
+  var batch = writeBatch(db);
+  batch.set(doc(db, "tuitionBookings", rec.uid + "_" + rec.seat), { uid: rec.uid, slotKey: rec.slotKey, name: rec.name, grade: rec.grade, status: "approved", assigned: true, createdAt: serverTimestamp() });
+  batch.set(doc(db, "tuitionTaken", rec.slotKey), { taken: true, at: serverTimestamp() });
+  batch.set(doc(db, "tuitionLedger", rec.uid), { name: rec.name, grade: rec.grade, updatedAt: serverTimestamp() }, { merge: true });
+  return batch.commit().then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
 function tuitionLedgerSave(owner, data){
   return setDoc(doc(db, "tuitionLedger", owner), Object.assign({}, data, { updatedAt: serverTimestamp() }), { merge: true })
     .then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
@@ -845,6 +853,7 @@ window.PQFirebase = {
   tuitionSetStatus: tuitionSetStatus,
   tuitionAdminRemove: tuitionAdminRemove,
   tuitionAdminAdd: tuitionAdminAdd,
+  tuitionAdminAssign: tuitionAdminAssign,
   tuitionLedgerSave: tuitionLedgerSave,
   signUp: signUp,
   logIn: logIn,
