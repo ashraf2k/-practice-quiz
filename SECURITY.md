@@ -68,6 +68,7 @@ by hand after publishing:
 * Student A `create /attempts/{A}_datarep` with `score` > `total` → **deny**; with extra field → **deny**; valid, `recordedAt = request.time` → allow.
 * As the admin (has `admins/{uid}` doc): `list /attempts` → allow.
 * Feedback (`feedback/{uid}_ilearn10br`): student A can create/update their own (ratings 1–5, `nps` 0–10, text without `< > &`, `updatedAt = request.time`) → allow; another student's id → **deny**; `list /feedback` as a student → **deny**; as the admin → allow. **Republish `firestore.rules` for the new Feedback form to save.**
+* Tuition booking: student A `create /tuitionBookings/{A}_1` (status `pending`, slot listed in `tuitionConfig/main.slots`, name/class equal to their profile) together with `create /tuitionTaken/{slotKey}` in one batch → allow; the same slot again, a third booking (`{A}_3`), `update /tuitionTaken/*`, or `get /tuitionLedger/*` as a student → **deny**; `list /tuitionBookings` as a student without `uid == auth.uid` → **deny**. Student A `update` of their own APPROVED booking setting only `changeTo` (a listed, untaken slot) and `changeAt = request.time` → allow; changing `status`/`slotKey`, or a taken target → **deny**. The admin can do all of these. The booking page is `book-m4k7t2qx9v.html` (unlisted, `noindex`); anyone who can read the public repository can find its name, so the login and these rules are the real protection.
 
 ## Known limitations
 

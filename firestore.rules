@@ -154,6 +154,44 @@ service cloud.firestore {
         && d.updatedAt == request.time;
     }
 
+    // ---------- tuition booking helpers ----------
+    // A student has two "seats" (<uid>_1, <uid>_2) = at most two slots. Slot exclusivity comes from
+    // tuitionTaken/<slotKey>: a student can only CREATE it (never update), so it can be created once.
+    function tuSeat(uid, bid) { return bid == uid + '_1' || bid == uid + '_2'; }
+    function tuBooking(bid) { return /databases/$(database)/documents/tuitionBookings/$(bid); }
+    function tuOwnsAfter(slotKey) {
+      return (existsAfter(tuBooking(request.auth.uid + '_1')) && getAfter(tuBooking(request.auth.uid + '_1')).data.slotKey == slotKey)
+          || (existsAfter(tuBooking(request.auth.uid + '_2')) && getAfter(tuBooking(request.auth.uid + '_2')).data.slotKey == slotKey);
+    }
+    function tuOwnsBefore(slotKey) {
+      return (exists(tuBooking(request.auth.uid + '_1')) && get(tuBooking(request.auth.uid + '_1')).data.slotKey == slotKey)
+          || (exists(tuBooking(request.auth.uid + '_2')) && get(tuBooking(request.auth.uid + '_2')).data.slotKey == slotKey);
+    }
+    function validTuitionBooking(uid, bid) {
+      let d = request.resource.data;
+      let cfg = get(/databases/$(database)/documents/tuitionConfig/main).data;
+      let me = get(/databases/$(database)/documents/users/$(uid)).data;
+      return d.keys().hasOnly(['uid','slotKey','name','grade','status','createdAt'])
+        && d.keys().hasAll(['uid','slotKey','name','grade','status','createdAt'])
+        && d.uid == uid && tuSeat(uid, bid)
+        && d.status == 'pending'
+        && cfg.get('open', false) == true
+        && d.slotKey is string && d.slotKey in cfg.get('slots', [])
+        && safeText(d.name, 1, 80) && d.name == me.name
+        && validClass(d.grade) && d.grade == me['class']
+        && d.createdAt == request.time;
+    }
+
+    // A student may ask to move an APPROVED booking to another free slot: only changeTo/changeAt can be set,
+    // the target must be a listed slot that is not taken. The teacher moves the booking (or declines).
+    function validTuitionChange(k) {
+      let cfg = get(/databases/$(database)/documents/tuitionConfig/main).data;
+      return cfg.get('open', false) == true
+        && k is string && k in cfg.get('slots', [])
+        && !exists(/databases/$(database)/documents/tuitionTaken/$(k))
+        && request.resource.data.get('changeAt', null) == request.time;
+    }
+
     // Resume checkpoints / iLearn state: owner-only, free-shaped but bounded.
     function validProgress(uid, id, keyField) {
       let d = request.resource.data;
@@ -272,6 +310,51 @@ service cloud.firestore {
         && validFeedback(request.auth.uid, feedbackId)
         && request.resource.data.createdAt == resource.data.createdAt;
       allow delete: if isAdmin();
+    }
+
+    // ---------- tuition booking (hidden page) ----------
+    match /tuitionConfig/{id} {
+      allow get: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Public "slot is taken" markers: no names, so students cannot see each other.
+    match /tuitionTaken/{slotKey} {
+      allow get, list: if signedIn();
+      allow create: if signedIn() && verifiedOrLegacy()
+        && request.resource.data.keys().hasOnly(['taken','at'])
+        && request.resource.data.keys().hasAll(['taken','at'])
+        && request.resource.data.taken == true
+        && request.resource.data.at == request.time
+        && tuOwnsAfter(slotKey);
+      // A student frees a slot only by withdrawing their own pending booking in the same batch.
+      allow delete: if signedIn() && tuOwnsBefore(slotKey)
+        && !(existsAfter(tuBooking(request.auth.uid + '_1')) && getAfter(tuBooking(request.auth.uid + '_1')).data.slotKey == slotKey)
+        && !(existsAfter(tuBooking(request.auth.uid + '_2')) && getAfter(tuBooking(request.auth.uid + '_2')).data.slotKey == slotKey);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /tuitionBookings/{bid} {
+      allow get: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow list: if signedIn() && (isAdmin() || resource.data.uid == request.auth.uid);
+      allow create: if signedIn() && verifiedOrLegacy() && validTuitionBooking(request.auth.uid, bid);
+      // Re-book on a seat whose previous request was declined.
+      allow update: if signedIn() && verifiedOrLegacy() && resource.data.uid == request.auth.uid
+        && resource.data.status == 'declined' && validTuitionBooking(request.auth.uid, bid);
+      // Request / withdraw a change to an approved booking.
+      allow update: if signedIn() && verifiedOrLegacy() && resource.data.uid == request.auth.uid
+        && resource.data.status == 'approved'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['changeTo','changeAt','changeResult'])
+        && !('changeResult' in request.resource.data)
+        && (!('changeTo' in request.resource.data) || validTuitionChange(request.resource.data.changeTo));
+      // Withdraw a pending request or dismiss a declined one (approved ones: ask the teacher).
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid && resource.data.status in ['pending','declined'];
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Paid / sessions completed / notes: teacher only, students can never read it.
+    match /tuitionLedger/{owner} {
+      allow read, write: if isAdmin();
     }
 
     // ---------- default deny ----------

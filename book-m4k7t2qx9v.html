@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-xpz73YGZnkk05I0xnC7gWrQXxOBoEUT0WlJ/9AAEQi4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261019j"></script>
+<script src="theme.js?v=20261027a"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta name="theme-color" content="#146C6A" />
+<link rel="icon" href="icons/icon-192.png" />
+<title>Book a tuition slot</title>
+<link rel="stylesheet" href="shared.css?v=20261019j" />
+<style>
+  .bk-note{ margin:0 0 14px; padding:12px 14px; border-radius:12px; background:var(--accent-tint); border:1px solid var(--accent); color:var(--ink); font-size:14px; }
+  .bk-note b{ color:var(--accent-dark); }
+  .bk-ok{ background:var(--correct-bg); border-color:var(--correct); }
+  .bk-warn{ background:var(--diff-moderate-bg); border-color:var(--diff-moderate); }
+  .bk-top{ display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; margin:0 0 6px; }
+  .bk-top h2{ margin:0; }
+  .bk-mine{ display:grid; gap:8px; margin:0 0 16px; }
+  .bk-mine > div{ display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; padding:11px 14px; border:1.5px solid var(--line); border-radius:12px; background:var(--surface); }
+  .bk-chip{ display:inline-block; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:800; border:1px solid var(--line); }
+  .bk-chip.pending{ background:var(--diff-moderate-bg); border-color:var(--diff-moderate); }
+  .bk-chip.approved{ background:var(--correct-bg); border-color:var(--correct); }
+  .bk-chip.declined{ background:var(--incorrect-bg); border-color:var(--incorrect); }
+  .bk-day{ margin:18px 0 6px; font-size:12.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .bk-slots{ display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:8px; }
+  .bk-slot{ padding:12px 14px; border-radius:12px; border:1.5px solid var(--accent); background:var(--surface); color:var(--ink); font:inherit; font-weight:700; cursor:pointer; text-align:left; }
+  .bk-slot:hover:not(:disabled){ background:var(--accent-tint); }
+  .bk-slot small{ display:block; font-weight:600; color:var(--muted); margin-top:2px; }
+  .bk-slot:disabled{ cursor:not-allowed; border-style:dashed; border-color:var(--line); background:var(--bg); color:var(--muted); opacity:.75; }
+  .bk-slot.mine{ border-style:solid; border-color:var(--accent); background:var(--accent-tint); opacity:1; color:var(--ink); }
+  .bk-confirm{ position:sticky; bottom:12px; margin:16px 0 0; padding:14px 16px; border-radius:14px; border:1.5px solid var(--accent); background:var(--surface); box-shadow:0 8px 30px rgba(0,0,0,.18); }
+  .bk-confirm .row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .bk-links{ display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; }
+  .btn.sm{ padding:6px 12px; font-size:13px; }
+  .bk-empty{ color:var(--muted); font-size:14px; }
+</style>
+<link rel="stylesheet" href="theme.css?v=20261027a" />
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo-link" href="index.html" aria-label="iLearnCS home"><img class="logo-img" src="logo.png" alt="iLearnCS"></a>
+    <div><h1>Book a tuition slot</h1><p id="header-sub">Choose a weekly time that suits you</p></div>
+  </header>
+
+  <!-- LOGIN -->
+  <section id="s-login" class="card hidden">
+    <h2 class="step-title">Log in to book</h2>
+    <p class="step-sub">Use your iLearnCS account (the same email and password as on the practice site).</p>
+    <div class="field"><label for="in-email">Email</label><input type="email" id="in-email" autocomplete="email" /></div>
+    <div class="field"><label for="in-pass">Password</label><input type="password" id="in-pass" autocomplete="current-password" /></div>
+    <label style="display:flex;gap:8px;align-items:center;font-size:14px;margin:6px 0 12px"><input type="checkbox" id="in-remember"> Remember me on this device</label>
+    <button class="btn btn-primary" id="btn-login" type="button">Log in</button>
+    <p class="step-sub" id="login-status" role="alert" style="min-height:1.4em;margin-top:10px"></p>
+    <div class="bk-links"><button class="link-btn" id="btn-forgot" type="button">Forgot password?</button><a class="link-btn" href="quiz.html">No account yet? Create one here</a></div>
+  </section>
+
+  <!-- VERIFY -->
+  <section id="s-verify" class="card hidden">
+    <h2 class="step-title">Verify your email first</h2>
+    <p class="step-sub">We sent a link to <b id="v-email"></b>. Click it, then come back and log in. Check your spam folder if you cannot find it.</p>
+    <button class="btn btn-secondary" id="btn-resend" type="button">Resend the email</button>
+    <button class="link-btn" id="btn-back-login" type="button">← Back to log in</button>
+    <p class="step-sub" id="verify-status" role="status" style="min-height:1.4em"></p>
+  </section>
+
+  <!-- BOOKING -->
+  <section id="s-book" class="card hidden">
+    <div class="bk-top"><h2 class="step-title" id="b-hello">Hello</h2><span><button class="btn btn-secondary sm" id="btn-refresh" type="button">↻ Refresh</button> <button class="link-btn" id="btn-logout" type="button">Log out</button></span></div>
+    <div class="bk-note" id="b-info"></div>
+    <div id="b-banner"></div>
+    <h3 style="margin:6px 0 8px;font-size:16px">My bookings</h3>
+    <div class="bk-mine" id="b-mine"></div>
+    <h3 style="margin:14px 0 0;font-size:16px">Available times <small style="font-weight:400;color:var(--muted)">(every week)</small></h3>
+    <div id="b-grid"></div>
+    <div id="b-confirm"></div>
+  </section>
+
+  <section id="s-wait" class="card"><p class="step-sub">Loading…</p></section>
+</div>
+
+<script src="firebase-config.js?v=20261019j"></script>
+<script type="module" src="firebase-init.js?v=20261102b"></script>
+<script type="module">
+(function(){
+  "use strict";
+  var DAYS = [["sat","Saturday"],["sun","Sunday"],["mon","Monday"],["tue","Tuesday"],["wed","Wednesday"],["thu","Thursday"],["fri","Friday"]];
+  var DAYNAME = {}; DAYS.forEach(function(d){ DAYNAME[d[0]] = d[1]; });
+  var user = null, isAdmin = false, data = null, picked = null, busy = false, timer = 0, changing = null;
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function show(id){ ["s-login","s-verify","s-book","s-wait"].forEach(function(s){ $(s).classList.toggle("hidden", s !== id); }); }
+  function mins(key){ var t = key.split("_")[1]; return Number(t.slice(0, 2)) * 60 + Number(t.slice(2)); }
+  function f12(m){ var h = Math.floor(m / 60) % 24, mm = m % 60, ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return h + ":" + (mm < 10 ? "0" : "") + mm + " " + ap; }
+  function range(key, len){ var a = mins(key), b = a + len, A = f12(a), B = f12(b); return (A.slice(-2) === B.slice(-2) ? A.slice(0, -3) : A) + "–" + B; }
+  function dayOf(key){ return DAYNAME[key.split("_")[0]] || key; }
+  function banner(html, cls){ $("b-banner").innerHTML = html ? '<div class="bk-note ' + (cls || "") + '" role="status">' + html + "</div>" : ""; }
+
+  // ---------- login ----------
+  function doLogin(){
+    var email = $("in-email").value.trim(), pass = $("in-pass").value, st = $("login-status");
+    if(!email || !pass){ st.textContent = "Please enter your email and password."; return; }
+    $("btn-login").disabled = true; st.textContent = "Logging in…";
+    PQFirebase.logIn(email, pass, $("in-remember").checked).then(function(res){
+      st.textContent = "";
+      if(res && res.needsVerification){ $("v-email").textContent = email; $("btn-resend").dataset.e = email; $("btn-resend").dataset.p = pass; show("s-verify"); }
+    }).catch(function(err){ st.textContent = err.message || "Could not log in."; }).then(function(){ $("btn-login").disabled = false; });
+  }
+  $("btn-login").addEventListener("click", doLogin);
+  $("in-pass").addEventListener("keydown", function(e){ if(e.key === "Enter") doLogin(); });
+  $("btn-forgot").addEventListener("click", function(){
+    var email = $("in-email").value.trim(), st = $("login-status");
+    if(!email){ st.textContent = "Type your email above first, then press “Forgot password?”."; return; }
+    PQFirebase.resetPassword(email).then(function(){ st.textContent = "If that email has an account, a reset link is on its way."; }, function(err){ st.textContent = err.message; });
+  });
+  $("btn-resend").addEventListener("click", function(){
+    var b = $("btn-resend"), st = $("verify-status"); st.textContent = "Sending…";
+    PQFirebase.resendVerification(b.dataset.e, b.dataset.p).then(function(r){ st.textContent = r && r.alreadyVerified ? "Your email is already verified. Please log in." : "Sent. Check your inbox."; }, function(err){ st.textContent = err.message; });
+  });
+  $("btn-back-login").addEventListener("click", function(){ show("s-login"); });
+  $("btn-logout").addEventListener("click", function(){ clearInterval(timer); PQFirebase.logOut().then(function(){ show("s-login"); }); });
+  $("btn-refresh").addEventListener("click", function(){ picked = null; load(true); });
+
+  // ---------- booking ----------
+  function myActive(){ return data.mine.filter(function(b){ return b.status !== "declined"; }); }
+  function render(){
+    var cfg = data.config, len = (cfg && cfg.slotMinutes) || 90;
+    $("b-hello").textContent = "Hello, " + (user.name || "student");
+    if(!cfg || !cfg.open){
+      $("b-info").innerHTML = "<b>Booking is not open right now.</b> Your teacher will let you know when it opens.";
+      $("b-grid").innerHTML = ""; $("b-confirm").innerHTML = "";
+    }else{
+      $("b-info").innerHTML = "Choose up to <b>2 weekly sessions</b> (" + (len / 60) + " hours each). The teacher must <b>approve</b> each request: log in again later to check. Times marked <b>Not available</b> are already taken." +
+        (cfg.note ? "<br>" + esc(cfg.note) : "");
+    }
+    // my bookings
+    var mh = "";
+    data.mine.slice().sort(function(a, b){ return a.slotKey < b.slotKey ? -1 : 1; }).forEach(function(b){
+      var label = dayOf(b.slotKey) + ", " + range(b.slotKey, len), chip, extra = "";
+      if(b.status === "approved"){
+        chip = '<span class="bk-chip approved">\u2714 Approved</span>';
+        if(b.changeTo){ chip += ' <span class="bk-chip pending">\u23F3 Change requested: ' + esc(dayOf(b.changeTo) + ", " + range(b.changeTo, len)) + '</span>'; extra = '<button class="btn btn-secondary sm" data-clearchg="' + esc(b.id) + '" type="button">Cancel change request</button>'; }
+        else if(changing === b.id) extra = '<button class="btn btn-secondary sm" data-stopchg="1" type="button">Stop choosing</button>';
+        else{ if(b.changeResult === "declined") chip += ' <span class="bk-chip declined">Your last change request was declined</span>'; extra = '<button class="btn btn-secondary sm" data-chg="' + esc(b.id) + '" type="button">Request a change</button>'; }
+      }
+      else if(b.status === "declined"){ chip = '<span class="bk-chip declined">Declined</span>'; extra = '<button class="btn btn-secondary sm" data-dismiss="' + esc(b.id) + '" data-key="' + esc(b.slotKey) + '" data-st="declined" type="button">Dismiss</button>'; }
+      else{ chip = '<span class="bk-chip pending">⏳ Waiting for teacher approval</span>'; extra = '<button class="btn btn-secondary sm" data-dismiss="' + esc(b.id) + '" data-key="' + esc(b.slotKey) + '" data-st="pending" type="button">Withdraw request</button>'; }
+      mh += "<div><div><b>" + esc(label) + "</b><br>" + chip + "</div><div>" + extra + "</div></div>";
+    });
+    $("b-mine").innerHTML = mh || '<p class="bk-empty">You have not booked anything yet.</p>';
+    Array.prototype.forEach.call($("b-mine").querySelectorAll("[data-chg]"), function(b){ b.addEventListener("click", function(){ changing = b.getAttribute("data-chg"); picked = null; banner("Choose the new time below. Your current time stays yours until the teacher approves the change.", ""); render(); $("b-grid").scrollIntoView({ behavior: "smooth", block: "start" }); }); });
+    Array.prototype.forEach.call($("b-mine").querySelectorAll("[data-stopchg]"), function(b){ b.addEventListener("click", function(){ changing = null; picked = null; banner(""); render(); }); });
+    Array.prototype.forEach.call($("b-mine").querySelectorAll("[data-clearchg]"), function(b){ b.addEventListener("click", function(){ PQFirebase.tuitionClearChange(b.getAttribute("data-clearchg")).then(function(r){ if(!r.ok) banner("Sorry, that could not be changed (" + esc(r.code) + ").", "bk-warn"); load(true); }); }); });
+    Array.prototype.forEach.call($("b-mine").querySelectorAll("[data-dismiss]"), function(b){
+      b.addEventListener("click", function(){
+        var st = b.getAttribute("data-st");
+        if(st === "pending" && !window.confirm("Withdraw this request and free the time?")) return;
+        PQFirebase.tuitionCancel(b.getAttribute("data-dismiss"), b.getAttribute("data-key"), st).then(function(r){ if(!r.ok) banner("Sorry, that could not be changed (" + esc(r.code) + "). Please try again.", "bk-warn"); else banner(""); load(true); });
+      });
+    });
+    // grid
+    if(!cfg || !cfg.open){ return; }
+    var keys = (cfg.slots || []).slice().sort(function(a, b){ var da = DAYS.map(function(d){ return d[0]; }), x = da.indexOf(a.split("_")[0]) - da.indexOf(b.split("_")[0]); return x || (mins(a) - mins(b)); });
+    var mineBy = {}; data.mine.forEach(function(b){ if(b.status !== "declined") mineBy[b.slotKey] = b; });
+    var full = myActive().length >= 2 && !changing, gh = "";
+    DAYS.forEach(function(d){
+      var ks = keys.filter(function(k){ return k.indexOf(d[0] + "_") === 0; }); if(!ks.length) return;
+      gh += '<div class="bk-day">' + d[1] + '</div><div class="bk-slots">';
+      ks.forEach(function(k){
+        var m = mineBy[k], t = !!data.taken[k], lab = range(k, len);
+        if(m) gh += '<button class="bk-slot mine" disabled type="button">' + lab + "<small>" + (m.status === "approved" ? "✔ Your session (approved)" : "⏳ Your request (pending)") + "</small></button>";
+        else if(t) gh += '<button class="bk-slot" disabled type="button">' + lab + "<small>Not available</small></button>";
+        else if(full || isAdmin) gh += '<button class="bk-slot" disabled type="button" title="' + (isAdmin ? "Admin preview" : "You already have 2 bookings") + '">' + lab + "<small>" + (isAdmin ? "Free (admin preview)" : "Free") + "</small></button>";
+        else gh += '<button class="bk-slot" data-pick="' + k + '" type="button">' + lab + "<small>" + (changing ? "Free – tap to move here" : "Free – tap to choose") + "</small></button>";
+      });
+      gh += "</div>";
+    });
+    $("b-grid").innerHTML = gh || '<p class="bk-empty">No times have been set up yet.</p>';
+    if(full) banner("You have used both of your 2 bookings. To choose a different time, first withdraw a pending request above.", "");
+    Array.prototype.forEach.call($("b-grid").querySelectorAll("[data-pick]"), function(b){ b.addEventListener("click", function(){ picked = b.getAttribute("data-pick"); renderConfirm(len); $("b-confirm").scrollIntoView({ behavior: "smooth", block: "nearest" }); }); });
+    renderConfirm(len);
+  }
+  function renderConfirm(len){
+    var box = $("b-confirm");
+    if(!picked){ box.innerHTML = ""; return; }
+    var cur = changing ? data.mine.filter(function(x){ return x.id === changing; })[0] : null;
+    box.innerHTML = '<div class="bk-confirm"><b>' + (cur ? "Ask to move from " + esc(dayOf(cur.slotKey) + ", " + range(cur.slotKey, len)) + " to " : "Request ") + esc(dayOf(picked)) + ", " + esc(range(picked, len)) + '?</b><div class="bk-empty">This is a weekly session. Your teacher will need to approve it' + (cur ? "; until then you keep your current time" : "") + '.</div><div class="row"><button class="btn btn-primary" id="c-yes" type="button">' + (cur ? "Yes, ask for this change" : "Yes, request this time") + '</button><button class="btn btn-secondary" id="c-no" type="button">Cancel</button></div></div>';
+    $("c-no").addEventListener("click", function(){ picked = null; box.innerHTML = ""; });
+    $("c-yes").addEventListener("click", function(){
+      if(busy) return; busy = true; $("c-yes").disabled = true; $("c-yes").textContent = "Sending…";
+      var key = picked;
+      if(changing){
+        PQFirebase.tuitionRequestChange(changing, key).then(function(r){
+          busy = false; picked = null; changing = null;
+          banner(r.ok ? "<b>Change requested!</b> Your teacher needs to approve the move and will let you know. Until then you keep your current time. Log in again later to check." : "Sorry, the change could not be requested (" + esc(r.code || "error") + "). That time may have just been taken; please try another.", r.ok ? "bk-ok" : "bk-warn");
+          load(true);
+        });
+        return;
+      }
+      PQFirebase.tuitionBook(user.uid, { name: user.name, "class": user["class"] }, key).then(function(r){
+        busy = false; picked = null;
+        if(r.ok){ banner("<b>Request sent!</b> Your teacher needs to <b>approve</b> this booking and will let you know. Log in again later to check whether it has been approved.", "bk-ok"); }
+        else if(r.code === "taken") banner("Sorry, someone has just booked that time. Please choose another.", "bk-warn");
+        else if(r.code === "limit") banner("You already have 2 bookings. Withdraw one first to choose a different time.", "bk-warn");
+        else banner("Sorry, the booking could not be saved (" + esc(r.code || "error") + "). Please try again, or tell your teacher.", "bk-warn");
+        load(true);
+      });
+    });
+  }
+  function load(keepBanner){
+    return PQFirebase.tuitionLoad(user.uid).then(function(d){ data = d; if(!keepBanner) banner(""); render(); show("s-book"); }).catch(function(err){
+      $("s-wait").innerHTML = '<p class="step-sub">Sorry, the schedule could not be loaded (' + esc((err && (err.code || err.message)) || "error") + '). <button class="link-btn" id="w-retry" type="button">Try again</button></p>'; show("s-wait");
+      $("w-retry").addEventListener("click", function(){ load(); });
+    });
+  }
+  PQFirebase.onAuthChange(function(u){
+    clearInterval(timer);
+    if(!u){ show("s-login"); return; }
+    user = u; if(!user.name) user.name = "";
+    var chk = PQFirebase.checkIsAdmin ? PQFirebase.checkIsAdmin(u.uid) : Promise.resolve(false);
+    chk.then(function(a){
+      isAdmin = !!a;
+      if(!user.name || !user["class"]){ if(!isAdmin){ $("s-wait").innerHTML = '<p class="step-sub">Your account has no name or class yet. Please sign in on the main site once first.</p>'; show("s-wait"); return; } }
+      return load();
+    }).then(function(){ timer = setInterval(function(){ if(!document.hidden && !picked && !busy && user) load(true); }, 60000); });
+  });
+})();
+</script>
+</body>
+</html>

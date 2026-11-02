@@ -33,6 +33,8 @@ import {
   orderBy,
   where,
   writeBatch,
+  updateDoc,
+  deleteField,
   serverTimestamp
 } from "firebase/firestore";
 
@@ -712,6 +714,114 @@ function listAllFeedback(){
   });
 }
 
+// ---------- Tuition booking (hidden page: weekly slots) ----------
+// tuitionConfig/main      : admin settings + the list of bookable slot keys (day_HHMM)
+// tuitionTaken/{slotKey}  : public "this slot is taken" marker (no names)
+// tuitionBookings/{uid_1|uid_2} : a student's booking, at most two per student
+// tuitionLedger/{owner}   : admin-only: paid / sessions completed / note
+function tuCfgRef(){ return doc(db, "tuitionConfig", "main"); }
+function tuitionGetConfig(){
+  return getDoc(tuCfgRef()).then(function(s){ return s.exists() ? s.data() : null; });
+}
+function tuitionLoad(uid){
+  return Promise.all([
+    tuitionGetConfig(),
+    getDocs(collection(db, "tuitionTaken")),
+    getDocs(query(collection(db, "tuitionBookings"), where("uid", "==", uid)))
+  ]).then(function(r){
+    var taken = {}, mine = [];
+    r[1].forEach(function(d){ taken[d.id] = true; });
+    r[2].forEach(function(d){ var x = d.data() || {}; mine.push({ id: d.id, slotKey: x.slotKey, status: x.status, name: x.name, grade: x.grade, changeTo: x.changeTo || "", changeResult: x.changeResult || "" }); });
+    return { config: r[0], taken: taken, mine: mine };
+  });
+}
+function tuitionBook(uid, profile, slotKey){
+  return getDocs(query(collection(db, "tuitionBookings"), where("uid", "==", uid))).then(function(snap){
+    var seats = { "1": null, "2": null };
+    snap.forEach(function(d){ var n = d.id.split("_")[1]; if(n in seats) seats[n] = d.data() || {}; });
+    var seat = null;
+    ["1", "2"].forEach(function(n){ if(!seat && !seats[n]) seat = n; });
+    ["1", "2"].forEach(function(n){ if(!seat && seats[n] && seats[n].status === "declined") seat = n; });
+    if(!seat) return { ok: false, code: "limit" };
+    var batch = writeBatch(db);
+    batch.set(doc(db, "tuitionBookings", uid + "_" + seat), { uid: uid, slotKey: slotKey, name: profile.name, grade: profile["class"], status: "pending", createdAt: serverTimestamp() });
+    batch.set(doc(db, "tuitionTaken", slotKey), { taken: true, at: serverTimestamp() });
+    return batch.commit().then(function(){ return { ok: true }; }, function(err){
+      // If the marker already exists somebody else got there first.
+      return getDoc(doc(db, "tuitionTaken", slotKey)).then(function(t){
+        return { ok: false, code: t.exists() ? "taken" : ((err && err.code) || "error"), error: (err && err.message) || "" };
+      }, function(){ return { ok: false, code: (err && err.code) || "error" }; });
+    });
+  }).catch(function(err){ return { ok: false, code: (err && err.code) || "error", error: (err && err.message) || "" }; });
+}
+// Student: withdraw a pending request (frees the slot) or dismiss a declined one.
+function tuitionCancel(bid, slotKey, status){
+  var batch = writeBatch(db);
+  batch.delete(doc(db, "tuitionBookings", bid));
+  if(status === "pending") batch.delete(doc(db, "tuitionTaken", slotKey));
+  return batch.commit().then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+// Student: ask to move an approved booking to another free slot (the teacher decides).
+function tuitionRequestChange(bid, newKey){
+  return updateDoc(doc(db, "tuitionBookings", bid), { changeTo: newKey, changeAt: serverTimestamp(), changeResult: deleteField() })
+    .then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+// Student: withdraw a change request, or dismiss the "declined" note.
+function tuitionClearChange(bid){
+  return updateDoc(doc(db, "tuitionBookings", bid), { changeTo: deleteField(), changeAt: deleteField(), changeResult: deleteField() })
+    .then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+// Admin: approve (move the booking) or decline a change request.
+function tuitionDecideChange(b, approve){
+  var ref = doc(db, "tuitionBookings", b.id);
+  if(!approve) return updateDoc(ref, { changeTo: deleteField(), changeAt: deleteField(), changeResult: "declined" })
+    .then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+  return getDoc(doc(db, "tuitionTaken", b.changeTo)).then(function(t){
+    if(t.exists()) return { ok: false, code: "taken" };
+    var batch = writeBatch(db);
+    batch.update(ref, { slotKey: b.changeTo, changeTo: deleteField(), changeAt: deleteField(), changeResult: deleteField() });
+    batch.delete(doc(db, "tuitionTaken", b.slotKey));
+    batch.set(doc(db, "tuitionTaken", b.changeTo), { taken: true, at: serverTimestamp() });
+    return batch.commit().then(function(){ return { ok: true }; });
+  }).catch(function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+
+// ----- admin -----
+function tuitionAdminLoad(){
+  return Promise.all([tuitionGetConfig(), getDocs(collection(db, "tuitionBookings")), getDocs(collection(db, "tuitionLedger")), getDocs(collection(db, "tuitionTaken"))]).then(function(r){
+    var bookings = [], ledger = {}, taken = {};
+    r[1].forEach(function(d){ var x = d.data() || {}; x.id = d.id; x.createdMs = x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0; delete x.createdAt; delete x.decidedAt; delete x.changeAt; bookings.push(x); });
+    r[2].forEach(function(d){ var x = d.data() || {}; delete x.updatedAt; ledger[d.id] = x; });
+    r[3].forEach(function(d){ taken[d.id] = true; });
+    return { config: r[0], bookings: bookings, ledger: ledger, taken: taken };
+  });
+}
+function tuitionSaveConfig(cfg){ return setDoc(tuCfgRef(), Object.assign({}, cfg, { updatedAt: serverTimestamp() })); }
+// status: "approved" | "declined" | "pending"
+function tuitionSetStatus(b, status){
+  var batch = writeBatch(db), ref = doc(db, "tuitionBookings", b.id), tk = doc(db, "tuitionTaken", b.slotKey);
+  batch.set(ref, { status: status, decidedAt: serverTimestamp() }, { merge: true });
+  if(status === "declined") batch.delete(tk); else batch.set(tk, { taken: true, at: serverTimestamp() });
+  return batch.commit().then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+function tuitionAdminRemove(b){
+  var batch = writeBatch(db);
+  batch.delete(doc(db, "tuitionBookings", b.id)); batch.delete(doc(db, "tuitionTaken", b.slotKey));
+  return batch.commit().then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+// A student who has no account (or an existing one you enter by hand), approved straight away.
+function tuitionAdminAdd(rec){
+  var owner = "manual_" + Math.random().toString(36).slice(2, 10), batch = writeBatch(db);
+  batch.set(doc(db, "tuitionBookings", owner + "_1"), { uid: owner, slotKey: rec.slotKey, name: rec.name, grade: rec.grade, status: "approved", manual: true, createdAt: serverTimestamp() });
+  batch.set(doc(db, "tuitionTaken", rec.slotKey), { taken: true, at: serverTimestamp() });
+  batch.set(doc(db, "tuitionLedger", owner), { name: rec.name, grade: rec.grade, paid: false, sessionsDone: 0, note: "", updatedAt: serverTimestamp() });
+  return batch.commit().then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+function tuitionLedgerSave(owner, data){
+  return setDoc(doc(db, "tuitionLedger", owner), Object.assign({}, data, { updatedAt: serverTimestamp() }), { merge: true })
+    .then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+
 // True only if admins/{uid} exists. The rules let a user read ONLY their own
 // admins doc, so this reveals nothing about anyone else.
 function checkIsAdmin(uid){
@@ -724,6 +834,18 @@ window.PQFirebase = {
   getMyFeedback: getMyFeedback,
   submitFeedback: submitFeedback,
   listAllFeedback: listAllFeedback,
+  tuitionLoad: tuitionLoad,
+  tuitionBook: tuitionBook,
+  tuitionCancel: tuitionCancel,
+  tuitionRequestChange: tuitionRequestChange,
+  tuitionClearChange: tuitionClearChange,
+  tuitionDecideChange: tuitionDecideChange,
+  tuitionAdminLoad: tuitionAdminLoad,
+  tuitionSaveConfig: tuitionSaveConfig,
+  tuitionSetStatus: tuitionSetStatus,
+  tuitionAdminRemove: tuitionAdminRemove,
+  tuitionAdminAdd: tuitionAdminAdd,
+  tuitionLedgerSave: tuitionLedgerSave,
   signUp: signUp,
   logIn: logIn,
   logOut: logOut,

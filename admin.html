@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-28tqQta7MLULJ7FJem2fjPkssGcFgzk/y/IFKUtIKE8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-aJZxqkVnOdYiMMtNUN3rk5kw5Aw3F0nez8CP9ODP2C4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -440,6 +440,7 @@
       <button class="admin-tab" data-tab="archive">Archive</button>
       <button class="admin-tab" data-tab="attention">Needs attention</button>
       <button class="admin-tab" data-tab="feedback">Feedback</button>
+      <button class="admin-tab" data-tab="tuition">Tuition</button>
       <button class="admin-tab" data-tab="classes">Class overview</button>
       <button class="admin-tab" data-tab="students">Quiz log</button>
     </div>
@@ -698,6 +699,17 @@
         </div>
         <p class="admin-status" id="fb-status">Click "Load student feedback" to read what students said about the iLearn journey.</p>
         <div id="fb-body"></div>
+      </div>
+
+      <div class="admin-panel" id="panel-tuition">
+        <div class="admin-toolbar no-print">
+          <button class="btn btn-primary" id="btn-tu-load" type="button">Load tuition bookings</button>
+          <span style="font-size:.85rem">Student booking link:</span>
+          <input type="text" id="tu-link" readonly style="min-width:260px;flex:1">
+          <button class="btn btn-secondary" id="btn-tu-copy" type="button">Copy link</button>
+        </div>
+        <p class="admin-status" id="tu-status">Click "Load tuition bookings". Give students the link above; it is not shown anywhere on the site.</p>
+        <div id="tu-body"></div>
       </div>
 
       <div class="admin-panel" id="panel-archive">
@@ -988,7 +1000,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","archive"];
+  var PANELS = ["students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","tuition","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
@@ -2525,6 +2537,148 @@
     }));
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" })); a.download = "ilearn-feedback.csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
   });
+
+
+  // ---------------- Tuition bookings ----------------
+  var TU_PAGE = "book-m4k7t2qx9v.html";
+  var TU_DAYS = [["sat","Saturday"],["sun","Sunday"],["mon","Monday"],["tue","Tuesday"],["wed","Wednesday"],["thu","Thursday"],["fri","Friday"]];
+  var TU_DEFAULT = { open: true, slotMinutes: 90, gapMinutes: 30, note: "", days: {
+    sat: { on: true, start: "15:30", end: "19:00" }, sun: { on: false, start: "15:30", end: "19:00" }, mon: { on: true, start: "15:30", end: "19:00" },
+    tue: { on: true, start: "15:30", end: "19:00" }, wed: { on: true, start: "15:30", end: "19:00" }, thu: { on: false, start: "15:30", end: "19:00" }, fri: { on: false, start: "15:30", end: "19:00" } } };
+  var tu = null;   // { config, bookings, ledger, taken }
+  function tuMin(t){ var p = String(t || "0:0").split(":"); return Number(p[0]) * 60 + Number(p[1] || 0); }
+  function tuKey(day, m){ var h = Math.floor(m / 60), mm = m % 60; return day + "_" + (h < 10 ? "0" : "") + h + (mm < 10 ? "0" : "") + mm; }
+  function tuKeyMin(k){ var t = k.split("_")[1]; return Number(t.slice(0, 2)) * 60 + Number(t.slice(2)); }
+  function tu12(m){ var h = Math.floor(m / 60) % 24, mm = m % 60, ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return h + ":" + (mm < 10 ? "0" : "") + mm + " " + ap; }
+  function tuRange(k, len){ var a = tuKeyMin(k), A = tu12(a), B = tu12(a + len); return (A.slice(-2) === B.slice(-2) ? A.slice(0, -3) : A) + "–" + B; }
+  function tuDayName(k){ var d = TU_DAYS.filter(function(x){ return x[0] === k.split("_")[0]; })[0]; return d ? d[1] : k; }
+  function tuSlots(cfg){
+    var out = [], L = Number(cfg.slotMinutes) || 90, G = Math.max(0, Number(cfg.gapMinutes) || 0);
+    TU_DAYS.forEach(function(d){ var c = (cfg.days || {})[d[0]]; if(!c || !c.on) return; for(var t = tuMin(c.start); t + L <= tuMin(c.end); t += L + G) out.push(tuKey(d[0], t)); });
+    return out;
+  }
+  function tuOwner(b){ return b.uid || String(b.id).replace(/_[12]$/, ""); }
+  function tuErr(r){ return "Failed (" + esc12((r && r.code) || "error") + "). " + ((r && /permission/i.test(r.code || "")) ? "Publish the latest firestore.rules (see SECURITY.md)." : ""); }
+  function tuRender(){
+    var box = document.getElementById("tu-body"), cfg = tu.config || TU_DEFAULT, L = Number(cfg.slotMinutes) || 90, st = document.getElementById("tu-status");
+    var slots = tu.config ? (tu.config.slots || []) : [], by = {};
+    tu.bookings.forEach(function(b){ if(b.status !== "declined") by[b.slotKey] = b; });
+    var active = tu.bookings.filter(function(b){ return b.status !== "declined"; }), pending = active.filter(function(b){ return b.status === "pending"; }), changes = active.filter(function(b){ return b.status === "approved" && b.changeTo; });
+    var owners = {}; active.forEach(function(b){ owners[tuOwner(b)] = 1; });
+    var paid = 0, unpaid = 0, done = 0;
+    Object.keys(owners).forEach(function(o){ var l = tu.ledger[o] || {}; if(l.paid) paid++; else unpaid++; done += Number(l.sessionsDone) || 0; });
+    st.textContent = tu.config ? "Loaded." : "No settings saved yet: review the defaults below and press Save settings.";
+    var h = '<div class="kpi-row">' +
+      '<div class="kpi"><div class="k-label">Students booked</div><div class="k-value">' + Object.keys(owners).length + '</div><div class="k-sub">' + active.length + ' weekly sessions</div></div>' +
+      '<div class="kpi"><div class="k-label">Waiting for approval</div><div class="k-value">' + (pending.length + changes.length) + '</div><div class="k-sub">' + (pending.length + changes.length ? (changes.length + " change request" + (changes.length === 1 ? "" : "s") + " included") : "all clear") + '</div></div>' +
+      '<div class="kpi"><div class="k-label">Free slots</div><div class="k-value">' + slots.filter(function(k){ return !tu.taken[k]; }).length + '</div><div class="k-sub">of ' + slots.length + '</div></div>' +
+      '<div class="kpi"><div class="k-label">Paid / not paid</div><div class="k-value">' + paid + ' / ' + unpaid + '</div><div class="k-sub">students</div></div>' +
+      '<div class="kpi"><div class="k-label">Sessions completed</div><div class="k-value">' + done + '</div><div class="k-sub">all students</div></div></div>';
+    // pending approvals
+    h += '<h4 style="margin:6px 0 8px">Waiting for your approval</h4>';
+    if(!pending.length) h += '<p class="admin-status">Nothing is waiting.</p>';
+    else{
+      h += '<div class="table-scroll"><table class="admin-table"><thead><tr><th>Student</th><th>Grade</th><th>Requested slot</th><th>Requested</th><th></th></tr></thead><tbody>';
+      pending.sort(function(a, b){ return a.createdMs - b.createdMs; }).forEach(function(b){
+        h += '<tr style="cursor:default"><td>' + esc12(b.name || "") + '</td><td>' + esc12(b.grade || "") + '</td><td>' + esc12(tuDayName(b.slotKey) + ", " + tuRange(b.slotKey, L)) + '</td><td>' + esc12(fmtDay(b.createdMs)) + '</td><td><button class="btn btn-primary sm" data-tu="approved" data-id="' + esc12(b.id) + '" type="button">Approve</button> <button class="btn btn-secondary sm" data-tu="declined" data-id="' + esc12(b.id) + '" type="button">Decline</button></td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+    if(changes.length){
+      h += '<h4 style="margin:18px 0 8px">Change requests (students asking to move an approved slot)</h4><div class="table-scroll"><table class="admin-table"><thead><tr><th>Student</th><th>Grade</th><th>Now</th><th>Wants to move to</th><th></th></tr></thead><tbody>';
+      changes.forEach(function(b){
+        var gone = !!tu.taken[b.changeTo];
+        h += '<tr style="cursor:default"><td>' + esc12(b.name || "") + '</td><td>' + esc12(b.grade || "") + '</td><td>' + esc12(tuDayName(b.slotKey) + ", " + tuRange(b.slotKey, L)) + '</td><td>' + esc12(tuDayName(b.changeTo) + ", " + tuRange(b.changeTo, L)) + (gone ? ' <b>(now taken)</b>' : '') + '</td><td><button class="btn btn-primary sm" data-chg="1" data-id="' + esc12(b.id) + '"' + (gone ? " disabled" : "") + ' type="button">Approve move</button> <button class="btn btn-secondary sm" data-chg="0" data-id="' + esc12(b.id) + '" type="button">Decline</button></td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+    // students ledger
+    h += '<h4 style="margin:22px 0 8px">Students: payment and sessions</h4>';
+    var list = Object.keys(owners).map(function(o){ var bs = active.filter(function(b){ return tuOwner(b) === o; }), l = tu.ledger[o] || {}; return { o: o, bs: bs, l: l, name: (bs[0] && bs[0].name) || l.name || "", grade: (bs[0] && bs[0].grade) || l.grade || "" }; })
+      .sort(function(a, b){ return a.name.localeCompare(b.name); });
+    if(!list.length) h += '<p class="admin-status">No students yet. Add the current ones below.</p>';
+    else{
+      h += '<div class="table-scroll"><table class="admin-table"><thead><tr><th>Student</th><th>Grade</th><th>Weekly slot(s)</th><th>Status</th><th>Paid</th><th>Sessions done</th><th>Note</th></tr></thead><tbody>';
+      list.forEach(function(x){
+        var slotsTxt = x.bs.map(function(b){ return esc12(tuDayName(b.slotKey).slice(0, 3) + " " + tuRange(b.slotKey, L)) + ' <button class="link-btn" data-rm="' + esc12(b.id) + '" type="button" title="Remove this booking">✕</button>'; }).join("<br>");
+        var stTxt = x.bs.map(function(b){ return (b.status === "approved" ? "✔ approved" : "⏳ pending") + (b.changeTo ? " (wants to move)" : ""); }).join("<br>");
+        h += '<tr style="cursor:default"><td>' + esc12(x.name) + '</td><td>' + esc12(x.grade) + '</td><td style="font-size:.85rem">' + slotsTxt + '</td><td style="font-size:.85rem">' + stTxt + '</td>' +
+          '<td><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-paid="' + esc12(x.o) + '"' + (x.l.paid ? " checked" : "") + '> ' + (x.l.paid ? "Paid" : "Not paid") + '</label></td>' +
+          '<td style="white-space:nowrap"><button class="btn btn-secondary sm" data-sess="-1" data-o="' + esc12(x.o) + '" type="button">−</button> <b style="display:inline-block;min-width:26px;text-align:center">' + (Number(x.l.sessionsDone) || 0) + '</b> <button class="btn btn-secondary sm" data-sess="1" data-o="' + esc12(x.o) + '" type="button">+1</button></td>' +
+          '<td><input type="text" class="tu-note" data-o="' + esc12(x.o) + '" value="' + esc12(x.l.note || "") + '" maxlength="200" placeholder="note" style="min-width:140px"></td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+    // add manually
+    var opts = slots.map(function(k){ return '<option value="' + k + '">' + esc12(tuDayName(k) + " " + tuRange(k, L)) + (tu.taken[k] ? " (taken)" : "") + '</option>'; }).join("");
+    h += '<div class="admin-toolbar no-print" style="margin-top:12px"><b>Add a student by hand</b> <input type="text" id="tu-add-name" placeholder="Name" maxlength="80"> <input type="text" id="tu-add-grade" placeholder="Grade (e.g. IG, AS)" maxlength="20" style="width:130px"> <select id="tu-add-slot">' + opts + '</select> <button class="btn btn-secondary" id="tu-add-btn" type="button">Add (approved)</button></div>';
+    var seeds = [["M.Aun", "AS", "sat_1730"], ["Faris", "IG", "mon_1530"], ["Ibrahim", "IG", "tue_1730"], ["Adham", "IG", "wed_1530"]];
+    if(tu.config && !tu.bookings.length) h += '<p class="admin-status"><button class="btn btn-secondary" id="tu-seed" type="button">Add the 4 current students from your schedule</button> (M.Aun AS Sat 5:30, Faris IG Mon 3:30, Ibrahim IG Tue 5:30, Adham IG Wed 3:30)</p>';
+    // weekly timetable
+    h += '<h4 style="margin:22px 0 8px">Weekly timetable</h4><div class="table-scroll"><table class="admin-table"><thead><tr><th>Day</th><th>Time</th><th>Status</th><th>Student</th><th>Grade</th></tr></thead><tbody>';
+    slots.slice().sort(function(a, b){ var ia = TU_DAYS.map(function(d){ return d[0]; }); return (ia.indexOf(a.split("_")[0]) - ia.indexOf(b.split("_")[0])) || (tuKeyMin(a) - tuKeyMin(b)); }).forEach(function(k){
+      var b = by[k];
+      h += '<tr style="cursor:default"><td>' + esc12(tuDayName(k)) + '</td><td>' + esc12(tuRange(k, L)) + '</td><td>' + (b ? (b.status === "approved" ? "✔ Booked" : "⏳ Pending") : "Free") + '</td><td>' + esc12(b ? b.name : "") + '</td><td>' + esc12(b ? b.grade : "") + '</td></tr>';
+    });
+    h += '</tbody></table></div>';
+    // settings
+    h += '<h4 style="margin:22px 0 8px">Booking settings</h4><div class="admin-toolbar no-print"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="tu-open"' + (cfg.open ? " checked" : "") + '> Booking is open</label> ' +
+      '<label>Slot length (minutes, at least 90) <input type="number" id="tu-len" min="90" step="15" value="' + L + '" style="width:80px"></label> <label>Break between slots (minutes) <input type="number" id="tu-gap" min="0" step="5" value="' + (cfg.gapMinutes == null ? 0 : cfg.gapMinutes) + '" style="width:70px"></label> <input type="text" id="tu-notetxt" maxlength="200" placeholder="Message shown to students (optional)" style="min-width:260px" value="' + esc12(cfg.note || "") + '"></div>';
+    h += '<div class="table-scroll"><table class="admin-table"><thead><tr><th>Day</th><th>Available</th><th>From</th><th>To</th></tr></thead><tbody>';
+    TU_DAYS.forEach(function(d){ var c = (cfg.days || {})[d[0]] || { on: false, start: "15:30", end: "20:00" };
+      h += '<tr style="cursor:default"><td>' + d[1] + '</td><td><input type="checkbox" data-d="' + d[0] + '" data-f="on"' + (c.on ? " checked" : "") + '></td><td><input type="time" data-d="' + d[0] + '" data-f="start" value="' + esc12(c.start) + '"></td><td><input type="time" data-d="' + d[0] + '" data-f="end" value="' + esc12(c.end) + '"></td></tr>'; });
+    h += '</tbody></table></div><p class="admin-status">Slots start at "From" and follow one another (with the break between them) while they still finish by "To", each at least 90 minutes. For 3:30 to 7:00 PM with a 30-minute break you get 3:30\u20135:00 and 5:30\u20137:00. Bookings that already exist are never removed when you change the hours.</p><button class="btn btn-primary" id="tu-save" type="button">Save settings</button>';
+    box.innerHTML = h;
+    tuWire();
+  }
+  function tuReload(msg){ return PQFirebase.tuitionAdminLoad().then(function(d){ tu = d; tuRender(); if(msg) document.getElementById("tu-status").textContent = msg; }).catch(function(err){ document.getElementById("tu-status").textContent = /permission|denied/i.test((err && (err.code + " " + err.message)) || "") ? "Permission denied. Publish the latest firestore.rules in the Firebase console (see SECURITY.md), then try again." : "Could not load (" + ((err && (err.code || err.message)) || "error") + ")."; }); }
+  function tuWire(){
+    var box = document.getElementById("tu-body"), q = function(sel, fn){ Array.prototype.forEach.call(box.querySelectorAll(sel), fn); };
+    q("[data-tu]", function(b){ b.addEventListener("click", function(){
+      var bk = tu.bookings.filter(function(x){ return x.id === b.dataset.id; })[0]; if(!bk) return; b.disabled = true;
+      PQFirebase.tuitionSetStatus(bk, b.dataset.tu).then(function(r){ if(!r.ok){ alert(tuErr(r)); b.disabled = false; return; } tuReload(b.dataset.tu === "approved" ? "Approved. The student sees it next time they log in." : "Declined and the slot is free again."); });
+    }); });
+    q("[data-chg]", function(b){ b.addEventListener("click", function(){
+      var bk = tu.bookings.filter(function(x){ return x.id === b.dataset.id; })[0]; if(!bk) return; b.disabled = true;
+      PQFirebase.tuitionDecideChange(bk, b.dataset.chg === "1").then(function(r){
+        if(!r.ok){ alert(r.code === "taken" ? "That slot has just been taken by someone else." : tuErr(r)); b.disabled = false; return; }
+        tuReload(b.dataset.chg === "1" ? "Moved. The student sees the new time next time they log in." : "Change declined; the student keeps the current time.");
+      });
+    }); });
+    q("[data-rm]", function(b){ b.addEventListener("click", function(){
+      var bk = tu.bookings.filter(function(x){ return x.id === b.dataset.rm; })[0]; if(!bk || !confirm("Remove " + (bk.name || "this student") + " from " + tuDayName(bk.slotKey) + "? The slot becomes free.")) return;
+      PQFirebase.tuitionAdminRemove(bk).then(function(r){ if(!r.ok) alert(tuErr(r)); else tuReload("Removed."); });
+    }); });
+    q("[data-paid]", function(c){ c.addEventListener("change", function(){ PQFirebase.tuitionLedgerSave(c.dataset.paid, { paid: c.checked }).then(function(r){ if(!r.ok){ alert(tuErr(r)); c.checked = !c.checked; } else tuReload(); }); }); });
+    q("[data-sess]", function(b){ b.addEventListener("click", function(){ var o = b.dataset.o, cur = Number((tu.ledger[o] || {}).sessionsDone) || 0, nx = Math.max(0, cur + Number(b.dataset.sess));
+      PQFirebase.tuitionLedgerSave(o, { sessionsDone: nx }).then(function(r){ if(!r.ok) alert(tuErr(r)); else tuReload(); }); }); });
+    q(".tu-note", function(i){ i.addEventListener("change", function(){ PQFirebase.tuitionLedgerSave(i.dataset.o, { note: i.value.replace(/[<>&]/g, " ").slice(0, 200) }).then(function(r){ if(!r.ok) alert(tuErr(r)); else tu.ledger[i.dataset.o] = Object.assign(tu.ledger[i.dataset.o] || {}, { note: i.value }); }); }); });
+    var add = document.getElementById("tu-add-btn");
+    if(add) add.addEventListener("click", function(){
+      var n = document.getElementById("tu-add-name").value.replace(/[<>&]/g, " ").trim(), g = document.getElementById("tu-add-grade").value.replace(/[<>&]/g, " ").trim(), k = document.getElementById("tu-add-slot").value;
+      if(!n || !g || !k){ alert("Please enter the name, the grade and choose a slot."); return; }
+      if(tu.taken[k] && !confirm("That slot is already taken. Add anyway?")) return;
+      PQFirebase.tuitionAdminAdd({ name: n, grade: g, slotKey: k }).then(function(r){ if(!r.ok) alert(tuErr(r)); else tuReload("Student added."); });
+    });
+    var seed = document.getElementById("tu-seed");
+    if(seed) seed.addEventListener("click", function(){
+      seed.disabled = true; var seeds = [["M.Aun", "AS", "sat_1730"], ["Faris", "IG", "mon_1530"], ["Ibrahim", "IG", "tue_1730"], ["Adham", "IG", "wed_1530"]];
+      seeds.reduce(function(p, s){ return p.then(function(ok){ return ok ? PQFirebase.tuitionAdminAdd({ name: s[0], grade: s[1], slotKey: s[2] }).then(function(r){ return r.ok; }) : false; }); }, Promise.resolve(true)).then(function(ok){ if(!ok) alert("Failed. Publish the latest firestore.rules and try again."); tuReload(ok ? "The 4 students were added." : ""); });
+    });
+    document.getElementById("tu-save").addEventListener("click", function(){
+      var cfg = { open: document.getElementById("tu-open").checked, slotMinutes: Math.max(90, Math.round(Number(document.getElementById("tu-len").value) || 90)), gapMinutes: Math.max(0, Math.round(Number(document.getElementById("tu-gap").value) || 0)), note: document.getElementById("tu-notetxt").value.replace(/[<>&]/g, " ").trim().slice(0, 200), days: {} };
+      var bad = "";
+      box.querySelectorAll("[data-d]").forEach(function(el){ var d = el.dataset.d; cfg.days[d] = cfg.days[d] || { on: false, start: "15:30", end: "20:00" }; if(el.dataset.f === "on") cfg.days[d].on = el.checked; else cfg.days[d][el.dataset.f] = el.value; });
+      TU_DAYS.forEach(function(d){ var c = cfg.days[d[0]]; if(c.on && (!c.start || !c.end || tuMin(c.end) - tuMin(c.start) < cfg.slotMinutes)) bad = d[1] + ": the time range must be at least " + cfg.slotMinutes + " minutes."; });
+      if(bad){ alert(bad); return; }
+      cfg.slots = tuSlots(cfg);
+      if(cfg.slots.length > 120){ alert("Too many slots."); return; }
+      PQFirebase.tuitionSaveConfig(cfg).then(function(){ tuReload("Settings saved: " + cfg.slots.length + " slots."); }).catch(function(err){ alert("Could not save (" + ((err && err.code) || "error") + "). Publish the latest firestore.rules."); });
+    });
+  }
+  document.getElementById("tu-link").value = new URL(TU_PAGE, location.href).href;
+  document.getElementById("btn-tu-copy").addEventListener("click", function(){ var i = document.getElementById("tu-link"); i.select(); try{ navigator.clipboard.writeText(i.value); }catch(e){ document.execCommand("copy"); } this.textContent = "Copied ✔"; var b = this; setTimeout(function(){ b.textContent = "Copy link"; }, 1500); });
+  document.getElementById("btn-tu-load").addEventListener("click", function(){ document.getElementById("tu-status").textContent = "Loading..."; tuReload(); });
 
   document.getElementById("filter-class-attn").addEventListener("change", renderAttention);
   document.getElementById("btn-attn-load").addEventListener("click", function(){
