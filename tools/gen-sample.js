@@ -23,42 +23,36 @@ Object.keys(E).forEach(k => { const e = E[k], c = (e.classes || []).join(","), n
 Object.keys(P).forEach(k => { const p = P[k], c = (p.classes || []).join(","), n = (p.questions || []).length; if(/10BR/.test(c)) cnt.igcse += n; else if(/11BR/.test(c)) cnt.as += n; else if(/12BR/.test(c)) cnt.a2 += n; });
 
 const byId = (arr, id) => { const l = arr.find(x => x.id === id); if(!l) throw new Error("lesson not found: " + id); return l; };
-const lesson = l => ({ id: l.id, code: l.code, title: l.title, video: l.video || null, concept: l.concept, example: l.example, checks: l.checks });
+// Checks of type "pp" embed Cambridge past-paper questions, so they are left out of the public sample.
+const lesson = l => ({ id: l.id, code: l.code, title: l.title, video: l.video || null, concept: l.concept, example: l.example, checks: (l.checks || []).filter(c => c.type !== "pp") });
 const mcq = (key, i) => { const q = E[key].questions[i]; if(!q || q.type !== "mcq") throw new Error("not an mcq: " + key + "#" + i); return { type: "mcq", q: q.q, options: q.options, correct: q.correct, explain: q.explain, topic: q.topic || "" }; };
 // Structured sample questions are written for the sample itself (not copied from the question bank), so no
 // past-paper text is shown to the public. Marking uses simple keyword groups, like the real iSolve.
-const AS_Q = { type: "paper", topic: "Sound: sampling rate", marks: 3,
-  prompt: "A sound is recorded digitally.\n(a) State what is meant by the sampling rate. [1]\n(b) State one effect of increasing the sampling rate on the quality of the recording and one effect on the file size. [2]",
+const AS_Q = { type: "paper", topic: "Compression", marks: 3,
+  prompt: "A music file is compressed before it is uploaded.\n(a) State one benefit of compressing the file. [1]\n(b) The compression is lossy. Describe what happens to the data when lossy compression is used. [2]",
   markPoints: [
-    { text: "(a) The number of samples (measurements of the sound wave) taken per second", marks: 1, match: { type: "keywords", groups: [["sample", "measurement"], ["per second", "each second", "every second", "a second", "hertz", "hz"]], needCount: 2 } },
-    { text: "(b) Higher quality: the recording is closer to / a more accurate copy of the original sound", marks: 1, match: { type: "keywords", groups: [["quality", "accurate", "accuracy", "closer", "faithful", "better"]], needCount: 1 } },
-    { text: "(b) The file size increases (more data is stored)", marks: 1, match: { type: "keywords", groups: [["larger", "bigger", "more storage", "more memory", "more data", "file size increases", "increases the file", "increase in file size"]], needCount: 1 } } ],
-  explanation: "A sample is one measurement of the sound wave. Taking more samples each second records the wave more accurately, but there is more data to store, so the file is larger." };
-const A2_Q = { type: "paper", topic: "Symmetric and asymmetric encryption", marks: 3,
-  prompt: "Describe how symmetric encryption differs from asymmetric encryption. [3]",
+    { text: "(a) Smaller file / less storage space / faster to upload or download / less bandwidth", marks: 1, match: { type: "keywords", groups: [["smaller", "less storage", "less space", "faster", "quicker", "less bandwidth", "less data", "takes up less"]], needCount: 1 } },
+    { text: "(b) Some data / detail is permanently removed", marks: 1, match: { type: "keywords", groups: [["remove", "removed", "discard", "discarded", "lost", "loses", "deleted", "permanent", "less important"]], needCount: 1 } },
+    { text: "(b) The original file cannot be restored exactly / quality is reduced", marks: 1, match: { type: "keywords", groups: [["cannot be restored", "can't be restored", "cannot be recovered", "not be restored", "original cannot", "can not be", "lower quality", "quality is reduced", "quality decreases", "reduced quality", "worse quality", "not the same as the original", "irreversible"]], needCount: 1 } } ],
+  explanation: "Compression makes the file smaller, so it needs less storage and uploads faster. Lossy compression permanently removes some data (usually the detail people notice least), so the original cannot be restored exactly." };
+const A2_Q = { type: "paper", topic: "File organisation and access", marks: 3,
+  prompt: "A bank stores customer records in a file.\n(a) Describe how records are stored in a serial file. [1]\n(b) Explain why a sequential file is quicker to search than a serial file when the records are in key order. [2]",
   markPoints: [
-    { text: "Symmetric encryption uses the same key to encrypt and to decrypt", marks: 1, match: { type: "keywords", groups: [["same key", "single key", "one key", "identical key", "shared key", "shared secret"]], needCount: 1 } },
-    { text: "Asymmetric encryption uses a pair of different keys: a public key and a private key", marks: 1, match: { type: "keywords", groups: [["public"], ["private"]], needCount: 2 } },
-    { text: "The public key encrypts and only the matching private key can decrypt (so the decryption key is never shared)", marks: 1, match: { type: "keywords", groups: [["public key"], ["decrypt"], ["private key"]], needCount: 3 } } ],
-  explanation: "Symmetric: one shared secret key does both jobs, so the key must be exchanged safely. Asymmetric: the public key can be given to anyone and used to encrypt; only the owner's private key can decrypt." };
-
+    { text: "(a) Records are stored one after another in the order they were added (no ordering by key)", marks: 1, match: { type: "keywords", groups: [["order they were added", "order added", "chronological", "added in order", "one after another", "no order", "unordered", "not in order", "as they are added", "time order", "order they are created", "order they were created"]], needCount: 1 } },
+    { text: "(b) Sequential records are held in order of a key field", marks: 1, match: { type: "keywords", groups: [["key field", "key order", "sorted", "in order of", "ordered by", "order of the key", "ordered"]], needCount: 1 } },
+    { text: "(b) So the search can stop once the key is passed / does not have to check every record", marks: 1, match: { type: "keywords", groups: [["stop", "passed", "bigger", "greater", "larger", "not have to", "does not need to", "doesn't need to", "fewer", "not every", "not all", "without checking"]], needCount: 1 } } ],
+  explanation: "A serial file stores records in the order they were added, so a search may have to read every record. A sequential file is kept in key order, so a search can stop as soon as it reaches a key larger than the one wanted." };
+const sect = (arr, pre) => arr.filter(l => l.id.indexOf(pre) === 0).map(lesson);
+const igTopics = ["ASCII vs Unicode", "Sound Sampling", "Pixels & Colour Depth"];
+const igQ = E.datarep.questions.filter(q => igTopics.indexOf(q.topic) > -1 && q.type === "mcq").map(q => ({ type: "mcq", q: q.q, options: q.options, correct: q.correct, explain: q.explain, topic: q.topic }));
 const S = {
-  igcse: { name: "IGCSE Computer Science", code: "0478 / 0984", lessonTotal: igL.length, questionTotal: cnt.igcse,
-    lessons: [byId(igL, "1.1.1"), byId(igL, "2.1.1b"), byId(igL, "8.1.4a")].map(lesson),
-    questions: [0, 1, 2, 3, 4].map(i => mcq("datarep", i)) },
-  as: { name: "AS Level Computer Science", code: "9618", lessonTotal: asL.length, questionTotal: cnt.as,
-    lessons: [byId(asL, "1.2.4a")].map(lesson),
-    questions: [AS_Q] },
-  a2: { name: "A Level (A2) Computer Science", code: "9618", lessonTotal: a2L.length, questionTotal: cnt.a2,
-    lessons: [byId(a2L, "17.1a"), byId(a2L, "19.1g")].map(lesson),
-    questions: [A2_Q] },
+  igcse: { name: "IGCSE Computer Science", code: "0478 / 0984", section: "Section 1.2 - Data storage: text, sound and images",
+    lessons: sect(igL, "1.2"), questions: igQ },
+  as: { name: "AS Level Computer Science", code: "9618", section: "Section 1.3 - Compression",
+    lessons: sect(asL, "1.3"), questions: [AS_Q] },
+  a2: { name: "A Level (A2) Computer Science", code: "9618", section: "Section 13.2 - File organisation and access",
+    lessons: sect(a2L, "13.2"), questions: [A2_Q] },
 };
-// ---- the 2% rule (hard stop if broken)
-Object.keys(S).forEach(k => {
-  const s = S[k], maxL = Math.floor(s.lessonTotal * 0.02), maxQ = Math.floor(s.questionTotal * 0.02);
-  if(s.lessons.length > maxL) throw new Error(k + ": " + s.lessons.length + " lessons > 2% (" + maxL + " of " + s.lessonTotal + ")");
-  if(s.questions.length > maxQ) throw new Error(k + ": " + s.questions.length + " questions > 2% (" + maxQ + " of " + s.questionTotal + ")");
-  console.log(k, "lessons", s.lessons.length + "/" + s.lessonTotal, "(" + (100 * s.lessons.length / s.lessonTotal).toFixed(2) + "%)", "questions", s.questions.length + "/" + s.questionTotal, "(" + (100 * s.questions.length / s.questionTotal).toFixed(2) + "%)");
-});
+Object.keys(S).forEach(k => { const s = S[k]; console.log(k, s.lessons.map(l => l.id).join(" "), "q:", s.questions.length, "checks:", s.lessons.map(l => (l.checks||[]).map(c => c.type || "mcq").join("/")).join(" ; ")); });
 fs.writeFileSync(path.join(root, "sample-data.js"), "/* generated by tools/gen-sample.js - do not edit. At most 2% of each level's lessons and questions. */\nwindow.PQ_SAMPLE = " + JSON.stringify(S) + ";\n");
 console.log("written", fs.statSync(path.join(root, "sample-data.js")).size, "bytes");

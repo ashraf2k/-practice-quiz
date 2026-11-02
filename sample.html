@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<meta charset="utf-8" /><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-cbUcV9D8JuYThT/FREmWKhroAyii5rBusETdYICd4WA='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta charset="utf-8" /><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-q0qxSSiuvR89yfsprtjEgpRmc6ML3nfWNYh5/Ioe+FU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Free sample · iLearn &amp; iSolve</title>
@@ -24,7 +24,7 @@ textarea{width:100%;box-sizing:border-box;min-height:110px;padding:10px;border:1
 .btn{display:inline-block;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;margin-top:8px}
 .btn.alt{background:var(--surface);color:var(--accent-dark);border:1px solid var(--accent)}
 .mp{margin:4px 0;padding:6px 10px;border-radius:8px}.mp.y{background:var(--correct-bg)}.mp.n{background:var(--incorrect-bg)}
-.cta{text-align:center}
+.cta{text-align:center}.step{margin:10px 0 0;font-weight:700;color:var(--muted)}.vid iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:10px;background:#000}
 </style></head><body><div class="wrap">
 <div class="top"><a href="index.html">&larr; Home</a><span><a href="quiz.html">Log in</a> · <a href="quiz.html">Sign up</a></span></div>
 <h1 style="margin:.2em 0">Free sample</h1>
@@ -32,45 +32,59 @@ textarea{width:100%;box-sizing:border-box;min-height:110px;padding:10px;border:1
 <div class="tabs" id="vw"></div>
 <div class="banner" id="banner"></div>
 <div id="out"></div>
-<div class="card cta"><h3>Want the whole course?</h3><p>Create a free account to unlock every lesson, practice question and your progress tracking.</p>
-<a class="btn" href="quiz.html">Sign up</a> <a class="btn alt" href="quiz.html">Log in</a></div>
 </div>
-<script src="sample-data.js?v=1"></script>
+<script src="sample-data.js?v=2"></script>
+<script src="learn-engine.js?v=1"></script>
 <script>
 (function(){
-var D=window.PQ_SAMPLE,p=new URLSearchParams(location.search);
-var lvl=D[p.get("level")]?p.get("level"):"igcse",view=p.get("view")==="solve"?"solve":"learn";
+var D=window.PQ_SAMPLE,E=window.ILearnEngine,p=new URLSearchParams(location.search);
+var lvl=D[p.get("level")]?p.get("level"):"igcse",view=p.get("view")==="solve"?"solve":"learn",idx=0;
 var $=function(i){return document.getElementById(i)};
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function el(h){var t=document.createElement("div");t.innerHTML=h;return t.firstElementChild}
 function tabs(){
- $("lv").innerHTML=Object.keys(D).map(function(k){return '<button data-l="'+k+'" class="'+(k===lvl?"on":"")+'">'+esc(D[k].name)+'</button>'}).join("");
+ $("lv").innerHTML=Object.keys(D).map(function(k){return '<button data-l="'+k+'" class="'+(k===lvl?"on":"")+'">'+esc(D[k].name.replace(" Computer Science",""))+'</button>'}).join("");
  $("vw").innerHTML=[["learn","iLearn · lessons"],["solve","iSolve · practice"]].map(function(v){return '<button data-v="'+v[0]+'" class="'+(v[0]===view?"on":"")+'">'+v[1]+'</button>'}).join("");
 }
-function go(){history.replaceState(null,"","?level="+lvl+"&view="+view);tabs();render()}
-$("lv").onclick=function(e){var k=e.target.dataset.l;if(k){lvl=k;go()}};
-$("vw").onclick=function(e){var k=e.target.dataset.v;if(k){view=k;go()}};
+function go(reset){if(reset)idx=0;history.replaceState(null,"","?level="+lvl+"&view="+view);tabs();render()}
+$("lv").onclick=function(e){var k=e.target.dataset.l;if(k){lvl=k;go(1)}};
+$("vw").onclick=function(e){var k=e.target.dataset.v;if(k){view=k;go(1)}};
+function lock(){
+ var other=view==="learn"?"solve":"learn";
+ return el('<div class="card cta" style="border:2px solid var(--accent)"><h2>&#128274; End of the free sample</h2><p>You have finished the free '+(view==="learn"?"iLearn lessons":"iSolve practice")+' for <b>'+esc(D[lvl].section)+'</b>. The rest of the course is for registered students.</p>'+
+ '<a class="btn" href="quiz.html#signup">Sign up to continue</a> <a class="btn alt" href="quiz.html">Log in</a>'+
+ '<p style="margin-top:12px"><a href="?level='+lvl+'&view='+other+'" style="color:var(--accent-dark);font-weight:600">Try the '+(other==="learn"?"iLearn lessons":"iSolve practice")+' sample</a></p></div>')}
 function render(){
- var d=D[lvl];
- $("banner").innerHTML='<b>Free sample of '+esc(d.name)+':</b> '+d.lessons.length+' of '+d.lessonTotal+' lessons and '+d.questions.length+' of '+d.questionTotal+' practice questions (about 2%). Sign up to unlock the rest.';
+ var d=D[lvl],items=view==="learn"?d.lessons:d.questions;
+ $("banner").innerHTML='<b>Free sample · '+esc(d.name)+':</b> '+esc(d.section)+' (the complete section, exactly as in the full course). Sign up to unlock everything else.';
  var o=$("out");o.innerHTML="";
- if(view==="learn")d.lessons.forEach(function(l){o.appendChild(lesson(l))});
- else d.questions.forEach(function(q,i){o.appendChild(q.type==="mcq"?mcq(q,i):paper(q,i))});
+ if(idx>=items.length){o.appendChild(lock());window.scrollTo(0,0);return}
+ var node=view==="learn"?lesson(items[idx]):(items[idx].type==="mcq"?mcq(items[idx]):paper(items[idx]));
+ o.appendChild(el('<p class="step">'+(view==="learn"?"Lesson ":"Question ")+(idx+1)+' of '+items.length+'</p>'));
+ o.appendChild(node);
+ var n=el('<button class="btn">'+(idx+1<items.length?"Next →":"Finish")+'</button>');n.onclick=function(){idx++;render();window.scrollTo(0,0)};o.appendChild(n);
 }
-function el(h){var t=document.createElement("div");t.innerHTML=h;return t.firstElementChild}
-function quiz(c,box){
- var h=el('<div class="q"><p><b>'+esc(c.q)+'</b></p></div>');
- c.options.forEach(function(t,i){var b=el('<button class="opt"></button>');b.textContent=t;b.onclick=function(){
-  if(h.dataset.done)return;h.dataset.done=1;var os=h.querySelectorAll(".opt");
-  os[c.correct].classList.add("ok");if(i!==c.correct)b.classList.add("bad");
-  h.appendChild(el('<div class="fb"><b>'+(i===c.correct?"Correct. ":"Not quite. ")+'</b>'+esc(c.explain||"")+'</div>'))};h.appendChild(b)});
+function quiz(c){
+ if(c.type==="text")return text(c);
+ var h=el('<div class="q"><p><b>'+c.q+'</b></p></div>'),order=E.shuffle(c.options.map(function(_,i){return i}));
+ order.forEach(function(oi){var b=el('<button class="opt"></button>');b.textContent=c.options[oi];b.onclick=function(){
+  if(h.dataset.done)return;h.dataset.done=1;var os=h.querySelectorAll(".opt"),ok=oi===c.correct;
+  os.forEach(function(x){if(x.textContent===c.options[c.correct])x.classList.add("ok")});if(!ok)b.classList.add("bad");
+  h.appendChild(el('<div class="fb"><b>'+(ok?"Correct. ":"Not quite. ")+'</b>'+esc(c.explain||"")+'</div>'))};h.appendChild(b)});
+ return h}
+function text(c){
+ var h=el('<div class="q"><p><b>'+c.q+'</b></p><textarea placeholder="Type your answer here…"></textarea><button class="btn alt">Check my answer</button><div class="fb"></div></div>');
+ h.querySelector(".btn").onclick=function(){var t=h.querySelector("textarea");if(!t.value.trim())return;var r=E.gradeText(c,t.value);t.disabled=true;this.remove();
+  h.querySelector(".fb").innerHTML=r.ok?'<b>Correct.</b> '+esc(c.explain||""):'<b>Not quite</b> (you covered '+r.matched+' of the '+r.need+' key points needed).<br><b>A full-mark answer:</b> '+esc(c.model||"")};
  return h}
 function lesson(l){
  var c=el('<div class="card"><h2>'+esc(l.code||"")+' '+esc(l.title)+'</h2><div>'+l.concept+'</div><div class="ex"><b>Worked example</b><div>'+l.example+'</div></div><h3>Check yourself</h3></div>');
- (l.checks||[]).forEach(function(k){c.appendChild(quiz(k))});return c}
-function mcq(q,i){var c=el('<div class="card"><small>Question '+(i+1)+(q.topic?' · '+esc(q.topic):'')+'</small></div>');c.appendChild(quiz(q));return c}
+ if(l.video&&l.video.id)c.insertBefore(el('<div class="vid"><iframe loading="lazy" allowfullscreen title="'+esc(l.video.label||"Video")+'" src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(l.video.id)+'?rel=0'+(l.video.start?'&start='+Number(l.video.start):'')+'"></iframe></div>'),c.querySelector(".ex"));
+ (l.checks||[]).forEach(function(k){var w=el('<div style="margin:12px 0"></div>');w.appendChild(quiz(k));c.appendChild(w)});return c}
+function mcq(q){var c=el('<div class="card"><small>'+esc(q.topic||"")+'</small></div>');c.appendChild(quiz(q));return c}
 function norm(s){return s.toLowerCase().replace(/\s+/g," ")}
-function paper(q,i){
- var c=el('<div class="card"><small>'+esc(q.topic||"")+' · '+q.marks+' marks</small><p style="white-space:pre-wrap"><b>'+esc(q.prompt)+'</b></p><textarea placeholder="Type your answer…"></textarea><button class="btn">Mark my answer</button><div class="fb"></div></div>');
+function paper(q){
+ var c=el('<div class="card"><small>'+esc(q.topic||"")+' · '+q.marks+' marks</small><p style="white-space:pre-wrap"><b>'+esc(q.prompt)+'</b></p><textarea placeholder="Type your answer…"></textarea><button class="btn alt">Mark my answer</button><div class="fb"></div></div>');
  c.querySelector(".btn").onclick=function(){
   var a=norm(c.querySelector("textarea").value),tot=0,h="";
   q.markPoints.forEach(function(m){var g=m.match.groups,n=0;g.forEach(function(gr){if(gr.some(function(w){return a.indexOf(norm(w))>-1}))n++});
@@ -79,4 +93,5 @@ function paper(q,i){
  return c}
 go();
 })();
-</script></body></html>
+</script>
+</body></html>
