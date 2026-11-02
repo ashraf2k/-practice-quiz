@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-3GcGLBDiQLym7NjGhfInvNI3pwKStSBhWGmHbDG6qQc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net 'sha256-mjf2AgST5Fw+BvQDdxEKAyeEqZ1L3Ll1kdXc57Ma4Hk='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -737,7 +737,7 @@
     if(preview || fbBusy) return;
     if(!fb.recommend){ renderFeedback("Please tell us whether you would recommend the website."); return; }
     var ps = perfSummary(), rec = { cls: String(user.class || "").slice(0, 20), progress: Math.max(0, Math.min(100, pct(ps.done, ps.total))),
-      name: fbClean(user.name, 80), email: String(user.email || "").slice(0, 120), level: fb.level, levelOther: fb.level === "other" ? fbClean(fb.levelOther, 40) : "", device: fb.device, freq: fb.freq,
+      name: String(user.name || "").slice(0, 80), email: String(user.email || "").slice(0, 120), level: fb.level, levelOther: fb.level === "other" ? fbClean(fb.levelOther, 40) : "", device: fb.device, freq: fb.freq,
       overall: fb.overall, ease: fb.ease, design: fb.design, materials: fb.materials, practice: fb.practice, exam: fb.exam,
       useful: fb.useful.slice(), usefulOther: fbClean(fb.usefulOther, 100), problems: fb.problems.slice(), findEase: fb.findEase, mobile: fb.mobile,
       best: fbClean(fb.best), weakness: fbClean(fb.weakness), feature: fbClean(fb.feature), other: fbClean(fb.other), recommend: fb.recommend };
@@ -747,7 +747,7 @@
       fbBusy = false;
       if(!r || !r.ok){
         var denied = r && /permission|denied/i.test((r.code || "") + " " + (r.error || ""));
-        renderFeedback(denied ? "Your feedback could not be saved yet because the teacher's setup is not finished. Your answers are kept on this device. Please try again later."
+        renderFeedback(denied ? "Your feedback could not be saved (" + ((r.code || "permission-denied")) + "). Your answers are kept on this device. Please take a screenshot of this message and send it to your teacher."
                               : "Sorry, we could not send your feedback. Please check your connection and try again.");
         return;
       }
