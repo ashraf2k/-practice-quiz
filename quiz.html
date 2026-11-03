@@ -27,7 +27,7 @@
       <img class="logo-img" src="logo.png" alt="iLearnCS">
     </a>
     <div>
-      <h1 id="header-title">Practice Questions</h1>
+      <h1 id="header-title">Enjoy learning journey</h1>
       <p id="header-sub">Log in to begin.</p>
     </div>
   </header>
@@ -481,7 +481,7 @@
   var pendingCreds = null;
   function showVerify(email, password){
     pendingCreds = { email: email, password: password };
-    setHeader("Practice Questions", "One more step.");
+    setHeader("Enjoy learning journey", "One more step.");
     document.getElementById("verify-email").textContent = email;
     document.getElementById("verify-status").textContent = "";
     showScreen("verify");
@@ -2265,7 +2265,7 @@
   // ============================================================
   function goToStartScreen(){
     var user = state.currentUser;
-    setHeader("Practice Questions", "Choose a topic to begin.");
+    setHeader("Enjoy learning journey", "Choose a topic to begin.");
     startGreeting.textContent = "Hi " + user.name + " — " + user.class + ".";
     startStatus.textContent = "";
     var choices = refreshTopicField(user.class);
@@ -2306,7 +2306,7 @@
       state.currentUser = null;
       // keep the "check your email" screen up after the post-sign-up sign-out
       if(pendingCreds && !document.getElementById("screen-verify").classList.contains("hidden")) return;
-      setHeader("Practice Questions", "Log in to begin.");
+      setHeader("Enjoy learning journey", "Log in to begin.");
       inputEmail.value = "";
       inputPassword.value = "";
       inputSignupName.value = "";
@@ -2321,7 +2321,7 @@
       document.getElementById("input-gp-name").value = user.name || "";
       document.getElementById("input-gp-level").value = "";
       document.getElementById("gp-status").textContent = "";
-      setHeader("Practice Questions", "Finish creating your account.");
+      setHeader("Enjoy learning journey", "Finish creating your account.");
       showScreen("profile");
       return;
     }
