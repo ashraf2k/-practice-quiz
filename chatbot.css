@@ -60,3 +60,4 @@
 .cb-course .lk{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:13px}
 @media (max-width:520px){#pqcb{right:12px;bottom:12px}#pqcb[dir=rtl]{left:12px}.cb-win{position:fixed;inset:0;width:100%;max-width:none;height:100%;max-height:none;border-radius:0;bottom:0;right:0}#pqcb[dir=rtl] .cb-win{left:0}}
 @media (prefers-reduced-motion:reduce){#pqcb *{animation:none!important;transition:none!important}}
+.cb-sugg{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}.cb-sugg[hidden]{display:none}.cb-sugg .cb-chip{font-size:12.5px;padding:5px 10px}

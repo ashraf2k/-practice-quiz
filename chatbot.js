@@ -149,7 +149,7 @@
     });
   }
   // Later phases replace these (m2 AI search, m3 resources, m4 exam prep, m5 enquiry, m6 support).
-  var CB = window.PQChatbot = { state: S, t: t, esc: esc, addMsg: addMsg, botSay: botSay, chips: chips, viewMenu: viewMenu,
+  var CB = window.PQChatbot = { startChat: startChat, state: S, t: t, esc: esc, addMsg: addMsg, botSay: botSay, chips: chips, viewMenu: viewMenu,
     handlers: { m1: coursesHandler, m2: soon, m3: soon, m4: soon, m5: soon, m6: soon },
     onText: function(txt){ botSay(esc(t("unavailable")) + "<br>" + esc(t("soon"))).then(soonChips); } };
   function sendText(){
