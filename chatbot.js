@@ -122,7 +122,8 @@
 
   // ---------- conversation ----------
   function addMsg(who, html, isHtml){
-    var d = document.createElement("div"); d.className = "cb-msg " + who; if(isHtml) d.innerHTML = html; else d.textContent = html; body.appendChild(d); scroll(); return d;
+    var d = document.createElement("div"); d.className = "cb-msg " + who; if(isHtml) d.innerHTML = html; else d.textContent = html; body.appendChild(d); scroll();
+    S.msgs.push({ who: who, text: (d.textContent || "").replace(/\s+/g, " ").trim().slice(0, 300) }); if(S.msgs.length > 60) S.msgs.shift(); return d;
   }
   function typing(ms){
     var d = document.createElement("div"); d.className = "cb-msg bot"; d.innerHTML = '<span class="cb-typing" aria-label="…"><i></i><i></i><i></i></span>'; body.appendChild(d); scroll();
@@ -150,7 +151,7 @@
     });
   }
   // Later phases replace these (m2 AI search, m3 resources, m4 exam prep, m5 enquiry, m6 support).
-  var CB = window.PQChatbot = { startChat: startChat, state: S, t: t, esc: esc, addMsg: addMsg, botSay: botSay, chips: chips, viewMenu: viewMenu,
+  var CB = window.PQChatbot = { startChat: startChat, transcript: function(){ return S.msgs.slice(-30).map(function(m){ return (m.who === "me" ? "Visitor: " : "Assistant: ") + m.text; }); }, state: S, t: t, esc: esc, addMsg: addMsg, botSay: botSay, chips: chips, viewMenu: viewMenu,
     handlers: { m1: coursesHandler, m2: soon, m3: soon, m4: soon, m5: soon, m6: soon },
     textHandler: null, onText: function(txt){ if(CB.textHandler){ var h = CB.textHandler; CB.textHandler = null; h(txt); return; } botSay(esc(t("unavailable")) + "<br>" + esc(t("soon"))).then(soonChips); } };
   function sendText(){

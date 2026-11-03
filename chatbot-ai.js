@@ -85,10 +85,12 @@
     CB.botSay(esc(x("gate"))).then(function(){ CB.chips([{ label: x("login"), say: false, run: function(){ location.href = "quiz.html"; } }, { label: x("signup"), say: false, run: function(){ location.href = "quiz.html#signup"; } }, { label: x("mainmenu"), say: false, run: CB.viewMenu }]); });
   }
   function guarded(fn){ return function(){ mode = null; whenAuth(function(){ if(!levels){ gate(); return; } if(!levels.length){ CB.botSay(esc(x("noLevel"))); return; } fn(); }); }; }
+  var lastQ = "";
   function answer(q){
+    lastQ = q;
     loadIndex().then(function(){
       var r = search(q, levels);
-      if(!r.length){ return CB.botSay(esc(x("none"))).then(function(){ CB.chips([{ label: x("nonePlus"), run: function(){ CB.startChat ? CB.startChat("m6") : CB.viewMenu(); } }, { label: x("more"), run: function(){ CB.botSay(esc(x("askPrompt"))); } }]); }); }
+      if(!r.length){ return CB.botSay(esc(x("none"))).then(function(){ CB.chips([{ label: x("nonePlus"), run: function(){ CB.handover ? CB.handover(lastQ) : CB.viewMenu(); } }, { label: x("more"), run: function(){ CB.botSay(esc(x("askPrompt"))); } }]); }); }
       return CB.botSay(esc(x("found"))).then(function(){
         r.forEach(function(h){
           CB.addMsg("bot", '<div class="cb-course"><b>' + esc(h.l.code + " " + h.l.title) + '</b><small>' + esc(NAME[h.lv]) + '</small><div style="margin:6px 0">' + esc(snippet(h.l, q)) + '</div><div class="lk"><a href="' + PAGE[h.lv] + '#lesson=' + encodeURIComponent(h.l.id) + '">' + esc(x("openL")) + '</a></div></div>', true);

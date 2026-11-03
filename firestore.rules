@@ -401,6 +401,37 @@ service cloud.firestore {
       allow delete: if canWrite();
     }
 
+    // ---------- messages / support requests from the chat assistant ----------
+    // Anyone may CREATE one (strict fields, server time, unread); only staff read them; only teachers/admins manage them.
+    function validChatMessage(id) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['ref','kind','reason','recipient','name','email','phone','iso','message','course','page','senderType','lang','consent','transcript','status','isRead','createdAt','uid'])
+        && d.keys().hasAll(['ref','kind','recipient','email','phone','message','senderType','lang','consent','status','isRead','createdAt'])
+        && id.matches('^(MSG|SUP)-[0-9]{8}-[A-Z0-9]{5}$') && d.ref == id
+        && d.kind in ['message','support'] && d.recipient in ['teacher','administrator']
+        && (!('reason' in d) || d.reason in ['technical','payment','registration','complaint','general','human','unanswered'])
+        && d.email is string && d.email.size() <= 120 && d.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
+        && d.phone is string && d.phone.matches('^[+][0-9]{6,15}$')
+        && (!('name' in d) || (d.name is string && d.name.size() <= 80))
+        && (!('iso' in d) || (d.iso is string && d.iso.size() == 2))
+        && d.message is string && d.message.size() >= 3 && d.message.size() <= 2000
+        && (!('course' in d) || d.course in ['igcse','as','a2','other'])
+        && (!('page' in d) || (d.page is string && d.page.size() <= 200))
+        && (!('transcript' in d) || (d.transcript is list && d.transcript.size() <= 30))
+        && d.consent == true && d.lang in ['en','ar'] && d.senderType in ['visitor','student']
+        && d.status == 'unread' && d.isRead == false && d.createdAt == request.time
+        && (!('uid' in d) || (signedIn() && d.uid == request.auth.uid));
+    }
+    match /chatMessages/{messageId} {
+      allow create: if validChatMessage(messageId);
+      allow get, list: if canRead();
+      allow update: if canWrite() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','notes','isRead','readAt','replies','updatedAt'])
+        && request.resource.data.status in ['unread','read','replied','resolved','archived']
+        && (!('notes' in request.resource.data) || (request.resource.data.notes is string && request.resource.data.notes.size() <= 2000))
+        && (!('replies' in request.resource.data) || (request.resource.data.replies is list && request.resource.data.replies.size() <= 30));
+      allow delete: if canWrite();
+    }
+
     // ---------- student feedback (admins read everything; a student can read/edit only their own) ----------
     match /feedback/{feedbackId} {
       allow get: if signedIn() && (feedbackId.split('_')[0] == request.auth.uid || canRead());

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-RlZ8hslBD9ZeATV1dkMHOy8LwSVf69JZ1Yp8Z8x8RJY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-gl0w1B//a1y8W91Jn4GJfefO4b0eZ569fYg2iT9md10='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -28,6 +28,17 @@
     flex-wrap: wrap;
   }
 
+  @keyframes msgblink{0%,100%{background:#dc2626;box-shadow:0 0 0 0 rgba(220,38,38,.55)}50%{background:#f97316;box-shadow:0 0 0 7px rgba(220,38,38,0)}}
+  .msg-new{display:inline-block;color:#fff;border-radius:6px;padding:2px 8px;font-size:.72rem;font-weight:800;letter-spacing:.03em;animation:msgblink 1.2s infinite}
+  .admin-tab.has-unread{animation:enqpulse 1.2s infinite}
+  tr.msg-unread td{background:#fef2f2;font-weight:600}
+  tr.msg-detail td{background:#f8fafc;padding:14px 18px}
+  .msg-box{white-space:pre-wrap;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin:6px 0}
+  .msg-conv{max-height:200px;overflow:auto;font-size:.82rem;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px}
+  #toast-host{position:fixed;top:14px;right:14px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:340px}
+  .toast{background:#7f1d1d;color:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,.3);cursor:pointer;font-size:.9rem}
+  .toast b{display:block}
+  @media (prefers-reduced-motion:reduce){.msg-new,.admin-tab.has-unread{animation:none}}
   .enq-badge{display:inline-block;min-width:18px;padding:0 6px;border-radius:9px;background:#dc2626;color:#fff;font-size:.72rem;font-weight:700;text-align:center;margin-inline-start:4px}
   .enq-badge[hidden]{display:none}
   @keyframes enqpulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -530,11 +541,13 @@
       </div>
       <div class="tab-group"><span class="tab-glabel">Teaching</span>
         <button class="admin-tab" data-tab="tuition">Tuition</button>
+        <button class="admin-tab" data-tab="messages">Messages from Chatbot <span id="msg-badge" class="enq-badge" hidden>0</span></button>
         <button class="admin-tab" data-tab="enquiries">Enquiries <span id="enq-badge" class="enq-badge" hidden>0</span></button>
         <button class="admin-tab" data-tab="feedback">Feedback</button>
       </div>
     </div>
 
+    <div id="toast-host" aria-live="polite"></div>
     <div id="admin-panels">
       <div class="admin-panel active" id="panel-dashboard">
         <div class="mg-kpis" id="db-kpis"></div>
@@ -897,6 +910,19 @@
           <thead><tr><th>Student</th><th>Class</th><th>Why</th><th>Last activity</th></tr></thead><tbody></tbody></table></div>
       </div>
 
+      <div class="admin-panel" id="panel-messages">
+        <div class="admin-toolbar no-print">
+          <input id="msg-search" type="search" placeholder="Search sender, email, keywords" style="min-width:220px">
+          <select id="msg-recipient"><option value="">All recipients</option><option value="teacher">Teacher</option><option value="administrator">Administrator</option></select>
+          <select id="msg-kind"><option value="">Messages + support</option><option value="message">Direct messages</option><option value="support">Support requests</option></select>
+          <select id="msg-course"><option value="">All courses</option><option value="igcse">IGCSE</option><option value="as">AS Level</option><option value="a2">A Level</option></select>
+          <select id="msg-status"><option value="active">Active (not archived)</option><option value="unread">Unread</option><option value="read">Read</option><option value="replied">Replied</option><option value="resolved">Resolved</option><option value="archived">Archived</option><option value="all">All</option></select>
+          <label style="font-size:.85rem">From <input type="date" id="msg-from"></label><label style="font-size:.85rem">To <input type="date" id="msg-to"></label>
+        </div>
+        <p class="admin-status" id="msg-status-line">Loading messages...</p>
+        <div id="msg-body"></div>
+      </div>
+
       <div class="admin-panel" id="panel-enquiries">
         <div class="admin-toolbar no-print">
           <input id="enq-search" type="search" placeholder="Search name, email, phone, reference" style="min-width:230px">
@@ -1049,7 +1075,7 @@
 <script src="syllabus-report.js?v=20261019j"></script>
 <script src="parent-report.js?v=20261021a"></script>
 <script src="firebase-config.js?v=20261103e"></script>
-<script type="module" src="firebase-init.js?v=20261103h"></script>
+<script type="module" src="firebase-init.js?v=20261103i"></script>
 <script type="module">
 (function(){
 
@@ -1206,6 +1232,7 @@
     showTab("dashboard");
     loadData();
     if(window.__startEnquiries) window.__startEnquiries();
+    if(window.__startMessages) window.__startMessages();
   }
 
   // Runs once per sign-in. Admin status is decided by the server: the user
@@ -1235,7 +1262,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["dashboard","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","tuition","ppPerf","archive"];
+  var PANELS = ["dashboard","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
@@ -2796,10 +2823,9 @@
   }
   function enqBadge(){
     var n = enqRows.filter(function(r){ return !r.isRead; }).length, b = document.getElementById("enq-badge"); b.textContent = n; b.hidden = !n;
-    document.title = (n ? "(" + n + ") " : "") + document.title.replace(/^\(\d+\)\s*/, "");
   }
   function renderEnq(){
-    enqBadge();
+    enqBadge(); msgBadge();
     var box = document.getElementById("enq-body"), st = document.getElementById("enq-status-line"), rows = enqFiltered();
     document.getElementById("enq-csv").disabled = !rows.length;
     st.textContent = !enqRows.length ? "No course enquiries yet. They appear here instantly when a visitor submits one through the chat assistant." : rows.length + " of " + enqRows.length + " enquiries" + (enqRows.filter(function(r){ return !r.isRead; }).length ? " - " + enqRows.filter(function(r){ return !r.isRead; }).length + " unread" : "") + ".";
@@ -2836,8 +2862,88 @@
   });
   window.__startEnquiries = function(){
     if(enqUnsub || typeof PQFirebase.subscribeCourseEnquiries !== "function") return;
-    enqUnsub = PQFirebase.subscribeCourseEnquiries(function(rows){ enqRows = rows; renderEnq(); }, function(err){
+    enqUnsub = PQFirebase.subscribeCourseEnquiries(function(rows, added){ enqRows = rows; renderEnq(); msgBadge(); (added || []).forEach(function(m){ toast("New course enquiry", (m.name || m.email) + " - " + (ENQ_C[m.course] || m.course), "enquiries"); }); }, function(err){
       enqUnsub = null; document.getElementById("enq-status-line").textContent = /permission|denied/i.test((err && (err.code + " " + err.message)) || "") ? "Permission denied. Publish the latest firestore.rules in the Firebase console, then refresh." : "Could not load enquiries (" + ((err && (err.code || err.message)) || "error") + ").";
+    });
+  };
+
+
+  // ---------------- Messages from Chatbot (live, with blinking NEW MESSAGE alerts) ----------------
+  var msgRows = [], msgUnsub = null, msgOpen = {}, MSG_R = { teacher:"Teacher", administrator:"Administrator" }, MSG_REASON = { technical:"Technical problem", payment:"Payment", registration:"Registration", complaint:"Complaint", general:"General", human:"Direct assistance", unanswered:"Unanswered question" }, MSG_ST = ["unread","read","replied","resolved","archived"];
+  function toast(title, text, tab){
+    var host = document.getElementById("toast-host"), t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "alert");
+    t.innerHTML = '<b>' + esc12(title) + '</b>' + esc12(text) + '<div style="margin-top:4px;text-decoration:underline">Open</div>';
+    t.onclick = function(){ showTab(tab); t.remove(); }; host.appendChild(t); setTimeout(function(){ if(t.parentNode) t.remove(); }, 20000);
+  }
+  function msgFiltered(){
+    var q = document.getElementById("msg-search").value.trim().toLowerCase(), rc = document.getElementById("msg-recipient").value, k = document.getElementById("msg-kind").value,
+        c = document.getElementById("msg-course").value, st = document.getElementById("msg-status").value, f = document.getElementById("msg-from").value, to = document.getElementById("msg-to").value;
+    var fm = f ? new Date(f + "T00:00:00").getTime() : 0, tm = to ? new Date(to + "T23:59:59").getTime() : 0;
+    return msgRows.filter(function(r){
+      if(st === "active" ? r.status === "archived" : (st !== "all" && r.status !== st)) return false;
+      return (!rc || r.recipient === rc) && (!k || r.kind === k) && (!c || r.course === c) && (!fm || r.createdMs >= fm) && (!tm || r.createdMs <= tm)
+        && (!q || [r.name, r.email, r.phone, r.message, r.ref].join(" ").toLowerCase().indexOf(q) > -1);
+    });
+  }
+  function msgUnread(){ return msgRows.filter(function(r){ return !r.isRead && r.status !== "archived"; }).length; }
+  function msgBadge(){
+    var n = msgUnread(), b = document.getElementById("msg-badge"); b.textContent = n; b.hidden = !n;
+    document.querySelector('[data-tab="messages"]').classList.toggle("has-unread", n > 0);
+    var total = n + enqRows.filter(function(r){ return !r.isRead; }).length;
+    document.title = (total ? "(" + total + ") " : "") + document.title.replace(/^\(\d+\)\s*/, "");
+  }
+  function renderMsgs(){
+    msgBadge(); enqBadge();
+    var box = document.getElementById("msg-body"), st = document.getElementById("msg-status-line"), rows = msgFiltered(), n = msgUnread();
+    st.innerHTML = !msgRows.length ? "No messages yet. Messages sent to the teacher or administrator through the chat assistant appear here instantly, newest first." : rows.length + " of " + msgRows.length + " messages" + (n ? ' · <b style="color:#b91c1c">' + n + ' unread</b>' : "") + ".";
+    if(!rows.length){ box.innerHTML = ""; return; }
+    var h = '<div class="table-scroll"><table class="admin-table"><thead><tr><th></th><th>Received</th><th>From</th><th>To / type</th><th>Message</th><th>Status</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var open = !!msgOpen[r.id], wa = String(r.phone || "").replace(/[^0-9]/g, "");
+      h += '<tr class="' + (r.isRead ? "" : "msg-unread") + '" data-id="' + esc12(r.id) + '" data-msg-row style="cursor:pointer"><td>' + (r.isRead ? "" : '<span class="msg-new">NEW MESSAGE</span>') + '</td><td>' + esc12(enqTime(r.createdMs)) + '<div style="font-size:.74rem;color:#64748b">' + esc12(r.ref) + '</div></td>' +
+        '<td><b>' + esc12(r.name || "(no name)") + '</b> <span style="font-size:.72rem;color:#64748b">' + esc12(r.senderType) + '</span><div style="font-weight:400">' + esc12(r.email) + '</div></td>' +
+        '<td>' + esc12(MSG_R[r.recipient] || r.recipient) + '<div style="font-size:.78rem;color:#64748b;font-weight:400">' + esc12(r.kind === "support" ? "Support: " + (MSG_REASON[r.reason] || "") : "Direct message") + '</div></td>' +
+        '<td style="max-width:320px;font-weight:400">' + esc12(String(r.message).slice(0, 140)) + (String(r.message).length > 140 ? "…" : "") + '</td><td>' + esc12(r.status) + '</td></tr>';
+      if(open){
+        var conv = (r.transcript || []).map(function(x){ return '<div>' + esc12(x) + '</div>'; }).join("") || '<i>No conversation attached.</i>';
+        var reps = (r.replies || []).map(function(x){ return '<div class="msg-box"><small>' + esc12(x.at || "") + ' · reply</small><br>' + esc12(x.text) + '</div>'; }).join("");
+        h += '<tr class="msg-detail" data-id="' + esc12(r.id) + '"><td colspan="6"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px"><div>' +
+          '<b>Message</b><div class="msg-box">' + esc12(r.message) + '</div>' + reps +
+          '<p style="margin:6px 0;font-size:.85rem">' + (r.course ? 'Course page: <b>' + esc12(r.course) + '</b> · ' : '') + 'Page: ' + esc12(r.page || "-") + ' · Language: ' + esc12(r.lang) + '</p>' +
+          '<p dir="ltr" style="margin:6px 0"><a href="mailto:' + esc12(r.email) + '?subject=' + encodeURIComponent("Re: your message " + r.ref) + '">Reply by email</a> · <a href="https://wa.me/' + esc12(wa) + '" target="_blank" rel="noopener">Reply on WhatsApp</a> · ' + esc12(r.phone) + '</p>' +
+          '<textarea data-reply rows="3" style="width:100%" placeholder="Write your reply here. It is recorded in the dashboard; send it to the sender by email or WhatsApp with the links above."></textarea>' +
+          '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-primary sm" type="button" data-act="reply">Save reply (mark replied)</button><button class="btn btn-secondary sm" type="button" data-act="toggleread">' + (r.isRead ? "Mark unread" : "Mark read") + '</button><button class="btn btn-secondary sm" type="button" data-act="resolve">Resolve</button><button class="btn btn-secondary sm" type="button" data-act="archive">' + (r.status === "archived" ? "Unarchive" : "Archive") + '</button></div>' +
+          '</div><div><b>Conversation history</b><div class="msg-conv">' + conv + '</div><b style="display:block;margin-top:10px">Internal notes</b><textarea data-notes rows="3" style="width:100%" placeholder="Only staff see this">' + esc12(r.notes || "") + '</textarea><button class="btn btn-secondary sm" type="button" data-act="notes" style="margin-top:6px">Save note</button></div></div></td></tr>';
+      }
+    });
+    box.innerHTML = h + "</tbody></table></div>";
+  }
+  function msgById(id){ return msgRows.filter(function(r){ return r.id === id; })[0]; }
+  document.getElementById("msg-body").addEventListener("click", function(e){
+    var act = e.target.closest("[data-act]"), tr = e.target.closest("tr"); if(!tr) return;
+    var id = tr.getAttribute("data-id"), r = msgById(id); if(!r) return;
+    if(!act){
+      if(!tr.hasAttribute("data-msg-row")) return;
+      msgOpen[id] = !msgOpen[id]; renderMsgs();
+      if(msgOpen[id] && !r.isRead) PQFirebase.updateChatMessage(id, { isRead: true, status: r.status === "unread" ? "read" : r.status });
+      return;
+    }
+    var a = act.getAttribute("data-act"), det = tr.closest("tbody").querySelector('tr.msg-detail[data-id="' + id + '"]');
+    function done(x){ if(!x.ok) alert("Could not update: " + x.error); }
+    if(a === "toggleread") PQFirebase.updateChatMessage(id, r.isRead ? { isRead: false, status: r.status === "read" ? "unread" : r.status } : { isRead: true, status: r.status === "unread" ? "read" : r.status }).then(done);
+    else if(a === "resolve") PQFirebase.updateChatMessage(id, { isRead: true, status: "resolved" }).then(done);
+    else if(a === "archive") PQFirebase.updateChatMessage(id, { status: r.status === "archived" ? (r.isRead ? "read" : "unread") : "archived", isRead: r.status === "archived" ? r.isRead : true }).then(done);
+    else if(a === "notes") PQFirebase.updateChatMessage(id, { notes: det.querySelector("[data-notes]").value.slice(0, 2000) }).then(done);
+    else if(a === "reply"){ var t = det.querySelector("[data-reply]").value.trim(); if(!t) return; var reps = (r.replies || []).concat([{ text: t.slice(0, 2000), at: new Date().toISOString().slice(0, 16).replace("T", " ") }]).slice(-30); PQFirebase.updateChatMessage(id, { replies: reps, isRead: true, status: "replied" }).then(done); }
+  });
+  ["msg-search","msg-recipient","msg-kind","msg-course","msg-status","msg-from","msg-to"].forEach(function(id){ document.getElementById(id).addEventListener(id === "msg-search" ? "input" : "change", renderMsgs); });
+  window.__startMessages = function(){
+    if(msgUnsub || typeof PQFirebase.subscribeChatMessages !== "function") return;
+    msgUnsub = PQFirebase.subscribeChatMessages(function(rows, added){
+      msgRows = rows; renderMsgs();
+      (added || []).forEach(function(m){ if(!m.isRead) toast("NEW MESSAGE", (m.name || m.email) + ": " + String(m.message).slice(0, 80), "messages"); });
+    }, function(err){
+      msgUnsub = null; document.getElementById("msg-status-line").textContent = /permission|denied/i.test((err && (err.code + " " + err.message)) || "") ? "Permission denied. Publish the latest firestore.rules in the Firebase console, then refresh." : "Could not load messages (" + ((err && (err.code || err.message)) || "error") + ").";
     });
   };
 
