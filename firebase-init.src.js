@@ -40,6 +40,7 @@ import {
   writeBatch,
   updateDoc,
   deleteField,
+  onSnapshot,
   serverTimestamp
 } from "firebase/firestore";
 
@@ -945,6 +946,37 @@ function submitFeedback(uid, key, record){
   });
 }
 
+
+// ---------- Course enquiries (from the chat assistant) ----------
+// Anyone may CREATE one (see firestore.rules for the strict field checks); only staff can read or manage them.
+// The promise resolves only after the server has stored the record, so the chat never claims a save that did not happen.
+function submitCourseEnquiry(rec){
+  var ref = doc(db, "courseEnquiries", rec.ref);
+  var payload = Object.assign({}, rec, { status: "new", isRead: false, createdAt: serverTimestamp() });
+  var uid = auth.currentUser && auth.currentUser.uid; if(uid) payload.uid = uid;
+  var timer;
+  var timeout = new Promise(function(_, no){ timer = setTimeout(function(){ no({ code: "timeout", message: "The server did not answer in time." }); }, 20000); });
+  return Promise.race([setDoc(ref, payload), timeout]).then(function(){ clearTimeout(timer); return { ok: true, ref: rec.ref }; })
+    .catch(function(err){ clearTimeout(timer); return { ok: false, code: (err && err.code) || "", error: (err && err.message) || "Could not save." }; });
+}
+function enquiryRow(d){
+  var x = d.data() || {}, t = x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0;
+  x.id = d.id; x.createdMs = t; delete x.createdAt; delete x.updatedAt; return x;
+}
+// Staff only: live list, newest first. Returns the unsubscribe function.
+function subscribeCourseEnquiries(onRows, onError){
+  return onSnapshot(collection(db, "courseEnquiries"), function(snap){
+    var out = []; snap.forEach(function(d){ out.push(enquiryRow(d)); });
+    out.sort(function(a, b){ return b.createdMs - a.createdMs; }); onRows(out);
+  }, function(err){ if(onError) onError(err); });
+}
+function updateCourseEnquiry(id, patch){
+  var allowed = {}; ["status", "notes", "isRead"].forEach(function(k){ if(k in patch) allowed[k] = patch[k]; });
+  allowed.updatedAt = serverTimestamp();
+  return updateDoc(doc(db, "courseEnquiries", id), allowed).then(function(){ return { ok: true }; })
+    .catch(function(err){ return { ok: false, error: (err && err.message) || "Could not update." }; });
+}
+
 // Admin-only (enforced by security rules): every feedback response, newest first.
 function listAllFeedback(){
   return getDocs(collection(db, "feedback")).then(function(snap){
@@ -1103,6 +1135,9 @@ window.PQFirebase = {
   getMyFeedback: getMyFeedback,
   submitFeedback: submitFeedback,
   listAllFeedback: listAllFeedback,
+  submitCourseEnquiry: submitCourseEnquiry,
+  subscribeCourseEnquiries: subscribeCourseEnquiries,
+  updateCourseEnquiry: updateCourseEnquiry,
   tuitionLoad: tuitionLoad,
   tuitionBook: tuitionBook,
   tuitionCancel: tuitionCancel,

@@ -109,7 +109,7 @@
         { label: x("eOpt4"), run: function(){ CB.botSay(esc(x("plan"))).then(function(){ CB.chips([{ label: x("mainmenu"), say: false, run: CB.viewMenu }]); }); } }]);
     });
   });
-  CB.onText = function(q){ if(mode === "ask") answer(q); else guarded(function(){ mode = "ask"; answer(q); })(); };
+  CB.onText = function(q){ if(CB.textHandler){ var h = CB.textHandler; CB.textHandler = null; h(q); return; } if(mode === "ask") answer(q); else guarded(function(){ mode = "ask"; answer(q); })(); };
   CB.setMode = function(m){ mode = m; };
 
   // ----- page-aware suggestions -----

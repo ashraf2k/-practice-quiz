@@ -370,6 +370,37 @@ service cloud.firestore {
       allow create, update, delete: if canWrite();
     }
 
+    // ---------- course enquiries from the chat assistant ----------
+    // Anyone (even not signed in) may create ONE record with exactly these fields; nobody but staff can read or change it.
+    function validEnquiry(id) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['ref','name','email','phone','iso','course','session','lessonType','schedule','level','comments','consent','lang','page','senderType','status','isRead','createdAt','uid'])
+        && d.keys().hasAll(['ref','email','phone','course','consent','lang','senderType','status','isRead','createdAt'])
+        && id.matches('^ENQ-[0-9]{8}-[A-Z0-9]{5}$') && d.ref == id
+        && d.email is string && d.email.size() <= 120 && d.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
+        && d.phone is string && d.phone.matches('^[+][0-9]{6,15}$')
+        && (!('name' in d) || (d.name is string && d.name.size() <= 80))
+        && (!('iso' in d) || (d.iso is string && d.iso.size() == 2))
+        && d.course in ['igcse','as','a2','other']
+        && (!('session' in d) || d.session in ['mayjune','octnov','undecided'])
+        && (!('lessonType' in d) || d.lessonType in ['individual','group','advice'])
+        && (!('schedule' in d) || d.schedule in ['weekdays','weekends','flexible'])
+        && (!('level' in d) || d.level in ['beginner','intermediate','advanced','studying'])
+        && (!('comments' in d) || (d.comments is string && d.comments.size() <= 1000))
+        && (!('page' in d) || (d.page is string && d.page.size() <= 200))
+        && d.consent == true && d.lang in ['en','ar'] && d.senderType in ['visitor','student']
+        && d.status == 'new' && d.isRead == false && d.createdAt == request.time
+        && (!('uid' in d) || (signedIn() && d.uid == request.auth.uid));
+    }
+    match /courseEnquiries/{enquiryId} {
+      allow create: if validEnquiry(enquiryId);
+      allow get, list: if canRead();
+      allow update: if canWrite() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','notes','isRead','updatedAt'])
+        && request.resource.data.status in ['new','contacted','interested','registered','closed']
+        && (!('notes' in request.resource.data) || (request.resource.data.notes is string && request.resource.data.notes.size() <= 2000));
+      allow delete: if canWrite();
+    }
+
     // ---------- student feedback (admins read everything; a student can read/edit only their own) ----------
     match /feedback/{feedbackId} {
       allow get: if signedIn() && (feedbackId.split('_')[0] == request.auth.uid || canRead());

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-0zDy5+FoV658V0QMAonvgcZLKUwFVZqqCzJ83CGMswo='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-RlZ8hslBD9ZeATV1dkMHOy8LwSVf69JZ1Yp8Z8x8RJY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -28,6 +28,12 @@
     flex-wrap: wrap;
   }
 
+  .enq-badge{display:inline-block;min-width:18px;padding:0 6px;border-radius:9px;background:#dc2626;color:#fff;font-size:.72rem;font-weight:700;text-align:center;margin-inline-start:4px}
+  .enq-badge[hidden]{display:none}
+  @keyframes enqpulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .enq-new{display:inline-block;background:#dc2626;color:#fff;border-radius:6px;padding:1px 7px;font-size:.7rem;font-weight:800;animation:enqpulse 1.1s infinite}
+  tr.enq-unread td{background:#fff7ed}
+  @media (prefers-reduced-motion:reduce){.enq-new{animation:none}}
   .admin-tab{
     appearance: none;
     background: none;
@@ -524,6 +530,7 @@
       </div>
       <div class="tab-group"><span class="tab-glabel">Teaching</span>
         <button class="admin-tab" data-tab="tuition">Tuition</button>
+        <button class="admin-tab" data-tab="enquiries">Enquiries <span id="enq-badge" class="enq-badge" hidden>0</span></button>
         <button class="admin-tab" data-tab="feedback">Feedback</button>
       </div>
     </div>
@@ -890,6 +897,18 @@
           <thead><tr><th>Student</th><th>Class</th><th>Why</th><th>Last activity</th></tr></thead><tbody></tbody></table></div>
       </div>
 
+      <div class="admin-panel" id="panel-enquiries">
+        <div class="admin-toolbar no-print">
+          <input id="enq-search" type="search" placeholder="Search name, email, phone, reference" style="min-width:230px">
+          <select id="enq-course"><option value="">All courses</option><option value="igcse">IGCSE</option><option value="as">AS Level</option><option value="a2">A Level</option><option value="other">Other / not sure</option></select>
+          <select id="enq-session"><option value="">All sessions</option><option value="mayjune">May/June</option><option value="octnov">Oct/Nov</option><option value="undecided">Not decided</option></select>
+          <select id="enq-status"><option value="">All statuses</option><option value="new">New</option><option value="contacted">Contacted</option><option value="interested">Interested</option><option value="registered">Registered</option><option value="closed">Closed</option></select>
+          <button class="btn btn-secondary" id="enq-csv" type="button" disabled>Download CSV</button>
+        </div>
+        <p class="admin-status" id="enq-status-line">Loading enquiries...</p>
+        <div id="enq-body"></div>
+      </div>
+
       <div class="admin-panel" id="panel-feedback">
         <div class="admin-toolbar no-print">
           <select id="filter-class-fb"><option value="">All classes</option></select>
@@ -1030,7 +1049,7 @@
 <script src="syllabus-report.js?v=20261019j"></script>
 <script src="parent-report.js?v=20261021a"></script>
 <script src="firebase-config.js?v=20261103e"></script>
-<script type="module" src="firebase-init.js?v=20261103g"></script>
+<script type="module" src="firebase-init.js?v=20261103h"></script>
 <script type="module">
 (function(){
 
@@ -1186,6 +1205,7 @@
     document.getElementById("wrap").classList.add("wrap-wide");
     showTab("dashboard");
     loadData();
+    if(window.__startEnquiries) window.__startEnquiries();
   }
 
   // Runs once per sign-in. Admin status is decided by the server: the user
@@ -1215,7 +1235,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["dashboard","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","tuition","ppPerf","archive"];
+  var PANELS = ["dashboard","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
@@ -2763,6 +2783,63 @@
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" })); a.download = "ilearn-feedback.csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
   });
 
+
+
+  // ---------------- Course enquiries (from the chat assistant), live ----------------
+  var enqRows = [], enqUnsub = null, ENQ_C = { igcse:"IGCSE", as:"AS Level", a2:"A Level", other:"Other / not sure" }, ENQ_S = { mayjune:"May/June", octnov:"Oct/Nov", undecided:"Not decided" },
+      ENQ_L = { individual:"Individual", group:"Small group", advice:"Needs advice" }, ENQ_SC = { weekdays:"Weekdays", weekends:"Weekends", flexible:"Flexible" }, ENQ_LV = { beginner:"Beginner", intermediate:"Intermediate", advanced:"Advanced", studying:"Already studying" },
+      ENQ_ST = ["new","contacted","interested","registered","closed"];
+  function enqTime(ms){ try { return new Date(ms).toLocaleString(undefined, { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }); } catch(e){ return ""; } }
+  function enqFiltered(){
+    var q = document.getElementById("enq-search").value.trim().toLowerCase(), c = document.getElementById("enq-course").value, se = document.getElementById("enq-session").value, st = document.getElementById("enq-status").value;
+    return enqRows.filter(function(r){ return (!c || r.course === c) && (!se || r.session === se) && (!st || r.status === st) && (!q || [r.name, r.email, r.phone, r.ref].join(" ").toLowerCase().indexOf(q) > -1); });
+  }
+  function enqBadge(){
+    var n = enqRows.filter(function(r){ return !r.isRead; }).length, b = document.getElementById("enq-badge"); b.textContent = n; b.hidden = !n;
+    document.title = (n ? "(" + n + ") " : "") + document.title.replace(/^\(\d+\)\s*/, "");
+  }
+  function renderEnq(){
+    enqBadge();
+    var box = document.getElementById("enq-body"), st = document.getElementById("enq-status-line"), rows = enqFiltered();
+    document.getElementById("enq-csv").disabled = !rows.length;
+    st.textContent = !enqRows.length ? "No course enquiries yet. They appear here instantly when a visitor submits one through the chat assistant." : rows.length + " of " + enqRows.length + " enquiries" + (enqRows.filter(function(r){ return !r.isRead; }).length ? " - " + enqRows.filter(function(r){ return !r.isRead; }).length + " unread" : "") + ".";
+    if(!rows.length){ box.innerHTML = ""; return; }
+    var h = '<div class="table-scroll"><table class="admin-table"><thead><tr><th>Received</th><th>Visitor</th><th>Course / session</th><th>Preferences</th><th>Status</th><th>Notes</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var wa = String(r.phone || "").replace(/[^0-9]/g, "");
+      h += '<tr class="' + (r.isRead ? "" : "enq-unread") + '" style="cursor:default" data-id="' + esc12(r.id) + '"><td>' + (r.isRead ? "" : '<span class="enq-new">NEW</span> ') + esc12(enqTime(r.createdMs)) + '<div style="font-size:.74rem;color:#64748b">' + esc12(r.ref) + '</div></td>' +
+        '<td><b>' + esc12(r.name || "(no name)") + '</b> <span style="font-size:.72rem;color:#64748b">' + esc12(r.senderType) + '</span><div><a href="mailto:' + esc12(r.email) + '">' + esc12(r.email) + '</a></div><div dir="ltr"><a href="https://wa.me/' + esc12(wa) + '" target="_blank" rel="noopener">' + esc12(r.phone) + '</a></div></td>' +
+        '<td>' + esc12(ENQ_C[r.course] || r.course) + '<div style="font-size:.8rem;color:#64748b">' + esc12(ENQ_S[r.session] || "-") + '</div></td>' +
+        '<td style="font-size:.82rem">' + esc12(ENQ_L[r.lessonType] || "-") + ' · ' + esc12(ENQ_SC[r.schedule] || "-") + ' · ' + esc12(ENQ_LV[r.level] || "-") + (r.comments ? '<div style="margin-top:4px"><i>' + esc12(r.comments) + '</i></div>' : '') + '</td>' +
+        '<td><select data-enq-status>' + ENQ_ST.map(function(x){ return '<option value="' + x + '"' + (x === r.status ? " selected" : "") + '>' + x.charAt(0).toUpperCase() + x.slice(1) + '</option>'; }).join("") + '</select>' +
+        '<div style="margin-top:4px"><button class="btn btn-secondary sm" type="button" data-enq-read>' + (r.isRead ? "Mark unread" : "Mark read") + '</button></div></td>' +
+        '<td><textarea data-enq-notes rows="2" style="width:170px" placeholder="Internal note">' + esc12(r.notes || "") + '</textarea><div><button class="btn btn-secondary sm" type="button" data-enq-save>Save note</button></div></td></tr>';
+    });
+    box.innerHTML = h + "</tbody></table></div>";
+  }
+  function enqRowOf(el){ var tr = el.closest("tr"); return tr && enqRows.filter(function(r){ return r.id === tr.getAttribute("data-id"); })[0]; }
+  document.getElementById("enq-body").addEventListener("change", function(e){
+    if(!e.target.hasAttribute("data-enq-status")) return; var r = enqRowOf(e.target); if(!r) return;
+    PQFirebase.updateCourseEnquiry(r.id, { status: e.target.value, isRead: true }).then(function(x){ if(!x.ok) alert("Could not update: " + x.error); });
+  });
+  document.getElementById("enq-body").addEventListener("click", function(e){
+    var r = enqRowOf(e.target); if(!r) return;
+    if(e.target.hasAttribute("data-enq-read")) PQFirebase.updateCourseEnquiry(r.id, { isRead: !r.isRead });
+    if(e.target.hasAttribute("data-enq-save")){ var v = e.target.closest("td").querySelector("textarea").value.slice(0, 2000); PQFirebase.updateCourseEnquiry(r.id, { notes: v, isRead: true }).then(function(x){ if(!x.ok) alert("Could not save: " + x.error); }); }
+  });
+  ["enq-search","enq-course","enq-session","enq-status"].forEach(function(id){ document.getElementById(id).addEventListener(id === "enq-search" ? "input" : "change", renderEnq); });
+  document.getElementById("enq-csv").addEventListener("click", function(){
+    var q = function(v){ var t = String(v == null ? "" : v); if(/^[=+\-@\t\r]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g, '""') + '"'; };
+    var lines = [["Received","Reference","Status","Name","Email","Phone","Course","Session","Lessons","Schedule","Level","Comments","Notes"].map(q).join(",")].concat(enqFiltered().map(function(r){
+      return [new Date(r.createdMs).toISOString(), r.ref, r.status, r.name, r.email, r.phone, ENQ_C[r.course], ENQ_S[r.session], ENQ_L[r.lessonType], ENQ_SC[r.schedule], ENQ_LV[r.level], r.comments, r.notes].map(q).join(","); }));
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" })); a.download = "course-enquiries.csv"; document.body.appendChild(a); a.click(); a.remove();
+  });
+  window.__startEnquiries = function(){
+    if(enqUnsub || typeof PQFirebase.subscribeCourseEnquiries !== "function") return;
+    enqUnsub = PQFirebase.subscribeCourseEnquiries(function(rows){ enqRows = rows; renderEnq(); }, function(err){
+      enqUnsub = null; document.getElementById("enq-status-line").textContent = /permission|denied/i.test((err && (err.code + " " + err.message)) || "") ? "Permission denied. Publish the latest firestore.rules in the Firebase console, then refresh." : "Could not load enquiries (" + ((err && (err.code || err.message)) || "error") + ").";
+    });
+  };
 
   // ---------------- Tuition bookings ----------------
   var TU_PAGE = "book-m4k7t2qx9v.html";

@@ -111,6 +111,7 @@
   // ---------- menu ----------
   var ICONS = { m1:"🎓", m2:"💬", m3:"📚", m4:"📝", m5:"🚀", m6:"🛟" };
   function viewMenu(first){
+    if(window.PQChatbot){ window.PQChatbot.textHandler = null; if(window.PQChatbot.setMode) window.PQChatbot.setMode(null); }
     S.screen = "menu"; chrome();
     var v = S.visitor || {}, nm = (v.name || "").split(" ")[0];
     var card = function(k, hero){ return '<button class="cb-card' + (hero ? ' hero' : '') + '" type="button" data-m="' + k + '"><span class="ic" aria-hidden="true">' + ICONS[k] + '</span><span><b>' + esc(t(k)) + '</b><span class="d">' + esc(t(k + "d")) + '</span></span>' + (hero ? '<span class="tag">' + esc(t("best")) + '</span>' : '') + '</button>'; };
@@ -151,12 +152,13 @@
   // Later phases replace these (m2 AI search, m3 resources, m4 exam prep, m5 enquiry, m6 support).
   var CB = window.PQChatbot = { startChat: startChat, state: S, t: t, esc: esc, addMsg: addMsg, botSay: botSay, chips: chips, viewMenu: viewMenu,
     handlers: { m1: coursesHandler, m2: soon, m3: soon, m4: soon, m5: soon, m6: soon },
-    onText: function(txt){ botSay(esc(t("unavailable")) + "<br>" + esc(t("soon"))).then(soonChips); } };
+    textHandler: null, onText: function(txt){ if(CB.textHandler){ var h = CB.textHandler; CB.textHandler = null; h(txt); return; } botSay(esc(t("unavailable")) + "<br>" + esc(t("soon"))).then(soonChips); } };
   function sendText(){
     var v = inp.value.trim(); if(!v) return; inp.value = "";
     if(/[؀-ۿ]/.test(v) && S.lang !== "ar"){ S.lang = "ar"; save(); chrome(); }
     addMsg("me", v); CB.onText(v);
   }
+  CB.setTextHandler = function(f){ CB.textHandler = f; };
 
   // ---------- events ----------
   function setOpen(o){
