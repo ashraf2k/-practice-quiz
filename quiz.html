@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-JHUykCKaWzE7mktuG7v8pn7BPZ7ybOsstC1QbNYBoW4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-LbbavzkKv0ig6x2PHGmv7fFNmR1bMEi7Z2JjfTK1Qhk='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -123,6 +123,18 @@
         <span class="hub-desc">Practise with quizzes and real exam-style questions, check your answers and see your progress.</span>
         <span class="hub-meta">Quizzes · exam questions · My Progress</span>
       </button>
+      <a class="hub-card hidden" id="hub-sci" href="science-exam.html" style="grid-column:1/-1">
+        <svg viewBox="0 0 360 110" role="img" aria-label="Biology leaf, chemistry flask and physics atom" style="width:100%;height:auto;border-radius:12px;background:var(--accent-tint)">
+          <g fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <g stroke="#2f8f4e"><path d="M60 82c-24-6-30-34-4-52 22 2 36 16 32 38-4 12-16 18-28 14z" fill="#b7e4c7"/><path d="M60 82c0-18 6-34 22-46"/></g>
+            <g stroke="#c2410c"><path d="M165 28h30M172 28v22l-26 38c-3 5 0 10 6 10h56c6 0 9-5 6-10l-26-38V28" fill="#fed7aa"/><path d="M152 78h56" stroke="#9a3412"/><circle cx="180" cy="86" r="3" fill="#9a3412"/><circle cx="192" cy="74" r="2.5" fill="#9a3412"/></g>
+            <g stroke="#1d4ed8"><circle cx="295" cy="55" r="6" fill="#1d4ed8"/><ellipse cx="295" cy="55" rx="40" ry="14"/><ellipse cx="295" cy="55" rx="40" ry="14" transform="rotate(60 295 55)"/><ellipse cx="295" cy="55" rx="40" ry="14" transform="rotate(-60 295 55)"/></g>
+          </g>
+        </svg>
+        <span class="hub-title">Combined Science 0653 &middot; Timed exams</span>
+        <span class="hub-desc">Biology, Chemistry and Physics together: 40 multiple-choice questions in 45 minutes, a countdown timer, and your IGCSE 9&ndash;1 grade at the end.</span>
+        <span class="hub-meta">24 exam papers &middot; answers saved every minute</span>
+      </a>
     </div>
     <div style="margin-top:16px;text-align:right;"><button class="link-btn" id="btn-logout-hub" type="button">Not you? Log out</button></div>
   </section>
@@ -2331,13 +2343,15 @@
   });
 
   // ---------- 10BR home menu: iLearn / iSolve ----------
-  function isBR(user){ return /^(10BR|11BR|12BR)/i.test(window.PQ_LEGACY_CLASS(String((user && user.class) || ""))); }
+  function isSciUser(user){ return String((user && user.email) || "").trim().toLowerCase() === "amrashrafelbialy24@gmail.com"; }
+  function isBR(user){ return isSciUser(user) || /^(10BR|11BR|12BR)/i.test(window.PQ_LEGACY_CLASS(String((user && user.class) || ""))); }
   function is11(user){ return /^11BR/i.test(window.PQ_LEGACY_CLASS(String((user && user.class) || ""))); }
   function is12(user){ return /^12BR/i.test(window.PQ_LEGACY_CLASS(String((user && user.class) || ""))); }
   function showHub(){
     var user = state.currentUser;
     setHeader("iLearnCS", "Choose how you want to work today.");
     document.getElementById("hub-greeting").textContent = "Hi " + user.name + " — " + user.class;
+    document.getElementById("hub-sci").classList.toggle("hidden", !isSciUser(user));
     var meta = document.getElementById("hub-learn-meta");
     var a12 = is12(user);
     var a11 = is11(user);
