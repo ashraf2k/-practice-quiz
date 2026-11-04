@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-KOP9BF982iankzwkKg/iY+npanMTXBchCO+ZNQPUpQ0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Combined Science 0653 · Timed MCQ exams</title>
+<link rel="stylesheet" href="shared.css?v=20261103f" />
+<style>
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.5}
+.wrap{max-width:900px;margin:0 auto;padding:14px 16px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0}
+.top a{color:var(--accent-dark);font-weight:600;text-decoration:none}
+h1{margin:.2em 0 .1em;font-size:1.5rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
+.muted{color:var(--muted);font-size:.93rem}
+.btn{display:inline-block;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+.btn.alt{background:var(--surface);color:var(--accent-dark);border:1px solid var(--accent)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.ex{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface)}
+.ex b{display:block;font-size:1.05rem}
+.tag{display:inline-block;font-size:.78rem;font-weight:700;padding:2px 9px;border-radius:999px;margin:6px 0;background:var(--accent-tint);color:var(--accent-dark)}
+.tag.run{background:#fef3c7;color:#92400e}.tag.done{background:var(--correct-bg);color:var(--ink)}
+.bar{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line);padding:8px 14px;margin:0 -16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.timer{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.35rem;padding:2px 12px;border-radius:10px;background:var(--accent-tint)}
+.timer.low{background:#fee2e2;color:#991b1b}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:5px;margin:10px 0}
+.pal button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 0;font:inherit;font-weight:600;cursor:pointer}
+.pal button.ans{background:var(--accent-tint);border-color:var(--accent)}
+.pal button.cur{outline:2px solid var(--accent-dark)}
+.pal button.ok{background:var(--correct-bg);border-color:var(--correct-line)}.pal button.bad{background:var(--incorrect-bg);border-color:var(--incorrect-line)}
+.qimg{width:100%;height:auto;display:block;background:#fff;border-radius:10px;border:1px solid var(--line)}
+.opts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.opts button{border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:12px 0;font:inherit;font-size:1.15rem;font-weight:800;cursor:pointer}
+.opts button.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.opts button.ok{background:var(--correct-bg);border-color:var(--correct-line)}.opts button.bad{background:var(--incorrect-bg);border-color:var(--incorrect-line)}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.grade{font-size:3.4rem;font-weight:900;line-height:1;color:var(--accent-dark)}
+.rows{width:100%;border-collapse:collapse}.rows td,.rows th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.sub{display:inline-block;font-size:.8rem;font-weight:700;color:var(--muted);margin-left:6px}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);max-width:min(96vw,760px);padding:12px}
+dialog img{max-width:100%;height:auto}
+.save{font-size:.8rem;color:var(--muted)}
+</style>
+</head><body><div class="wrap">
+<div class="top"><a href="index.html">&larr; Home</a><span id="who" class="muted"></span></div>
+<h1>Combined Science 0653 &middot; Timed MCQ exams</h1>
+<div id="out"><p class="muted">Loading&hellip;</p></div>
+</div>
+<dialog id="pt"><img id="pt-img" alt="Periodic Table" /><p style="text-align:right"><button class="btn alt" id="pt-x" type="button">Close</button></p></dialog>
+<script src="firebase-config.js?v=20261103e"></script>
+<script type="module" src="firebase-init.js?v=20261103i"></script>
+<script src="science-exams-data.js?v=1"></script>
+<script>
+(function(){
+  var C = window.PQ_SCI, out = document.getElementById("out");
+  var USER = null, REC = {}, cur = null, tick = null, saver = null, dirty = false;
+  var KEYP = "pqsci_";
+
+  function el(h){ var d = document.createElement("div"); d.innerHTML = h; return d.firstElementChild; }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); }
+  function pkey(id){ return "sci0653_" + id.replace(/-/g, "_"); }
+  function lsGet(id){ try { return JSON.parse(localStorage.getItem(KEYP + USER.uid + "_" + id) || "null"); } catch(e){ return null; } }
+  function lsSet(id, r){ try { localStorage.setItem(KEYP + USER.uid + "_" + id, JSON.stringify(r)); } catch(e){} }
+  function sha(s){
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)).then(function(b){
+      return Array.prototype.map.call(new Uint8Array(b), function(x){ return ("0" + x.toString(16)).slice(-2); }).join("").slice(0, 20);
+    });
+  }
+  function gradeFor(score){ for(var i = 0; i < C.grades.length; i++) if(score >= C.grades[i][1]) return C.grades[i][0]; return "U"; }
+  function subjOf(n){ for(var i = 0; i < C.blocks.length; i++) if(n >= C.blocks[i][0] && n <= C.blocks[i][1]) return C.blocks[i][2]; return ""; }
+  function blank(){ return new Array(41).join("-"); }
+
+  // ---- storage: Firestore (practiceProgress) + a local copy -------------------
+  function remoteLoad(){
+    if(typeof PQFirebase.getMyProgress !== "function") return Promise.resolve();
+    return Promise.all(C.exams.map(function(e){
+      return PQFirebase.getMyProgress(USER.uid, pkey(e.id)).then(function(d){ if(d) REC[e.id] = pick(d); }, function(){});
+    }));
+  }
+  function pick(d){ return { state: d.state, startedAt: d.startedAt, ans: d.ans, score: d.score, grade: d.grade, submittedAt: d.submittedAt, bio: d.bio, chem: d.chem, phys: d.phys }; }
+  function merge(id){
+    var l = lsGet(id), r = REC[id];
+    if(l && (!r || (l.state === "done" && r.state !== "done") || (r.state !== "done" && (l.savedAt || 0) > (r.savedAt || 0)))) REC[id] = l;
+  }
+  function persist(id, setStatus){
+    var r = REC[id]; r.savedAt = Date.now(); lsSet(id, r);
+    var snap = { kind: "sci0653", exam: id, state: r.state, startedAt: r.startedAt, ans: r.ans };
+    if(r.state === "done"){ snap.score = r.score; snap.grade = String(r.grade); snap.submittedAt = r.submittedAt; snap.bio = r.bio; snap.chem = r.chem; snap.phys = r.phys; }
+    return PQFirebase.saveProgress(USER.uid, pkey(id), snap).then(function(res){
+      if(setStatus) setStatus(res && res.ok ? "Saved " + new Date().toLocaleTimeString() : "Could not reach the server - your answers are kept on this device and will sync.");
+      return res;
+    });
+  }
+
+  // ---- screens -------------------------------------------------------------
+  function home(){
+    stopTimers(); cur = null;
+    var h = '<div class="card"><p>Each exam is a past-paper style <b>Paper 2 multiple choice</b>: <b>40 questions, ' + C.minutes + ' minutes</b> (13 Biology, 14 Chemistry, 13 Physics). The timer starts when you press Start and the exam closes by itself when time is up. Your answers are saved every minute, so you can come back if your connection drops &ndash; but the clock keeps running.</p><p class="muted">Grade shown on the IGCSE 9&ndash;1 scale (indicative: see the note on your result).</p></div><div class="list" id="ls"></div>';
+    out.innerHTML = h;
+    var ls = document.getElementById("ls");
+    C.exams.forEach(function(e){
+      merge(e.id);
+      var r = REC[e.id], tag, btn;
+      if(r && r.state === "done"){ tag = '<span class="tag done">Done &middot; ' + r.score + '/40 &middot; Grade ' + esc(r.grade) + '</span>'; btn = '<button class="btn alt" data-v="' + e.id + '">View result</button>'; }
+      else if(r && r.state === "running"){ var left = Math.max(0, r.startedAt + C.minutes * 60000 - Date.now()); tag = '<span class="tag run">In progress &middot; ' + Math.ceil(left / 60000) + ' min left</span>'; btn = '<button class="btn" data-s="' + e.id + '">Resume</button>'; }
+      else { tag = '<span class="tag">Not started</span>'; btn = '<button class="btn" data-s="' + e.id + '">Start</button>'; }
+      ls.appendChild(el('<div class="ex"><b>' + esc(e.title) + ' &middot; Paper ' + e.paper + '</b><span class="muted">Combined Science 0653/2' + e.paper.slice(1) + '</span><br>' + tag + '<br>' + btn + '</div>'));
+    });
+    ls.addEventListener("click", function(ev){
+      var b = ev.target.closest("button"); if(!b) return;
+      if(b.dataset.s){
+        var r = REC[b.dataset.s];
+        if(!(r && r.state === "running") && !window.confirm("Start this exam now?\n\nYou get " + C.minutes + " minutes. The timer cannot be paused.")) return;
+        startExam(b.dataset.s);
+      } else if(b.dataset.v) showResult(b.dataset.v);
+    });
+  }
+  function stopTimers(){ clearInterval(tick); clearInterval(saver); tick = saver = null; }
+
+  function startExam(id){
+    var r = REC[id];
+    if(!r || r.state !== "running"){ r = REC[id] = { state: "running", startedAt: Date.now(), ans: blank() }; persist(id); }
+    if(r.startedAt + C.minutes * 60000 <= Date.now()){ finish(id, true); return; }
+    cur = { id: id, exam: C.exams.filter(function(e){ return e.id === id; })[0], q: 1 };
+    out.innerHTML = '<div class="bar"><b>' + esc(cur.exam.title) + ' &middot; Paper ' + cur.exam.paper + '</b><span class="save" id="sv"></span><span class="timer" id="tm">--:--</span></div>' +
+      '<div class="card"><div class="muted" id="qh"></div><img class="qimg" id="qi" alt="Question" /><div class="opts" id="op"></div>' +
+      '<div class="nav"><button class="btn alt" id="pv" type="button">&larr; Previous</button><button class="btn alt" id="pt-b" type="button">Periodic Table</button><button class="btn" id="nx" type="button">Next &rarr;</button></div></div>' +
+      '<div class="card"><div class="pal" id="pal"></div><p><button class="btn" id="sub" type="button">Submit exam</button></p></div>';
+    drawQ(); tickNow();
+    tick = setInterval(tickNow, 500);
+    saver = setInterval(function(){ if(dirty){ dirty = false; persist(id, setSv); } }, 60000);
+    document.getElementById("pv").onclick = function(){ go(cur.q - 1); };
+    document.getElementById("nx").onclick = function(){ go(cur.q + 1); };
+    document.getElementById("pt-b").onclick = openPT;
+    document.getElementById("sub").onclick = function(){
+      var un = REC[id].ans.split("-").length - 1;
+      if(window.confirm(un ? un + " question" + (un === 1 ? " is" : "s are") + " unanswered. Submit anyway?" : "Submit your exam now?")) finish(id, false);
+    };
+    document.getElementById("op").onclick = function(ev){
+      var b = ev.target.closest("button"); if(!b) return;
+      var a = REC[id].ans.split(""); a[cur.q - 1] = a[cur.q - 1] === b.dataset.l ? "-" : b.dataset.l; REC[id].ans = a.join("");
+      dirty = true; lsSet(id, Object.assign({ savedAt: Date.now() }, REC[id])); drawQ();
+    };
+    document.getElementById("pal").onclick = function(ev){ var b = ev.target.closest("button"); if(b) go(+b.dataset.n); };
+    window.addEventListener("pagehide", flush);
+  }
+  function setSv(t){ var s = document.getElementById("sv"); if(s) s.textContent = t; }
+  function flush(){ if(cur && dirty && REC[cur.id].state === "running"){ dirty = false; persist(cur.id); } }
+  function go(n){ if(n < 1 || n > 40) return; cur.q = n; drawQ(); window.scrollTo(0, 0); }
+  function drawQ(){
+    var n = cur.q, a = REC[cur.id].ans;
+    document.getElementById("qh").textContent = "Question " + n + " of 40 · " + subjOf(n);
+    document.getElementById("qi").src = C.dir + "/" + cur.id + "/" + (n < 10 ? "0" : "") + n + ".webp";
+    document.getElementById("op").innerHTML = "ABCD".split("").map(function(l){ return '<button type="button" data-l="' + l + '" class="' + (a[n - 1] === l ? "sel" : "") + '">' + l + '</button>'; }).join("");
+    var p = ""; for(var i = 1; i <= 40; i++) p += '<button type="button" data-n="' + i + '" class="' + (a[i - 1] !== "-" ? "ans " : "") + (i === n ? "cur" : "") + '">' + i + '</button>';
+    document.getElementById("pal").innerHTML = p;
+    document.getElementById("pv").disabled = n === 1; document.getElementById("nx").disabled = n === 40;
+  }
+  function tickNow(){
+    var r = REC[cur.id]; if(!r || r.state !== "running") return;
+    var left = r.startedAt + C.minutes * 60000 - Date.now();
+    var t = document.getElementById("tm"); if(!t) return;
+    if(left <= 0){ t.textContent = "00:00"; finish(cur.id, true); return; }
+    var s = Math.ceil(left / 1000); t.textContent = ("0" + Math.floor(s / 60)).slice(-2) + ":" + ("0" + (s % 60)).slice(-2);
+    t.classList.toggle("low", s <= 300);
+  }
+  function openPT(){ var d = document.getElementById("pt"); document.getElementById("pt-img").src = C.dir + "/periodic-table.webp"; if(d.showModal) d.showModal(); else d.setAttribute("open", ""); }
+  document.getElementById("pt-x").onclick = function(){ var d = document.getElementById("pt"); if(d.close) d.close(); else d.removeAttribute("open"); };
+
+  function finish(id, timeUp){
+    stopTimers(); window.removeEventListener("pagehide", flush);
+    var r = REC[id]; if(r.state === "done"){ showResult(id); return; }
+    var e = C.exams.filter(function(x){ return x.id === id; })[0];
+    r.state = "done"; r.submittedAt = new Date().toISOString();
+    Promise.all(r.ans.split("").map(function(l, i){ return l === "-" ? Promise.resolve(false) : sha(id + ":" + (i + 1) + ":" + l).then(function(h){ return h === e.keys[i]; }); })).then(function(ok){
+      var sc = { Biology: 0, Chemistry: 0, Physics: 0 };
+      ok.forEach(function(v, i){ if(v) sc[subjOf(i + 1)]++; });
+      r.bio = sc.Biology; r.chem = sc.Chemistry; r.phys = sc.Physics; r.score = r.bio + r.chem + r.phys; r.grade = gradeFor(r.score);
+      return persist(id).then(function(){ showResult(id, timeUp); });
+    });
+  }
+
+  function showResult(id, timeUp){
+    stopTimers(); cur = null;
+    var r = REC[id], e = C.exams.filter(function(x){ return x.id === id; })[0];
+    var pct = Math.round(r.score / 40 * 100);
+    out.innerHTML = '<div class="card"><p><a href="#" id="bk">&larr; All exams</a></p>' + (timeUp ? '<p class="tag run">Time is up &ndash; the exam was closed and your answers submitted.</p>' : '') +
+      '<h2 style="margin:.2em 0">' + esc(e.title) + ' &middot; Paper ' + e.paper + '</h2>' +
+      '<div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap"><div><div class="muted">IGCSE grade (9&ndash;1)</div><div class="grade">' + esc(r.grade) + '</div></div><div><div class="muted">Score</div><div style="font-size:2rem;font-weight:800">' + r.score + ' / 40 <span class="muted">(' + pct + '%)</span></div></div></div>' +
+      '<table class="rows" style="margin-top:12px"><tr><th>Subject</th><th>Score</th></tr><tr><td>Biology</td><td>' + r.bio + ' / 13</td></tr><tr><td>Chemistry</td><td>' + r.chem + ' / 14</td></tr><tr><td>Physics</td><td>' + r.phys + ' / 13</td></tr></table>' +
+      '<p class="muted">Grade boundaries: ' + C.grades.map(function(g){ return g[0] + " = " + g[1] + "+"; }).join(", ") + ' marks out of 40, below 6 = U. Cambridge does not publish boundaries for a single paper, so this is an indicative scale to show where you stand.</p></div>' +
+      '<div class="card"><h3 style="margin:.1em 0">Review</h3><p class="muted">Green = correct, red = your wrong answer.</p><div class="pal" id="pal"></div><div id="rv"></div></div>';
+    document.getElementById("bk").onclick = function(ev){ ev.preventDefault(); home(); };
+    Promise.all(r.ans.split("").map(function(l, i){
+      return Promise.all("ABCD".split("").map(function(c){ return sha(id + ":" + (i + 1) + ":" + c).then(function(h){ return h === e.keys[i] ? c : ""; }); })).then(function(a){ return a.join(""); });
+    })).then(function(corr){
+      var p = "", rv = "";
+      for(var i = 0; i < 40; i++){
+        var mine = r.ans[i], ok = mine === corr[i];
+        p += '<button type="button" class="' + (ok ? "ok" : "bad") + '" data-n="' + (i + 1) + '">' + (i + 1) + '</button>';
+      }
+      document.getElementById("pal").innerHTML = p;
+      var rvEl = document.getElementById("rv");
+      function show(n){
+        var mine = r.ans[n - 1], c = corr[n - 1];
+        rvEl.innerHTML = '<p><b>Question ' + n + '</b> &middot; ' + subjOf(n) + ' &middot; your answer: <b>' + (mine === "-" ? "none" : mine) + '</b> &middot; correct: <b>' + c + '</b></p><img class="qimg" alt="Question ' + n + '" src="' + C.dir + "/" + id + "/" + (n < 10 ? "0" : "") + n + '.webp" />';
+      }
+      document.getElementById("pal").onclick = function(ev){ var b = ev.target.closest("button"); if(b) show(+b.dataset.n); };
+      show(1);
+    });
+  }
+
+  // ---- gate: only the one allowed account ---------------------------------
+  function deny(msg, login){
+    out.innerHTML = '<div class="card"><p>' + msg + '</p>' + (login ? '<p><a class="btn" href="quiz.html">Log in</a></p>' : '') + '</div>';
+  }
+  function boot(){
+    if(!window.PQFirebase || !PQFirebase.onAuthChange){ setTimeout(boot, 100); return; }
+    PQFirebase.onAuthChange(function(user){
+      if(!user){ deny("Please log in to continue.", true); return; }
+      if(String(user.email || "").trim().toLowerCase() !== C.allowed){ deny("These exams are not available for your account."); return; }
+      USER = user; document.getElementById("who").textContent = user.name || user.email;
+      remoteLoad().then(function(){
+        C.exams.forEach(function(e){ merge(e.id); });
+        home();
+      });
+    });
+  }
+  boot();
+})();
+</script>
+</body></html>
