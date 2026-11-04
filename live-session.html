@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-O4iCTFkUrMGAnzkgIQxMaE5CnkSWNsgMrU8KchjmbSI='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261019j"></script>
+<script src="theme.js?v=20261027a"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta name="theme-color" content="#146C6A" />
+<link rel="icon" href="icons/icon-192.png" />
+<title>Book a live session</title>
+<link rel="stylesheet" href="shared.css?v=20261103f" />
+<style>
+  @font-face{font-family:"PQ Flags";src:url(chatbot-flags.woff2) format("woff2");unicode-range:U+1F1E6-1F1FF;font-display:swap}
+  .bk-note{ margin:0 0 14px; padding:12px 14px; border-radius:12px; background:var(--accent-tint); border:1px solid var(--accent); color:var(--ink); font-size:14px; }
+  .bk-note b{ color:var(--accent-dark); }
+  .bk-ok{ background:var(--correct-bg); border-color:var(--correct); }
+  .bk-warn{ background:var(--diff-moderate-bg); border-color:var(--diff-moderate); }
+  .bk-hero{ display:grid; gap:6px; margin:0 0 14px; padding:14px 16px; border-radius:14px; border:1.5px solid var(--accent); background:var(--accent-tint); }
+  .bk-hero h2{ margin:0; font-size:19px; }
+  .bk-hero ul{ margin:4px 0 0; padding-left:20px; font-size:14.5px; }
+  .bk-hero li{ margin:2px 0; }
+  .bk-top{ display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; margin:0 0 6px; }
+  .bk-top h2{ margin:0; }
+  .bk-mine{ display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; padding:13px 15px; border:1.5px solid var(--correct); border-radius:12px; background:var(--correct-bg); margin:0 0 16px; }
+  .bk-chip{ display:inline-block; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:800; border:1px solid var(--correct); background:var(--surface); }
+  .bk-day{ margin:18px 0 6px; font-size:12.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .bk-slots{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; }
+  .bk-slot{ padding:12px 14px; border-radius:12px; border:1.5px solid var(--accent); background:var(--surface); color:var(--ink); font:inherit; font-weight:700; cursor:pointer; text-align:left; }
+  .bk-slot:hover:not(:disabled){ background:var(--accent-tint); }
+  .bk-slot.sel{ background:var(--accent-tint); box-shadow:0 0 0 2px var(--accent-dark); }
+  .bk-slot small{ display:block; font-weight:600; color:var(--muted); margin-top:2px; }
+  .bk-slot .loc{ font-weight:600; font-size:12.5px; color:var(--muted); }
+  .bk-slot .seats{ display:flex; align-items:center; gap:8px; margin-top:6px; font-size:13px; font-weight:700; color:var(--ink); }
+  .dots{ display:inline-flex; gap:3px; }
+  .dots i{ width:10px; height:10px; border-radius:50%; border:1.5px solid var(--accent); display:inline-block; }
+  .dots i.on{ background:var(--accent); }
+  .bk-slot:disabled{ cursor:not-allowed; border-style:dashed; border-color:var(--line); background:var(--bg); color:var(--muted); opacity:.8; }
+  .bk-slot:disabled .dots i{ border-color:var(--muted); } .bk-slot:disabled .dots i.on{ background:var(--muted); }
+  .bk-slot.mine{ border-style:solid; border-color:var(--correct); background:var(--correct-bg); opacity:1; color:var(--ink); }
+  .bk-wait{ display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; padding:13px 15px; border:1.5px solid var(--diff-moderate); border-radius:12px; background:var(--diff-moderate-bg); margin:0 0 16px; }
+  .bk-slot.waitmine{ border-color:var(--diff-moderate); background:var(--diff-moderate-bg); opacity:1; color:var(--ink); }
+  .bk-slot.joinwl{ border-style:dashed; }
+  .bk-hero h2{ display:flex; align-items:center; gap:10px; }
+  .bk-hero .pq-live-ic{ flex:0 0 auto; }
+  .pq-live-dot{ animation:bkpulse 1.4s ease-in-out infinite; } @keyframes bkpulse{ 50%{ opacity:.25 } } @media (prefers-reduced-motion:reduce){ .pq-live-dot{ animation:none } }
+  .bk-last{ color:var(--incorrect, #b91c1c); }
+  .bk-confirm{ position:sticky; bottom:12px; margin:16px 0 0; padding:14px 16px; border-radius:14px; border:1.5px solid var(--accent); background:var(--surface); box-shadow:0 8px 30px rgba(0,0,0,.18); }
+  .bk-confirm .row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .bk-wa{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .bk-wa select{ max-width:100%; font-family:"PQ Flags",system-ui,sans-serif; }
+  .bk-wa input, .bk-wa select{ padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font:inherit; }
+  .bk-wa input{ flex:1 1 170px; min-width:0; }
+  .bk-err{ color:#b91c1c; font-size:13px; min-height:1.2em; margin-top:4px; }
+  .bk-links{ display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; }
+  .btn.sm{ padding:6px 12px; font-size:13px; }
+  .bk-empty{ color:var(--muted); font-size:14px; }
+</style>
+<link rel="stylesheet" href="theme.css?v=20261027a" />
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo-link" href="index.html" aria-label="iLearnCS home"><img class="logo-img" src="logo.png" alt="iLearnCS"></a>
+    <div><h1>Book a live session</h1><p id="header-sub">Very small online groups with your teacher</p></div>
+  </header>
+
+  <!-- LOGIN -->
+  <section id="s-login" class="card hidden">
+    <h2 class="step-title">Log in to book</h2>
+    <p class="step-sub">Use your iLearnCS account (the same email and password as on the practice site). Only registered students can see the live-session times.</p>
+    <div class="field"><label for="in-email">Email</label><input type="email" id="in-email" autocomplete="email" /></div>
+    <div class="field"><label for="in-pass">Password</label><input type="password" id="in-pass" autocomplete="current-password" /></div>
+    <label style="display:flex;gap:8px;align-items:center;font-size:14px;margin:6px 0 12px"><input type="checkbox" id="in-remember"> Remember me on this device</label>
+    <button class="btn btn-primary" id="btn-login" type="button">Log in</button>
+    <p class="step-sub" id="login-status" role="alert" style="min-height:1.4em;margin-top:10px"></p>
+    <div class="bk-links"><button class="link-btn" id="btn-forgot" type="button">Forgot password?</button><a class="link-btn" href="quiz.html">No account yet? Create one here</a></div>
+  </section>
+
+  <!-- VERIFY -->
+  <section id="s-verify" class="card hidden">
+    <h2 class="step-title">Verify your email first</h2>
+    <p class="step-sub">We sent a link to <b id="v-email"></b>. Click it, then come back and log in. Check your spam folder if you cannot find it.</p>
+    <button class="btn btn-secondary" id="btn-resend" type="button">Resend the email</button>
+    <button class="link-btn" id="btn-back-login" type="button">&larr; Back to log in</button>
+    <p class="step-sub" id="verify-status" role="status" style="min-height:1.4em"></p>
+  </section>
+
+  <!-- BOOKING -->
+  <section id="s-book" class="card hidden">
+    <div class="bk-top"><h2 class="step-title" id="b-hello">Hello</h2><span><button class="btn btn-secondary sm" id="btn-refresh" type="button">&#8635; Refresh</button> <button class="link-btn" id="btn-logout" type="button">Log out</button></span></div>
+    <div class="bk-hero" id="b-hero"></div>
+    <div id="b-banner"></div>
+    <div id="b-mine"></div>
+    <h3 style="margin:14px 0 0;font-size:16px">Weekly times <small style="font-weight:400;color:var(--muted)" id="b-tz"></small></h3>
+    <div id="b-grid"></div>
+    <div id="b-confirm"></div>
+    <p class="bk-empty" style="margin-top:18px">Need a different time? <a href="quiz.html">Contact your teacher</a> through the chat assistant (the round button at the bottom of the page).</p>
+  </section>
+
+  <section id="s-wait" class="card"><p class="step-sub">Loading&hellip;</p></section>
+</div>
+
+<script src="firebase-config.js?v=20261103e"></script>
+<script type="module" src="firebase-init.js?v=20261105b"></script>
+<script src="live-slots.js?v=3"></script>
+<script src="live-config.js?v=1"></script>
+<script>
+(function(){
+  "use strict";
+  var L = window.PQ_LIVE, CAP = L.capacity;
+  var user = null, isAdmin = false, data = null, picked = null, pickedMode = "book", busy = false, timer = 0, phoneReady = null, iso = "SA";
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function show(id){ ["s-login","s-verify","s-book","s-wait"].forEach(function(s){ $(s).classList.toggle("hidden", s !== id); }); }
+  function banner(html, cls){ $("b-banner").innerHTML = html ? '<div class="bk-note ' + (cls || "") + '" role="status">' + html + "</div>" : ""; }
+  function dots(n){ var h = '<span class="dots" aria-hidden="true">'; for(var i = 0; i < CAP; i++) h += '<i' + (i < n ? ' class="on"' : "") + "></i>"; return h + "</span>"; }
+  function loadPhone(){
+    if(window.PQPhone) return Promise.resolve();
+    if(!phoneReady) phoneReady = new Promise(function(ok, no){ var s = document.createElement("script"); s.src = "chatbot-phone.js?v=1"; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+    return phoneReady;
+  }
+
+  // ---------- login ----------
+  function doLogin(){
+    var email = $("in-email").value.trim(), pass = $("in-pass").value, st = $("login-status");
+    if(!email || !pass){ st.textContent = "Please enter your email and password."; return; }
+    $("btn-login").disabled = true; st.textContent = "Logging in…";
+    PQFirebase.logIn(email, pass, $("in-remember").checked).then(function(res){
+      st.textContent = "";
+      if(res && res.needsVerification){ $("v-email").textContent = email; $("btn-resend").dataset.e = email; $("btn-resend").dataset.p = pass; show("s-verify"); }
+    }).catch(function(err){ st.textContent = err.message || "Could not log in."; }).then(function(){ $("btn-login").disabled = false; });
+  }
+  $("btn-login").addEventListener("click", doLogin);
+  $("in-pass").addEventListener("keydown", function(e){ if(e.key === "Enter") doLogin(); });
+  $("btn-forgot").addEventListener("click", function(){
+    var email = $("in-email").value.trim(), st = $("login-status");
+    if(!email){ st.textContent = "Type your email above first, then press “Forgot password?”."; return; }
+    PQFirebase.resetPassword(email).then(function(){ st.textContent = "If that email has an account, a reset link is on its way."; }, function(err){ st.textContent = err.message; });
+  });
+  $("btn-resend").addEventListener("click", function(){
+    var b = $("btn-resend"), st = $("verify-status"); st.textContent = "Sending…";
+    PQFirebase.resendVerification(b.dataset.e, b.dataset.p).then(function(r){ st.textContent = r && r.alreadyVerified ? "Your email is already verified. Please log in." : "Sent. Check your inbox."; }, function(err){ st.textContent = err.message; });
+  });
+  $("btn-back-login").addEventListener("click", function(){ show("s-login"); });
+  $("btn-logout").addEventListener("click", function(){ clearInterval(timer); PQFirebase.logOut().then(function(){ show("s-login"); }); });
+  $("btn-refresh").addEventListener("click", function(){ picked = null; load(true); });
+
+  // ---------- booking ----------
+  function slotHtml(s){
+    var k = s.key, n = data.counts[k] || 0, mine = data.mine && data.mine.slotKey === k, waiting = data.wait && data.wait.slotKey === k, full = n >= CAP, loc = L.localRange(k);
+    var time = '<span>' + esc(L.range(k)) + '</span>' + (loc ? '<span class="loc"><br>Your time: ' + esc(loc) + "</span>" : "");
+    if(!s.open) return '<button class="bk-slot" disabled type="button">' + time + "<small>Not available</small></button>";
+    if(mine) return '<button class="bk-slot mine" disabled type="button">' + time + '<span class="seats">' + dots(n) + "✔ Your session</span></button>";
+    var cnt = '<span class="seats">' + dots(n) + n + " of " + CAP + " booked</span>";
+    if(waiting) return '<button class="bk-slot waitmine" disabled type="button">' + time + cnt + "<small>⏳ You are on the waiting list</small></button>";
+    if(full){
+      if(isAdmin || data.mine || data.wait) return '<button class="bk-slot" disabled type="button">' + time + cnt + "<small>Full</small></button>";
+      return '<button class="bk-slot joinwl' + (picked === k ? " sel" : "") + '" data-pick="' + esc(k) + '" data-mode="wait" type="button">' + time + cnt + "<small>Full – tap to join the waiting list</small></button>";
+    }
+    var off = isAdmin || data.mine;
+    var hint = isAdmin ? "Admin preview" : data.mine ? "Cancel your booking to choose another" : (n === CAP - 1 ? '<span class="bk-last">Last place!</span> Tap to choose' : "Free – tap to choose");
+    return '<button class="bk-slot' + (picked === k ? " sel" : "") + '" ' + (off ? "disabled " : 'data-pick="' + esc(k) + '" data-mode="book" ') + 'type="button">' + time + cnt + "<small>" + hint + "</small></button>";
+  }
+  function render(){
+    $("b-hello").textContent = "Hello, " + (user.name || "student");
+    $("b-hero").innerHTML = "<h2>" + L.icon(34) + "<span>Live online sessions for " + esc(L.session) + "</span></h2><ul>" +
+      "<li><b>" + esc(L.trial) + "</b> – no payment, no commitment to continue.</li>" +
+      "<li><b>Very small groups: maximum " + CAP + " students</b> in every session, so you get real attention.</li>" +
+      "<li>One weekly session of " + (L.minutes / 60) + " hours, online, with your teacher.</li>" +
+      "<li>You can book <b>one</b> session. Cancel it any time to pick a different one.</li>" +
+      "<li>Your teacher will contact you on <b>WhatsApp</b> to confirm.</li></ul>";
+    $("b-tz").textContent = "(" + L.tzName + ", repeated every week)";
+    // my booking
+    var m = data.mine, mh = "";
+    if(m){
+      var loc = L.localRange(m.slotKey);
+      mh = '<div class="bk-mine"><div><span class="bk-chip">✔ You are booked</span><br><b>' + esc(L.label(m.slotKey)) + "</b> <small>(" + esc(L.tzName) + ")</small>" + (loc ? "<br><small>Your time: " + esc(loc) + "</small>" : "") +
+        '<br><small>WhatsApp: <span dir="ltr">' + esc(m.whatsapp) + "</span></small></div><div>" +
+        '<button class="btn btn-secondary sm" id="btn-ics" type="button">Add to calendar</button> <button class="btn btn-secondary sm" id="btn-cancel" type="button">Cancel booking</button></div></div>';
+    }
+    var w = data.wait;
+    if(w && !m){
+      mh += '<div class="bk-wait"><div><span class="bk-chip">⏳ Waiting list</span><br><b>' + esc(L.label(w.slotKey)) + '</b> <small>(' + esc(L.tzName) + ')</small><br><small>The session is full. If a place opens, your teacher will contact you on WhatsApp.</small></div><div><button class="btn btn-secondary sm" id="btn-leavewl" type="button">Leave the waiting list</button></div></div>';
+    }
+    $("b-mine").innerHTML = mh;
+    if(w && !m) $("btn-leavewl").addEventListener("click", function(){
+      this.disabled = true;
+      PQFirebase.liveLeaveWaitlist(user.uid).then(function(r){ banner(r && r.ok ? "You left the waiting list." : "Sorry, that could not be done.", r && r.ok ? "bk-ok" : "bk-warn"); load(true); });
+    });
+    if(m){
+      $("btn-ics").addEventListener("click", function(){
+        var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([L.icsFor(m.slotKey)], { type: "text/calendar" })); a.download = "ilearncs-live-session.ics"; document.body.appendChild(a); a.click(); a.remove();
+      });
+      $("btn-cancel").addEventListener("click", function(){
+        if(!window.confirm("Cancel your booking for " + L.label(m.slotKey) + "? Your place will be given to another student.")) return;
+        $("btn-cancel").disabled = true;
+        PQFirebase.liveCancel(user.uid, m.slotKey).then(function(r){ banner(r.ok ? "Your booking was cancelled. You can choose another time." : "Sorry, the booking could not be cancelled (" + esc(r.code || "error") + "). Please try again.", r.ok ? "bk-ok" : "bk-warn"); picked = null; load(true); });
+      });
+    }
+    // grid
+    var gh = "";
+    L.days.forEach(function(d){
+      var ss = L.slots.filter(function(s){ return s.key.indexOf(d[0] + "_") === 0; }); if(!ss.length) return;
+      gh += '<div class="bk-day">' + d[1] + '</div><div class="bk-slots">' + ss.map(slotHtml).join("") + "</div>";
+    });
+    $("b-grid").innerHTML = gh;
+    Array.prototype.forEach.call($("b-grid").querySelectorAll("[data-pick]"), function(b){
+      b.addEventListener("click", function(){ picked = b.getAttribute("data-pick"); pickedMode = b.getAttribute("data-mode") || "book"; render(); renderConfirm(); $("b-confirm").scrollIntoView({ behavior: "smooth", block: "nearest" }); });
+    });
+    renderConfirm();
+  }
+  var TZ_ISO = { "Asia/Riyadh":"SA", "Asia/Dubai":"AE", "Asia/Kuwait":"KW", "Asia/Qatar":"QA", "Asia/Bahrain":"BH", "Asia/Muscat":"OM", "Africa/Cairo":"EG", "Asia/Amman":"JO", "Asia/Beirut":"LB", "Asia/Baghdad":"IQ", "Africa/Khartoum":"SD", "Africa/Tripoli":"LY", "Africa/Tunis":"TN", "Africa/Algiers":"DZ", "Africa/Casablanca":"MA", "Asia/Karachi":"PK", "Asia/Kolkata":"IN", "Europe/London":"GB", "Asia/Istanbul":"TR" };
+  function guessIso(){
+    var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch(e){}
+    if(TZ_ISO[tz]) return TZ_ISO[tz];
+    var m = /[-_]([A-Za-z]{2})$/.exec((navigator.language || "") + ""), r = m ? m[1].toUpperCase() : "";
+    return r && r !== "US" ? r : "SA";
+  }
+  function renderConfirm(){
+    var box = $("b-confirm");
+    if(!picked || data.mine || isAdmin){ box.innerHTML = ""; return; }
+    var loc = L.localRange(picked);
+    var wl = pickedMode === "wait";
+    box.innerHTML = '<div class="bk-confirm"><b>' + (wl ? "Join the waiting list for " : "Book ") + esc(L.label(picked)) + "?</b> <small>(" + esc(L.tzName) + (loc ? " · your time: " + esc(loc) : "") + ")</small>" +
+      '<div class="bk-empty">' + (wl ? "This session is full (" + CAP + " of " + CAP + "). If a place opens, your teacher will contact you on WhatsApp. You are not booked until then." : "Weekly session · maximum " + CAP + " students. " + esc(L.trial) + ". Enter your WhatsApp number so your teacher can contact you.") + '</div>' +
+      '<div class="bk-wa"><select id="c-cc" aria-label="Country code"><option>Loading…</option></select><input type="tel" id="c-num" inputmode="tel" autocomplete="tel-national" placeholder="WhatsApp number" aria-label="WhatsApp number" dir="ltr" /></div>' +
+      '<div class="bk-err" id="c-err" role="alert"></div>' +
+      '<label style="display:flex;gap:8px;align-items:flex-start;font-size:13.5px;margin-top:6px"><input type="checkbox" id="c-ok" style="margin-top:3px"> <span>I agree that my teacher may contact me on this WhatsApp number about my live session. (<a href="privacy.html" target="_blank" rel="noopener">Privacy</a>)</span></label>' +
+      '<div class="row"><button class="btn btn-primary" id="c-yes" type="button">' + (wl ? "Join the waiting list" : "Confirm booking") + '</button><button class="btn btn-secondary" id="c-no" type="button">Cancel</button></div></div>';
+    loadPhone().then(function(){
+      var sel = $("c-cc"); if(!sel) return;
+      var list = window.PQPhone.countries; if(!list.some(function(c){ return c.iso === iso; })) iso = "SA";
+      sel.innerHTML = list.map(function(c){ return '<option value="' + c.iso + '"' + (c.iso === iso ? " selected" : "") + ">" + c.flag + " " + esc(c.en) + " " + c.dial + "</option>"; }).join("");
+      sel.addEventListener("change", function(){ iso = sel.value; });
+    }, function(){ var e = $("c-err"); if(e) e.textContent = "Could not load the country list. Please refresh the page."; });
+    $("c-no").addEventListener("click", function(){ picked = null; render(); });
+    $("c-yes").addEventListener("click", submit);
+  }
+  function submit(){
+    if(busy) return;
+    var err = $("c-err"), raw = $("c-num").value.trim();
+    if(!window.PQPhone){ err.textContent = "Please wait a moment and try again."; return; }
+    var pv = window.PQPhone.validate(iso, raw);
+    if(!pv.ok){ err.textContent = "Please enter a valid WhatsApp number for the country you chose."; $("c-num").focus(); return; }
+    if(!$("c-ok").checked){ err.textContent = "Please tick the box to let your teacher contact you."; return; }
+    err.textContent = ""; busy = true; $("c-yes").disabled = true; $("c-yes").textContent = "Booking…";
+    var key = picked, wl = pickedMode === "wait";
+    (wl ? PQFirebase.liveJoinWaitlist(user.uid, user, key, pv.e164, iso) : PQFirebase.liveBook(user.uid, user, key, pv.e164, iso)).then(function(r){
+      busy = false; picked = null;
+      if(r.ok){
+        banner(wl ? "<b>You are on the waiting list</b> for " + esc(L.label(key)) + ". If a place opens, your teacher will contact you on WhatsApp." : "<b>You are booked!</b> " + esc(L.label(key)) + ". " + esc(L.trial) + ". Your teacher will contact you on WhatsApp to confirm. You can add the session to your calendar below.", "bk-ok");
+        notifyTeacher(wl ? "waitlist" : "booking");
+      }
+      else if(r.code === "full") banner("Sorry, that session has just filled up (" + CAP + " of " + CAP + "). You can join its waiting list.", "bk-warn");
+      else if(r.code === "notfull") banner("A place has just opened in that session. Please book it now.", "bk-warn");
+      else if(r.code === "changed") banner("The list changed while you were booking. Please check the times and try again.", "bk-warn");
+      else banner("Sorry, that could not be saved (" + esc(r.detail || r.code || "error") + "). Please try again, or message your teacher.", "bk-warn");
+      load(true);
+    });
+  }
+  // Optional Telegram alert to the teacher (see SETUP-LIVE-ALERTS.md). The booking never depends on it.
+  function notifyTeacher(kind){
+    var url = window.PQ_LIVE_NOTIFY_URL; if(!url || !PQFirebase.getIdToken) return;
+    PQFirebase.getIdToken().then(function(t){
+      if(!t) return;
+      return fetch(url, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ kind: kind, idToken: t }) });
+    }).catch(function(){});
+  }
+  function load(keepBanner){
+    return PQFirebase.liveLoad(user.uid).then(function(d){ data = d; if(!keepBanner) banner(""); render(); show("s-book"); }).catch(function(err){
+      var denied = /permission|denied/i.test((err && (err.code + " " + err.message)) || "");
+      $("s-wait").innerHTML = '<p class="step-sub">' + (denied ? "The live-session system is not switched on yet. Please tell your teacher." : "Sorry, the times could not be loaded (" + esc((err && (err.code || err.message)) || "error") + ").") + ' <button class="link-btn" id="w-retry" type="button">Try again</button></p>'; show("s-wait");
+      $("w-retry").addEventListener("click", function(){ load(); });
+    });
+  }
+  function boot(){
+    if(!window.PQFirebase || !PQFirebase.onAuthChange || !PQFirebase.liveLoad){ setTimeout(boot, 100); return; }
+    iso = guessIso();
+    PQFirebase.onAuthChange(function(u){
+      clearInterval(timer);
+      if(!u){ show("s-login"); return; }
+      user = u; if(!user.name) user.name = "";
+      var chk = PQFirebase.checkIsAdmin ? PQFirebase.checkIsAdmin(u.uid) : Promise.resolve(false);
+      chk.then(function(a){
+        isAdmin = !!a;
+        if(!isAdmin && user.role && user.role !== "student"){ $("s-wait").innerHTML = '<p class="step-sub">Live sessions are booked by students. This account is not a student account.</p>'; show("s-wait"); return; }
+        if(!isAdmin && (!user.name || !user["class"])){ $("s-wait").innerHTML = '<p class="step-sub">Your account has no name or level yet. Please sign in on the main site once first.</p>'; show("s-wait"); return; }
+        return load().then(function(){ timer = setInterval(function(){ if(!document.hidden && !picked && !busy && user) load(true); }, 45000); });
+      });
+    });
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

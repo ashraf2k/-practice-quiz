@@ -231,6 +231,32 @@ service cloud.firestore {
         && d.updatedAt == request.time;
     }
 
+    // ---------- live sessions (small online groups, max 5 students per slot) ----------
+    // The bookable slot keys (day_HHMM, Saudi time). Keep in step with live-slots.js.
+    function liveSlotKeys() { return ['sat_1300', 'sat_1700', 'mon_1800', 'tue_1730', 'wed_1730', 'thu_1630', 'thu_1830']; }
+    function examSessions() { return ['Feb/March 2027', 'May/June 2027', 'Oct/Nov 2027', 'May/June 2028 or later']; }
+    function liveSlotPath(k) { return /databases/$(database)/documents/liveSlots/$(k); }
+    function liveCount(k) { return exists(liveSlotPath(k)) ? get(liveSlotPath(k)).data.count : 0; }
+    function liveCountAfter(k) { return existsAfter(liveSlotPath(k)) ? getAfter(liveSlotPath(k)).data.count : 0; }
+    function liveBookingPath(uid) { return /databases/$(database)/documents/liveBookings/$(uid); }
+    function validLiveEntry(uid, st) {
+      let d = request.resource.data;
+      let me = get(/databases/$(database)/documents/users/$(uid)).data;
+      return d.keys().hasOnly(['uid', 'slotKey', 'name', 'email', 'whatsapp', 'iso', 'class', 'examSession', 'status', 'createdAt'])
+        && d.keys().hasAll(['uid', 'slotKey', 'name', 'email', 'whatsapp', 'class', 'status', 'createdAt'])
+        && d.uid == uid
+        && d.slotKey in liveSlotKeys()
+        && safeText(d.name, 1, 80) && d.name == me.name
+        && d.email is string && request.auth.token.email != null && d.email.lower() == request.auth.token.email.lower()
+        && d.whatsapp is string && d.whatsapp.matches('^[+][0-9]{8,15}$')
+        && (!('iso' in d) || (d.iso is string && d.iso.size() == 2))
+        && validClass(d['class']) && d['class'] == me['class']
+        && (!('examSession' in d) || (d.examSession is string && d.examSession.size() <= 30 && d.examSession.matches('[A-Za-z0-9/ ]*')))
+        && me.get('role', 'student') == 'student'
+        && d.status == st
+        && d.createdAt == request.time;
+    }
+
     // ---------- admins (read-only marker docs; written from console only) ----------
     match /admins/{uid} {
       // A signed-in user may check ONLY whether they themselves are an admin.
@@ -289,14 +315,22 @@ service cloud.firestore {
       // One-time profile creation by the owner. No later self-edit (so the
       // class / name / e-mail cannot be tampered with), no self-delete.
       allow create: if signedIn() && request.auth.uid == uid
-                    && request.resource.data.keys().hasOnly(['name', 'email', 'class', 'createdAt'])
+                    && request.resource.data.keys().hasOnly(['name', 'email', 'class', 'createdAt', 'examSession', 'certificate'])
                     && request.resource.data.keys().hasAll(['name', 'email', 'class', 'createdAt'])
+                    && (!('examSession' in request.resource.data) || request.resource.data.examSession in examSessions())
+                    && (!('certificate' in request.resource.data) || request.resource.data.certificate in ['IGCSE', 'AS', 'A2'])
                     && safeText(request.resource.data.name, 1, 80)
                     && validClass(request.resource.data['class'])
                     && request.resource.data.email is string
                     && request.auth.token.email != null
                     && request.resource.data.email.lower() == request.auth.token.email.lower()
                     && request.resource.data.createdAt == request.time;
+      // A student may set the planned exam session and the certificate ONCE (when they are missing). Nothing else.
+      allow update: if signedIn() && request.auth.uid == uid && verifiedOrLegacy()
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['examSession', 'certificate'])
+                    && !('examSession' in resource.data)
+                    && request.resource.data.examSession in examSessions()
+                    && request.resource.data.certificate in ['IGCSE', 'AS', 'A2'];
       // Archive / restore / change class (teacher).
       allow create, update, delete: if canWriteUser();
     }
@@ -490,6 +524,49 @@ service cloud.firestore {
     match /tuitionLedger/{owner} {
       allow read: if canRead();
       allow write: if canWrite();
+    }
+
+    // One booking document per student (id = uid), so nobody can hold two places. The slot counter lives in
+    // liveSlots/{key} and may only change by exactly 1 in the same batch as the booking is created / removed,
+    // never above 5.
+    match /liveBookings/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || canRead());
+      allow list: if canRead();
+      allow create: if signedIn() && request.auth.uid == uid && verifiedOrLegacy() && validLiveEntry(uid, 'booked')
+        && liveCountAfter(request.resource.data.slotKey) == liveCount(request.resource.data.slotKey) + 1
+        && liveCountAfter(request.resource.data.slotKey) <= 5;
+      // A student may cancel their own booking (the counter must go down by 1 in the same batch).
+      allow delete: if signedIn() && request.auth.uid == uid
+        && liveCountAfter(resource.data.slotKey) == liveCount(resource.data.slotKey) - 1;
+      allow create, update, delete: if canWrite();
+    }
+    // Waiting list for FULL slots: one entry per student (id = uid). The teacher moves a student into the slot
+    // from the dashboard when a place opens.
+    match /liveWaitlist/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || canRead());
+      allow list: if canRead();
+      allow create: if signedIn() && request.auth.uid == uid && verifiedOrLegacy() && validLiveEntry(uid, 'waiting')
+        && !exists(liveBookingPath(uid))
+        && liveCount(request.resource.data.slotKey) >= 5;
+      allow delete: if signedIn() && request.auth.uid == uid;
+      allow create, update, delete: if canWrite();
+    }
+    match /liveSlots/{k} {
+      allow get, list: if signedIn();
+      allow create, update: if signedIn() && verifiedOrLegacy() && k in liveSlotKeys()
+        && request.resource.data.keys().hasOnly(['count', 'updatedAt'])
+        && request.resource.data.count is int && request.resource.data.count >= 0 && request.resource.data.count <= 5
+        && request.resource.data.updatedAt == request.time
+        && (
+          (!exists(liveBookingPath(request.auth.uid)) && existsAfter(liveBookingPath(request.auth.uid))
+            && getAfter(liveBookingPath(request.auth.uid)).data.slotKey == k
+            && request.resource.data.count == liveCount(k) + 1)
+          ||
+          (exists(liveBookingPath(request.auth.uid)) && get(liveBookingPath(request.auth.uid)).data.slotKey == k
+            && !existsAfter(liveBookingPath(request.auth.uid))
+            && request.resource.data.count == liveCount(k) - 1)
+        );
+      allow create, update, delete: if canWrite();
     }
 
     // ---------- default deny ----------

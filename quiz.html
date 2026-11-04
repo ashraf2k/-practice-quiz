@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-LbbavzkKv0ig6x2PHGmv7fFNmR1bMEi7Z2JjfTK1Qhk='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-PknH8LwEZe5taFKEV/AdWK1oyqdsqL3GEgYr4OunBWM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -38,9 +38,18 @@
     <h2 class="step-title">One last step</h2>
     <p class="step-sub">Welcome! Tell us your name and level. Your teacher will add you to a class afterwards.</p>
     <div class="field" id="field-gp-name"><label for="input-gp-name">Full name</label><input type="text" id="input-gp-name" autocomplete="name" /><div class="err">Please enter your full name.</div></div>
-    <div class="field" id="field-gp-level"><label for="input-gp-level">Your level</label>
+    <div class="field" id="field-gp-level"><label for="input-gp-level">Your certificate</label>
       <select id="input-gp-level"><option value="" disabled selected>Choose your level</option><option value="IGCSE">IGCSE Computer Science (0478)</option><option value="AS">AS Level Computer Science (9618)</option><option value="A2">A Level (A2) Computer Science (9618)</option></select>
-      <div class="err">Please choose your level.</div></div>
+      <div class="err">Please choose your certificate.</div></div>
+    <div class="field" id="field-gp-session"><label for="input-gp-session">Your planned exam session</label>
+      <select id="input-gp-session">
+        <option value="" disabled selected>Choose your exam session</option>
+        <option value="Feb/March 2027">Feb/March 2027</option>
+        <option value="May/June 2027">May/June 2027</option>
+        <option value="Oct/Nov 2027">Oct/Nov 2027</option>
+        <option value="May/June 2028 or later">May/June 2028 or later</option>
+      </select>
+      <div class="err">Please choose your planned exam session.</div></div>
     <div class="btn-row"><button class="btn btn-primary" id="btn-gp-save" type="button">Continue</button></div>
     <p class="cohort-note" id="gp-status" aria-live="polite"></p>
     <p class="cohort-note"><button class="link-btn" id="btn-gp-logout" type="button">Use a different account</button></p>
@@ -63,14 +72,26 @@
     </div>
 
     <div class="field hidden" id="field-signup-class">
-      <label for="input-signup-class">Your level</label>
+      <label for="input-signup-class">Your certificate</label>
       <select id="input-signup-class">
         <option value="" disabled selected>Choose your level</option>
         <option value="IGCSE">IGCSE Computer Science (0478)</option>
         <option value="AS">AS Level Computer Science (9618)</option>
         <option value="A2">A Level (A2) Computer Science (9618)</option>
       </select>
-      <div class="err">Please choose your level.</div>
+      <div class="err">Please choose your certificate.</div>
+    </div>
+
+    <div class="field hidden" id="field-signup-session">
+      <label for="input-signup-session">Your planned exam session</label>
+      <select id="input-signup-session">
+        <option value="" disabled selected>Choose your exam session</option>
+        <option value="Feb/March 2027">Feb/March 2027</option>
+        <option value="May/June 2027">May/June 2027</option>
+        <option value="Oct/Nov 2027">Oct/Nov 2027</option>
+        <option value="May/June 2028 or later">May/June 2028 or later</option>
+      </select>
+      <div class="err">Please choose your planned exam session.</div>
     </div>
 
     <div class="field" id="field-email">
@@ -360,7 +381,7 @@
 <script src="report-lib.js?v=20261019j"></script>
 <script src="scratchpad.js?v=20261019j"></script>
 <script src="firebase-config.js?v=20261103e"></script>
-<script type="module" src="firebase-init.js?v=20261103i"></script>
+<script type="module" src="firebase-init.js?v=20261105b"></script>
 <script type="module">
 (function(){
 
@@ -403,6 +424,7 @@
   var btnAuthSubmit = document.getElementById("btn-auth-submit");
   var fieldSignupName = document.getElementById("field-signup-name");
   var fieldSignupClass = document.getElementById("field-signup-class");
+  var fieldSignupSession = document.getElementById("field-signup-session"), inputSignupSession = document.getElementById("input-signup-session");
   var fieldEmail = document.getElementById("field-email");
   var fieldPassword = document.getElementById("field-password");
   var inputSignupName = document.getElementById("input-signup-name");
@@ -415,7 +437,7 @@
   var authMode = "login";
 
   function clearAuthErrors(){
-    [fieldSignupName, fieldSignupClass, fieldEmail, fieldPassword].forEach(function(f){
+    [fieldSignupName, fieldSignupClass, fieldSignupSession, fieldEmail, fieldPassword].forEach(function(f){
       f.classList.remove("invalid");
     });
   }
@@ -431,7 +453,7 @@
       authTitle.textContent = "Sign up";
       authSub.textContent = "Create your account once — after that you'll just log in.";
       fieldSignupName.classList.remove("hidden");
-      fieldSignupClass.classList.remove("hidden");
+      fieldSignupClass.classList.remove("hidden"); fieldSignupSession.classList.remove("hidden");
       passwordHint.classList.remove("hidden");
       btnAuthSubmit.textContent = "Sign up";
       inputPassword.autocomplete = "new-password";
@@ -439,7 +461,7 @@
       authTitle.textContent = "Log in";
       authSub.textContent = "Log in to continue your practice, or sign up if this is your first time.";
       fieldSignupName.classList.add("hidden");
-      fieldSignupClass.classList.add("hidden");
+      fieldSignupClass.classList.add("hidden"); fieldSignupSession.classList.add("hidden");
       passwordHint.classList.add("hidden");
       btnAuthSubmit.textContent = "Log in";
       inputPassword.autocomplete = "current-password";
@@ -461,10 +483,12 @@
     if(!email || email.indexOf("@") === -1){ fieldEmail.classList.add("invalid"); ok = false; }
     if(!password){ fieldPassword.classList.add("invalid"); ok = false; }
 
-    var name, cls;
+    var name, cls, sess;
     if(authMode === "signup"){
       name = inputSignupName.value.trim();
       cls = inputSignupClass.value;
+      sess = inputSignupSession.value;
+      if(!sess){ fieldSignupSession.classList.add("invalid"); ok = false; }
       if(!name){ fieldSignupName.classList.add("invalid"); ok = false; }
       if(!cls){ fieldSignupClass.classList.add("invalid"); ok = false; }
     }
@@ -475,7 +499,7 @@
     authStatus.textContent = authMode === "signup" ? "Creating your account…" : "Logging in…";
 
     var action = authMode === "signup"
-      ? PQFirebase.signUp(email, password, name, cls, inputRemember.checked)
+      ? PQFirebase.signUp(email, password, name, cls, inputRemember.checked, sess)
       : PQFirebase.logIn(email, password, inputRemember.checked);
 
     action.then(function(res){
@@ -491,7 +515,7 @@
     });
   });
 
-  var pendingCreds = null;
+  var pendingCreds = null, gpSessionOnly = false;
   function showVerify(email, password){
     pendingCreds = { email: email, password: password };
     setHeader("Enjoy learning journey", "One more step.");
@@ -2302,13 +2326,15 @@
       .then(function(){ btnGoogle.disabled = false; });
   });
   document.getElementById("btn-gp-save").addEventListener("click", function(){
-    var f1 = document.getElementById("field-gp-name"), f2 = document.getElementById("field-gp-level"), st = document.getElementById("gp-status");
-    var name = document.getElementById("input-gp-name").value.trim(), lv = document.getElementById("input-gp-level").value;
-    f1.classList.toggle("invalid", !name); f2.classList.toggle("invalid", !lv);
-    if(!name || !lv) return;
-    var b = this; b.disabled = true; st.textContent = "Saving…";
-    PQFirebase.completeGoogleProfile(name, lv).then(function(p){
-      st.textContent = ""; state.currentUser = p;
+    var f1 = document.getElementById("field-gp-name"), f2 = document.getElementById("field-gp-level"), f3 = document.getElementById("field-gp-session"), st = document.getElementById("gp-status");
+    var sessionOnly = !!gpSessionOnly;
+    var name = document.getElementById("input-gp-name").value.trim(), lv = document.getElementById("input-gp-level").value, se = document.getElementById("input-gp-session").value;
+    f1.classList.toggle("invalid", !sessionOnly && !name); f2.classList.toggle("invalid", !lv); f3.classList.toggle("invalid", !se);
+    if((!sessionOnly && !name) || !lv || !se) return;
+    var b = this; b.disabled = true; st.textContent = "Saving\u2026";
+    var p = sessionOnly ? PQFirebase.saveMySession(state.pendingProfile.uid, se, lv) : PQFirebase.completeGoogleProfile(name, lv, se);
+    p.then(function(p){
+      st.textContent = ""; state.currentUser = p; gpSessionOnly = false;
       if(isBR(p)) showHub(); else goToStartScreen();
     }).catch(function(err){ st.textContent = (err && err.message) || "Could not save. Please try again."; }).then(function(){ b.disabled = false; });
   });
@@ -2323,7 +2349,7 @@
       inputEmail.value = "";
       inputPassword.value = "";
       inputSignupName.value = "";
-      inputSignupClass.value = "";
+      inputSignupClass.value = ""; inputSignupSession.value = "";
       setAuthMode(/signup/.test(window.location.hash) ? "signup" : "login");
       showScreen("auth");
       return;
@@ -2332,9 +2358,22 @@
     if(user.needsProfile){
       state.currentUser = null;
       document.getElementById("input-gp-name").value = user.name || "";
-      document.getElementById("input-gp-level").value = "";
+      document.getElementById("input-gp-level").value = ""; document.getElementById("input-gp-session").value = "";
+      document.getElementById("field-gp-name").classList.remove("hidden"); gpSessionOnly = false;
       document.getElementById("gp-status").textContent = "";
       setHeader("Enjoy learning journey", "Finish creating your account.");
+      showScreen("profile");
+      return;
+    }
+    if(user.needsSession){
+      // A new student who has not chosen the planned exam session yet: ask once, before anything else.
+      state.currentUser = null; state.pendingProfile = user; gpSessionOnly = true;
+      document.getElementById("input-gp-name").value = user.name || "";
+      document.getElementById("field-gp-name").classList.add("hidden");
+      document.getElementById("input-gp-level").value = ["IGCSE", "AS", "A2"].indexOf(user.certificate || user["class"]) >= 0 ? (user.certificate || user["class"]) : "";
+      document.getElementById("input-gp-session").value = "";
+      document.getElementById("gp-status").textContent = "";
+      setHeader("Enjoy learning journey", "One quick question.");
       showScreen("profile");
       return;
     }
@@ -2370,6 +2409,8 @@
 
 })();
 </script>
+<script src="live-slots.js?v=3"></script>
+<script src="live-banner.js?v=2" defer></script>
 <script src="chatbot.js?v=4" defer></script>
 <script src="chatbot-ai.js?v=3" defer></script>
 <script src="chatbot-enquiry.js?v=2" defer></script>

@@ -102,6 +102,9 @@ function num(v, fallback){
   return isFinite(n) ? n : (fallback == null ? 0 : fallback);
 }
 var MIN_PASSWORD = 8;
+// Planned exam session: required for accounts created on/after this moment (5 Nov 2026, 00:49 Riyadh time).
+var SESSION_REQUIRED_FROM = Date.parse("2026-11-04T21:49:00Z");
+var EXAM_SESSIONS = ["Feb/March 2027", "May/June 2027", "Oct/Nov 2027", "May/June 2028 or later"];
 
 function friendlyAuthError(err){
   var code = err && err.code;
@@ -131,8 +134,9 @@ function needsVerification(user){
   return !(created < VERIFY_REQUIRED_FROM);
 }
 
-function signUp(email, password, name, cls, remember){
+function signUp(email, password, name, cls, remember, examSession){
   name = cleanName(name); cls = cleanClass(cls);
+  if(EXAM_SESSIONS.indexOf(examSession) < 0) return Promise.reject(new Error("Please choose your planned exam session."));
   if(!name) return Promise.reject(new Error("Please enter your name (letters and numbers only, no < > or &)."));
   if(!cls) return Promise.reject(new Error("Please choose your class."));
   if(!password || String(password).length < MIN_PASSWORD) return Promise.reject(new Error("Please choose a password with at least " + MIN_PASSWORD + " characters."));
@@ -146,6 +150,8 @@ function signUp(email, password, name, cls, remember){
         name: name,
         email: email,
         class: cls,
+        examSession: examSession,
+        certificate: STUDENT_LEVELS.indexOf(cls) >= 0 ? cls : "",
         createdAt: serverTimestamp()
       }).then(function(){
         // The account is unusable until this link is clicked. A failed send
@@ -202,14 +208,22 @@ function googleSignIn(remember){
 }
 // Creates the profile of a first-time Google user. The class is the level
 // (IGCSE / AS / A2) until a teacher approves a class code.
-function completeGoogleProfile(name, level){
+function completeGoogleProfile(name, level, examSession){
   name = cleanName(name); level = String(level || "");
+  if(EXAM_SESSIONS.indexOf(examSession) < 0) return Promise.reject(new Error("Please choose your planned exam session."));
   if(!name) return Promise.reject(new Error("Please enter your full name."));
   if(STUDENT_LEVELS.indexOf(level) < 0) return Promise.reject(new Error("Please choose IGCSE, AS or A2."));
   var u = auth.currentUser;
   if(!u) return Promise.reject(new Error("Please sign in again."));
-  return setDoc(doc(db, "users", u.uid), { name: name, email: u.email, class: level, createdAt: serverTimestamp() })
+  return setDoc(doc(db, "users", u.uid), { name: name, email: u.email, class: level, examSession: examSession, certificate: level, createdAt: serverTimestamp() })
     .then(function(){ return getMyProfile(u.uid); });
+}
+// A student created after the exam-session rule came in, but without a session (e.g. an older cached sign-up
+// page): set it once. The security rules allow exactly these two fields, and only while they are missing.
+function saveMySession(uid, examSession, certificate){
+  if(EXAM_SESSIONS.indexOf(examSession) < 0) return Promise.reject(new Error("Please choose your planned exam session."));
+  if(STUDENT_LEVELS.indexOf(certificate) < 0) return Promise.reject(new Error("Please choose your certificate."));
+  return updateDoc(doc(db, "users", uid), { examSession: examSession, certificate: certificate }).then(function(){ return getMyProfile(uid); });
 }
 
 function logIn(email, password, remember){
@@ -291,7 +305,12 @@ function getMyProfile(uid){
   return getDoc(doc(db, "users", uid)).then(function(snap){
     if(!snap.exists()) return null;
     var d = snap.data();
-    return { uid: uid, name: d.name, email: d.email, class: d.class, blocked: d.blocked === true, role: d.role || "student" };
+    var cm = d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : 0;
+    var role = d.role || "student";
+    return { uid: uid, name: d.name, email: d.email, class: d.class, blocked: d.blocked === true, role: role,
+             examSession: d.examSession || "", certificate: d.certificate || "", createdMs: cm,
+             // Students who joined after the exam-session rule came in must pick their session once.
+             needsSession: role === "student" && !d.examSession && cm >= SESSION_REQUIRED_FROM };
   });
 }
 
@@ -1019,6 +1038,75 @@ function listAllFeedback(){
   });
 }
 
+// ---------- Live sessions (small online groups, max 5 per slot) ----------
+// liveBookings/{uid}   : one booking per student (id = uid, so nobody can hold two places)
+// liveSlots/{slotKey}  : { count } how many places are taken (0-5); changed only together with a booking (see rules)
+function liveLoad(uid){
+  return Promise.all([getDocs(collection(db, "liveSlots")), getDoc(doc(db, "liveBookings", uid)), getDoc(doc(db, "liveWaitlist", uid))]).then(function(r){
+    var counts = {}; r[0].forEach(function(d){ var c = (d.data() || {}).count; counts[d.id] = typeof c === "number" ? c : 0; });
+    function pick(s){ if(!s.exists()) return null; var x = Object.assign({ id: s.id }, s.data()); if(x.createdAt && x.createdAt.toMillis) x.createdMs = x.createdAt.toMillis(); delete x.createdAt; return x; }
+    return { counts: counts, mine: pick(r[1]), wait: pick(r[2]) };
+  });
+}
+function liveSlotCount(key){
+  return getDoc(doc(db, "liveSlots", key)).then(function(s){ var c = s.exists() ? (s.data() || {}).count : 0; return typeof c === "number" ? c : 0; });
+}
+function liveBook(uid, profile, slotKey, whatsapp, iso){
+  return liveSlotCount(slotKey).then(function(c){
+    if(c >= 5) return { ok: false, code: "full" };
+    var b = writeBatch(db), rec = { uid: uid, slotKey: slotKey, name: profile.name, email: String(profile.email || "").trim(), whatsapp: whatsapp,
+      "class": profile["class"], status: "booked", createdAt: serverTimestamp() };
+    if(iso) rec.iso = iso;
+    if(profile.examSession) rec.examSession = profile.examSession;
+    b.set(doc(db, "liveBookings", uid), rec);
+    b.set(doc(db, "liveSlots", slotKey), { count: c + 1, updatedAt: serverTimestamp() });
+    b.delete(doc(db, "liveWaitlist", uid));
+    return b.commit().then(function(){ return { ok: true }; }, function(err){
+      // Someone else took the last place (or the counter moved): tell the page to refresh.
+      return liveSlotCount(slotKey).then(function(n){ return { ok: false, code: n >= 5 ? "full" : (err && err.code === "permission-denied" ? "changed" : "error"), detail: err && err.code }; }, function(){ return { ok: false, code: "error" }; });
+    });
+  }, function(err){ return { ok: false, code: "error", detail: err && err.code }; });
+}
+// A student cancels their own booking; staff use the same call to free a place.
+function liveCancel(uid, slotKey){
+  return liveSlotCount(slotKey).then(function(c){
+    var b = writeBatch(db);
+    b.delete(doc(db, "liveBookings", uid));
+    b.set(doc(db, "liveSlots", slotKey), { count: Math.max(0, c - 1), updatedAt: serverTimestamp() });
+    return b.commit().then(function(){ return { ok: true }; });
+  }).catch(function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+function liveJoinWaitlist(uid, profile, slotKey, whatsapp, iso){
+  return liveSlotCount(slotKey).then(function(c){
+    if(c < 5) return { ok: false, code: "notfull" };
+    var rec = { uid: uid, slotKey: slotKey, name: profile.name, email: String(profile.email || "").trim(), whatsapp: whatsapp, "class": profile["class"], status: "waiting", createdAt: serverTimestamp() };
+    if(iso) rec.iso = iso; if(profile.examSession) rec.examSession = profile.examSession;
+    return setDoc(doc(db, "liveWaitlist", uid), rec).then(function(){ return { ok: true }; });
+  }).catch(function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+function liveLeaveWaitlist(uid){
+  return deleteDoc(doc(db, "liveWaitlist", uid)).then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+// Staff: move a waiting student into the slot (only if a place is free and they hold no booking).
+function liveAdminPromote(w){
+  return Promise.all([liveSlotCount(w.slotKey), getDoc(doc(db, "liveBookings", w.id))]).then(function(r){
+    if(r[0] >= 5) return { ok: false, code: "full" };
+    if(r[1].exists()) return { ok: false, code: "hasBooking" };
+    var rec = { uid: w.id, slotKey: w.slotKey, name: w.name, email: w.email, whatsapp: w.whatsapp, "class": w["class"], status: "booked", createdAt: serverTimestamp() };
+    if(w.iso) rec.iso = w.iso; if(w.examSession) rec.examSession = w.examSession;
+    var b = writeBatch(db);
+    b.set(doc(db, "liveBookings", w.id), rec);
+    b.set(doc(db, "liveSlots", w.slotKey), { count: r[0] + 1, updatedAt: serverTimestamp() });
+    b.delete(doc(db, "liveWaitlist", w.id));
+    return b.commit().then(function(){ return { ok: true }; });
+  }).catch(function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
+function subscribeLiveWaitlist(onRows, onError){ return subscribeLive("liveWaitlist", onRows, onError); }
+// Fresh sign-in token, sent to the notification Worker so it can check the booking really exists.
+function getIdToken(){ return auth.currentUser ? auth.currentUser.getIdToken() : Promise.resolve(null); }
+function subscribeLiveBookings(onRows, onError){ return subscribeLive("liveBookings", onRows, onError); }
+
+
 // ---------- Tuition booking (hidden page: weekly slots) ----------
 // tuitionConfig/main      : admin settings + the list of bookable slot keys (day_HHMM)
 // tuitionTaken/{slotKey}  : public "this slot is taken" marker (no names)
@@ -1167,6 +1255,17 @@ window.PQFirebase = {
   submitChatMessage: submitChatMessage,
   subscribeChatMessages: subscribeChatMessages,
   updateChatMessage: updateChatMessage,
+  liveLoad: liveLoad,
+  liveBook: liveBook,
+  liveCancel: liveCancel,
+  liveJoinWaitlist: liveJoinWaitlist,
+  liveLeaveWaitlist: liveLeaveWaitlist,
+  liveAdminPromote: liveAdminPromote,
+  subscribeLiveWaitlist: subscribeLiveWaitlist,
+  getIdToken: getIdToken,
+  subscribeLiveBookings: subscribeLiveBookings,
+  saveMySession: saveMySession,
+  EXAM_SESSIONS: EXAM_SESSIONS,
   tuitionLoad: tuitionLoad,
   tuitionBook: tuitionBook,
   tuitionCancel: tuitionCancel,
