@@ -3,6 +3,7 @@
    open:false = shown to students as "Not available". */
 window.PQ_LIVE = {
   session: "May/June 2027",
+  course: "IGCSE Computer Science 0478/0984",
   capacity: 5,
   trial: "Your first session is a free trial",
   minutes: 90,
@@ -24,9 +25,10 @@ window.PQ_LIVE = {
   L.icon = function(size){
     size = size || 28;
     return '<svg class="pq-live-ic" width="' + size + '" height="' + size + '" viewBox="0 0 32 32" fill="none" aria-hidden="true">' +
-      '<rect x="2.5" y="8" width="18" height="16" rx="4" fill="currentColor" opacity=".18" stroke="currentColor" stroke-width="2.4"/>' +
-      '<path d="M20.5 14l7-4.2a1 1 0 0 1 1.5.9v14.6a1 1 0 0 1-1.5.9l-7-4.2" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>' +
-      '<circle class="pq-live-dot" cx="8.5" cy="14" r="3" fill="#e11d48"/></svg>';
+      '<circle class="pq-live-ring" cx="8.5" cy="14" r="4" stroke="#16a34a" stroke-width="1.6"/>' +
+      '<g class="pq-live-cam"><rect x="2.5" y="8" width="18" height="16" rx="4" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="2.4"/>' +
+      '<path d="M20.5 14l7-4.2a1 1 0 0 1 1.5.9v14.6a1 1 0 0 1-1.5.9l-7-4.2" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></g>' +
+      '<circle class="pq-live-dot" cx="8.5" cy="14" r="3" fill="#16a34a"/></svg>';
   };
   function mins(key){ var t = key.split("_")[1]; return Number(t.slice(0, 2)) * 60 + Number(t.slice(2)); }
   function f12(m){ var h = Math.floor(m / 60) % 24, mm = m % 60, ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12; return h + ":" + (mm < 10 ? "0" : "") + mm + " " + ap; }
