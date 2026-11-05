@@ -36,8 +36,8 @@
   var cs = [["11", "Computer systems", "A", "05-10", "PM", 105], ["21", "Algorithms, programming and logic", "A", "05-19", "PM", 105]];
   S("IG", "Computing", "Computer Science", "0478", cs);
   S("91", "Computing", "Computer Science", "0984", cs);
-  S("IG", "Computing", "Information & Communication Technology", "0417", [["12", "Theory", "A", "05-06", "AM", 90]]);
-  S("91", "Computing", "Information & Communication Technology", "0983", [["12", "Theory", "A", "05-06", "AM", 90]]);
+  S("IG", "Computing", "Information & Communication Technology", "0417", [["12", "Theory", "A", "05-06", "AM", 90], ["21", "Practical test", "A", "03-31", "DAY", 135], ["22", "Practical test", "A", "04-19", "DAY", 135], ["31", "Practical test", "A", "04-01", "DAY", 150], ["32", "Practical test", "A", "04-21", "DAY", 150]]);
+  S("91", "Computing", "Information & Communication Technology", "0983", [["12", "Theory", "A", "05-06", "AM", 90], ["21", "Practical test", "A", "03-31", "DAY", 135], ["22", "Practical test", "A", "04-19", "DAY", 135], ["31", "Practical test", "A", "04-01", "DAY", 150], ["32", "Practical test", "A", "04-21", "DAY", 150]]);
   // ---- Languages ----
   S("IG", "Languages", "First Language English", "0500", [["11", "Reading", "A", "04-29", "PM", 120], ["21", "Directed writing and composition", "A", "05-04", "PM", 120]]);
   S("91", "Languages", "First Language English", "0990", [["11", "Reading", "A", "04-29", "PM", 120], ["21", "Directed writing and composition", "A", "05-04", "PM", 120]]);
@@ -100,6 +100,13 @@
   M("IG", "Languages", "Bahasa Indonesia", "0538", [["01", "Paper 1", "A", "04-30", "AM", 105], ["02", "Paper 2", "A", "05-04", "AM", 105]]);
   M("IG", "Languages", "Urdu as a Second Language", "0539", [["01", "Reading and writing", "A", "05-13", "AM", 120], ["02", "Listening", "A", "05-04", "AM", 45]]);
   M("IG", "Languages", "Swahili", "0262", [["01", "Reading and writing", "A", "04-26", "AM", 120], ["02", "Listening", "A", "05-03", "AM", 45]]);
+  // Which papers of a subject count for a student: tier, practical choice (sciences: "5" or "6"), ICT practical variants ("21" = Paper 2 variant 2 is stored as two digits "12").
+  D.pick = function(p, tier, prac){
+    if(p[2] !== "A" && p[2] !== tier) return false;
+    if(p[1] === "Practical" || p[1] === "Alternative to Practical") return p[0].charAt(0) === (/^[56]$/.test(prac) ? prac : "5");
+    if(p[1] === "Practical test"){ var c = /^[12]{2}$/.test(prac) ? prac : "11"; return p[0].charAt(1) === c.charAt(p[0].charAt(0) === "2" ? 0 : 1); }
+    return true;
+  };
   window.PQ_TIMETABLE = D;
 
 })();

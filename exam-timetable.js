@@ -18,13 +18,16 @@
   function paperLabel(c){ return c.charAt(0) === "0" ? "Paper " + c.charAt(1) : "Paper " + c.charAt(0) + " · Variant " + c.charAt(1); }
   function subjectsFor(q){ return D.subjects.filter(function(s){ return s.qual === q; }); }
   function hasPractical(s){ return s.papers.some(function(p){ return p[1] === "Practical"; }); }
+  function hasTests(s){ return s.papers.some(function(p){ return p[1] === "Practical test"; }); }
+  function testOpts(s, d, cur){ return s.papers.filter(function(p){ return p[1] === "Practical test" && p[0].charAt(0) === d; }).map(function(p){ var m = p[3].split("-"); return '<option value="' + p[0].charAt(1) + '"' + (cur === p[0].charAt(1) ? " selected" : "") + ">Variant " + p[0].charAt(1) + " (" + dshort2(p[3]) + ")</option>"; }).join(""); }
+  function dshort2(md){ var m = md.split("-"); return new Date(Date.UTC(D.year, m[0] - 1, +m[1])).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }); }
   function tiered(s){ return s.papers.some(function(p){ return p[2] !== "A"; }); }
 
   // ---------- store ----------
   function toItems(){ return state.subs.map(function(n){ return state.qual + "|" + state.tier + "|" + n + "|" + (state.prac[n] || ""); }); }
   function fromItems(items, keyAM, keyPM){
     var subs = [], prac = {}, qual = state.qual, tier = state.tier;
-    (items || []).forEach(function(it, i){ var p = String(it).split("|"); if(p.length < 3) return; if(i === 0){ qual = p[0] === "IG" ? "IG" : "91"; tier = p[1] === "C" ? "C" : "E"; } if(subs.indexOf(p[2]) < 0) subs.push(p[2]); if(p[3] === "5" || p[3] === "6") prac[p[2]] = p[3]; });
+    (items || []).forEach(function(it, i){ var p = String(it).split("|"); if(p.length < 3) return; if(i === 0){ qual = p[0] === "IG" ? "IG" : "91"; tier = p[1] === "C" ? "C" : "E"; } if(subs.indexOf(p[2]) < 0) subs.push(p[2]); if(/^([56]|[12]{2})$/.test(p[3])) prac[p[2]] = p[3]; });
     state.qual = qual; state.tier = tier; state.subs = subs; state.prac = prac;
     if(parseKey(keyAM, null)) state.keyAM = keyAM; if(parseKey(keyPM, null)) state.keyPM = keyPM;
   }
@@ -46,10 +49,8 @@
     D.subjects.forEach(function(s){
       if(s.qual !== state.qual || state.subs.indexOf(s.name) < 0) return;
       s.papers.forEach(function(p){
-        if(p[2] !== "A" && p[2] !== state.tier) return;
-        var isPr = p[1] === "Practical" || p[1] === "Alternative to Practical";
-        if(isPr && p[0].charAt(0) !== (state.prac[s.name] || "5")) return;
-        var m = p[3].split("-"), t = p[4] === "AM" ? aM : pM, start = Date.UTC(D.year, m[0] - 1, +m[1], t[0] - 3, t[1]);
+        if(!D.pick(p, state.tier, state.prac[s.name])) return;
+        var m = p[3].split("-"), t = p[4] === "PM" ? pM : aM, start = Date.UTC(D.year, m[0] - 1, +m[1], t[0] - 3, t[1]);
         out.push({ subject: s.name, group: s.group, code: s.base + "/" + p[0], paper: paperLabel(p[0]), type: p[1], tier: p[2] === "C" ? "Core" : p[2] === "E" ? "Extended" : "", session: p[4], iso: D.year + "-" + m[0] + "-" + m[1], mins: p[5], start: start, end: start + p[5] * 60000 });
       });
     });
@@ -74,7 +75,7 @@
       h += '<div class="tt-lab">' + esc(g) + '</div><div class="tt-grid">' + list.map(function(s){
         var on = state.subs.indexOf(s.name) > -1;
         return "<div><button type=\"button\" class=\"tt-sub " + gcls(g) + '" data-sub="' + esc(s.name) + '" aria-pressed="' + on + '"><b>' + esc(s.name) + "</b><small>" + esc(s.base) + (tiered(s) ? " · Core/Extended" : "") + "</small></button>" +
-          (on && hasPractical(s) ? '<div class="tt-prac"><label for="pr-' + esc(s.base) + '">Practical paper:</label><select id="pr-' + esc(s.base) + '" data-prac="' + esc(s.name) + '"><option value="5"' + ((state.prac[s.name] || "5") === "5" ? " selected" : "") + '>Practical (Paper 5)</option><option value="6"' + (state.prac[s.name] === "6" ? " selected" : "") + ">Alternative to Practical (Paper 6)</option></select></div>" : "") + "</div>";
+          (on && hasTests(s) ? '<div class="tt-prac"><label for="t2-' + esc(s.base) + '">Paper 2 (practical):</label><select id="t2-' + esc(s.base) + '" data-test="' + esc(s.name) + '|0">' + testOpts(s, "2", (state.prac[s.name] || "11").charAt(0)) + '</select></div><div class="tt-prac"><label for="t3-' + esc(s.base) + '">Paper 3 (practical):</label><select id="t3-' + esc(s.base) + '" data-test="' + esc(s.name) + '|1">' + testOpts(s, "3", (state.prac[s.name] || "11").charAt(1)) + '</select></div><p class="tt-hint" style="margin:4px 0 0 5px">Ask your teacher which variant your school sits.</p>' : "") + (on && hasPractical(s) ? '<div class="tt-prac"><label for="pr-' + esc(s.base) + '">Practical paper:</label><select id="pr-' + esc(s.base) + '" data-prac="' + esc(s.name) + '"><option value="5"' + ((state.prac[s.name] || "5") === "5" ? " selected" : "") + '>Practical (Paper 5)</option><option value="6"' + (state.prac[s.name] === "6" ? " selected" : "") + ">Alternative to Practical (Paper 6)</option></select></div>" : "") + "</div>";
       }).join("") + "</div>";
     });
     h += '<div class="tt-lab">4 &middot; Your centre\'s start times <span style="text-transform:none;letter-spacing:0;font-weight:600">(optional, Saudi Arabia time)</span></div><div class="tt-keys"><label>Morning (AM) papers<input type="time" id="k-am" value="' + esc(state.keyAM) + '"></label><label>Afternoon (PM) papers<input type="time" id="k-pm" value="' + esc(state.keyPM) + '"></label></div>' +
@@ -126,7 +127,7 @@
       if(p.end <= now && !state.showDone) return;
       if(p.iso !== cur){ cur = p.iso; var dd = Math.round(Date.parse(p.iso + "T00:00:00Z") / 86400000) - today; h += '<div class="tt-day"><h3>' + esc(dateLong(p.iso)) + "</h3><span>" + (dd < 0 ? "" : dd === 0 ? "today" : dd === 1 ? "tomorrow" : "in " + dd + " days") + (perDay[p.iso] > 1 ? " &middot; " + perDay[p.iso] + " papers" : "") + "</span></div>"; }
       var clash = slot[p.iso + p.session].length > 1;
-      h += '<div class="tt-row ' + gcls(p.group) + (p.end <= now ? " done" : "") + (clash ? " clash" : "") + '"><div class="a"><b>' + esc(p.subject) + '</b><small><span class="tt-code">' + esc(p.code) + "</span> &middot; " + esc(p.paper) + " &middot; " + esc(p.type) + (p.tier ? " &middot; " + p.tier : "") + '</small></div><div class="b"><span class="tt-pill ' + (p.session === "AM" ? "am" : "pm") + '">' + p.session + "</span><span>" + hhmm(p.start) + "–" + hhmm(p.end) + " <small style=\"color:var(--muted)\">(" + dur(p.mins) + ")</small></span>" + (clash ? '<span class="tt-pill warn">clash</span>' : "") + badge(p, now, today) + '<button class="btn btn-secondary sm tt-no-print" type="button" data-ics="' + i + '" aria-label="Add ' + esc(p.subject) + " " + esc(p.code) + ' to calendar">+ Calendar</button></div></div>';
+      h += '<div class="tt-row ' + gcls(p.group) + (p.end <= now ? " done" : "") + (clash ? " clash" : "") + '"><div class="a"><b>' + esc(p.subject) + '</b><small><span class="tt-code">' + esc(p.code) + "</span> &middot; " + esc(p.paper) + " &middot; " + esc(p.type) + (p.tier ? " &middot; " + p.tier : "") + '</small></div><div class="b"><span class="tt-pill ' + (p.session === "PM" ? "pm" : "am") + '">' + (p.session === "DAY" ? "TEST DAY" : p.session) + "</span><span>" + (p.session === "DAY" ? "date set by Cambridge, your school sets the time" : hhmm(p.start) + "\u2013" + hhmm(p.end)) + " <small style=\"color:var(--muted)\">(" + dur(p.mins) + ")</small></span>" + (clash ? '<span class="tt-pill warn">clash</span>' : "") + badge(p, now, today) + '<button class="btn btn-secondary sm tt-no-print" type="button" data-ics="' + i + '" aria-label="Add ' + esc(p.subject) + " " + esc(p.code) + ' to calendar">+ Calendar</button></div></div>';
     });
     return h;
   }
@@ -173,6 +174,7 @@
   document.addEventListener("change", function(e){
     var t = e.target;
     if(t.id === "more-sel"){ if(t.value && state.subs.length < MAXSUB && state.subs.indexOf(t.value) < 0){ state.subs.push(t.value); change(); } else if(t.value){ saveMsg = "You can choose up to " + MAXSUB + " subjects."; paintSetup(); } }
+    else if(t.hasAttribute && t.hasAttribute("data-test")){ var tp = t.getAttribute("data-test").split("|"), cur = (state.prac[tp[0]] || "11").split(""); cur[+tp[1]] = t.value; state.prac[tp[0]] = cur.join(""); save(); paintOut(); }
     else if(t.hasAttribute && t.hasAttribute("data-prac")){ state.prac[t.getAttribute("data-prac")] = t.value; save(); paintOut(); }
     else if(t.id === "k-am" || t.id === "k-pm"){ if(parseKey(t.value, null)){ state[t.id === "k-am" ? "keyAM" : "keyPM"] = t.value; save(); paintOut(); } }
   });

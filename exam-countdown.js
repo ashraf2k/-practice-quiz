@@ -15,9 +15,8 @@
     plan.items.forEach(function(it){
       var x = String(it).split("|"), s = D.subjects.filter(function(o){ return o.qual === x[0] && o.name === x[2]; })[0]; if(!s) return;
       s.papers.forEach(function(p){
-        if(p[2] !== "A" && p[2] !== x[1]) return;
-        if((p[1] === "Practical" || p[1] === "Alternative to Practical") && p[0].charAt(0) !== (x[3] || "5")) return;
-        var m = p[3].split("-"), t = p[4] === "AM" ? aM : pM, start = Date.UTC(D.year, m[0] - 1, +m[1], t[0] - 3, t[1]);
+        if(!D.pick(p, x[1], x[3])) return;
+        var m = p[3].split("-"), t = p[4] === "PM" ? pM : aM, start = Date.UTC(D.year, m[0] - 1, +m[1], t[0] - 3, t[1]);
         out.push({ subject: s.name, group: s.group, code: s.base + "/" + p[0], session: p[4], iso: D.year + "-" + p[3], start: start, end: start + p[5] * 60000 });
       });
     });
@@ -29,12 +28,12 @@
     var up = all.filter(function(p){ return p.end > now; });   // finished exams are removed here
     if(!up.length){ box.innerHTML = '<div class="cd-hero"><div class="n">\u2713</div><div class="u">All exams finished</div><p>Well done. Good luck with your results.</p></div>'; return; }
     var nx = up[0], days = Math.round(Date.parse(nx.iso + "T00:00:00Z") / 86400000) - today, ms = Math.max(0, nx.start - now), started = nx.start <= now;
-    var h = '<div class="cd-hero"><div class="n">' + Math.max(days, 0) + '</div><div class="u">' + (days === 0 ? "exam today" : days === 1 ? "day to next exam" : "days to next exam") + "</div><p><b>" + esc(nx.subject) + "</b> \u00b7 " + esc(nx.code) + " \u00b7 " + esc(dshort(nx.iso)) + " " + nx.session + "</p>" +
+    var h = '<div class="cd-hero"><div class="n">' + Math.max(days, 0) + '</div><div class="u">' + (days === 0 ? "exam today" : days === 1 ? "day to next exam" : "days to next exam") + "</div><p><b>" + esc(nx.subject) + "</b> \u00b7 " + esc(nx.code) + " \u00b7 " + esc(dshort(nx.iso)) + " " + (nx.session === "DAY" ? "(practical test day)" : nx.session) + "</p>" +
       (started ? '<p><b style="color:var(--accent-dark)">In progress now</b></p>' : '<div class="cd-clock" role="timer"><div><b>' + Math.floor(ms / 86400000) + "</b><span>days</span></div><div><b>" + pad(Math.floor(ms % 86400000 / 3600000)) + "</b><span>hours</span></div><div><b>" + pad(Math.floor(ms % 3600000 / 60000)) + "</b><span>min</span></div></div>") + "</div>";
     var rest = up.slice(1), shown = expanded ? rest : rest.slice(0, SHOW);
     shown.forEach(function(p){
       var d = Math.round(Date.parse(p.iso + "T00:00:00Z") / 86400000) - today;
-      h += '<div class="cd-row g-' + esc(p.group.split(" ")[0]) + (d <= 0 ? " today" : "") + '"><div><b>' + esc(p.subject) + "</b><small>" + esc(p.code) + " \u00b7 " + esc(dshort(p.iso)) + " \u00b7 " + p.session + '</small></div><div class="d"><i>' + Math.max(d, 0) + "</i><span>" + (d === 1 ? "day" : "days") + "</span></div></div>";
+      h += '<div class="cd-row g-' + esc(p.group.split(" ")[0]) + (d <= 0 ? " today" : "") + '"><div><b>' + esc(p.subject) + "</b><small>" + esc(p.code) + " \u00b7 " + esc(dshort(p.iso)) + " \u00b7 " + (p.session === "DAY" ? "practical test" : p.session) + '</small></div><div class="d"><i>' + Math.max(d, 0) + "</i><span>" + (d === 1 ? "day" : "days") + "</span></div></div>";
     });
     if(rest.length > SHOW) h += '<button class="btn btn-secondary cd-more" id="cd-more" type="button">' + (expanded ? "Show fewer" : "Show all " + rest.length + " upcoming") + "</button>";
     box.innerHTML = h;

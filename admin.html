@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-hfGjj6UGRdeUIrkrmxkooHPRv9r+u+jVLwGHUfgvSa0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-eu5oWoz16624wk2UrgWa+bMoKodHEBK5WGEIBBD1Akw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -1097,7 +1097,7 @@
 <script src="syllabus-report.js?v=20261019j"></script>
 <script src="parent-report.js?v=20261021a"></script>
 <script src="live-slots.js?v=4"></script>
-<script src="exam-timetable-data.js?v=3"></script>
+<script src="exam-timetable-data.js?v=4"></script>
 <script src="firebase-config.js?v=20261103e"></script>
 <script type="module" src="firebase-init.js?v=20261105d"></script>
 <script type="module">
@@ -3002,7 +3002,7 @@
     var D = window.PQ_TIMETABLE, qual = "", tier = "", subs = [], first = "", n = 0;
     (items || []).forEach(function(it, i){ var x = String(it).split("|"); if(i === 0){ qual = x[0] === "IG" ? "IGCSE (A*-G)" : "IGCSE (9-1)"; tier = x[1] === "C" ? "Core" : "Extended"; } subs.push(x[2]);
       var s = D && D.subjects.filter(function(o){ return o.qual === x[0] && o.name === x[2]; })[0];
-      if(s) s.papers.forEach(function(p){ if(p[2] !== "A" && p[2] !== x[1]) return; if((p[1] === "Practical" || p[1] === "Alternative to Practical") && p[0].charAt(0) !== (x[3] || "5")) return; n++; var d = D.year + "-" + p[3]; if(!first || d < first) first = d; }); });
+      if(s) s.papers.forEach(function(p){ if(!D.pick(p, x[1], x[3])) return; n++; var d = D.year + "-" + p[3]; if(!first || d < first) first = d; }); });
     return { qual: qual, tier: tier, subs: subs, first: first, papers: n };
   }
   function ttRows(){

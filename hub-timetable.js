@@ -18,8 +18,7 @@
       p.items.forEach(function(it){
         var x = String(it).split("|"), s = D.subjects.filter(function(o){ return o.qual === x[0] && o.name === x[2]; })[0]; if(!s) return;
         s.papers.forEach(function(pp){
-          if(pp[2] !== "A" && pp[2] !== x[1]) return;
-          if((pp[1] === "Practical" || pp[1] === "Alternative to Practical") && pp[0].charAt(0) !== (x[3] || "5")) return;
+          if(!D.pick(pp, x[1], x[3])) return;
           n++; var d = D.year + "-" + pp[3]; if(!first || d < first) first = d;
         });
       });
