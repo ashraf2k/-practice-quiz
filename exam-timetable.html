@@ -30,6 +30,9 @@
   .tt-prac{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:6px 0 0 5px; font-size:13px; color:var(--muted); }
   .tt-prac select, .tt-keys input{ padding:8px 10px; border:1.5px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font:inherit; }
   .tt-keys{ display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-top:6px; } .tt-keys label{ display:grid; gap:3px; font-size:13px; font-weight:700; }
+  .tt-chips{ display:flex; gap:6px; flex-wrap:wrap; margin:8px 0 4px; } .tt-chip{ display:inline-flex; align-items:center; gap:4px; padding:4px 4px 4px 12px; border-radius:99px; border:1.5px solid var(--accent); background:var(--accent-tint); font-size:13.5px; font-weight:700; }
+  .tt-chip button{ width:26px; height:26px; border-radius:50%; border:0; background:transparent; color:var(--ink); font:inherit; cursor:pointer; } .tt-chip button:hover{ background:var(--line); }
+  .tt-more{ margin:12px 0 2px; display:grid; gap:4px; } .tt-more{ min-width:0; } .tt-more select{ width:100%; min-width:0; padding:11px 12px; min-height:44px; border:1.5px solid var(--accent); border-radius:12px; background:var(--surface); color:var(--ink); font:inherit; font-weight:600; max-width:100%; }
   .tt-hint{ color:var(--muted); font-size:13px; margin:4px 0 0; }
   .tt-hero{ display:flex; gap:16px; flex-wrap:wrap; align-items:stretch; margin:0 0 14px; }
   .tt-big{ flex:1 1 260px; padding:18px 20px; border-radius:18px; border:1.5px solid var(--accent); background:linear-gradient(135deg,var(--accent-tint),var(--surface)); }
@@ -85,7 +88,7 @@
 </div>
 <script src="firebase-config.js?v=20261103e"></script>
 <script type="module" src="firebase-init.js?v=20261105d"></script>
-<script src="exam-timetable-data.js?v=2"></script>
-<script src="exam-timetable.js?v=3"></script>
+<script src="exam-timetable-data.js?v=3"></script>
+<script src="exam-timetable.js?v=5"></script>
 </body>
 </html>

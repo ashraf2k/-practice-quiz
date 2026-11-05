@@ -63,8 +63,14 @@
       '<div class="tt-lab">2 &middot; Tier</div><div class="tt-seg">' + [["E", "Extended"], ["C", "Core"]].map(function(x){ return '<button type="button" data-t="' + x[0] + '" aria-pressed="' + (state.tier === x[0]) + '">' + x[1] + "</button>"; }).join("") + '</div><p class="tt-hint">Sciences, Mathematics and English (as an Additional Language) have Core and Extended papers.</p>' +
       '<div class="tt-lab">3 &middot; Your subjects <span style="text-transform:none;letter-spacing:0;font-weight:600">(' + state.subs.length + " chosen, up to " + MAXSUB + ')</span></div>' +
       '<div class="tt-seg"><button type="button" data-quick="1">Quick start: sciences + maths + English + computer science</button>' + (state.subs.length ? '<button type="button" data-clear="1">Clear all</button>' : "") + "</div>";
+    if(state.subs.length){
+      h += '<div class="tt-chips" aria-label="Your chosen subjects">' + state.subs.map(function(n){ return '<span class="tt-chip">' + esc(n) + '<button type="button" data-rm="' + esc(n) + '" aria-label="Remove ' + esc(n) + '">\u2715</button></span>'; }).join("") + "</div>";
+    }
+    var pool = subjectsFor(state.qual).filter(function(s){ return state.subs.indexOf(s.name) < 0; });
+    h += '<div class="tt-more"><label for="more-sel"><b>Add any other subject from the timetable</b></label><select id="more-sel" aria-label="Add another subject"><option value="">Choose a subject\u2026</option>' +
+      GROUPS.map(function(g){ var l = pool.filter(function(s){ return s.group === g; }).sort(function(a, b){ return a.name.localeCompare(b.name); }); return l.length ? '<optgroup label="' + esc(g) + '">' + l.map(function(s){ return '<option value="' + esc(s.name) + '">' + esc(s.name) + " (" + esc(s.base) + ")</option>"; }).join("") + "</optgroup>" : ""; }).join("") + "</select></div>";
     GROUPS.forEach(function(g){
-      var list = subjectsFor(state.qual).filter(function(s){ return s.group === g; }); if(!list.length) return;
+      var list = subjectsFor(state.qual).filter(function(s){ return s.group === g && !s.more; }); if(!list.length) return;
       h += '<div class="tt-lab">' + esc(g) + '</div><div class="tt-grid">' + list.map(function(s){
         var on = state.subs.indexOf(s.name) > -1;
         return "<div><button type=\"button\" class=\"tt-sub " + gcls(g) + '" data-sub="' + esc(s.name) + '" aria-pressed="' + on + '"><b>' + esc(s.name) + "</b><small>" + esc(s.base) + (tiered(s) ? " · Core/Extended" : "") + "</small></button>" +
@@ -156,6 +162,7 @@
     if(b.hasAttribute("data-q")){ if(state.qual !== b.getAttribute("data-q")){ state.qual = b.getAttribute("data-q"); state.subs = []; state.prac = {}; } change(); }
     else if(b.hasAttribute("data-t")){ state.tier = b.getAttribute("data-t"); change(); }
     else if(b.hasAttribute("data-sub")){ var n = b.getAttribute("data-sub"), i = state.subs.indexOf(n); if(i > -1) state.subs.splice(i, 1); else if(state.subs.length < MAXSUB) state.subs.push(n); else { saveMsg = "You can choose up to " + MAXSUB + " subjects."; } change(); }
+    else if(b.hasAttribute("data-rm")){ var rn = b.getAttribute("data-rm"), ri = state.subs.indexOf(rn); if(ri > -1) state.subs.splice(ri, 1); change(); }
     else if(b.hasAttribute("data-quick")){ QUICK[state.qual].forEach(function(n){ if(state.subs.indexOf(n) < 0 && state.subs.length < MAXSUB) state.subs.push(n); }); change(); }
     else if(b.hasAttribute("data-clear")){ state.subs = []; state.prac = {}; change(); }
     else if(b.hasAttribute("data-view")){ state.view = b.getAttribute("data-view"); save(); paintOut(); }
@@ -165,7 +172,8 @@
   });
   document.addEventListener("change", function(e){
     var t = e.target;
-    if(t.hasAttribute && t.hasAttribute("data-prac")){ state.prac[t.getAttribute("data-prac")] = t.value; save(); paintOut(); }
+    if(t.id === "more-sel"){ if(t.value && state.subs.length < MAXSUB && state.subs.indexOf(t.value) < 0){ state.subs.push(t.value); change(); } else if(t.value){ saveMsg = "You can choose up to " + MAXSUB + " subjects."; paintSetup(); } }
+    else if(t.hasAttribute && t.hasAttribute("data-prac")){ state.prac[t.getAttribute("data-prac")] = t.value; save(); paintOut(); }
     else if(t.id === "k-am" || t.id === "k-pm"){ if(parseKey(t.value, null)){ state[t.id === "k-am" ? "keyAM" : "keyPM"] = t.value; save(); paintOut(); } }
   });
 
@@ -176,11 +184,13 @@
   function showSteps(list){ var o = $("tt-steps"); o.innerHTML = list.map(function(x){ return "<li>" + x + "</li>"; }).join(""); o.classList.remove("hidden"); }
   window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); deferred = e; });
   window.addEventListener("appinstalled", function(){ $("tt-install").classList.add("hidden"); $("tt-steps").classList.add("hidden"); });
-  if(!standalone && touchy) $("tt-install").classList.remove("hidden");
+  if(!standalone) $("tt-install").classList.remove("hidden");
   $("btn-install").addEventListener("click", function(){
     if(deferred){ deferred.prompt(); deferred.userChoice.then(function(){ deferred = null; }); return; }
     if(isIOS) showSteps(["Open this page in <b>Safari</b> (it does not work from inside other apps).", "Tap the <b>Share</b> button (the square with an arrow, at the bottom or top of Safari).", "Scroll down and tap <b>Add to Home Screen</b>.", "Tap <b>Add</b>. The <b>Exam timetable</b> icon now appears on your Home screen."]);
-    else showSteps(["Open this page in <b>Chrome</b>.", "Tap the <b>\u22ee</b> menu (top right).", "Tap <b>Add to Home screen</b> (or <b>Install app</b>).", "Tap <b>Add</b>. The <b>Exam timetable</b> icon now appears on your Home screen."]);
+    else if(isAndroid) showSteps(["Open this page in <b>Chrome</b>.", "Tap the <b>\u22ee</b> menu (top right).", "Tap <b>Add to Home screen</b> (or <b>Install app</b>).", "Tap <b>Add</b>. The <b>Exam timetable</b> icon now appears on your Home screen."]);
+    else showSteps(["Open this page <b>on your phone</b>: <a href=\"#\" id=\"cp-link\">copy the link</a> and send it to yourself (WhatsApp or email).", "<b>iPhone:</b> open it in Safari, tap <b>Share</b>, then <b>Add to Home Screen</b>.", "<b>Android:</b> open it in Chrome, tap the <b>\u22ee</b> menu, then <b>Add to Home screen</b>.", "On a computer with Chrome or Edge you can also use the install icon at the right end of the address bar."]);
+    var cp = $("cp-link"); if(cp) cp.addEventListener("click", function(ev){ ev.preventDefault(); var u = location.href.split("#")[0]; (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(function(){ cp.textContent = "link copied"; }, function(){ window.prompt("Copy this link:", u); }); });
   });
   if("serviceWorker" in navigator) window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
 

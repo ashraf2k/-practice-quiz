@@ -47,12 +47,14 @@
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1), touchy = isIOS || /android/i.test(navigator.userAgent);
   window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); deferred = e; });
   window.addEventListener("appinstalled", function(){ $("cd-install").classList.add("hidden"); $("cd-steps").classList.add("hidden"); });
-  if(!standalone && touchy) $("cd-install").classList.remove("hidden");
+  if(!standalone) $("cd-install").classList.remove("hidden");
   $("btn-install").addEventListener("click", function(){
     if(deferred){ deferred.prompt(); deferred.userChoice.then(function(){ deferred = null; }); return; }
     var steps = isIOS ? ["Open this page in <b>Safari</b>.", "Tap the <b>Share</b> button (square with an arrow).", "Scroll down and tap <b>Add to Home Screen</b>.", "Tap <b>Add</b>. The <b>Exam countdown</b> icon appears on your Home screen."]
-      : ["Open this page in <b>Chrome</b>.", "Tap the <b>\u22ee</b> menu (top right).", "Tap <b>Add to Home screen</b> (or <b>Install app</b>).", "Tap <b>Add</b>. The <b>Exam countdown</b> icon appears on your Home screen."];
+      : /android/i.test(navigator.userAgent) ? ["Open this page in <b>Chrome</b>.", "Tap the <b>\u22ee</b> menu (top right).", "Tap <b>Add to Home screen</b> (or <b>Install app</b>).", "Tap <b>Add</b>. The <b>Exam countdown</b> icon appears on your Home screen."]
+      : ["Open this page <b>on your phone</b>: <a href=\"#\" id=\"cp-link\">copy the link</a> and send it to yourself.", "<b>iPhone:</b> open it in Safari, tap <b>Share</b>, then <b>Add to Home Screen</b>.", "<b>Android:</b> open it in Chrome, tap the <b>\u22ee</b> menu, then <b>Add to Home screen</b>.", "On a computer with Chrome or Edge you can also use the install icon in the address bar."];
     var o = $("cd-steps"); o.innerHTML = steps.map(function(x){ return "<li>" + x + "</li>"; }).join(""); o.classList.remove("hidden");
+    var cp = $("cp-link"); if(cp) cp.addEventListener("click", function(ev){ ev.preventDefault(); var u = location.href.split("#")[0]; (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(function(){ cp.textContent = "link copied"; }, function(){ window.prompt("Copy this link:", u); }); });
   });
   if("serviceWorker" in navigator) window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
 

@@ -63,5 +63,43 @@
   S("IG", "Humanities and business", "Psychology", "0266", [["11", "Written paper", "A", "05-06", "PM", 90], ["21", "Written paper", "A", "05-18", "PM", 80]]);
   S("IG", "Humanities and business", "Physical Education", "0413", [["12", "Theory", "A", "05-20", "AM", 105]]);
   S("91", "Humanities and business", "Physical Education", "0995", [["12", "Theory", "A", "05-20", "AM", 105]]);
+
+  // ---- More subjects (shown in the "Add another subject" menu) ----
+  function M(qual, group, name, base, papers){ S(qual, group, name, base, papers); D.subjects[D.subjects.length - 1].more = true; }
+  function both(group, name, igBase, nBase, papers){ M("IG", group, name, igBase, papers); if(nBase) M("91", group, name, nBase, papers); }
+  var HB = "Humanities and business";
+  both(HB, "Drama", "0411", "0994", [["12", "Written paper", "A", "05-28", "AM", 150]]);
+  both(HB, "Music (Listening)", "0410", "0978", [["12", "Listening", "A", "05-21", "AM", 75]]);
+  M("IG", HB, "Enterprise", "0454", [["12", "Written paper", "A", "06-03", "AM", 90]]);
+  M("IG", HB, "Environmental Management", "0680", [["11", "Written paper", "A", "05-24", "PM", 105], ["21", "Written paper", "A", "05-28", "PM", 105]]);
+  M("IG", HB, "Food & Nutrition", "0648", [["12", "Written paper", "A", "06-08", "AM", 120]]);
+  M("IG", HB, "Sociology", "0495", [["12", "Paper 1", "A", "05-11", "AM", 120], ["22", "Paper 2", "A", "05-27", "AM", 105]]);
+  M("IG", HB, "Marine Science", "0697", [["12", "Paper 1", "A", "05-11", "AM", 105], ["22", "Paper 2", "A", "05-14", "AM", 105]]);
+  M("IG", HB, "Travel & Tourism", "0471", [["12", "Paper 1", "A", "05-06", "AM", 90], ["22", "Paper 2", "A", "05-14", "AM", 120]]);
+  M("IG", HB, "Statistics", "0479", [["12", "Paper 1", "A", "05-06", "AM", 135], ["22", "Paper 2", "A", "05-21", "AM", 135]]);
+  M("IG", HB, "Pakistan Studies", "0448", [["01", "Paper 1", "A", "04-30", "AM", 90], ["02", "Paper 2", "A", "05-03", "AM", 90]]);
+  M("IG", "Languages", "Latin", "0480", [["12", "Paper 1", "A", "05-06", "AM", 90], ["22", "Paper 2", "A", "05-11", "AM", 90]]);
+  M("IG", "Languages", "Sanskrit", "0499", [["12", "Paper 1", "A", "04-27", "AM", 90], ["22", "Paper 2", "A", "05-04", "AM", 90]]);
+  both("Languages", "English as a Second Language (Count-in Speaking)", "0511", "0991", [["11", "Reading and writing", "A", "04-29", "PM", 120], ["21", "Listening", "A", "05-24", "PM", 50]]);
+  both("Languages", "English as a Second Language (Speaking Endorsement)", "0510", "0993", [["11", "Reading and writing", "A", "04-29", "PM", 120], ["21", "Listening", "A", "05-24", "PM", 50]]);
+  M("IG", "Languages", "First Language Chinese", "0509", [["12", "Paper 1", "A", "04-26", "AM", 135], ["22", "Paper 2", "A", "04-30", "AM", 120]]);
+  M("IG", "Languages", "First Language French", "0501", [["01", "Paper 1", "A", "04-26", "AM", 120], ["02", "Paper 2", "A", "05-11", "AM", 120]]);
+  M("IG", "Languages", "First Language German", "0505", [["01", "Paper 1", "A", "05-10", "AM", 120], ["02", "Paper 2", "A", "05-18", "AM", 120]]);
+  M("IG", "Languages", "First Language Portuguese", "0504", [["01", "Paper 1", "A", "05-20", "PM", 120], ["02", "Paper 2", "A", "05-28", "PM", 120]]);
+  M("IG", "Languages", "First Language Spanish", "0502", [["11", "Paper 1", "A", "05-20", "PM", 120], ["21", "Paper 2", "A", "05-31", "PM", 120]]);
+  M("IG", "Languages", "First Language Thai", "0518", [["01", "Paper 1", "A", "05-03", "AM", 120], ["02", "Paper 2", "A", "05-13", "AM", 120]]);
+  M("IG", "Languages", "First Language Turkish", "0513", [["01", "Paper 1", "A", "04-26", "AM", 120], ["02", "Paper 2", "A", "05-13", "AM", 120]]);
+  M("IG", "Languages", "French", "0520", [["11", "Listening", "A", "06-07", "PM", 50], ["21", "Reading and writing", "A", "05-05", "PM", 60], ["41", "Paper 4", "A", "04-28", "PM", 60]]);
+  var de = [["12", "Listening", "A", "05-04", "AM", 50], ["22", "Reading and writing", "A", "05-10", "AM", 60], ["42", "Paper 4", "A", "05-04", "AM", 60]];
+  both("Languages", "German", "0525", "7159", de);
+  M("IG", "Languages", "Italian", "0535", [["12", "Listening", "A", "04-27", "AM", 50], ["22", "Reading and writing", "A", "05-04", "AM", 60], ["42", "Paper 4", "A", "04-27", "AM", 60]]);
+  M("IG", "Languages", "Spanish", "0530", [["12", "Listening", "A", "05-26", "AM", 50], ["22", "Reading and writing", "A", "05-14", "AM", 60], ["42", "Paper 4", "A", "05-26", "AM", 60]]);
+  M("IG", "Languages", "Chinese as a Second Language", "0523", [["11", "Reading and writing", "A", "04-30", "PM", 120], ["21", "Listening", "A", "05-12", "PM", 45]]);
+  M("IG", "Languages", "Mandarin Chinese", "0547", [["11", "Listening", "A", "04-28", "PM", 40], ["21", "Reading and writing", "A", "05-12", "PM", 75], ["41", "Paper 4", "A", "04-26", "PM", 75]]);
+  M("IG", "Languages", "Malay", "0546", [["12", "Listening", "A", "05-24", "AM", 50], ["22", "Reading and writing", "A", "05-03", "AM", 60], ["42", "Paper 4", "A", "05-12", "AM", 60]]);
+  M("IG", "Languages", "Bahasa Indonesia", "0538", [["01", "Paper 1", "A", "04-30", "AM", 105], ["02", "Paper 2", "A", "05-04", "AM", 105]]);
+  M("IG", "Languages", "Urdu as a Second Language", "0539", [["01", "Reading and writing", "A", "05-13", "AM", 120], ["02", "Listening", "A", "05-04", "AM", 45]]);
+  M("IG", "Languages", "Swahili", "0262", [["01", "Reading and writing", "A", "04-26", "AM", 120], ["02", "Listening", "A", "05-03", "AM", 45]]);
   window.PQ_TIMETABLE = D;
+
 })();
