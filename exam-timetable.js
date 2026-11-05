@@ -3,7 +3,7 @@
   var D = window.PQ_TIMETABLE, LS = "pq_exam_plan_v1", MAXSUB = 14, TZ = 3 * 3600000;
   var GROUPS = ["Sciences", "Mathematics", "Computing", "Languages", "Humanities and business"];
   var QUICK = { "91": ["Biology", "Chemistry", "Physics", "Mathematics", "First Language English", "Computer Science"], "IG": ["Biology", "Chemistry", "Physics", "Mathematics (without coursework)", "First Language English", "Computer Science"] };
-  var state = { qual: "91", tier: "E", subs: [], prac: {}, keyAM: "08:00", keyPM: "13:30", view: "list" };
+  var state = { qual: "91", tier: "E", subs: [], prac: {}, keyAM: "08:00", keyPM: "13:30", view: "list", showDone: false };
   var user = null, saveTimer = 0, saveMsg = "";
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -101,9 +101,13 @@
     var clashes = Object.keys(slot).filter(function(k){ return slot[k].length > 1; });
     h += '<div class="tt-stats"><div class="tt-stat"><b>' + ps.length + "</b><span>papers</span></div><div class=\"tt-stat\"><b>" + dl.length + "</b><span>exam days</span></div><div class=\"tt-stat\"><b>" + esc(dateShort(last.iso)) + "</b><span>last paper</span></div><div class=\"tt-stat\"><b>" + (gap > 0 ? plural(gap, "day") : "-") + "</b><span>longest revision gap" + (gap > 0 ? " (" + esc(gapFrom.slice(5)) + " to " + esc(gapTo.slice(5)) + ")" : "") + "</span></div></div>";
     if(clashes.length) h += '<div class="tt-warn" role="alert"><b>Timetable clash:</b> ' + clashes.map(function(k){ var a = slot[k]; return esc(dateShort(a[0].iso)) + " " + a[0].session + " (" + a.map(function(p){ return esc(p.subject) + " " + esc(p.code); }).join(" and ") + ")"; }).join("; ") + ". Two papers in the same session: ask your exam officer about a timetable deviation. If a clash only appears because you picked Core and Extended papers together, check your tier.</div>";
-    h += '<div class="tt-bar tt-no-print"><div class="tt-seg" style="margin:0"><button type="button" data-view="list" aria-pressed="' + (state.view === "list") + '">List</button><button type="button" data-view="cal" aria-pressed="' + (state.view === "cal") + '">Calendar</button></div><div class="tt-seg" style="margin:0"><button type="button" data-ics="all">Add all to calendar (.ics)</button><button type="button" data-print="1">Print</button></div></div>';
+    h += '<div class="tt-bar tt-no-print"><div class="tt-seg" style="margin:0"><button type="button" data-view="list" aria-pressed="' + (state.view === "list") + '">List</button><button type="button" data-view="cal" aria-pressed="' + (state.view === "cal") + '">Calendar</button></div><div class="tt-seg" style="margin:0"><button type="button" data-ics="all">Add all to calendar (.ics)</button><button type="button" data-print="1">Print</button>' + doneBtn(ps, now) + '</div></div>';
     h += state.view === "cal" ? calendar(ps) : list(ps, now, today, slot);
     box.innerHTML = h;
+  }
+  function doneBtn(ps, now){
+    var n = ps.filter(function(p){ return p.end <= now; }).length;
+    return n ? '<button type="button" data-done="1">' + (state.showDone ? "Hide finished exams" : "Show finished exams (" + n + ")") + "</button>" : "";
   }
   function badge(p, now, today){
     if(p.end <= now) return '<span class="tt-pill">done</span>';
@@ -111,8 +115,9 @@
     return '<span class="tt-pill cd">' + (dd <= 0 ? (p.start <= now ? "in progress" : "today") : dd === 1 ? "tomorrow" : "in " + dd + " days") + "</span>";
   }
   function list(ps, now, today, slot){
-    var h = "", cur = "", perDay = {}; ps.forEach(function(p){ perDay[p.iso] = (perDay[p.iso] || 0) + 1; });
+    var h = "", cur = "", perDay = {}; ps.forEach(function(p){ if(p.end > now || state.showDone) perDay[p.iso] = (perDay[p.iso] || 0) + 1; });
     ps.forEach(function(p, i){
+      if(p.end <= now && !state.showDone) return;
       if(p.iso !== cur){ cur = p.iso; var dd = Math.round(Date.parse(p.iso + "T00:00:00Z") / 86400000) - today; h += '<div class="tt-day"><h3>' + esc(dateLong(p.iso)) + "</h3><span>" + (dd < 0 ? "" : dd === 0 ? "today" : dd === 1 ? "tomorrow" : "in " + dd + " days") + (perDay[p.iso] > 1 ? " &middot; " + perDay[p.iso] + " papers" : "") + "</span></div>"; }
       var clash = slot[p.iso + p.session].length > 1;
       h += '<div class="tt-row ' + gcls(p.group) + (p.end <= now ? " done" : "") + (clash ? " clash" : "") + '"><div class="a"><b>' + esc(p.subject) + '</b><small><span class="tt-code">' + esc(p.code) + "</span> &middot; " + esc(p.paper) + " &middot; " + esc(p.type) + (p.tier ? " &middot; " + p.tier : "") + '</small></div><div class="b"><span class="tt-pill ' + (p.session === "AM" ? "am" : "pm") + '">' + p.session + "</span><span>" + hhmm(p.start) + "–" + hhmm(p.end) + " <small style=\"color:var(--muted)\">(" + dur(p.mins) + ")</small></span>" + (clash ? '<span class="tt-pill warn">clash</span>' : "") + badge(p, now, today) + '<button class="btn btn-secondary sm tt-no-print" type="button" data-ics="' + i + '" aria-label="Add ' + esc(p.subject) + " " + esc(p.code) + ' to calendar">+ Calendar</button></div></div>';
@@ -155,6 +160,7 @@
     else if(b.hasAttribute("data-clear")){ state.subs = []; state.prac = {}; change(); }
     else if(b.hasAttribute("data-view")){ state.view = b.getAttribute("data-view"); save(); paintOut(); }
     else if(b.hasAttribute("data-print")){ window.print(); }
+    else if(b.hasAttribute("data-done")){ state.showDone = !state.showDone; paintOut(); }
     else if(b.hasAttribute("data-ics")){ var ps = papers(), k = b.getAttribute("data-ics"); if(k === "all") download("my-exam-timetable-2027.ics", ics(ps)); else if(ps[+k]) download(ps[+k].code.replace("/", "-") + ".ics", ics([ps[+k]])); }
   });
   document.addEventListener("change", function(e){

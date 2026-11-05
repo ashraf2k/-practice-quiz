@@ -76,7 +76,7 @@
     <div><h1>My exam timetable</h1><p id="header-sub">Cambridge IGCSE May/June 2027 &middot; Administrative Zone 3</p></div>
   </header>
 
-  <div class="tt-install tt-no-print hidden" id="tt-install"><div><b>Keep your timetable on your phone</b><span>Add it to your Home screen and open it like an app, with the countdown ready.</span></div><button class="btn btn-primary" id="btn-install" type="button">Add to Home screen</button></div>
+  <div class="tt-install tt-no-print hidden" id="tt-install"><div><b>Keep your timetable on your phone</b><span>Add it to your Home screen and open it like an app, with the countdown ready.</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" id="btn-install" type="button">Add timetable to Home screen</button><a class="btn btn-secondary" href="exam-countdown.html">Save a concise countdown</a></div></div>
   <ol class="tt-steps tt-no-print hidden" id="tt-steps"></ol>
   <section class="card tt-no-print hidden" id="tt-login" aria-label="Log in"><h2 class="step-title" style="font-size:17px">Log in to load your saved timetable</h2><p class="tt-hint">Use your iLearnCS email and password. Your timetable then follows you to every device, including the Home-screen app.</p><div class="tt-login"><input type="email" id="tl-email" placeholder="Email" autocomplete="email" aria-label="Email"><input type="password" id="tl-pass" placeholder="Password" autocomplete="current-password" aria-label="Password"><button class="btn btn-primary" id="tl-go" type="button">Log in</button><p class="tt-hint" id="tl-st" role="alert" style="min-height:1.3em"></p></div></section>
   <section class="card tt-setup tt-no-print" id="tt-setup" aria-label="Choose your subjects"></section>
@@ -86,6 +86,6 @@
 <script src="firebase-config.js?v=20261103e"></script>
 <script type="module" src="firebase-init.js?v=20261105d"></script>
 <script src="exam-timetable-data.js?v=2"></script>
-<script src="exam-timetable.js?v=2"></script>
+<script src="exam-timetable.js?v=3"></script>
 </body>
 </html>
