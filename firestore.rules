@@ -526,6 +526,20 @@ service cloud.firestore {
       allow write: if canWrite();
     }
 
+    // My exam timetable: one private plan per student (subject picks and centre key times). Staff can read it.
+    match /examPlans/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || canRead());
+      allow list: if canRead();
+      allow create, update: if signedIn() && request.auth.uid == uid && verifiedOrLegacy()
+        && request.resource.data.keys().hasOnly(['items', 'keyAM', 'keyPM', 'updatedAt'])
+        && request.resource.data.items is list && request.resource.data.items.size() <= 14
+        && request.resource.data.keyAM is string && request.resource.data.keyAM.size() <= 5
+        && request.resource.data.keyPM is string && request.resource.data.keyPM.size() <= 5
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if signedIn() && request.auth.uid == uid;
+      allow create, update, delete: if canWrite();
+    }
+
     // One booking document per student (id = uid), so nobody can hold two places. The slot counter lives in
     // liveSlots/{key} and may only change by exactly 1 in the same batch as the booking is created / removed,
     // never above 5.

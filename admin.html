@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-TqAQ2hQ76jEurQu+n0ItTMvWq4RH8KUCW112wMr3pII='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-hfGjj6UGRdeUIrkrmxkooHPRv9r+u+jVLwGHUfgvSa0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -542,6 +542,7 @@
       <div class="tab-group"><span class="tab-glabel">Teaching</span>
         <button class="admin-tab" data-tab="tuition">Tuition</button>
         <button class="admin-tab" data-tab="messages">Messages from Chatbot <span id="msg-badge" class="enq-badge" hidden>0</span></button>
+        <button class="admin-tab" data-tab="timetables">Exam timetables</button>
         <button class="admin-tab" data-tab="live">Live sessions <span id="live-badge" class="enq-badge" hidden>0</span></button>
         <button class="admin-tab" data-tab="enquiries">Enquiries <span id="enq-badge" class="enq-badge" hidden>0</span></button>
         <button class="admin-tab" data-tab="feedback">Feedback</button>
@@ -924,6 +925,17 @@
         <div id="msg-body"></div>
       </div>
 
+      <div class="admin-panel" id="panel-timetables">
+        <div class="admin-toolbar no-print">
+          <input id="tt-search" type="search" placeholder="Search name, email or class" style="min-width:230px">
+          <select id="tt-filter"><option value="all">All 10BR students</option><option value="built">Built a timetable</option><option value="not">Not yet</option></select>
+          <button class="btn btn-secondary" id="tt-refresh" type="button">Refresh</button>
+          <button class="btn btn-secondary" id="tt-csv" type="button" disabled>Download CSV</button>
+        </div>
+        <p class="admin-status" id="tt-status-line">Open this tab to load the students' exam timetables.</p>
+        <div id="tt-body"></div>
+      </div>
+
       <div class="admin-panel" id="panel-live">
         <div class="admin-toolbar no-print">
           <input id="live-search" type="search" placeholder="Search name, email, WhatsApp" style="min-width:230px">
@@ -1085,8 +1097,9 @@
 <script src="syllabus-report.js?v=20261019j"></script>
 <script src="parent-report.js?v=20261021a"></script>
 <script src="live-slots.js?v=4"></script>
+<script src="exam-timetable-data.js?v=2"></script>
 <script src="firebase-config.js?v=20261103e"></script>
-<script type="module" src="firebase-init.js?v=20261105b"></script>
+<script type="module" src="firebase-init.js?v=20261105d"></script>
 <script type="module">
 (function(){
 
@@ -1274,7 +1287,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["dashboard","live","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
+  var PANELS = ["dashboard","live","timetables","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
@@ -1286,6 +1299,7 @@
       var el = document.getElementById("panel-" + id); if(el) el.classList.toggle("active", id === name);
     });
     if(name === "live" && window.__liveOpened) window.__liveOpened();
+    if(name === "timetables" && window.__ttOpened) window.__ttOpened();
     if(name === "dashboard" && window.__renderDashboard) window.__renderDashboard();
     if(name === "viewas" && window.__renderViewAs) window.__renderViewAs();
     if(name === "manage" && window.__renderManage) window.__renderManage();
@@ -2981,6 +2995,52 @@
       liveUnsub = null; document.getElementById("live-status-line").textContent = /permission|denied/i.test((err && (err.code + " " + err.message)) || "") ? "Permission denied. Publish the latest firestore.rules in the Firebase console, then refresh." : "Could not load bookings (" + ((err && (err.code || err.message)) || "error") + ").";
     });
   };
+
+  // ---------------- Exam timetables: which 10BR students built their exam timetable ----------------
+  var ttPlans = {}, ttUsers = [], ttLoaded = false;
+  function ttSummary(items){
+    var D = window.PQ_TIMETABLE, qual = "", tier = "", subs = [], first = "", n = 0;
+    (items || []).forEach(function(it, i){ var x = String(it).split("|"); if(i === 0){ qual = x[0] === "IG" ? "IGCSE (A*-G)" : "IGCSE (9-1)"; tier = x[1] === "C" ? "Core" : "Extended"; } subs.push(x[2]);
+      var s = D && D.subjects.filter(function(o){ return o.qual === x[0] && o.name === x[2]; })[0];
+      if(s) s.papers.forEach(function(p){ if(p[2] !== "A" && p[2] !== x[1]) return; if((p[1] === "Practical" || p[1] === "Alternative to Practical") && p[0].charAt(0) !== (x[3] || "5")) return; n++; var d = D.year + "-" + p[3]; if(!first || d < first) first = d; }); });
+    return { qual: qual, tier: tier, subs: subs, first: first, papers: n };
+  }
+  function ttRows(){
+    var q = document.getElementById("tt-search").value.trim().toLowerCase(), f = document.getElementById("tt-filter").value;
+    return ttUsers.filter(function(u){ return (u.role || "student") === "student" && /^10BR/i.test(window.PQ_LEGACY_CLASS ? window.PQ_LEGACY_CLASS(u.className || "") : (u.className || "")) && !u.blocked; })
+      .map(function(u){ var p = ttPlans[u.uid]; return { u: u, p: p && p.items.length ? p : null, sum: p && p.items.length ? ttSummary(p.items) : null }; })
+      .filter(function(r){ return (f === "all" || (f === "built") === !!r.p) && (!q || [r.u.name, r.u.email, r.u.className].join(" ").toLowerCase().indexOf(q) > -1); })
+      .sort(function(a, b){ return (b.p ? b.p.updatedMs : 0) - (a.p ? a.p.updatedMs : 0) || (a.u.name || "").localeCompare(b.u.name || ""); });
+  }
+  function renderTT(){
+    var all = ttUsers.filter(function(u){ return (u.role || "student") === "student" && /^10BR/i.test(window.PQ_LEGACY_CLASS ? window.PQ_LEGACY_CLASS(u.className || "") : (u.className || "")) && !u.blocked; });
+    var built = all.filter(function(u){ return ttPlans[u.uid] && ttPlans[u.uid].items.length; }).length, rows = ttRows();
+    document.getElementById("tt-status-line").innerHTML = "<b>" + built + " of " + all.length + "</b> 10BR students have built an exam timetable" + (all.length ? " (" + Math.round(built * 100 / all.length) + "%)" : "") + ".";
+    document.getElementById("tt-csv").disabled = !rows.length;
+    var h = '<div class="table-scroll"><table class="admin-table"><thead><tr><th>Student</th><th>Class</th><th>Timetable</th><th>Subjects</th><th>First exam</th><th>Last updated</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      h += "<tr><td><b>" + esc12(r.u.name || "(no name)") + '</b><div style="font-weight:400">' + esc12(r.u.email || "") + "</div></td><td>" + esc12(r.u.className || "") + "</td>" +
+        (r.p ? '<td><span style="display:inline-block;padding:1px 8px;border-radius:99px;background:#15803d;color:#fff;font-size:.68rem;font-weight:800;letter-spacing:.05em">BUILT</span> <div style="font-size:.8rem;color:#64748b">' + esc12(r.sum.qual + " · " + r.sum.tier + " · " + r.sum.papers + " papers") + '</div></td><td style="max-width:320px;font-weight:400">' + esc12(r.sum.subs.join(", ")) + "</td><td>" + esc12(r.sum.first) + "</td><td>" + esc12(new Date(r.p.updatedMs).toLocaleString()) + "</td>"
+          : '<td><span class="tag" style="color:#b45309;font-weight:800">Not yet</span></td><td></td><td></td><td></td>') + "</tr>";
+    });
+    document.getElementById("tt-body").innerHTML = h + "</tbody></table></div>";
+  }
+  function loadTT(){
+    var st = document.getElementById("tt-status-line"); st.textContent = "Loading...";
+    Promise.all([PQFirebase.listAllUsers(), PQFirebase.listExamPlans ? PQFirebase.listExamPlans() : Promise.resolve([])]).then(function(r){
+      ttUsers = r[0] || []; ttPlans = {}; (r[1] || []).forEach(function(p){ ttPlans[p.uid] = p; }); ttLoaded = true; renderTT();
+    }).catch(function(err){ st.textContent = /permission|denied/i.test((err && (err.code + " " + err.message)) || "") ? "Permission denied. Publish the latest firestore.rules in Firebase." : "Could not load (" + ((err && (err.code || err.message)) || "error") + ")."; });
+  }
+  window.__ttOpened = function(){ if(!ttLoaded) loadTT(); else renderTT(); };
+  document.getElementById("tt-refresh").addEventListener("click", loadTT);
+  document.getElementById("tt-search").addEventListener("input", renderTT);
+  document.getElementById("tt-filter").addEventListener("change", renderTT);
+  document.getElementById("tt-csv").addEventListener("click", function(){
+    var q = function(v){ var t = String(v == null ? "" : v); if(/^[=+\-@\t\r]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g, '""') + '"'; };
+    var lines = [["Name","Email","Class","Built","Qualification","Tier","Subjects","Papers","First exam","Updated"].map(q).join(",")].concat(ttRows().map(function(r){
+      return [r.u.name, r.u.email, r.u.className, r.p ? "yes" : "no", r.sum ? r.sum.qual : "", r.sum ? r.sum.tier : "", r.sum ? r.sum.subs.join("; ") : "", r.sum ? r.sum.papers : "", r.sum ? r.sum.first : "", r.p ? new Date(r.p.updatedMs).toISOString() : ""].map(q).join(","); }));
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" })); a.download = "exam-timetables.csv"; document.body.appendChild(a); a.click(); a.remove();
+  });
 
   // ---------------- Messages from Chatbot (live, with blinking NEW MESSAGE alerts) ----------------
   var msgRows = [], msgUnsub = null, msgOpen = {}, MSG_R = { teacher:"Teacher", administrator:"Administrator" }, MSG_REASON = { technical:"Technical problem", payment:"Payment", registration:"Registration", complaint:"Complaint", general:"General", human:"Direct assistance", unanswered:"Unanswered question" }, MSG_ST = ["unread","read","replied","resolved","archived"];

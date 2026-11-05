@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-PknH8LwEZe5taFKEV/AdWK1oyqdsqL3GEgYr4OunBWM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-JOxTl7/a456QMJgWjt8GzAROTfcckPwIg5PsX2XhqjQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -144,6 +144,11 @@
         <span class="hub-desc">Practise with quizzes and real exam-style questions, check your answers and see your progress.</span>
         <span class="hub-meta">Quizzes · exam questions · My Progress</span>
       </button>
+      <a class="hub-card hidden" id="hub-tt" href="exam-timetable.html" style="grid-column:1/-1">
+        <span class="hub-title">My exam timetable &middot; May/June 2027</span>
+        <span class="hub-desc">Choose your IGCSE subjects and see every paper with its code, variant, session and time, plus a live countdown to your first exam.</span>
+        <span class="hub-meta" id="hub-tt-meta">Build your timetable &middot; add it to your phone Home screen</span>
+      </a>
       <a class="hub-card hidden" id="hub-sci" href="science-exam.html" style="grid-column:1/-1">
         <svg viewBox="0 0 360 110" role="img" aria-label="Biology leaf, chemistry flask and physics atom" style="width:100%;height:auto;border-radius:12px;background:var(--accent-tint)">
           <g fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -381,7 +386,7 @@
 <script src="report-lib.js?v=20261019j"></script>
 <script src="scratchpad.js?v=20261019j"></script>
 <script src="firebase-config.js?v=20261103e"></script>
-<script type="module" src="firebase-init.js?v=20261105b"></script>
+<script type="module" src="firebase-init.js?v=20261105d"></script>
 <script type="module">
 (function(){
 
@@ -2391,6 +2396,9 @@
     setHeader("iLearnCS", "Choose how you want to work today.");
     document.getElementById("hub-greeting").textContent = "Hi " + user.name + " — " + user.class;
     document.getElementById("hub-sci").classList.toggle("hidden", !isSciUser(user));
+    var showTT = isSciUser(user) || /^10BR/i.test(window.PQ_LEGACY_CLASS(String(user.class || "")));
+    document.getElementById("hub-tt").classList.toggle("hidden", !showTT);
+    if(showTT && window.PQ_hubTT) window.PQ_hubTT(user);
     var meta = document.getElementById("hub-learn-meta");
     var a12 = is12(user);
     var a11 = is11(user);
@@ -2409,7 +2417,7 @@
 
 })();
 </script>
-<script src="live-slots.js?v=4"></script>
+<script src="exam-timetable-data.js?v=2"></script><script src="hub-timetable.js?v=1"></script><script src="live-slots.js?v=4"></script>
 <script src="live-banner.js?v=5" defer></script>
 <script src="chatbot.js?v=4" defer></script>
 <script src="chatbot-ai.js?v=3" defer></script>

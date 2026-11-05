@@ -1104,6 +1104,21 @@ function liveAdminPromote(w){
 function subscribeLiveWaitlist(onRows, onError){ return subscribeLive("liveWaitlist", onRows, onError); }
 // Fresh sign-in token, sent to the notification Worker so it can check the booking really exists.
 function getIdToken(){ return auth.currentUser ? auth.currentUser.getIdToken() : Promise.resolve(null); }
+// ---------- My exam timetable (one private document per student) ----------
+function getExamPlan(uid){
+  return getDoc(doc(db, "examPlans", uid)).then(function(s){ return s.exists() ? s.data() : null; }).catch(function(){ return null; });
+}
+// Staff: every student's saved plan (rules allow staff to read; students only see their own).
+function listExamPlans(){
+  return getDocs(collection(db, "examPlans")).then(function(snap){
+    var out = []; snap.forEach(function(d){ var x = d.data() || {}; out.push({ uid: d.id, items: Array.isArray(x.items) ? x.items : [], keyAM: x.keyAM || "", keyPM: x.keyPM || "", updatedMs: x.updatedAt && x.updatedAt.toMillis ? x.updatedAt.toMillis() : 0 }); });
+    return out;
+  });
+}
+function saveExamPlan(uid, plan){
+  var rec = { items: (plan.items || []).slice(0, 14).map(String), keyAM: String(plan.keyAM || ""), keyPM: String(plan.keyPM || ""), updatedAt: serverTimestamp() };
+  return setDoc(doc(db, "examPlans", uid), rec).then(function(){ return { ok: true }; }, function(err){ return { ok: false, code: (err && err.code) || "error" }; });
+}
 function subscribeLiveBookings(onRows, onError){ return subscribeLive("liveBookings", onRows, onError); }
 
 
@@ -1263,6 +1278,9 @@ window.PQFirebase = {
   liveAdminPromote: liveAdminPromote,
   subscribeLiveWaitlist: subscribeLiveWaitlist,
   getIdToken: getIdToken,
+  getExamPlan: getExamPlan,
+  saveExamPlan: saveExamPlan,
+  listExamPlans: listExamPlans,
   subscribeLiveBookings: subscribeLiveBookings,
   saveMySession: saveMySession,
   EXAM_SESSIONS: EXAM_SESSIONS,

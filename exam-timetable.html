@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com ; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261019j"></script>
+<script src="theme.js?v=20261027a"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta name="theme-color" content="#146C6A" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="manifest" href="manifest-timetable.webmanifest" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Exam timetable" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<title>My exam timetable</title>
+<link rel="stylesheet" href="shared.css?v=20261103f" />
+<style>
+  .tt-seg{ display:flex; gap:6px; flex-wrap:wrap; margin:6px 0 4px; }
+  .tt-seg button{ padding:9px 14px; min-height:44px; border-radius:12px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font:inherit; font-weight:700; cursor:pointer; }
+  .tt-seg button[aria-pressed="true"]{ border-color:var(--accent); background:var(--accent-tint); box-shadow:0 0 0 2px var(--accent); }
+  .tt-lab{ margin:16px 0 2px; font-size:12.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .tt-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; margin-top:6px; }
+  .tt-sub{ text-align:left; padding:11px 13px; min-height:44px; border-radius:12px; border:1.5px solid var(--line); border-left:5px solid var(--gc,var(--accent)); background:var(--surface); color:var(--ink); font:inherit; cursor:pointer; }
+  .tt-sub b{ display:block; font-size:14.5px; } .tt-sub small{ color:var(--muted); font-weight:600; }
+  .tt-sub[aria-pressed="true"]{ border-color:var(--gc,var(--accent)); background:var(--accent-tint); box-shadow:0 0 0 2px var(--gc,var(--accent)); }
+  .tt-sub[aria-pressed="true"] b::before{ content:"\2714  "; color:var(--gc,var(--accent)); }
+  .tt-prac{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:6px 0 0 5px; font-size:13px; color:var(--muted); }
+  .tt-prac select, .tt-keys input{ padding:8px 10px; border:1.5px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font:inherit; }
+  .tt-keys{ display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; margin-top:6px; } .tt-keys label{ display:grid; gap:3px; font-size:13px; font-weight:700; }
+  .tt-hint{ color:var(--muted); font-size:13px; margin:4px 0 0; }
+  .tt-hero{ display:flex; gap:16px; flex-wrap:wrap; align-items:stretch; margin:0 0 14px; }
+  .tt-big{ flex:1 1 260px; padding:18px 20px; border-radius:18px; border:1.5px solid var(--accent); background:linear-gradient(135deg,var(--accent-tint),var(--surface)); }
+  .tt-big .n{ font-size:clamp(44px,12vw,72px); font-weight:900; line-height:1; color:var(--accent-dark); font-variant-numeric:tabular-nums; }
+  .tt-big .u{ font-size:18px; font-weight:800; margin-left:6px; } .tt-big p{ margin:6px 0 0; color:var(--muted); font-size:14px; }
+  .tt-next{ flex:1 1 260px; padding:16px 18px; border-radius:18px; border:1.5px solid var(--line); background:var(--surface); }
+  .tt-next h3{ margin:0 0 6px; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .tt-clock{ display:flex; gap:8px; margin:8px 0; } .tt-clock div{ min-width:62px; padding:8px 6px; text-align:center; border-radius:12px; background:var(--accent-tint); }
+  .tt-clock b{ display:block; font-size:24px; font-variant-numeric:tabular-nums; } .tt-clock span{ font-size:11px; font-weight:700; text-transform:uppercase; color:var(--muted); }
+  .tt-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px; margin:0 0 14px; }
+  .tt-stat{ padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:var(--surface); } .tt-stat b{ display:block; font-size:20px; } .tt-stat span{ font-size:12.5px; color:var(--muted); }
+  .tt-warn{ margin:0 0 12px; padding:12px 14px; border-radius:12px; border:1.5px solid var(--diff-moderate); background:var(--diff-moderate-bg); font-size:14px; }
+  .tt-bar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin:6px 0 10px; }
+  .tt-day{ margin:18px 0 6px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; align-items:baseline; }
+  .tt-day h3{ margin:0; font-size:16px; } .tt-day span{ font-size:13px; font-weight:800; color:var(--accent-dark); }
+  .tt-row{ display:flex; gap:12px; justify-content:space-between; align-items:center; flex-wrap:wrap; padding:11px 14px; margin:0 0 6px; border-radius:12px; border:1px solid var(--line); border-left:6px solid var(--gc,var(--accent)); background:var(--surface); }
+  .tt-row.done{ opacity:.55; } .tt-row.clash{ border-color:var(--diff-moderate); box-shadow:0 0 0 2px var(--diff-moderate); }
+  .tt-row .a{ flex:1 1 240px; min-width:0; } .tt-row .a b{ font-size:15.5px; } .tt-row .a small{ display:block; color:var(--muted); font-size:13px; margin-top:1px; }
+  .tt-code{ font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:700; }
+  .tt-row .b{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:13.5px; }
+  .tt-pill{ padding:3px 10px; border-radius:99px; font-size:12px; font-weight:800; border:1px solid var(--line); background:var(--bg); white-space:nowrap; }
+  .tt-pill.am{ border-color:var(--diff-moderate); } .tt-pill.pm{ border-color:var(--accent); background:var(--accent-tint); } .tt-pill.cd{ border-color:var(--accent-dark); color:var(--accent-dark); }
+  .tt-pill.warn{ background:var(--diff-moderate-bg); border-color:var(--diff-moderate); }
+  .tt-months{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; }
+  .tt-month h3{ margin:0 0 6px; } .tt-cal{ display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+  .tt-cal .h{ font-size:11px; font-weight:800; color:var(--muted); text-align:center; }
+  .tt-cal .c{ min-height:62px; padding:3px; border-radius:8px; border:1px solid var(--line); background:var(--surface); font-size:11px; overflow:hidden; } .tt-cal .c.off{ opacity:.35; } .tt-cal .c.has{ border-color:var(--accent); background:var(--accent-tint); }
+  .tt-cal .c i{ display:block; font-style:normal; font-weight:800; font-size:11px; } .tt-cal .c u{ display:block; text-decoration:none; font-size:10.5px; font-weight:700; border-left:3px solid var(--gc,var(--accent)); padding-left:3px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tt-empty{ padding:22px; text-align:center; color:var(--muted); border:1.5px dashed var(--line); border-radius:14px; }
+  .g-Sciences{ --gc:#16a34a } .g-Mathematics{ --gc:#2563eb } .g-Computing{ --gc:#7c3aed } .g-Languages{ --gc:#d97706 } .g-Humanities{ --gc:#db2777 }
+  .tt-save{ font-size:13px; color:var(--muted); margin:6px 0 0; }
+  .tt-install{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin:0 0 14px; padding:12px 16px; border-radius:14px; border:1.5px solid var(--accent); background:var(--accent-tint); }
+  .tt-install b{ display:block; } .tt-install span{ font-size:13.5px; color:var(--muted); }
+  .tt-steps{ margin:10px 0 0; padding:12px 16px 12px 34px; border-radius:12px; border:1px solid var(--line); background:var(--surface); font-size:14.5px; } .tt-steps li{ margin:5px 0; }
+  .tt-login{ display:grid; gap:8px; max-width:420px; margin-top:8px; } .tt-login input{ padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font:inherit; }
+  @media print{ .tt-no-print, header.top, .tt-setup{ display:none !important; } }
+</style>
+<link rel="stylesheet" href="theme.css?v=20261027a" />
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo-link" href="index.html" aria-label="iLearnCS home"><img class="logo-img" src="logo.png" alt="iLearnCS"></a>
+    <div><h1>My exam timetable</h1><p id="header-sub">Cambridge IGCSE May/June 2027 &middot; Administrative Zone 3</p></div>
+  </header>
+
+  <div class="tt-install tt-no-print hidden" id="tt-install"><div><b>Keep your timetable on your phone</b><span>Add it to your Home screen and open it like an app, with the countdown ready.</span></div><button class="btn btn-primary" id="btn-install" type="button">Add to Home screen</button></div>
+  <ol class="tt-steps tt-no-print hidden" id="tt-steps"></ol>
+  <section class="card tt-no-print hidden" id="tt-login" aria-label="Log in"><h2 class="step-title" style="font-size:17px">Log in to load your saved timetable</h2><p class="tt-hint">Use your iLearnCS email and password. Your timetable then follows you to every device, including the Home-screen app.</p><div class="tt-login"><input type="email" id="tl-email" placeholder="Email" autocomplete="email" aria-label="Email"><input type="password" id="tl-pass" placeholder="Password" autocomplete="current-password" aria-label="Password"><button class="btn btn-primary" id="tl-go" type="button">Log in</button><p class="tt-hint" id="tl-st" role="alert" style="min-height:1.3em"></p></div></section>
+  <section class="card tt-setup tt-no-print" id="tt-setup" aria-label="Choose your subjects"></section>
+  <section class="card" id="tt-out" aria-live="polite"></section>
+  <p class="tt-hint" style="margin:10px 4px 0">Source: Cambridge Final Exam Timetable June 2027, Zone 3 (<span id="tt-ver"></span>). Cambridge may publish changes: always confirm your dates and start times with your school exam officer.</p>
+</div>
+<script src="firebase-config.js?v=20261103e"></script>
+<script type="module" src="firebase-init.js?v=20261105d"></script>
+<script src="exam-timetable-data.js?v=2"></script>
+<script src="exam-timetable.js?v=2"></script>
+</body>
+</html>
