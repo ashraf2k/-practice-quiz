@@ -76,8 +76,8 @@
   // student's browser) that has not seen the latest reset for a topic is
   // stale for that topic, so its lessons, test and puzzle data for it are
   // ignored instead of bringing the old progress back.
-  function emptyState(){ return { learn:{}, days:{}, tests:{}, games:{}, spent:{}, resets:{} }; }
-  function pick(rec){ return rec && (rec.learn || rec.days || rec.tests || rec.games || rec.spent || rec.resets) ? rec : null; }
+  function emptyState(){ return { learn:{}, days:{}, tests:{}, games:{}, spent:{}, began:{}, resets:{} }; }
+  function pick(rec){ return rec && (rec.learn || rec.days || rec.tests || rec.games || rec.spent || rec.began || rec.resets) ? rec : null; }
   function mergeState(a, b){
     var out = emptyState();
     var srcs = [pick(a), pick(b)];
@@ -109,6 +109,12 @@
         var les = LESSON_BY_ID[k]; if(les && stale(src, topicOf(les))) return;
         out.spent[k] = Math.max(out.spent[k] || 0, Number(SP[k]) || 0);
       });
+      var BG = src.began || {};
+      Object.keys(BG).forEach(function(k){
+        var v = Number(BG[k]) || 0; if(!v) return;
+        var lesB = LESSON_BY_ID[k]; if(lesB && stale(src, topicOf(lesB))) return;
+        out.began[k] = out.began[k] ? Math.min(out.began[k], v) : v;   // earliest first-open wins
+      });
       var GM = src.games || {};
       Object.keys(GM).forEach(function(k){
         var les = LESSON_BY_ID[k]; if(les && stale(src, topicOf(les))) return;
@@ -125,7 +131,7 @@
   }
   function snapshot(st){
     var done = LESSONS.filter(function(l){ return st.learn[l.id] && st.learn[l.id].d; }).length;
-    return { learn: st.learn, days: st.days, tests: st.tests, games: st.games || {}, spent: st.spent || {}, xp: xp(st), learnDone: done, learnTotal: LESSONS.length, lastActive: Date.now(), resets: st.resets || {} };
+    return { learn: st.learn, days: st.days, tests: st.tests, games: st.games || {}, spent: st.spent || {}, began: st.began || {}, xp: xp(st), learnDone: done, learnTotal: LESSONS.length, lastActive: Date.now(), resets: st.resets || {} };
   }
 
   // ---------- spaced review ----------

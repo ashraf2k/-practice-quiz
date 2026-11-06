@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-eu5oWoz16624wk2UrgWa+bMoKodHEBK5WGEIBBD1Akw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-wlVXJRclBS96UafDzSKREXSGdatqkS68eI9B5aIRZoM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -1087,7 +1087,7 @@
 <script src="learn-t9.js?v=20261019j"></script>
 <script src="learn-t10.js?v=20261019j"></script>
 <script src="learn-games-data.js?v=20261019j"></script>
-<script src="learn-engine.js?v=20261019j"></script>
+<script src="learn-engine.js?v=20261106a"></script>
 <script src="alevel-index.js?v=20261021b"></script>
 <script src="as-index.js?v=20261021a"></script>
 <script src="brand-assets.js?v=20261101a"></script>
@@ -2215,19 +2215,34 @@
       else if(!(inactive >= 7)) fl.appendChild(mk("li", "", "Nothing flagged. Learning steadily with no repeated struggles."));
     }
     fb.appendChild(fl); body.appendChild(fb);
-    var tb = box("Progress by topic and lesson", "✓ done · ★ mastered first time · number = attempts");
+    function fmtDT(ts){ if(!ts) return "-"; var d = new Date(ts); return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) + " " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); }
+    function fmtMin(sec){ if(!sec) return "-"; var m = sec / 60; return m < 1 ? "<1 min" : (m < 10 ? m.toFixed(1) : Math.round(m)) + " min"; }
+    var B = rec.began || {}, secTotal = 0, secN = 0, firstStart = 0;
+    I.forEach(function(l){ var x = L[l.id]; if(x && x.d && !x.pre && x.s){ secTotal += x.s; secN++; } var b = Number(B[l.id]) || 0; if(b && (!firstStart || b < firstStart)) firstStart = b; });
+    var kr2 = mk("div", "kpi-row");
+    kr2.appendChild(tile("Total study time", secTotal ? fmtMin(secTotal) : "-", secN ? "over " + secN + " timed lesson" + (secN === 1 ? "" : "s") : "no timing recorded yet"));
+    kr2.appendChild(tile("Average per lesson", secN ? fmtMin(secTotal / secN) : "-"));
+    kr2.appendChild(tile("Started the journey", firstStart ? fmtDT(firstStart) : "-"));
+    body.appendChild(kr2);
+    var tb = box("Progress by topic and lesson", "✓ done · ★ mastered first time · tries = attempts needed · minutes = active time on the lesson");
     var table = mk("table", "admin-table"), th = mk("thead"), htr = mk("tr");
-    ["Lesson", "Status", "Past-paper question"].forEach(function(h){ htr.appendChild(mk("th", null, h)); }); th.appendChild(htr); table.appendChild(th);
+    ["Lesson", "Status", "Tries", "Started", "Finished", "Minutes", "Past-paper question"].forEach(function(h){ htr.appendChild(mk("th", null, h)); }); th.appendChild(htr); table.appendChild(th);
     var tbd = mk("tbody"), lastTopic = null;
     I.forEach(function(l){
       if(l.topic !== lastTopic){
         lastTopic = l.topic;
         var hr = mk("tr"); hr.style.cursor = "default";
-        var td = mk("td", null, "Topic " + l.topic + " — " + (c.byTopic[l.topic] || 0) + " / " + c.totalByTopic[l.topic] + " done"); td.colSpan = 3; td.style.cssText = "font-weight:700;background:var(--bg)"; hr.appendChild(td); tbd.appendChild(hr);
+        var tsec = 0; I.forEach(function(q){ if(q.topic === l.topic && L[q.id] && L[q.id].d && !L[q.id].pre && L[q.id].s) tsec += L[q.id].s; });
+        var td = mk("td", null, "Topic " + l.topic + " — " + (c.byTopic[l.topic] || 0) + " / " + c.totalByTopic[l.topic] + " done" + (tsec ? " · " + fmtMin(tsec) : "")); td.colSpan = 7; td.style.cssText = "font-weight:700;background:var(--bg)"; hr.appendChild(td); tbd.appendChild(hr);
       }
       var x = L[l.id], tr = mk("tr"); tr.style.cursor = "default";
+      var done = !!(x && x.d), b = Number(B[l.id]) || 0;
       tr.appendChild(mk("td", null, l.id + "  " + l.title));
-      tr.appendChild(mk("td", null, !x || !x.d ? "—" : (x.pre ? "✓ skipped by test" : (x.f ? "★ mastered" : "✓ done, " + (Number(x.a) || 2) + " tries"))));
+      tr.appendChild(mk("td", null, !done ? "—" : (x.pre ? "✓ skipped by test" : (x.f ? "★ mastered" : "✓ done"))));
+      tr.appendChild(mk("td", null, !done || x.pre ? "-" : String(Number(x.a) || 2)));
+      tr.appendChild(mk("td", null, done && x.pre ? "-" : fmtDT(b)));
+      tr.appendChild(mk("td", null, done ? fmtDT(x.t) : "-"));
+      tr.appendChild(mk("td", null, done && !x.pre ? fmtMin(x.s) : "-"));
       tr.appendChild(mk("td", null, x && x.pp ? x.pp[0] + " / " + x.pp[1] + " (" + Math.round(100 * x.pp[0] / x.pp[1]) + "%)" : "-"));
       tbd.appendChild(tr);
     });

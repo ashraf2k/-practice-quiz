@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-BtfqyONpDJCIm6YvSL1JwL9zBuGh7Oo/uYUTg9VW+XY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-KSvlEQHZA/dMs9g2uR0Gsk/oEwAbqcWUmYd3kFVMhK0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -229,7 +229,7 @@
 <script src="as-t12b.js?v=20261021c"></script>
 <script src="as-pp.js?v=20261021a"></script>
 <script src="arrow-btn.js?v=20261021a"></script>
-<script src="learn-engine.js?v=20261021a"></script>
+<script src="learn-engine.js?v=20261106a"></script>
 <script src="alevel-viz.js?v=20261019o"></script>
 <script src="alevel-viz-1.js?v=20261019o"></script>
 <script src="alevel-viz-2.js?v=20261019o"></script>
@@ -535,6 +535,8 @@
     var l = LESSON_BY_ID[id]; if(!l) return;
     activeTab = paperOf(l);
     current = { l: l, step: 0, ci: 0, wrongs: 0, wrongTotal: 0 };
+    st.began = st.began || {};
+    if(!st.began[l.id]) st.began[l.id] = Date.now();   // when the student first opened this lesson
     touch();
     $("crumb").textContent = O[l.code][0] + "  ›  " + l.code;
     $("lesson-title").textContent = l.title;
