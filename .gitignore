@@ -1,0 +1,6 @@
+
+# local backups and secrets - never commit
+users.json
+firestore-dump.json
+backup*/
+*.log

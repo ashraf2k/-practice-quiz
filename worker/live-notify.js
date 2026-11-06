@@ -5,7 +5,7 @@
 // booking from Firestore AS THE STUDENT (the security rules only let a student read their own booking), and only
 // alerts you if the booking really exists and is fresh. A stranger cannot make it send fake alerts, and the
 // alert text is built here from the stored record, never from what the browser sends.
-const ALLOWED_ORIGINS = ["https://ashraf2k.github.io"];
+const ALLOWED_ORIGINS = ["https://ashraf2k.github.io", "https://ilearnhub.web.app", "https://ilearnhub.firebaseapp.com"];
 const PROJECT_ID = "practicequestions-6cfd1";
 const DAYS = { sat: "Saturday", sun: "Sunday", mon: "Monday", tue: "Tuesday", wed: "Wednesday", thu: "Thursday" };
 const CAP = 5, MINUTES = 90, FRESH_MS = 10 * 60 * 1000;

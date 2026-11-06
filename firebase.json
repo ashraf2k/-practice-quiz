@@ -1,0 +1,24 @@
+{
+  "hosting": {
+    "site": "ilearnhub",
+    "public": ".",
+    "ignore": [
+      "firebase.json", ".firebaserc", ".git/**", ".github/**", "**/.*", "**/node_modules/**",
+      "worker/**", "tools/**", "*.md", "firestore.rules", "backup*/**", "*.log",
+      "users.json", "firestore-dump.json"
+    ],
+    "cleanUrls": false,
+    "trailingSlash": false,
+    "headers": [
+      { "source": "**/*.html", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "**/*.@(js|css|webmanifest)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }] },
+      { "source": "**/*.@(png|jpg|jpeg|svg|ico|woff2|webp)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }] },
+      { "source": "**", "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ] }
+    ]
+  },
+  "firestore": { "rules": "firestore.rules" }
+}
