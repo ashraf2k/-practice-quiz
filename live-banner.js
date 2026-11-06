@@ -35,7 +35,8 @@
     TARGETS.forEach(function(id){
       var host = document.getElementById(id); if(!host) return;
       Array.prototype.forEach.call(host.querySelectorAll(":scope > [data-pq-live]"), function(n){ n.remove(); });
-      host.insertAdjacentHTML("afterbegin", html(L, mine, ""));
+      var ah = host.querySelector(":scope > #asp-host");   // the AS study-plan header stays above the banner
+      if(ah) ah.insertAdjacentHTML("afterend", html(L, mine, "")); else host.insertAdjacentHTML("afterbegin", html(L, mine, ""));
       if(id === "view-journey") host.insertAdjacentHTML("beforeend", html(L, mine, "bottom"));
     });
   }
