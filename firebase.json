@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "ilearnhub",
+    "site": "ilearn-hub",
     "public": ".",
     "ignore": [
       "firebase.json", ".firebaserc", ".git/**", ".github/**", "**/.*", "**/node_modules/**",

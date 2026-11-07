@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-wlVXJRclBS96UafDzSKREXSGdatqkS68eI9B5aIRZoM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-kv/Lp4u//A3FAmvTB7Xm2U0ehG/Dg9nKBhlA1UkdF3Q='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -528,6 +528,7 @@
       <div class="tab-group"><span class="tab-glabel">Students</span>
         <button class="admin-tab" data-tab="manage">Manage students</button>
         <button class="admin-tab" data-tab="groups">Classes &amp; requests</button>
+        <button class="admin-tab" data-tab="subs">Subscriptions</button>
         <button class="admin-tab" data-tab="byStudent">By student</button>
         <button class="admin-tab" data-tab="viewas">View as student</button>
         <button class="admin-tab" data-tab="archive">Archive</button>
@@ -925,6 +926,11 @@
         <div id="msg-body"></div>
       </div>
 
+      <div class="admin-panel" id="panel-subs">
+        <h2 style="margin:0 0 4px">Subscription management</h2>
+        <p class="admin-status">Give students access for a period: individually or in bulk. Dates are in Riyadh time.</p>
+      </div>
+
       <div class="admin-panel" id="panel-timetables">
         <div class="admin-toolbar no-print">
           <input id="tt-search" type="search" placeholder="Search name, email or class" style="min-width:230px">
@@ -1099,7 +1105,7 @@
 <script src="live-slots.js?v=4"></script>
 <script src="exam-timetable-data.js?v=4"></script>
 <script src="firebase-config.js?v=20261103e"></script>
-<script type="module" src="firebase-init.js?v=20261105d"></script>
+<script type="module" src="firebase-init.js?v=20261106a"></script>
 <script type="module">
 (function(){
 
@@ -1280,6 +1286,7 @@
         return;
       }
       currentAdminEmail = user.email || null; currentAdminUid = user.uid; currentAdminName = user.name || "";
+      window.__adminCtx = function(){ return { uid: currentAdminUid, name: currentAdminName, role: staffRole }; };
       showDashboard();
     });
   });
@@ -1287,7 +1294,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["dashboard","live","timetables","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
+  var PANELS = ["dashboard","live","timetables","subs","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
@@ -1298,6 +1305,7 @@
     PANELS.forEach(function(id){
       var el = document.getElementById("panel-" + id); if(el) el.classList.toggle("active", id === name);
     });
+    if(name === "subs" && window.__subsOpened) window.__subsOpened();
     if(name === "live" && window.__liveOpened) window.__liveOpened();
     if(name === "timetables" && window.__ttOpened) window.__ttOpened();
     if(name === "dashboard" && window.__renderDashboard) window.__renderDashboard();
@@ -5048,5 +5056,6 @@
 
 })();
 </script>
+<script src="admin-subs.js?v=1"></script>
 </body>
 </html>

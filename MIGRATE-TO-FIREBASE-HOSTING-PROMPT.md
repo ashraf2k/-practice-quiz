@@ -1,4 +1,4 @@
-# Migration prompt: move the iLearn/iSolve site to Firebase Hosting (ilearnhub.web.app)
+# Migration prompt: move the iLearn/iSolve site to Firebase Hosting (ilearn-hub.web.app)
 
 Copy everything below the line into a new Claude Code session opened in the repo.
 
@@ -8,7 +8,7 @@ ROLE
 You are a careful DevOps engineer moving a live school learning site from GitHub Pages to Firebase Hosting with NO data loss and NO downtime for students. Work in phases. After each phase, show me the evidence (command output, counts, screenshots) and WAIT for my "go" before the next phase. Never delete or overwrite anything in the old setup. Never commit or push unless I say "commit and push".
 
 GOAL
-1. The site is served from https://ilearnhub.web.app (Firebase Hosting site ID `ilearnhub`).
+1. The site is served from https://ilearn-hub.web.app (Firebase Hosting site ID `ilearnhub`).
 2. All stored data comes with it: Firebase Auth users (logins keep working with the SAME passwords), Firestore data (users, progress, exam attempts, live bookings, timetables, groups, feedback, etc.), Storage files if any, security rules and indexes.
 3. The old site (GitHub Pages) keeps working until I approve the cutover, then redirects to the new URL.
 
@@ -35,7 +35,7 @@ PHASE 1 - BACKUP FIRST (before touching anything)
 PHASE 2 - NEW HOSTING SITE (no data yet if option A)
 - Create `firebase.json` (hosting target `ilearnhub`, `public` = repo root with an ignore list for worker/, tools/, node_modules, *.md, backups), cache headers (long cache for versioned assets, `no-cache` for html and `sw.js`), security headers, clean 404.html.
 - Deploy a preview channel first: `firebase hosting:channel:deploy preview --expires 7d`. Show me the preview URL.
-- Add the new domains (`ilearnhub.web.app`, `ilearnhub.firebaseapp.com`) to Auth > Settings > Authorized domains, to the Google sign-in client's authorized origins, to the Cloudflare Worker allowlist, to the CSP (`tools/csp.js`), and to API-key referrer restrictions. List each change as a checklist and tick them off.
+- Add the new domains (`ilearn-hub.web.app`, `ilearnhub.firebaseapp.com`) to Auth > Settings > Authorized domains, to the Google sign-in client's authorized origins, to the Cloudflare Worker allowlist, to the CSP (`tools/csp.js`), and to API-key referrer restrictions. List each change as a checklist and tick them off.
 - Update absolute URLs found in Phase 0, rebuild `firebase-init.js`, bump versions, run `node tools/csp.js`.
 
 PHASE 3 - DATA (only if option B, new project)
@@ -50,7 +50,7 @@ Test list, one at a time, with screenshots: student login (existing account, old
 
 PHASE 5 - CUTOVER (only after I say "go live")
 - Deploy to the live channel: `firebase deploy --only hosting,firestore:rules,firestore:indexes`.
-- Replace the GitHub Pages site with a redirect page to `https://ilearnhub.web.app` (keep the repo for history). Add a visible notice for students already logged in on the old URL (their localStorage progress does not move between domains: make sure unsynced progress is pushed to Firestore first, or warn them to open the old site once and sync).
+- Replace the GitHub Pages site with a redirect page to `https://ilearn-hub.web.app` (keep the repo for history). Add a visible notice for students already logged in on the old URL (their localStorage progress does not move between domains: make sure unsynced progress is pushed to Firestore first, or warn them to open the old site once and sync).
 - Tell me the exact message to send students and parents.
 
 PHASE 6 - AFTER GO-LIVE

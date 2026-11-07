@@ -56,6 +56,34 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    // ---------- subscriptions (users/{uid}.sub, written ONLY by an admin) ----------
+    // sub = { plan, start, expiry, isTrial, suspended, grace, by, byUid, modified }.
+    // A brand-new account must carry exactly { plan: 'trial', start: request.time } (server time), and its
+    // expiry is start + 24 hours, worked out here so the student's device clock and browser storage cannot move it.
+    // An account WITHOUT a sub field is an existing (legacy) student: full access, nothing changes for them.
+    // An admin-set sub carries an explicit expiry. suspended == true blocks access whatever the dates say.
+    // grace (optional timestamp) gives temporary access past the expiry without changing the expiry.
+    function trialShape(s) {
+      return s is map && s.keys().hasOnly(['plan', 'start']) && s.keys().hasAll(['plan', 'start'])
+        && s.plan == 'trial' && s.start == request.time;
+    }
+    function subExpiry(s) {
+      return (s.plan == 'trial' && !('expiry' in s)) ? s.start + duration.value(24, 'h') : s.expiry;
+    }
+    function subValid(s) {
+      return s.get('suspended', false) != true
+        && (subExpiry(s) > request.time
+            || (s.get('grace', null) != null && s.grace > request.time));
+    }
+    function hasAccess() {
+      return signedIn()
+        && (!exists(/databases/$(database)/documents/users/$(request.auth.uid))
+            || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('sub', null) == null
+            || subValid(get(/databases/$(database)/documents/users/$(request.auth.uid)).data.sub));
+    }
+    // Verified e-mail (or legacy) AND a valid subscription: used for the learning data that is subscription-protected.
+    function entitled() { return verifiedOrLegacy() && hasAccess(); }
+
     // Staff roles (users/{uid}.role, set only by an admin):
     //   teacher      = reads and writes everything the dashboard needs (not roles / admins),
     //   collaborator = read-only view of the dashboard data.
@@ -65,12 +93,13 @@ service cloud.firestore {
     }
     function canRead() { return isAdmin() || staffRole() in ['teacher', 'collaborator']; }
     function canWrite() { return isAdmin() || staffRole() == 'teacher'; }
-    // Teachers may edit student profiles but never change anyone's role.
+    // Teachers may edit student profiles but never change anyone's role or subscription (admins only).
     function canWriteUser() {
       return isAdmin() || (staffRole() == 'teacher'
         && (request.method == 'delete'
-            || (request.method == 'create' && !('role' in request.resource.data))
-            || (request.method == 'update' && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))));
+            || (request.method == 'create' && !('role' in request.resource.data)
+                && (!('sub' in request.resource.data) || trialShape(request.resource.data.sub)))
+            || (request.method == 'update' && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'sub']))));
     }
     // A parent linked (by a teacher) to this student: parentLinks/{parentUid}_{childUid}.
     function parentOf(childUid) {
@@ -315,8 +344,9 @@ service cloud.firestore {
       // One-time profile creation by the owner. No later self-edit (so the
       // class / name / e-mail cannot be tampered with), no self-delete.
       allow create: if signedIn() && request.auth.uid == uid
-                    && request.resource.data.keys().hasOnly(['name', 'email', 'class', 'createdAt', 'examSession', 'certificate'])
-                    && request.resource.data.keys().hasAll(['name', 'email', 'class', 'createdAt'])
+                    && request.resource.data.keys().hasOnly(['name', 'email', 'class', 'createdAt', 'examSession', 'certificate', 'sub'])
+                    && request.resource.data.keys().hasAll(['name', 'email', 'class', 'createdAt', 'sub'])
+                    && trialShape(request.resource.data.sub)
                     && (!('examSession' in request.resource.data) || request.resource.data.examSession in examSessions())
                     && (!('certificate' in request.resource.data) || request.resource.data.certificate in ['IGCSE', 'AS', 'A2'])
                     && safeText(request.resource.data.name, 1, 80)
@@ -335,6 +365,17 @@ service cloud.firestore {
       allow create, update, delete: if canWriteUser();
     }
 
+    // ---------- subscription audit log (append-only) ----------
+    match /users/{uid}/subHistory/{hid} {
+      allow get, list: if canRead() || (signedIn() && request.auth.uid == uid);
+      allow create: if isAdmin()
+                    && request.resource.data.keys().hasOnly(['action', 'plan', 'prevPlan', 'prevExpiry', 'newExpiry', 'startDate', 'at', 'by', 'byUid', 'reason'])
+                    && request.resource.data.keys().hasAll(['action', 'plan', 'at', 'by', 'byUid'])
+                    && request.resource.data.at == request.time
+                    && request.resource.data.action in ['assign', 'renew', 'extend', 'change', 'suspend', 'reactivate', 'grace', 'expiry-date', 'trial'];
+      allow update, delete: if false;
+    }
+
     // ---------- archive (teacher) ----------
     match /archive/{uid} {
       // A student may read ONLY their own summary doc (login uses it to
@@ -351,15 +392,15 @@ service cloud.firestore {
 
     // ---------- MCQ attempts (max 2; comm9618 max 1) ----------
     match /attempts/{attemptId} {
-      allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid || canRead() || parentOf(attemptId.split('_')[0]));
+      allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid && hasAccess() || canRead() || parentOf(attemptId.split('_')[0]));
       allow list: if canRead() || (signedIn() && parentOf(resource.data.uid));
 
-      allow create: if signedIn() && verifiedOrLegacy()
+      allow create: if signedIn() && entitled()
                     && validAttempt(request.auth.uid, attemptId)
                     && request.resource.data.attemptNumber == 1
                     && !exists(/databases/$(database)/documents/attempts/$(attemptId));
 
-      allow update: if signedIn() && verifiedOrLegacy()
+      allow update: if signedIn() && entitled()
                     && validAttempt(request.auth.uid, attemptId)
                     && resource.data.uid == request.auth.uid
                     && resource.data.examKey == request.resource.data.examKey
@@ -372,12 +413,12 @@ service cloud.firestore {
 
     // ---------- topical exam papers (unlimited retakes; comm9618_exam once) ----------
     match /examAttempts/{attemptId} {
-      allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid || canRead() || parentOf(attemptId.split('_')[0]));
+      allow get: if signedIn() && (attemptId.split('_')[0] == request.auth.uid && hasAccess() || canRead() || parentOf(attemptId.split('_')[0]));
       allow list: if canRead() || (signedIn() && parentOf(resource.data.uid));
 
-      allow create: if signedIn() && verifiedOrLegacy() && validExamAttempt(request.auth.uid, attemptId);
+      allow create: if signedIn() && entitled() && validExamAttempt(request.auth.uid, attemptId);
 
-      allow update: if signedIn() && verifiedOrLegacy()
+      allow update: if signedIn() && entitled()
                     && validExamAttempt(request.auth.uid, attemptId)
                     && resource.data.uid == request.auth.uid
                     && resource.data.paperKey == request.resource.data.paperKey
@@ -389,17 +430,17 @@ service cloud.firestore {
 
     // ---------- resume checkpoints + iLearn state ----------
     match /practiceProgress/{progressId} {
-      allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid || canRead() || parentOf(progressId.split('_')[0]));
+      allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid && hasAccess() || canRead() || parentOf(progressId.split('_')[0]));
       allow list: if canRead() || (signedIn() && parentOf(resource.data.uid));
-      allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'examKey') && verifiedOrLegacy();
+      allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'examKey') && entitled();
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
       allow create, update, delete: if canWrite();
     }
 
     match /examProgress/{progressId} {
-      allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid || canRead() || parentOf(progressId.split('_')[0]));
+      allow get: if signedIn() && (progressId.split('_')[0] == request.auth.uid && hasAccess() || canRead() || parentOf(progressId.split('_')[0]));
       allow list: if canRead() || (signedIn() && parentOf(resource.data.uid));
-      allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'paperKey') && verifiedOrLegacy();
+      allow create, update: if signedIn() && validProgress(request.auth.uid, progressId, 'paperKey') && entitled();
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
       allow create, update, delete: if canWrite();
     }
@@ -546,7 +587,7 @@ service cloud.firestore {
     match /liveBookings/{uid} {
       allow get: if signedIn() && (request.auth.uid == uid || canRead());
       allow list: if canRead();
-      allow create: if signedIn() && request.auth.uid == uid && verifiedOrLegacy() && validLiveEntry(uid, 'booked')
+      allow create: if signedIn() && request.auth.uid == uid && entitled() && validLiveEntry(uid, 'booked')
         && liveCountAfter(request.resource.data.slotKey) == liveCount(request.resource.data.slotKey) + 1
         && liveCountAfter(request.resource.data.slotKey) <= 5;
       // A student may cancel their own booking (the counter must go down by 1 in the same batch).
@@ -559,7 +600,7 @@ service cloud.firestore {
     match /liveWaitlist/{uid} {
       allow get: if signedIn() && (request.auth.uid == uid || canRead());
       allow list: if canRead();
-      allow create: if signedIn() && request.auth.uid == uid && verifiedOrLegacy() && validLiveEntry(uid, 'waiting')
+      allow create: if signedIn() && request.auth.uid == uid && entitled() && validLiveEntry(uid, 'waiting')
         && !exists(liveBookingPath(uid))
         && liveCount(request.resource.data.slotKey) >= 5;
       allow delete: if signedIn() && request.auth.uid == uid;
@@ -567,7 +608,7 @@ service cloud.firestore {
     }
     match /liveSlots/{k} {
       allow get, list: if signedIn();
-      allow create, update: if signedIn() && verifiedOrLegacy() && k in liveSlotKeys()
+      allow create, update: if signedIn() && entitled() && k in liveSlotKeys()
         && request.resource.data.keys().hasOnly(['count', 'updatedAt'])
         && request.resource.data.count is int && request.resource.data.count >= 0 && request.resource.data.count <= 5
         && request.resource.data.updatedAt == request.time

@@ -152,7 +152,8 @@ function signUp(email, password, name, cls, remember, examSession){
         class: cls,
         examSession: examSession,
         certificate: STUDENT_LEVELS.indexOf(cls) >= 0 ? cls : "",
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        sub: { plan: "trial", start: serverTimestamp() }   // 24-hour free trial; the rules force start == server time
       }).then(function(){
         // The account is unusable until this link is clicked. A failed send
         // does not fail sign-up; the student can press "Resend" on the next screen.
@@ -215,7 +216,7 @@ function completeGoogleProfile(name, level, examSession){
   if(STUDENT_LEVELS.indexOf(level) < 0) return Promise.reject(new Error("Please choose IGCSE, AS or A2."));
   var u = auth.currentUser;
   if(!u) return Promise.reject(new Error("Please sign in again."));
-  return setDoc(doc(db, "users", u.uid), { name: name, email: u.email, class: level, examSession: examSession, certificate: level, createdAt: serverTimestamp() })
+  return setDoc(doc(db, "users", u.uid), { name: name, email: u.email, class: level, examSession: examSession, certificate: level, createdAt: serverTimestamp(), sub: { plan: "trial", start: serverTimestamp() } })
     .then(function(){ return getMyProfile(u.uid); });
 }
 // A student created after the exam-session rule came in, but without a session (e.g. an older cached sign-up
@@ -301,6 +302,66 @@ function resendVerification(email, password){
     .then(function(r){ authBusy = false; return r; }, function(err){ authBusy = false; throw new Error(friendlyAuthError(err)); });
 }
 
+// ---------- subscriptions ----------
+// users/{uid}.sub is written only by an admin (security rules). A new account carries { plan: "trial", start } and
+// its expiry is start + 24 h. No sub field = an existing student with full access (legacy).
+var SUB_PLANS = { trial: "Free trial", monthly: "Monthly", quarterly: "3-Month", biannual: "6-Month", exams: "Until exams", custom: "Custom" };
+function tsMs(t){ return t && t.toMillis ? t.toMillis() : (t instanceof Date ? t.getTime() : 0); }
+function subFrom(d){
+  var s = d && d.sub;
+  if(!s || typeof s !== "object") return null;
+  var plan = String(s.plan || ""), start = tsMs(s.start);
+  var exp = s.expiry ? tsMs(s.expiry) : (plan === "trial" ? start + 86400000 : 0);
+  return { plan: plan, label: SUB_PLANS[plan] || plan, isTrial: plan === "trial" || s.isTrial === true,
+           startMs: start, expiryMs: exp, suspended: s.suspended === true, graceMs: tsMs(s.grace),
+           by: String(s.by || ""), modifiedMs: tsMs(s.modified) };
+}
+// Live subscription of the signed-in student (fires again when an admin changes it, so access can end without a re-login).
+function watchMySubscription(uid, cb){
+  return onSnapshot(doc(db, "users", uid), function(snap){ cb(snap.exists() ? subFrom(snap.data()) : null, snap.exists()); },
+    function(){ cb(undefined, true); });
+}
+function subHistoryList(uid){
+  return getDocs(query(collection(db, "users", uid, "subHistory"), orderBy("at", "desc"))).then(function(snap){
+    var out = []; snap.forEach(function(d){ var x = d.data() || {};
+      out.push({ id: d.id, action: x.action || "", plan: x.plan || "", prevPlan: x.prevPlan || "", prevExpiryMs: tsMs(x.prevExpiry), newExpiryMs: tsMs(x.newExpiry),
+                 startMs: tsMs(x.startDate), atMs: tsMs(x.at), by: x.by || "", reason: x.reason || "" }); });
+    return out;
+  });
+}
+// Admin only. items: [{ uid, action, plan, startMs, expiryMs, suspended, graceMs, reason, prevPlan, prevExpiryMs }].
+// Each student is written on its own (user update + history entry in one atomic batch) so one failure does not stop the others.
+function assignSubscriptions(items, adminName, adminUid){
+  var by = cleanAdminName(adminName), ok = [], failed = [], i = 0;
+  function one(it){
+    var sub = { plan: String(it.plan), start: new Date(it.startMs), expiry: new Date(it.expiryMs),
+                isTrial: it.plan === "trial", suspended: it.suspended === true, by: by, byUid: String(adminUid || ""), modified: serverTimestamp() };
+    if(it.graceMs) sub.grace = new Date(it.graceMs);
+    var hist = { action: String(it.action || "assign"), plan: String(it.plan), startDate: new Date(it.startMs), newExpiry: new Date(it.expiryMs),
+                 at: serverTimestamp(), by: by, byUid: String(adminUid || "") };
+    if(it.prevPlan) hist.prevPlan = String(it.prevPlan);
+    if(it.prevExpiryMs) hist.prevExpiry = new Date(it.prevExpiryMs);
+    if(it.reason) hist.reason = String(it.reason).slice(0, 200);
+    // Concurrent edits: if another admin changed this student since the list was loaded, refuse instead of overwriting.
+    var guard = (it.expectExpiryMs === undefined) ? Promise.resolve() : getDoc(doc(db, "users", it.uid)).then(function(snap){
+      var cur = snap.exists() ? subFrom(snap.data()) : null, curMs = cur ? cur.expiryMs : 0;
+      if(curMs !== Number(it.expectExpiryMs || 0)) throw new Error("changed by someone else meanwhile - refresh and try again");
+    });
+    return guard.then(function(){
+      var b = writeBatch(db);
+      b.update(doc(db, "users", it.uid), { sub: sub });
+      b.set(doc(collection(db, "users", it.uid, "subHistory")), hist);
+      return b.commit();
+    }).then(function(){ ok.push(it.uid); }, function(e){ failed.push({ uid: it.uid, error: (e && e.message) || "failed" }); });
+  }
+  function next(){
+    var chunk = items.slice(i, i + 6); i += 6;
+    if(!chunk.length) return Promise.resolve({ ok: ok, failed: failed });
+    return Promise.all(chunk.map(one)).then(next);
+  }
+  return next();
+}
+
 function getMyProfile(uid){
   return getDoc(doc(db, "users", uid)).then(function(snap){
     if(!snap.exists()) return null;
@@ -308,7 +369,7 @@ function getMyProfile(uid){
     var cm = d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : 0;
     var role = d.role || "student";
     return { uid: uid, name: d.name, email: d.email, class: d.class, blocked: d.blocked === true, role: role,
-             examSession: d.examSession || "", certificate: d.certificate || "", createdMs: cm,
+             examSession: d.examSession || "", certificate: d.certificate || "", createdMs: cm, sub: subFrom(d),
              // Students who joined after the exam-session rule came in must pick their session once.
              needsSession: role === "student" && !d.examSession && cm >= SESSION_REQUIRED_FROM };
   });
@@ -401,7 +462,7 @@ function recordAttempt(uid, examKey, record){
 function listAllUsers(){
   return getDocs(collection(db, "users")).then(function(snap){
     var out = [];
-    snap.forEach(function(d){ var x = d.data() || {}; out.push({ uid: d.id, name: x.name || "", email: x.email || "", className: x["class"] || "", blocked: x.blocked === true, role: x.role || "student", createdMs: x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0 }); });
+    snap.forEach(function(d){ var x = d.data() || {}; out.push({ uid: d.id, name: x.name || "", email: x.email || "", className: x["class"] || "", blocked: x.blocked === true, role: x.role || "student", createdMs: x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0, sub: subFrom(x), examSession: x.examSession || "" }); });
     return out;
   });
 }
@@ -742,7 +803,7 @@ function adminCreateStudent(name, email, cls, password){
   var uid = "", sent = false;
   return createUserWithEmailAndPassword(secAuth, email, password).then(function(cred){
     uid = cred.user.uid;
-    return setDoc(doc(db, "users", uid), { name: name, email: email, class: cls, createdAt: serverTimestamp() }).then(function(){
+    return setDoc(doc(db, "users", uid), { name: name, email: email, class: cls, createdAt: serverTimestamp(), sub: { plan: "trial", start: serverTimestamp() } }).then(function(){
       return sendEmailVerification(cred.user).then(function(){ sent = true; }, function(){ sent = false; });
     });
   }).then(function(){
@@ -1257,6 +1318,9 @@ function getStaffRole(uid){
 }
 
 window.PQFirebase = {
+  watchMySubscription: watchMySubscription,
+  subHistoryList: subHistoryList,
+  assignSubscriptions: assignSubscriptions,
   checkIsAdmin: checkIsAdmin,
   getStaffRole: getStaffRole,
   listMyChildren: listMyChildren,
