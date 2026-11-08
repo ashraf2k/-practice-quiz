@@ -1,0 +1,54 @@
+.wb{ max-width:1180px; margin:0 auto; padding:14px 14px 60px; }
+.wb-head h1{ margin:6px 0 4px; font-size:26px; }
+.wb-sub{ margin:0 0 14px; color:var(--muted); }
+.wb-back{ font-size:14px; font-weight:700; text-decoration:none; color:var(--accent-dark); }
+.wb-gate{ padding:16px 18px; border-radius:12px; background:var(--accent-tint); border:1.5px solid var(--accent); }
+.wb-gate.bad{ background:var(--diff-moderate-bg, #fff4d6); border-color:var(--diff-moderate, #d99a00); }
+.wb-langs{ display:flex; gap:8px; flex-wrap:wrap; margin:0 0 10px; }
+.wb-langs button{ padding:10px 18px; border-radius:12px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font:800 15px system-ui,sans-serif; cursor:pointer; }
+.wb-langs button.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.wb-langs small{ font-weight:600; opacity:.85; margin-left:6px; }
+.wb-topics{ display:flex; gap:7px; flex-wrap:wrap; margin:0 0 14px; }
+.wb-topics button{ padding:7px 13px; border-radius:99px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font:700 13.5px system-ui,sans-serif; cursor:pointer; }
+.wb-topics button.on{ border-color:var(--accent); background:var(--accent-tint); }
+.wb-topics button.done::before{ content:"\2713 "; color:var(--correct, #1f8a4c); font-weight:900; }
+.wb-grid{ display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); grid-template-areas:"lesson play" "quiz play"; gap:14px; align-items:start; }
+.wb-lesson{ grid-area:lesson; } .wb-quiz{ grid-area:quiz; } .wb-play{ grid-area:play; position:sticky; top:8px; }
+@media (max-width:900px){ .wb-grid{ grid-template-columns:minmax(0,1fr); grid-template-areas:"lesson" "play" "quiz"; } .wb-play{ position:static; } }
+.wb-lesson h2, .wb-quiz h2, .wb-play h2{ margin:0 0 8px; font-size:20px; }
+.wb-lesson h3{ margin:16px 0 4px; font-size:15px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+.wb-lesson p{ line-height:1.6; margin:0 0 10px; }
+.wb-lesson code, .wb-quiz code, .wb-q code{ background:var(--bg); border:1px solid var(--line); border-radius:5px; padding:1px 5px; font-size:.92em; }
+.wb-code{ margin:8px 0 12px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--bg); }
+.wb-code-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 10px; background:var(--accent-tint); border-bottom:1px solid var(--line); font-size:12.5px; font-weight:800; }
+.wb-code pre{ margin:0; padding:10px 12px; overflow:auto; font:13.5px/1.5 ui-monospace, Menlo, Consolas, monospace; white-space:pre; color:var(--ink); }
+.wb-code .wb-try{ padding:5px 12px; border-radius:8px; border:1.5px solid var(--accent); background:var(--accent); color:#fff; font:800 12.5px system-ui,sans-serif; cursor:pointer; }
+.wb-tip{ margin:10px 0; padding:10px 12px; border-radius:10px; background:var(--accent-tint); border-left:4px solid var(--accent); font-size:14px; }
+.wb-play-top{ display:flex; justify-content:space-between; gap:8px; align-items:center; flex-wrap:wrap; margin:0 0 8px; }
+.wb-play-btns{ display:flex; gap:6px; }
+.wb-edtabs{ display:flex; gap:4px; margin:0 0 6px; }
+.wb-edtabs button{ padding:6px 14px; border-radius:8px 8px 0 0; border:1.5px solid var(--line); background:var(--surface); color:var(--muted); font:800 13px system-ui,sans-serif; cursor:pointer; }
+.wb-edtabs button.on{ background:var(--bg); color:var(--ink); border-color:var(--accent); }
+.wb-ed{ width:100%; box-sizing:border-box; min-height:190px; resize:vertical; padding:10px 12px; border:1.5px solid var(--line); border-radius:0 10px 10px 10px; background:var(--bg); color:var(--ink); font:14px/1.5 ui-monospace, Menlo, Consolas, monospace; tab-size:2; }
+.wb-ed:focus{ outline:2px solid var(--accent); }
+.wb-hint{ margin:6px 0 10px; font-size:12.5px; color:var(--muted); }
+.wb-frame-wrap{ border:1.5px solid var(--line); border-radius:10px; background:#fff; min-height:150px; overflow:hidden; }
+.wb-frame-wrap iframe{ display:block; width:100%; height:240px; border:0; background:#fff; }
+.wb-empty{ margin:0; padding:20px; color:#666; text-align:center; font-size:14px; }
+.wb-console-head{ margin:10px 0 4px; font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+.wb-console{ margin:0; min-height:48px; max-height:140px; overflow:auto; padding:8px 10px; border-radius:10px; background:#10201f; color:#d6f5e9; font:13px/1.45 ui-monospace, Menlo, Consolas, monospace; white-space:pre-wrap; }
+.wb-console .e{ color:#ff9b8f; } .wb-console .w{ color:#ffd479; } .wb-console .a{ color:#9ad1ff; }
+.wb-q{ margin:14px 0; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; }
+.wb-q-t{ font-weight:800; margin:0 0 8px; line-height:1.45; }
+.wb-opts{ display:grid; gap:7px; }
+.wb-opt{ text-align:left; padding:9px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font:600 14.5px system-ui,sans-serif; cursor:pointer; }
+.wb-opt:hover:not(:disabled){ border-color:var(--accent); background:var(--accent-tint); }
+.wb-opt.ok{ border-color:var(--correct, #1f8a4c); background:var(--correct-bg, #e3f5ea); }
+.wb-opt.no{ border-color:var(--wrong, #c0392b); background:var(--wrong-bg, #fde8e5); }
+.wb-why{ margin:8px 0 0; font-size:13.5px; line-height:1.5; }
+.wb-score{ margin:10px 0; padding:10px 12px; border-radius:10px; background:var(--accent-tint); font-weight:800; display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; }
+.wb-written textarea{ width:100%; box-sizing:border-box; min-height:120px; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--bg); color:var(--ink); font:14px/1.5 ui-monospace, Menlo, Consolas, monospace; }
+.wb-model{ margin:10px 0 0; padding:12px 14px; border-radius:12px; border:1.5px solid var(--correct, #1f8a4c); background:var(--correct-bg, #e3f5ea); }
+.wb-model pre{ margin:6px 0; white-space:pre-wrap; font:13.5px/1.5 ui-monospace, Menlo, Consolas, monospace; color:var(--ink); }
+.wb-model ul{ list-style:none; padding:0; margin:8px 0 0; } .wb-model li{ margin:5px 0; }
+.wb-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:8px 0 0; }

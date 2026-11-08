@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob: https:; font-src data:; media-src data: blob:; connect-src 'none'; form-action 'none'; frame-src 'none'; base-uri 'none'; object-src 'none'" />
+<!--csp:custom-->
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Preview</title>
+</head>
+<body>
+<!-- Runs a student's HTML/CSS/JS. It is loaded in a sandboxed iframe (no same-origin access, no network, no forms,
+     no pop-ups), so nothing typed here can reach the rest of the site, the student's login or any data. -->
+<script>
+(function(){
+  var HOOK = '<script>(function(){function s(t,a){try{parent.postMessage({type:"console",level:t,text:Array.prototype.map.call(a,function(x){try{return typeof x==="object"?JSON.stringify(x):String(x)}catch(_){return String(x)}}).join(" ")},"*")}catch(_){}}' +
+    '["log","info","warn","error"].forEach(function(k){var o=console[k];console[k]=function(){s(k,arguments);try{o.apply(console,arguments)}catch(_){}}});' +
+    'window.addEventListener("error",function(ev){s("error",[ev.message+(ev.lineno?" (line "+ev.lineno+")":"")])});' +
+    'window.alert=function(m){s("alert",[m])};window.confirm=function(m){s("confirm",[m]);return true};window.prompt=function(m,d){s("prompt",[m]);return d||"Student"};' +
+    '})();<\/script>';
+  window.addEventListener("message", function(e){
+    var d = e.data; if(!d || d.type !== "run") return;
+    var html = String(d.html || ""), css = String(d.css || ""), js = String(d.js || "").replace(new RegExp("<" + "/script", "gi"), "<\\/script");
+    var m = html.match(/^\s*<!doctype[^>]*>/i), dt = m ? m[0] : "<!DOCTYPE html>";
+    if(m) html = html.slice(m[0].length);
+    var out = dt + "<style>" + css.replace(/<\/style/gi, "<\\/style") + "</style>" + HOOK + html + (js ? "<script>" + js + "<\/script>" : "");
+    document.open(); document.write(out); document.close();
+  });
+  parent.postMessage({ type: "ready" }, "*");
+})();
+</script>
+</body>
+</html>

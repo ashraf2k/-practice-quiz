@@ -9,6 +9,9 @@ const MARK = /<meta http-equiv="Content-Security-Policy"[^>]*>\s*/;
 for (const f of pages) {
   const p = path.join(root, f);
   let html = fs.readFileSync(p, "utf8");
+  // A page can opt out (a sandbox that must run student code) or add 'self' to frame-src (a page that embeds that sandbox).
+  if (/<!--csp:custom-->/.test(html)) { console.log(f + " (own CSP, skipped)"); continue; }
+  const FRAME_SELF = /<!--csp:frame-self-->/.test(html);
   html = html.replace(MARK, "");
   const hashes = [];
   html.replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi, (m, attrs, body) => {
@@ -24,7 +27,7 @@ for (const f of pages) {
     "font-src 'self' data:",
     "media-src 'self' blob:",
     "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev",
-    "frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com",
+    "frame-src " + (FRAME_SELF ? "'self' " : "") + "https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com",
     "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
