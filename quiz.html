@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-cEhiBAvwAQfMTxAws4Xx6gGs3EaN3vXT/qZL00Ns3Bs='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-FcesnUjK3Ym1sK88S9uu2GHkx0QTVATJgSIHvZFp+cA='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -16,7 +16,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Practice Quiz</title>
-<link rel="stylesheet" href="shared.css?v=20261109a" />
+<link rel="stylesheet" href="shared.css?v=20261109b" />
 <link rel="stylesheet" href="theme.css?v=20261027a" />
 <link rel="stylesheet" href="chatbot.css?v=2">
 </head>
@@ -183,6 +183,12 @@
       <span class="hub-title">Web basics: HTML, CSS &amp; JavaScript</span>
       <span class="hub-desc">Short lessons, 5 quiz questions and a written question for every topic, plus a space to try your own code.</span>
       <span class="hub-meta">New for 10AM &middot; 15 topics</span>
+    </a>
+    <a class="hub-card hidden" id="gimp-card" href="gimp.html" style="margin:0 0 14px">
+      <span class="unit-tag">Photo editing: GIMP application</span>
+      <span class="hub-title">Photo editing with GIMP</span>
+      <span class="hub-desc">Animated, step-by-step lessons: select, add effects and fix photos. Easy quiz questions after every lesson.</span>
+      <span class="hub-meta">New for 10AM &middot; 13 topics</span>
     </a>
     <div class="perf-meter" id="perf-meter">
       <div class="ring-wrap">
@@ -2326,6 +2332,7 @@
     loadPerformanceMeter();
     document.getElementById("btn-back-hub").classList.toggle("hidden", !isBR(user));
     document.getElementById("web-tut-card").classList.toggle("hidden", !/^10AM/i.test(window.PQ_LEGACY_CLASS(String(user.class || ""))));
+    document.getElementById("gimp-card").classList.toggle("hidden", !/^10AM/i.test(window.PQ_LEGACY_CLASS(String(user.class || ""))));
     showScreen("start");
   }
 

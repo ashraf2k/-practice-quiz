@@ -1,0 +1,14 @@
+.wb-grid{grid-template-areas:"lesson play" "quiz play"}
+.wb-play{position:sticky;top:8px}
+.gm-player{display:grid;gap:8px}
+.gm-path{padding:7px 11px;border-radius:9px;background:var(--accent-tint);border:1px solid var(--line);font:700 13px system-ui,sans-serif}
+.gm-svg{width:100%;height:auto;display:block;border-radius:10px;border:1.5px solid var(--line);background:#2b2f36}
+.gm-ctl{display:flex;gap:8px;flex-wrap:wrap}
+.gm-steps{list-style:decimal;margin:4px 0 0;padding:0 0 0 22px;display:grid;gap:4px}
+.gm-steps li{color:var(--muted);font-size:14px}
+.gm-steps li button{all:unset;cursor:pointer;line-height:1.45;display:inline;padding:1px 0}
+.gm-steps li button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gm-steps li.on{color:var(--ink);font-weight:800}
+.gm-steps li.past{color:var(--ink)}
+.gm-steps li.on::marker{color:var(--accent);font-weight:900}
+@media (max-width:900px){.wb-play{position:static}}
