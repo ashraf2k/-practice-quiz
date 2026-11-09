@@ -1787,3 +1787,5 @@
 .btn-google{ width:100%; display:flex; align-items:center; justify-content:center; gap:10px; background:#fff; color:#1f2937; border:1.5px solid #d1d5db; border-radius:12px; padding:12px 16px; font:inherit; font-weight:700; cursor:pointer; }
 .btn-google:hover{ background:#f3f4f6; }
 .btn-google:disabled{ opacity:.6; cursor:wait; }
+
+#web-tut-card .unit-tag{display:inline-block;align-self:flex-start;margin:0 0 8px;padding:3px 11px;border-radius:99px;background:var(--accent-dark);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
