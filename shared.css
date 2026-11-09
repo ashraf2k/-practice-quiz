@@ -1788,4 +1788,4 @@
 .btn-google:hover{ background:#f3f4f6; }
 .btn-google:disabled{ opacity:.6; cursor:wait; }
 
-#web-tut-card .unit-tag,#gimp-card .unit-tag{display:inline-block;align-self:flex-start;margin:0 0 8px;padding:3px 11px;border-radius:99px;background:var(--accent-dark);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+#web-tut-card .unit-tag,#gimp-card .unit-tag,#unit1-card .unit-tag{display:inline-block;align-self:flex-start;margin:0 0 8px;padding:3px 11px;border-radius:99px;background:var(--accent-dark);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com ; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<!--csp:frame-self-->
+<script src="framebust.js?v=20261019j"></script>
+<script src="theme.js?v=20261027a"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta name="theme-color" content="#146C6A" />
+<link rel="icon" href="icons/icon-192.png" />
+<title>Unit 1: Technology, IP and Security</title>
+<link rel="stylesheet" href="shared.css?v=20261110a" />
+<link rel="stylesheet" href="web-basics.css?v=3" />
+<link rel="stylesheet" href="gimp.css?v=1" />
+</head>
+<body>
+<main class="wb" id="wb">
+  <header class="wb-head">
+    <a class="wb-back" href="quiz.html">&larr; Back</a>
+    <h1>Unit 1: Technology, IP and Security</h1>
+    <p class="wb-dl"><a class="wb-dlbtn" href="unit1-50-mcq.pdf" download>&#11015; Download 50 MCQs with answers (PDF)</a></p>
+    <p class="wb-sub">Watch the animation, read the lesson, answer the quiz, then write your own answer. Covers data privacy and network security. For 10AM students.</p>
+  </header>
+
+  <p class="wb-gate" id="wb-gate">Checking your account&hellip;</p>
+
+  <div id="wb-app" hidden>
+    <div class="wb-langs" id="wb-langs" role="tablist" aria-label="Language"></div>
+    <div class="wb-topics" id="wb-topics" role="tablist" aria-label="Topics"></div>
+
+    <div class="wb-grid">
+      <section class="wb-lesson card" id="wb-lesson" aria-live="polite"></section>
+
+      <section class="wb-play card" id="wb-demo" aria-label="Animated demonstration"></section>
+
+      <section class="wb-quiz card" id="wb-quiz"></section>
+    </div>
+  </div>
+</main>
+<script src="firebase-config.js?v=20261103e"></script>
+<script type="module" src="firebase-init.js?v=20261106a"></script>
+<script src="unit1-data.js?v=1"></script>
+<script src="unit1-anim.js?v=1"></script>
+<script src="unit1.js?v=1"></script>
+</body>
+</html>
