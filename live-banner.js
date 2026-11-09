@@ -44,6 +44,8 @@
     if(!window.PQFirebase || !PQFirebase.onAuthChange || !window.PQ_LIVE){ setTimeout(boot, 150); return; }
     PQFirebase.onAuthChange(function(u){
       if(!u || (u.role && u.role !== "student" && u.role !== "admin")){ return; }
+      var cl = String(u.class || u.className || ""); try{ if(window.PQ_LEGACY_CLASS) cl = window.PQ_LEGACY_CLASS(cl); }catch(e){}
+      if(/^10AM/i.test(cl)){ Array.prototype.forEach.call(document.querySelectorAll("[data-pq-live]"), function(n){ n.remove(); }); return; }   // 10AM classes do not get live sessions
       var go = function(mine){ mount(mine); /* the page re-renders its sections: put the banner back */ setTimeout(function(){ mount(mine); }, 1500); };
       if(typeof PQFirebase.liveLoad !== "function"){ go(null); return; }
       PQFirebase.liveLoad(u.uid).then(function(d){ go(d.mine); }, function(){ go(null); });
