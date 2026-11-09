@@ -11,7 +11,40 @@
   var PKEY = function(){ return "pq_webtut_v1_" + ((user && user.uid) || "anon"); };
   function loadProg(){ try{ prog = JSON.parse(localStorage.getItem(PKEY()) || "{}") || {}; }catch(e){ prog = {}; } }
   function saveProg(){ try{ localStorage.setItem(PKEY(), JSON.stringify(prog)); }catch(e){} }
-  function P(tid){ return prog[tid] || (prog[tid] = { mcq: {}, written: "", seen: false }); }
+  function P(tid){ return prog[tid] || (prog[tid] = { mcq: {}, written: "", seen: false, t: 0 }); }
+  // ---- save to the school database (practiceProgress, key "webtut") so teachers can review it and it follows the student ----
+  var cloudT = 0, TOTAL = 0;
+  function snapshot(){
+    var topics = {}, d = 0, last = 0;
+    Object.keys(prog).forEach(function(k){
+      var p = prog[k]; if(!p) return;
+      var m = {}; Object.keys(p.mcq || {}).forEach(function(q){ var x = p.mcq[q]; m[q] = { pick: String(x.pick || "").slice(0, 140), ok: x.ok === true }; });
+      topics[k] = { mcq: m, written: String(p.written || "").slice(0, 4000), seen: p.seen === true, t: p.t || 0 };
+      if(done(k)) d++; if((p.t || 0) > last) last = p.t;
+    });
+    return { topics: topics, done: d, total: TOTAL, lastActive: last };
+  }
+  function pushCloud(){
+    clearTimeout(cloudT);
+    cloudT = setTimeout(function(){
+      var F = window.PQFirebase;
+      if(user && F && F.saveProgress) F.saveProgress(user.uid, "webtut", snapshot());
+    }, 1500);
+  }
+  function touch(tid){ P(tid).t = Date.now(); saveProg(); pushCloud(); }
+  function cloudLoad(){
+    var F = window.PQFirebase;
+    if(!F || !F.getMyProgress) return Promise.resolve();
+    return F.getMyProgress(user.uid, "webtut").then(function(rec){
+      if(!rec || !rec.topics) return;
+      Object.keys(rec.topics).forEach(function(k){
+        var c = rec.topics[k], l = prog[k];
+        if(!c || (l && (l.t || 0) >= (c.t || 0))) return;
+        prog[k] = { mcq: c.mcq || {}, written: c.written || "", seen: c.seen === true, t: c.t || 0 };
+      });
+      saveProg();
+    }, function(){});
+  }
   function done(tid){ var p = prog[tid]; return !!(p && p.seen && Object.keys(p.mcq || {}).length >= 5); }
   function shuffle(a){ a = a.slice(); for(var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 
@@ -34,7 +67,7 @@
       var roleP = F.getStaffRole ? F.getStaffRole(p.uid) : Promise.resolve("");
       Promise.resolve(roleP).then(function(role){
         if(!allowed(p, role)){ gateMsg("This tutorial is for 10AM students.", true, ["Back to your home page", "quiz.html"]); return; }
-        user = p; $("wb-gate").hidden = true; $("wb-app").hidden = false; loadProg(); start();
+        user = p; $("wb-gate").hidden = true; $("wb-app").hidden = false; loadProg(); TOTAL = W.langs.reduce(function(n, L){ return n + L.topics.length; }, 0); cloudLoad().then(start);
       }, function(){ gateMsg("Could not check your account. Please refresh.", true); });
     });
   }
@@ -107,7 +140,7 @@
       order.forEach(function(text){
         var b = el("button", "wb-opt", text); b.type = "button";
         b.addEventListener("click", function(){
-          p.mcq[key] = { pick: text, ok: text === q.o[0] }; saveProg(); lock(text); renderQuizFoot(box, t); renderLangs(); renderTopics();
+          p.mcq[key] = { pick: text, ok: text === q.o[0] }; touch(t.id); lock(text); renderQuizFoot(box, t); renderLangs(); renderTopics();
         });
         opts.appendChild(b);
       });
@@ -118,14 +151,14 @@
 
     var wr = el("div", "wb-q wb-written");
     wr.appendChild(html("p", "wb-q-t", "Written question: " + t.written.q));
-    var ta = el("textarea"); ta.placeholder = "Write your answer here. It is saved in this browser as you type."; ta.value = p.written || ""; ta.setAttribute("aria-label", "Your written answer");
+    var ta = el("textarea"); ta.maxLength = 4000; ta.placeholder = "Write your answer here. It is saved in this browser as you type."; ta.value = p.written || ""; ta.setAttribute("aria-label", "Your written answer");
     wr.appendChild(ta);
     var row = el("div", "wb-row"), chk = el("button", "btn", "Show model answer"); chk.type = "button";
     var note = el("span", "wb-sub", "");
     row.appendChild(chk); row.appendChild(note); wr.appendChild(row);
     var modelBox = el("div"); wr.appendChild(modelBox);
     function enable(){ var ok = ta.value.trim().length >= 15; chk.disabled = !ok; note.textContent = ok ? "" : "Write your own answer first (at least a sentence), then compare."; }
-    ta.addEventListener("input", function(){ p.written = ta.value; clearTimeout(saveT); saveT = setTimeout(saveProg, 400); enable(); });
+    ta.addEventListener("input", function(){ p.written = ta.value; clearTimeout(saveT); saveT = setTimeout(function(){ touch(t.id); }, 700); enable(); });
     function showModel(){
       modelBox.textContent = "";
       var m = el("div", "wb-model"); m.appendChild(el("b", null, "Model answer"));
@@ -133,7 +166,7 @@
       m.appendChild(el("b", null, "Compare with yours. Did your answer include:"));
       var ul = el("ul"); t.written.check.forEach(function(c){ var li2 = el("li"), lab = el("label"), cb = el("input"); cb.type = "checkbox"; lab.appendChild(cb); lab.appendChild(html("span", null, " " + c.replace(/</g, "&lt;"))); li2.appendChild(lab); ul.appendChild(li2); });
       m.appendChild(ul); m.appendChild(el("p", "wb-sub", "Missed something? Improve your answer above, then try it in the practice window.")); modelBox.appendChild(m);
-      p.seen = true; saveProg(); renderLangs(); renderTopics();
+      if(!p.seen){ p.seen = true; touch(t.id); } renderLangs(); renderTopics();
     }
     chk.addEventListener("click", showModel); enable(); if(p.seen) showModel();
     box.appendChild(wr);
@@ -144,7 +177,7 @@
     if(n < t.mcq.length) return;
     var s = el("div", "wb-score"); s.appendChild(el("span", null, "Quiz score: " + ok + " / " + t.mcq.length + (ok === t.mcq.length ? " - perfect!" : "")));
     var b = el("button", "btn btn-secondary", "Try the quiz again"); b.type = "button";
-    b.addEventListener("click", function(){ p.mcq = {}; saveProg(); renderAll(false); });
+    b.addEventListener("click", function(){ p.mcq = {}; touch(t.id); renderAll(false); });
     s.appendChild(b); foot.appendChild(s);
   }
 
