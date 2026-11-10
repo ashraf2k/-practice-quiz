@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-OoJ9KymWATPz8qkiwrmEul1abp8TfL+UJTycJukQ3Mg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-sDjzXObyFgCkkv9TJm11X/3v3ZmduRA8gMsZ6dDV66U='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -512,6 +512,7 @@
     .pal-btn kbd{ display:none; }
   }
   @media (prefers-reduced-motion: reduce){ .side{ transition:none; } }
+  .unit-sw{ display:flex; gap:6px; flex-wrap:wrap; margin:0 0 14px; }
 </style>
 <link rel="stylesheet" href="theme.css?v=20261027a" />
 </head>
@@ -572,13 +573,9 @@
           <button class="admin-tab" data-tab="viewas">View as student</button>
           <button class="admin-tab" data-tab="archive">Archive</button>
         </div>
-        <div class="tab-group"><span class="tab-glabel">10AM units</span>
-          <button class="admin-tab" data-tab="unit1" title="Unit 1: Technology, IP and Security (10AM)">Unit 1: Tech, IP and Security</button>
-          <button class="admin-tab" data-tab="gimp" title="Unit 2: GIMP (10AM)">Unit 2: GIMP</button>
-          <button class="admin-tab" data-tab="webtut" title="Unit 3: Web basics (10AM)">Unit 3: Web basics</button>
-        </div>
         <div class="tab-group"><span class="tab-glabel">Learning</span>
           <button class="admin-tab" data-tab="ilearn">iLearn</button>
+          <button class="admin-tab" data-tab="unit1">10AM units</button>
           <button class="admin-tab" data-tab="isolve">iSolve</button>
           <button class="admin-tab" data-tab="syllabus">Syllabus report</button>
           <button class="admin-tab" data-tab="ppPerf">Past papers</button>
@@ -618,6 +615,7 @@
       <button type="button" class="lvl-btn" data-gl="10">10BR · IGCSE</button>
       <button type="button" class="lvl-btn" data-gl="11">11BR · AS Level</button>
       <button type="button" class="lvl-btn" data-gl="12">12BR · A Level</button>
+      <button type="button" class="lvl-btn" data-gl="AM">10AM · Digi Champs</button>
     </div>
 
     <div id="toast-host" aria-live="polite"></div>
@@ -1399,7 +1397,7 @@
   // ============================================================
   var PANELS = ["dashboard","live","timetables","subs","unit1","gimp","webtut","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
-    ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
+    ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes", gimp:"unit1", webtut:"unit1" };
   function showTab(name){
     var menu = MENU_OF[name] || name;
     document.querySelectorAll(".admin-tab").forEach(function(btn){
@@ -2426,11 +2424,11 @@
   // ------------------------------------------------------------
   var LV = { ilearn: "10", syllabus: "10", isolve: "10" };
   var GLV = "";   // shared level filter: "" = all, else "10" / "11" / "12"
-  window.__curLevel = function(){ return GLV || LV.ilearn || "10"; };
+  window.__curLevel = function(){ return (GLV && GLV !== "AM") ? GLV : (LV.ilearn || "10"); };
   var LV_NAMES = ["10", "11", "12"];
   var TOPIC_NAMES = { 1:"Information representation", 2:"Communication", 3:"Hardware", 4:"Processor fundamentals", 5:"System software", 6:"Security, privacy and data integrity", 7:"Ethics and ownership", 8:"Databases", 9:"Algorithm design and problem-solving", 10:"Data types and structures", 11:"Programming", 12:"Software development",
     13:"Data representation", 14:"Communication and internet technologies", 15:"Hardware and virtual machines", 16:"System software", 17:"Security", 18:"Artificial intelligence", 19:"Computational thinking and problem solving", 20:"Further programming" };
-  function levelOf(cls){ var m = /^\s*(\d+)\s*BR/i.exec(window.PQ_LEGACY_CLASS(cls || "")); return m ? m[1] : ""; }
+  function levelOf(cls){ var c = window.PQ_LEGACY_CLASS(cls || ""); if(/^\s*10\s*AM/i.test(c)) return "AM"; var m = /^\s*(\d+)\s*BR/i.exec(c); return m ? m[1] : ""; }
   function rosterFor(level){
     return (usersRoster || []).filter(function(u){ return u && u.uid && levelOf(u.className || u.class) === level; }).map(function(u){
       return { uid: u.uid, name: u.name || "(no name)", email: u.email || "", className: String(u.className || u.class || "").replace(/\s+/g, "") };
@@ -2485,6 +2483,9 @@
     }
   }
   window.__goMenu = function(tab){
+    if(tab === "unit1" && GLV !== "AM"){ setGlobalLevel("AM"); showTab("unit1"); return true; }
+    if(GLV === "AM" && tab === "ilearn"){ showTab("unit1"); return true; }
+    if(GLV === "AM" && (tab === "syllabus" || tab === "isolve")){ setGlobalLevel(LV[tab] || "10"); return true; }
     if(tab === "ilearn" || tab === "syllabus" || tab === "isolve"){ setLevel(tab, LV[tab]); return true; }
     if(tab === "attention"){ showTab("attention"); renderAttention(); return true; }
     return false;
@@ -3598,10 +3599,14 @@
   function setGlobalLevel(l){
     GLV = l || "";
     Array.prototype.forEach.call(document.querySelectorAll("#level-bar .lvl-btn"), function(b){ b.classList.toggle("on", b.getAttribute("data-gl") === GLV); });
-    if(GLV){ LV.ilearn = GLV; LV.syllabus = GLV; LV.isolve = GLV; markSwitchers(); }
+    var br = GLV === "10" || GLV === "11" || GLV === "12";
+    if(br){ LV.ilearn = GLV; LV.syllabus = GLV; LV.isolve = GLV; markSwitchers(); }
     var cur = document.querySelector(".admin-tab.active"); var tab = cur ? cur.dataset.tab : "";
-    if(GLV && (tab === "ilearn" || tab === "syllabus" || tab === "isolve")) setLevel(tab, GLV);
-    if(tab === "ppPerf"){ if(GLV) document.getElementById("pp-level").value = GLV; if(window.__renderPP) window.__renderPP(); }
+    var UNITS = ["unit1", "gimp", "webtut"];
+    if(GLV === "AM" && (tab === "ilearn" || tab === "syllabus" || tab === "isolve")){ showTab("unit1"); tab = "unit1"; }
+    else if(br && UNITS.indexOf(tab) >= 0){ setLevel("ilearn", GLV); tab = "ilearn"; }
+    else if(br && (tab === "ilearn" || tab === "syllabus" || tab === "isolve")) setLevel(tab, GLV);
+    if(tab === "ppPerf"){ if(br) document.getElementById("pp-level").value = GLV; if(window.__renderPP) window.__renderPP(); }
     if(tab === "byStudent") renderByStudent();
     if(tab === "attention") renderAttention();
     fillMgClasses(); renderManage(); renderGroups(); renderArchive();
@@ -3660,7 +3665,7 @@
       var c0 = mk("td"), cb = mk("input"); cb.type = "checkbox"; cb.checked = !!mgSel[u.uid]; cb.setAttribute("data-uid", u.uid); cb.setAttribute("aria-label", "Select " + (u.name || "student"));
       cb.addEventListener("change", function(){ if(cb.checked) mgSel[u.uid] = 1; else delete mgSel[u.uid]; mgBulkBar(); }); c0.appendChild(cb); tr.appendChild(c0);
       var c1 = mk("td"); c1.appendChild(mk("div", null, u.name || "(no name)")); var em = mk("div", null, u.email || ""); em.style.cssText = "font-size:.75rem;color:var(--muted)"; c1.appendChild(em); tr.appendChild(c1);
-      var c2 = mk("td", null, String(u.className || "").replace(/\s+/g, "") || "-"); var lv = levelOf(u.className); if(lv) c2.appendChild(mk("span", "mg-lvl", lv + "BR")); tr.appendChild(c2);
+      var c2 = mk("td", null, String(u.className || "").replace(/\s+/g, "") || "-"); var lv = levelOf(u.className); if(lv) c2.appendChild(mk("span", "mg-lvl", lv === "AM" ? "10AM" : lv + "BR")); tr.appendChild(c2);
       var cR = mk("td"), rs = mk("select", "mg-role"); rs.setAttribute("aria-label", "Role of " + (u.name || "student")); rs.setAttribute("data-uid", u.uid);
       ["student", "parent", "collaborator", "teacher", "admin"].forEach(function(r){ var o = mk("option", null, r.charAt(0).toUpperCase() + r.slice(1)); o.value = r; rs.appendChild(o); });
       rs.value = adminFlags[u.uid] ? "admin" : (u.role || "student"); if(staffRole !== "admin") rs.disabled = true; cR.appendChild(rs);
@@ -3850,7 +3855,7 @@
       ca.appendChild(act); tr.appendChild(ca); rt.appendChild(tr);
     });
     gt.innerHTML = "";
-    var list = groupsList.filter(function(g){ return !GLV || g.level === GLV; });
+    var list = groupsList.filter(function(g){ return !GLV || (GLV === "AM" ? /^10AM/i.test(String(g.code || "")) : g.level === GLV); });
     if(!list.length){ var t1 = mk("tr"), d1 = mk("td", "wrap-cell", "No classes yet. Create one, or move the old classes below."); d1.colSpan = 7; t1.appendChild(d1); gt.appendChild(t1); }
     list.forEach(function(g){
       var tr = mk("tr"), n = countIn(g.code);
@@ -3894,7 +3899,7 @@
   });
   document.getElementById("gr-new-toggle").addEventListener("click", function(){
     var box = document.getElementById("gr-new"); box.hidden = !box.hidden;
-    if(!box.hidden){ document.getElementById("gr-n-teacher").value = currentAdminName || "Mr. Ashraf"; var lv = document.getElementById("gr-n-level"); if(GLV) lv.value = GLV; document.getElementById("gr-n-code").value = ({ "10": "10BR", "11": "AS", "12": "A2" })[lv.value]; }
+    if(!box.hidden){ document.getElementById("gr-n-teacher").value = currentAdminName || "Mr. Ashraf"; var lv = document.getElementById("gr-n-level"); if(GLV && GLV !== "AM") lv.value = GLV; document.getElementById("gr-n-code").value = ({ "10": "10BR", "11": "AS", "12": "A2" })[lv.value]; }
   });
   document.getElementById("gr-n-level").addEventListener("change", function(){ var c = document.getElementById("gr-n-code"); if(!/\d{2,}/.test(c.value) || c.value.length <= 4) c.value = ({ "10": "10BR", "11": "AS", "12": "A2" })[this.value]; });
   document.getElementById("gr-n-cancel").addEventListener("click", function(){ document.getElementById("gr-new").hidden = true; });
@@ -4018,6 +4023,18 @@
     document.getElementById("side-scrim").addEventListener("click", function(){ navOpen(false); });
     document.getElementById("admin-tabs").addEventListener("click", function(e){ if(e.target.closest(".admin-tab")) navOpen(false); });
 
+
+    // 10AM unit switcher (same pill style as the level bar)
+    var UNIT_TABS = [["unit1", "Unit 1: Tech, IP and Security"], ["gimp", "Unit 2: GIMP"], ["webtut", "Unit 3: Web basics"]];
+    function markUnits(name){ document.querySelectorAll(".unit-sw .lvl-btn").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-u") === name); }); }
+    UNIT_TABS.forEach(function(u){
+      var panel = document.getElementById("panel-" + u[0]); if(!panel) return;
+      var bar = document.createElement("div"); bar.className = "unit-sw no-print"; bar.setAttribute("role", "group"); bar.setAttribute("aria-label", "10AM unit");
+      UNIT_TABS.forEach(function(v){ var b = document.createElement("button"); b.type = "button"; b.className = "lvl-btn"; b.textContent = v[1]; b.setAttribute("data-u", v[0]); b.addEventListener("click", function(){ showTab(v[0]); }); bar.appendChild(b); });
+      panel.insertBefore(bar, panel.firstChild);
+    });
+    var baseShow = showTab;
+    showTab = function(name){ baseShow(name); markUnits(name); if(name === "unit1" || name === "gimp" || name === "webtut"){ if(GLV !== "AM") setGlobalLevel("AM"); } };
     var pal = document.getElementById("pal"), pq = document.getElementById("pal-q"), pl = document.getElementById("pal-list");
     var items = [], sel = 0;
     function labelOf(btn){ var t = ""; btn.childNodes.forEach(function(n){ if(n.nodeType === 3) t += n.textContent; }); return t.trim(); }
@@ -4029,6 +4046,7 @@
           var l = labelOf(btn); if(!q || (l + " " + gl).toLowerCase().indexOf(q) >= 0) items.push({ label: l, sub: gl, run: function(){ if(!(window.__goMenu && window.__goMenu(btn.dataset.tab))) showTab(btn.dataset.tab); } });
         });
       });
+      UNIT_TABS.forEach(function(u){ if(!q || (u[1] + " 10AM units").toLowerCase().indexOf(q) >= 0) items.push({ label: u[1], sub: "10AM units", run: function(){ showTab(u[0]); } }); });
       if(q.length >= 2 && loaded){
         var seen = 0;
         groupByStudent(attempts.concat(examAttempts)).forEach(function(g){

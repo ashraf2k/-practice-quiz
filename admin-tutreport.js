@@ -96,14 +96,13 @@ function make(cfg){
     if(!body) return; body.textContent = "";
     var list = visible(), started = list.filter(function(r){ return r.st.last; }).length, avg = 0, n = 0;
     list.forEach(function(r){ if(r.st.answered){ avg += r.st.right / r.st.answered; n++; } });
-    var tiles = el("div", "sb-tiles"); tiles.style.cssText = "display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 12px";
-    [["Students shown", list.length], ["Started", started], ["Not started", list.length - started], ["Average quiz score", n ? Math.round(100 * avg / n) + "%" : "-"]].forEach(function(t){
-      var d = el("div"); d.style.cssText = "background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px";
-      var b = el("b", null, String(t[1])); b.style.cssText = "display:block;font-size:26px;line-height:1.1"; d.appendChild(b); var sp = el("span", null, t[0]); sp.style.cssText = "font-size:12px;color:var(--muted);font-weight:600"; d.appendChild(sp); tiles.appendChild(d);
+    var tiles = el("div", "kpi-row");
+    [["Students shown", list.length, "in " + (filt.cls === "all" ? "all 10AM classes" : filt.cls)], ["Started", started, list.length ? Math.round(100 * started / list.length) + "% of students" : "-"], ["Not started", list.length - started, "no topics opened yet"], ["Average quiz score", n ? Math.round(100 * avg / n) + "%" : "-", "across students who answered"]].forEach(function(t){
+      var d = el("div", "kpi"); d.appendChild(el("div", "k-label", t[0])); d.appendChild(el("div", "k-value", String(t[1]))); d.appendChild(el("div", "k-sub", t[2])); tiles.appendChild(d);
     });
     body.appendChild(tiles);
     var wrap = el("div", "table-scroll"), t = el("table", "admin-table"), th = el("thead"), hr = el("tr");
-    var heads = ["Student", "Class", "Topics done"]; LANGS().forEach(function(L){ heads.push(L.title); }); heads = heads.concat(["Quiz score", "Written answers", "Last active", ""]);
+    var heads = ["Student", "Class", "Topics done"]; LANGS().forEach(function(L){ heads.push(L.title); }); heads = heads.concat(["Quiz score", "Rating", "Written answers", "Last active", ""]);
     heads.forEach(function(h){ hr.appendChild(el("th", null, h)); }); th.appendChild(hr); t.appendChild(th);
     var tbd = el("tbody");
     list.forEach(function(r){
@@ -113,6 +112,8 @@ function make(cfg){
       var td = el("td"); td.appendChild(el("div", null, s.done + " / " + s.total)); var bar = el("div", "wt-bar"), i = el("i"); i.style.width = (s.total ? Math.round(100 * s.done / s.total) : 0) + "%"; bar.appendChild(i); td.appendChild(bar); tr.appendChild(td);
       LANGS().forEach(function(L){ var x = s.byLang[L.id]; tr.appendChild(el("td", null, x.done + " / " + x.total)); });
       tr.appendChild(el("td", null, s.answered ? s.right + " / " + s.answered + " (" + Math.round(100 * s.right / s.answered) + "%)" : "-"));
+      var rt = el("td"), pc = s.answered ? Math.round(100 * s.right / s.answered) : null, rl = pc == null ? "Not started" : pc >= 90 ? "Excellent" : pc >= 80 ? "Secure" : pc >= 70 ? "Improving" : pc >= 50 ? "Developing" : "Struggling";
+      var chip = el("span", null, rl); chip.style.cssText = "display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:" + ({ Excellent: "#0f766e", Secure: "#16a34a", Improving: "#0ea5e9", Developing: "#f59e0b", Struggling: "#dc2626" }[rl] || "#94a3b8"); rt.appendChild(chip); tr.appendChild(rt);
       tr.appendChild(el("td", null, s.written + " / " + s.total));
       tr.appendChild(el("td", null, fmt(s.last)));
       var ta = el("td"), b = el("button", "btn btn-secondary", "View"); b.type = "button"; b.disabled = !s.last; b.addEventListener("click", function(){ detail(r); }); ta.appendChild(b); tr.appendChild(ta);
