@@ -1,9 +1,11 @@
-/* Admin: "Web basics" report for the 10AM tutorial (HTML, CSS, JavaScript).
-   Reads each 10AM student's progress record (practiceProgress, key "webtut") and shows topics done, quiz scores and written answers. */
+/* Admin: progress reports for the 10AM tutorials (Unit 1 Technology, IP and Security; Unit 2 GIMP; Unit 3 Web basics).
+   One reusable report per tutorial: reads each 10AM student's progress record (practiceProgress, key per tutorial) and shows
+   topics done, quiz scores, wrong answers and the written answers next to the model answer. */
 (function(){
   "use strict";
+function make(cfg){
   var rows = [], loaded = false, loading = false, filt = { q: "", cls: "all", sort: "name" }, host, body;
-  var LANGS = function(){ return (window.WEBTUT && window.WEBTUT.langs) || []; };
+  var LANGS = function(){ return (window[cfg.data] && window[cfg.data].langs) || []; };
   function el(tag, cls, txt){ var e = document.createElement(tag); if(cls) e.className = cls; if(txt != null) e.textContent = txt; return e; }
   function fmt(ms){ return ms ? new Date(ms).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Riyadh" }) : "-"; }
   function is10AM(u){
@@ -39,23 +41,23 @@
     document.head.appendChild(s);
   }
   function build(){
-    host = document.getElementById("panel-webtut"); if(!host || host.__built) return; host.__built = true; css();
+    host = document.getElementById("panel-" + cfg.id); if(!host || host.__built) return; host.__built = true; css();
     var tb = el("div", "admin-toolbar no-print");
     var q = el("input"); q.type = "search"; q.placeholder = "Search name or email"; q.style.cssText = "min-width:220px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit";
     q.addEventListener("input", function(){ filt.q = q.value; render(); });
-    var cs = el("select"); cs.id = "wt-cls"; cs.addEventListener("change", function(){ filt.cls = cs.value; render(); });
+    var cs = el("select"); cs.id = cfg.id + "-cls"; cs.addEventListener("change", function(){ filt.cls = cs.value; render(); });
     var so = el("select"); [["name", "Sort: name"], ["done", "Sort: most topics done"], ["last", "Sort: last active"], ["quiz", "Sort: quiz score"]].forEach(function(o){ var op = el("option", null, o[1]); op.value = o[0]; so.appendChild(op); });
     so.addEventListener("change", function(){ filt.sort = so.value; render(); });
     var rf = el("button", "btn btn-secondary", "Refresh"); rf.type = "button"; rf.addEventListener("click", function(){ load(true); });
     var ex = el("button", "btn btn-secondary", "Download CSV"); ex.type = "button"; ex.addEventListener("click", csv);
     [q, cs, so, rf, ex].forEach(function(n){ tb.appendChild(n); });
-    var st = el("p", "admin-status"); st.id = "wt-status";
-    body = el("div"); body.id = "wt-body";
+    var st = el("p", "admin-status"); st.id = cfg.id + "-status";
+    body = el("div"); body.id = cfg.id + "-body";
     host.appendChild(tb); host.appendChild(st); host.appendChild(body);
   }
   function load(force){
     if(loading) return; loading = true;
-    var st = document.getElementById("wt-status"); st.textContent = "Loading 10AM students...";
+    var st = document.getElementById(cfg.id + "-status"); st.textContent = "Loading 10AM students...";
     window.PQFirebase.listAllUsers().then(function(list){
       var users = list.filter(function(u){ return (u.role || "student") === "student" && is10AM(u); });
       var i = 0, got = 0;
@@ -64,7 +66,7 @@
         var chunk = rows.slice(i, i + 6); i += 6;
         if(!chunk.length) return Promise.resolve();
         return Promise.all(chunk.map(function(r){
-          return window.PQFirebase.getMyProgress(r.u.uid, "webtut").then(function(rec){ r.rec = rec; r.st = stats(rec); }, function(){});
+          return window.PQFirebase.getMyProgress(r.u.uid, cfg.key).then(function(rec){ r.rec = rec; r.st = stats(rec); }, function(){});
         })).then(function(){ got += chunk.length; st.textContent = "Loading progress " + Math.min(got, rows.length) + " / " + rows.length + "..."; return next(); });
       }
       return next().then(function(){
@@ -75,7 +77,7 @@
     }, function(e){ loading = false; st.textContent = "Could not load students: " + ((e && e.message) || "error"); });
   }
   function syncClasses(){
-    var s = document.getElementById("wt-cls"), seen = {}; rows.forEach(function(r){ if(r.u.className) seen[r.u.className] = 1; });
+    var s = document.getElementById(cfg.id + "-cls"), seen = {}; rows.forEach(function(r){ if(r.u.className) seen[r.u.className] = 1; });
     s.textContent = ""; var a = el("option", null, "All 10AM classes"); a.value = "all"; s.appendChild(a);
     Object.keys(seen).sort().forEach(function(n){ var o = el("option", null, n); o.value = n; s.appendChild(o); });
   }
@@ -120,8 +122,8 @@
     if(!list.length) body.appendChild(el("p", "admin-status", loaded ? "No 10AM students match." : ""));
   }
   function detail(r){
-    var old = document.getElementById("wt-dlg"); if(old) old.remove();
-    var dlg = el("div", "wt-dlg"); dlg.id = "wt-dlg"; var box = el("div", "wt-box"); dlg.appendChild(box);
+    var old = document.getElementById(cfg.id + "-dlg"); if(old) old.remove();
+    var dlg = el("div", "wt-dlg"); dlg.id = cfg.id + "-dlg"; var box = el("div", "wt-box"); dlg.appendChild(box);
     dlg.addEventListener("mousedown", function(e){ if(e.target === dlg) dlg.remove(); });
     var top = el("div", "wt-top"), h = el("div"); h.appendChild(el("h3", null, r.u.name)); h.appendChild(el("div", "admin-status", r.u.email + " - " + r.u.className + " - last active " + fmt(r.st.last)));
     var close = el("button", "btn btn-secondary", "Close"); close.type = "button"; close.addEventListener("click", function(){ dlg.remove(); });
@@ -161,8 +163,12 @@
       line = line.concat([s.right, s.answered, s.answered ? Math.round(100 * s.right / s.answered) : "", s.written, s.last ? fmt(s.last) : ""]); lines.push(line);
     });
     var text = lines.map(function(l){ return l.map(function(v){ v = String(v == null ? "" : v); if(/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }).join(","); }).join("\r\n");
-    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + text], { type: "text/csv" })); a.download = "web-basics-10AM.csv"; document.body.appendChild(a); a.click();
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + text], { type: "text/csv" })); a.download = cfg.csv; document.body.appendChild(a); a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
-  window.__webtutOpened = function(){ build(); if(!loaded) load(); else render(); };
+  window[cfg.hook] = function(){ build(); if(!loaded) load(); else render(); };
+}
+make({ id: "unit1", key: "unit1", data: "UNIT1TUT", hook: "__unit1Opened", csv: "unit1-technology-ip-security-10AM.csv" });
+make({ id: "gimp", key: "gimp", data: "GIMPTUT", hook: "__gimpOpened", csv: "unit2-gimp-10AM.csv" });
+make({ id: "webtut", key: "webtut", data: "WEBTUT", hook: "__webtutOpened", csv: "unit3-web-basics-10AM.csv" });
 })();

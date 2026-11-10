@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-GYn9HU+HptF1HgG38ejlpwys7T1xx9BboeIrHjKI3LM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-uQFd1FlEQFIqWTrWBwkP6mzyuhD0O1Z25qaoySJLD1M='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -529,7 +529,9 @@
         <button class="admin-tab" data-tab="manage">Manage students</button>
         <button class="admin-tab" data-tab="groups">Classes &amp; requests</button>
         <button class="admin-tab" data-tab="subs">Subscriptions</button>
-        <button class="admin-tab" data-tab="webtut">Web basics (10AM)</button>
+        <button class="admin-tab" data-tab="unit1">Unit 1: Technology, IP and Security (10AM)</button>
+        <button class="admin-tab" data-tab="gimp">Unit 2: GIMP (10AM)</button>
+        <button class="admin-tab" data-tab="webtut">Unit 3: Web basics (10AM)</button>
         <button class="admin-tab" data-tab="byStudent">By student</button>
         <button class="admin-tab" data-tab="viewas">View as student</button>
         <button class="admin-tab" data-tab="archive">Archive</button>
@@ -927,8 +929,20 @@
         <div id="msg-body"></div>
       </div>
 
+      <div class="admin-panel" id="panel-unit1">
+        <h2 style="margin:0 0 4px">Unit 1: Technology, IP and Security report (10AM)</h2>
+        <p class="admin-status">Data privacy and Network and security tutorial: topics completed, quiz scores, wrong answers and written answers for every 10AM student.</p>
+        <p><a class="btn btn-primary" href="unit1.html" target="_blank" rel="noopener">Open the tutorial as a student</a> <span class="admin-status">Your own practice is saved under your teacher account and is not counted in this report.</span></p>
+      </div>
+
+      <div class="admin-panel" id="panel-gimp">
+        <h2 style="margin:0 0 4px">Unit 2: Photo editing with GIMP report (10AM)</h2>
+        <p class="admin-status">GIMP tutorial: topics completed, quiz scores, wrong answers and written answers for every 10AM student.</p>
+        <p><a class="btn btn-primary" href="gimp.html" target="_blank" rel="noopener">Open the tutorial as a student</a> <span class="admin-status">Your own practice is saved under your teacher account and is not counted in this report.</span></p>
+      </div>
+
       <div class="admin-panel" id="panel-webtut">
-        <h2 style="margin:0 0 4px">Web basics report (10AM)</h2>
+        <h2 style="margin:0 0 4px">Unit 3: Web basics report (10AM)</h2>
         <p class="admin-status">HTML, CSS and JavaScript tutorial: topics completed, quiz scores and written answers for every 10AM student.</p>
         <p><a class="btn btn-primary" href="web-basics.html" target="_blank" rel="noopener">Open the tutorial as a student</a> <span class="admin-status">Full tutorial with quizzes, written answers and the code editor. Your own practice is saved under your teacher account and is not counted in this report.</span></p>
       </div>
@@ -1301,7 +1315,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["dashboard","live","timetables","subs","webtut","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
+  var PANELS = ["dashboard","live","timetables","subs","unit1","gimp","webtut","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes" };
   function showTab(name){
@@ -1314,6 +1328,8 @@
     });
     if(name === "subs" && window.__subsOpened) window.__subsOpened();
     if(name === "webtut" && window.__webtutOpened) window.__webtutOpened();
+    if(name === "unit1" && window.__unit1Opened) window.__unit1Opened();
+    if(name === "gimp" && window.__gimpOpened) window.__gimpOpened();
     if(name === "live" && window.__liveOpened) window.__liveOpened();
     if(name === "timetables" && window.__ttOpened) window.__ttOpened();
     if(name === "dashboard" && window.__renderDashboard) window.__renderDashboard();
@@ -5068,6 +5084,8 @@
 <script src="webtut-css.js?v=1"></script>
 <script src="webtut-js.js?v=1"></script>
 <script src="admin-subs.js?v=1"></script>
-<script src="admin-webtut.js?v=1"></script>
+<script src="unit1-data.js?v=1"></script>
+<script src="gimp-data.js?v=1"></script>
+<script src="admin-tutreport.js?v=1"></script>
 </body>
 </html>
