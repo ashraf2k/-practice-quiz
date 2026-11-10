@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-BGBDya7TrVnuKhBkUIhoWcagH7XCgkkHEbOAcaTbYAs='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-5Qq3lvdNE51fOMX5ejGhX+cMDHKaFg4dLGCndIGAdGU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -2367,7 +2367,31 @@
   });
   document.getElementById("btn-gp-logout").addEventListener("click", function(){ doLogout(); });
 
+  // Admin preview of the 10AM student view: quiz.html?preview=10AM. Only for signed-in admins; nothing is saved or read.
+  function startPreview(user){
+    state.preview = true;
+    var none = function(){ return Promise.resolve(null); }, ok = function(){ return Promise.resolve(); };
+    PQFirebase.recordAttempt = ok; PQFirebase.saveProgress = ok; PQFirebase.deleteProgress = ok;
+    PQFirebase.getMyAttempt = none; PQFirebase.getMyProgress = none; PQFirebase.getMyExamAttempt = none;
+    var u = {}; for(var k in user) u[k] = user[k];
+    u.name = (user.name || "Admin") + " (preview)"; u["class"] = "10AM1"; u.needsProfile = false; u.needsSession = false;
+    state.currentUser = u;
+    var bn = document.createElement("div"); bn.setAttribute("role", "status");
+    bn.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:60;background:#fff3d6;color:#5a3d00;border-bottom:2px solid #e8a020;padding:8px 12px;font:700 14px system-ui,sans-serif;text-align:center"; document.body.style.paddingTop = "40px";
+    bn.textContent = "Admin preview of the 10AM student view. Nothing you do here is saved.";
+    document.body.insertBefore(bn, document.body.firstChild);
+    goToStartScreen();
+  }
+  var previewAsked = /[?&]preview=10AM/i.test(window.location.search);
   PQFirebase.onAuthChange(function(user){
+    if(state.preview && user) return;
+    if(user && previewAsked && PQFirebase.checkIsAdmin){
+      PQFirebase.checkIsAdmin(user.uid).then(function(adm){ if(adm) startPreview(user); else onUser(user); }, function(){ onUser(user); });
+      return;
+    }
+    onUser(user);
+  });
+  function onUser(user){
     if(!user){
       state.currentUser = null;
       // keep the "check your email" screen up after the post-sign-up sign-out
@@ -2406,7 +2430,7 @@
     }
     state.currentUser = user;
     if(isBR(user) && !/solve/.test(window.location.hash) && !/[?&]topic=/.test(window.location.search)) showHub(); else goToStartScreen();
-  });
+  }
 
   // ---------- 10BR home menu: iLearn / iSolve ----------
   function isSciUser(user){ return String((user && user.email) || "").trim().toLowerCase() === "amrashrafelbialy24@gmail.com"; }
