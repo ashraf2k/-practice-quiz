@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-k50YKEIFm9jrYSF6VmLHS6B8J6aOfIQ3rujRfekhHzM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-OoJ9KymWATPz8qkiwrmEul1abp8TfL+UJTycJukQ3Mg='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -455,6 +455,63 @@
   .mg-lvl{ font-size:11px; font-weight:700; color:var(--muted); margin-left:6px; }
   tr.mg-blocked td{ opacity:.65; }
   .mg-bulk[hidden], .mg-add[hidden]{ display:none; }
+
+  /* ===== Sidebar shell (v2 layout) ===== */
+  .wrap.wrap-wide{ max-width: 1520px; }
+  #screen-dashboard.card{ padding: 0; overflow: visible; }
+  .shell{ display:grid; grid-template-columns: 252px minmax(0,1fr); align-items:start; }
+  .side{ position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto; padding:18px 12px 24px; border-right:1px solid var(--line); background:var(--surface); border-radius:18px 0 0 18px; }
+  .side-brand{ display:flex; align-items:center; gap:10px; padding:0 8px 16px; }
+  .side-logo{ width:32px; height:32px; border-radius:9px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex:none; }
+  .side-brand b{ display:block; font-size:15px; line-height:1.2; }
+  .side-brand small{ display:block; font-size:12px; color:var(--muted); }
+  .shell .admin-tabs{ display:flex !important; flex-direction:column !important; flex-wrap:nowrap !important; overflow:visible !important; gap:16px !important; padding:0 !important; margin:0 !important; background:none !important; border:0 !important; border-radius:0 !important; }
+  .shell .tab-group{ display:flex; flex-direction:column; align-items:stretch; gap:2px; width:100%; }
+  .shell .tab-group + .tab-group{ border-left:0; padding-left:0; }
+  .shell .tab-glabel{ font-size:11px; padding:0 12px 4px; margin:0; opacity:1; }
+  .shell .admin-tab{ width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; text-align:left; white-space:normal; padding:8px 12px; min-height:36px; border-radius:8px; font-size:13.5px; font-weight:500; color:var(--ink); background:none; box-shadow:none; }
+  .shell .admin-tab:hover{ background:var(--bg); }
+  .shell .admin-tab.active{ background:var(--accent-tint, rgba(20,108,106,.12)); color:var(--accent); font-weight:700; box-shadow:none; }
+  .main{ min-width:0; padding:20px 28px 32px; }
+  .topbar{ margin-bottom:6px; }
+  .tb-sp{ flex:1; }
+  .pal-btn{ display:inline-flex; align-items:center; gap:10px; height:40px; min-width:260px; max-width:420px; flex:1 1 260px; padding:0 12px; border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--muted); font:inherit; font-size:13px; cursor:pointer; text-align:left; }
+  .pal-btn span{ flex:1; }
+  .pal-btn:hover{ border-color:var(--accent); }
+  kbd{ font:inherit; font-size:11px; border:1px solid var(--line); border-radius:6px; padding:1px 6px; background:var(--surface); color:var(--muted); }
+  .menu-btn{ display:none; width:44px; height:44px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); align-items:center; justify-content:center; cursor:pointer; }
+  .side-scrim{ display:none; }
+  .home-head{ display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px; margin:4px 0 16px; }
+  .home-head h2{ margin:0; font-size:26px; letter-spacing:-.02em; }
+  .home-head p{ margin:4px 0 0; color:var(--muted); font-size:14px; }
+  .h3-sub{ font-size:12px; font-weight:500; color:var(--muted); margin-left:6px; }
+  .db-chart{ display:flex; align-items:flex-end; gap:6px; height:190px; padding-top:8px; }
+  .db-chart .col{ flex:1; min-width:0; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px; }
+  .db-chart .bar{ width:100%; border-radius:6px 6px 0 0; background:var(--accent); opacity:.45; min-height:2px; }
+  .db-chart .col.today .bar{ opacity:1; }
+  .db-chart .v{ font-size:11px; color:var(--muted); }
+  .db-chart .d{ font-size:11px; color:var(--muted); border-top:1px solid var(--line); width:100%; text-align:center; padding-top:4px; }
+  #pal{ border:1px solid var(--line); border-radius:14px; padding:0; width:min(560px,92vw); background:var(--surface); color:var(--ink); box-shadow:0 24px 60px rgba(0,0,0,.35); margin:12vh auto auto; }
+  #pal::backdrop{ background:rgba(15,23,42,.45); }
+  .pal-box{ padding:12px; }
+  #pal-q{ width:100%; box-sizing:border-box; height:46px; padding:0 14px; border:1px solid var(--line); border-radius:10px; font:inherit; font-size:15px; background:var(--bg); color:var(--ink); }
+  #pal-q:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  #pal-list{ list-style:none; margin:8px 0 0; padding:0; max-height:340px; overflow:auto; }
+  #pal-list li{ display:flex; justify-content:space-between; gap:10px; padding:10px 12px; border-radius:8px; cursor:pointer; font-size:14px; min-height:20px; }
+  #pal-list li small{ color:var(--muted); font-size:12px; }
+  #pal-list li[aria-selected="true"]{ background:var(--accent-tint, rgba(20,108,106,.12)); color:var(--accent); }
+  .pal-hint{ margin:8px 4px 0; font-size:12px; color:var(--muted); }
+  @media (max-width: 900px){
+    .shell{ grid-template-columns: minmax(0,1fr); }
+    .side{ position:fixed; inset:0 auto 0 0; width:280px; max-height:none; height:100vh; z-index:60; transform:translateX(-102%); transition:transform .2s ease; border-radius:0; box-shadow:0 0 40px rgba(0,0,0,.3); }
+    body.nav-open .side{ transform:none; }
+    body.nav-open .side-scrim{ display:block; position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:55; }
+    .menu-btn{ display:inline-flex; }
+    .main{ padding:14px 14px 24px; }
+    .pal-btn{ min-width:0; }
+    .pal-btn kbd{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){ .side{ transition:none; } }
 </style>
 <link rel="stylesheet" href="theme.css?v=20261027a" />
 </head>
@@ -498,8 +555,54 @@
 
   <!-- ============ DASHBOARD SCREEN ============ -->
   <section id="screen-dashboard" class="card hidden">
-    <div class="admin-toolbar no-print">
-      <select id="filter-exam">
+   <div class="shell">
+    <aside class="side no-print" id="side" aria-label="Main menu">
+      <div class="side-brand"><span class="side-logo" aria-hidden="true">iL</span><span><b>iLearn Admin</b><small id="side-role"></small></span></div>
+      <nav class="admin-tabs no-print" id="admin-tabs" aria-label="Admin sections">
+        <div class="tab-group"><span class="tab-glabel">Home</span>
+          <button class="admin-tab active" data-tab="dashboard">Overview</button>
+          <button class="admin-tab" data-tab="attention">Needs attention</button>
+          <button class="admin-tab" data-tab="classes">Class overview</button>
+        </div>
+        <div class="tab-group"><span class="tab-glabel">People</span>
+          <button class="admin-tab" data-tab="manage">Manage students</button>
+          <button class="admin-tab" data-tab="groups">Classes &amp; requests</button>
+          <button class="admin-tab" data-tab="subs">Subscriptions</button>
+          <button class="admin-tab" data-tab="byStudent">By student</button>
+          <button class="admin-tab" data-tab="viewas">View as student</button>
+          <button class="admin-tab" data-tab="archive">Archive</button>
+        </div>
+        <div class="tab-group"><span class="tab-glabel">10AM units</span>
+          <button class="admin-tab" data-tab="unit1" title="Unit 1: Technology, IP and Security (10AM)">Unit 1: Tech, IP and Security</button>
+          <button class="admin-tab" data-tab="gimp" title="Unit 2: GIMP (10AM)">Unit 2: GIMP</button>
+          <button class="admin-tab" data-tab="webtut" title="Unit 3: Web basics (10AM)">Unit 3: Web basics</button>
+        </div>
+        <div class="tab-group"><span class="tab-glabel">Learning</span>
+          <button class="admin-tab" data-tab="ilearn">iLearn</button>
+          <button class="admin-tab" data-tab="isolve">iSolve</button>
+          <button class="admin-tab" data-tab="syllabus">Syllabus report</button>
+          <button class="admin-tab" data-tab="ppPerf">Past papers</button>
+          <button class="admin-tab" data-tab="students">Quiz log</button>
+        </div>
+        <div class="tab-group"><span class="tab-glabel">Communication</span>
+          <button class="admin-tab" data-tab="messages">Chatbot messages <span id="msg-badge" class="enq-badge" hidden>0</span></button>
+          <button class="admin-tab" data-tab="enquiries">Enquiries <span id="enq-badge" class="enq-badge" hidden>0</span></button>
+          <button class="admin-tab" data-tab="feedback">Feedback</button>
+          <button class="admin-tab" data-tab="live">Live sessions <span id="live-badge" class="enq-badge" hidden>0</span></button>
+        </div>
+        <div class="tab-group"><span class="tab-glabel">Business</span>
+          <button class="admin-tab" data-tab="tuition">Tuition</button>
+          <button class="admin-tab" data-tab="timetables">Exam timetables</button>
+        </div>
+      </nav>
+    </aside>
+    <div class="side-scrim" id="side-scrim"></div>
+    <div class="main">
+    <div class="admin-toolbar no-print topbar">
+      <button type="button" class="menu-btn" id="btn-menu" aria-label="Open menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <button type="button" class="pal-btn" id="btn-palette" aria-haspopup="dialog"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span>Search pages and students</span><kbd>Ctrl K</kbd></button>
+      <span class="tb-sp"></span>
+      <select id="filter-exam" aria-label="Exam filter">
         <option value="">All exams</option>
       </select>
       <button class="btn btn-secondary" id="btn-refresh">Refresh data</button>
@@ -507,8 +610,6 @@
       <button class="btn btn-secondary" id="btn-logout">Log out</button>
     </div>
     <p class="admin-status" id="admin-status">Loading…</p>
-
-    <div class="kpi-row no-print" id="kpi-row" aria-label="Overview"></div>
 
     <p class="ro-note no-print">View-only access: you can see every report, but not change anything.</p>
     <div class="level-bar no-print" id="level-bar" role="group" aria-label="Level">
@@ -519,47 +620,18 @@
       <button type="button" class="lvl-btn" data-gl="12">12BR · A Level</button>
     </div>
 
-    <div class="admin-tabs no-print" id="admin-tabs">
-      <div class="tab-group"><span class="tab-glabel">Overview</span>
-        <button class="admin-tab active" data-tab="dashboard">Dashboard</button>
-        <button class="admin-tab" data-tab="attention">Needs attention</button>
-        <button class="admin-tab" data-tab="classes">Class overview</button>
-      </div>
-      <div class="tab-group"><span class="tab-glabel">Students</span>
-        <button class="admin-tab" data-tab="manage">Manage students</button>
-        <button class="admin-tab" data-tab="groups">Classes &amp; requests</button>
-        <button class="admin-tab" data-tab="subs">Subscriptions</button>
-        <button class="admin-tab" data-tab="unit1">Unit 1: Technology, IP and Security (10AM)</button>
-        <button class="admin-tab" data-tab="gimp">Unit 2: GIMP (10AM)</button>
-        <button class="admin-tab" data-tab="webtut">Unit 3: Web basics (10AM)</button>
-        <button class="admin-tab" data-tab="byStudent">By student</button>
-        <button class="admin-tab" data-tab="viewas">View as student</button>
-        <button class="admin-tab" data-tab="archive">Archive</button>
-      </div>
-      <div class="tab-group"><span class="tab-glabel">Learning</span>
-        <button class="admin-tab" data-tab="ilearn">iLearn</button>
-        <button class="admin-tab" data-tab="isolve">iSolve</button>
-        <button class="admin-tab" data-tab="syllabus">Syllabus report</button>
-        <button class="admin-tab" data-tab="ppPerf">Past papers</button>
-        <button class="admin-tab" data-tab="students">Quiz log</button>
-      </div>
-      <div class="tab-group"><span class="tab-glabel">Teaching</span>
-        <button class="admin-tab" data-tab="tuition">Tuition</button>
-        <button class="admin-tab" data-tab="messages">Messages from Chatbot <span id="msg-badge" class="enq-badge" hidden>0</span></button>
-        <button class="admin-tab" data-tab="timetables">Exam timetables</button>
-        <button class="admin-tab" data-tab="live">Live sessions <span id="live-badge" class="enq-badge" hidden>0</span></button>
-        <button class="admin-tab" data-tab="enquiries">Enquiries <span id="enq-badge" class="enq-badge" hidden>0</span></button>
-        <button class="admin-tab" data-tab="feedback">Feedback</button>
-      </div>
-    </div>
-
     <div id="toast-host" aria-live="polite"></div>
     <div id="admin-panels">
       <div class="admin-panel active" id="panel-dashboard">
+        <div class="home-head">
+          <div><h2 id="home-greet">Welcome</h2><p id="home-date"></p></div>
+          <div class="db-actions" id="db-actions"></div>
+        </div>
+        <div class="kpi-row no-print" id="kpi-row" aria-label="Overview"></div>
         <div class="mg-kpis" id="db-kpis"></div>
         <div class="db-grid">
-          <div class="gr-card"><h3>To do</h3><div id="db-todo"></div></div>
-          <div class="gr-card"><h3>Quick actions</h3><div class="db-actions" id="db-actions"></div></div>
+          <div class="gr-card"><h3>Needs attention</h3><div id="db-todo"></div></div>
+          <div class="gr-card"><h3>Students active each day <span class="h3-sub">last 14 days</span></h3><div class="db-chart" id="db-chart" aria-label="Students active each day"></div></div>
         </div>
         <div class="db-grid">
           <div class="gr-card"><h3>Students by class</h3><div id="db-classes"></div></div>
@@ -1063,7 +1135,17 @@
         <div id="exampractice-detail"></div>
       </div>
     </div>
+    </div>
+   </div>
   </section>
+
+<dialog id="pal" aria-label="Search">
+  <div class="pal-box">
+    <input id="pal-q" type="text" placeholder="Go to a page or find a student…" autocomplete="off" aria-label="Search pages and students">
+    <ul id="pal-list" role="listbox"></ul>
+    <p class="pal-hint"><kbd>↑</kbd> <kbd>↓</kbd> to move · <kbd>Enter</kbd> to open · <kbd>Esc</kbd> to close</p>
+  </div>
+</dialog>
 
 </div>
 
@@ -2574,13 +2656,13 @@
     E.LESSONS.forEach(function(l){ var x = L[l.id]; if(x && x.d){ d++; if(x.f) m++; } });
     return d >= 3 ? Math.round(100 * m / d) : null;
   }
-  var sylLoading10 = false;
+  var sylLoading10 = false, sylDone10 = false;
   function ensureIlearn10(){
-    if(ilearnRows.length || sylLoading10 || !loaded || !window.ILearnEngine || typeof PQFirebase.getMyProgress !== "function") return;
+    if(ilearnRows.length || sylLoading10 || sylDone10 || !loaded || !window.ILearnEngine || typeof PQFirebase.getMyProgress !== "function") return;
     sylLoading10 = true;
     Promise.all(rosterFor("10").map(function(s){
       return PQFirebase.getMyProgress(s.uid, "ilearn").catch(function(){ return null; }).then(function(rec){ return { s: s, st: window.ILearnEngine.mergeState(null, rec), lastActive: (rec && rec.lastActive) || null }; });
-    })).then(function(rows){ if(!ilearnRows.length) ilearnRows = rows; sylLoading10 = false; renderSyllabus(); });
+    })).then(function(rows){ if(!ilearnRows.length) ilearnRows = rows; sylLoading10 = false; sylDone10 = true; renderSyllabus(); });
   }
 
   // ---- 11BR / 12BR syllabus report -------------------------------
@@ -3927,6 +4009,88 @@
     ev.forEach(function(e){ var tr = mk("tr"); [e.n || "", e.w || "", e.r, dbWhen(e.t)].forEach(function(v){ tr.appendChild(mk("td", null, v)); }); rt.appendChild(tr); });
   }
   window.__renderDashboard = renderDashboard;
+
+  // ---- Sidebar (mobile), search palette, Home extras ----
+  (function(){
+    var body = document.body;
+    function navOpen(on){ body.classList.toggle("nav-open", !!on); }
+    document.getElementById("btn-menu").addEventListener("click", function(){ navOpen(true); });
+    document.getElementById("side-scrim").addEventListener("click", function(){ navOpen(false); });
+    document.getElementById("admin-tabs").addEventListener("click", function(e){ if(e.target.closest(".admin-tab")) navOpen(false); });
+
+    var pal = document.getElementById("pal"), pq = document.getElementById("pal-q"), pl = document.getElementById("pal-list");
+    var items = [], sel = 0;
+    function labelOf(btn){ var t = ""; btn.childNodes.forEach(function(n){ if(n.nodeType === 3) t += n.textContent; }); return t.trim(); }
+    function build(q){
+      q = q.trim().toLowerCase(); items = [];
+      document.querySelectorAll("#admin-tabs .tab-group").forEach(function(g){
+        var gl = (g.querySelector(".tab-glabel") || {}).textContent || "";
+        g.querySelectorAll(".admin-tab").forEach(function(btn){
+          var l = labelOf(btn); if(!q || (l + " " + gl).toLowerCase().indexOf(q) >= 0) items.push({ label: l, sub: gl, run: function(){ if(!(window.__goMenu && window.__goMenu(btn.dataset.tab))) showTab(btn.dataset.tab); } });
+        });
+      });
+      if(q.length >= 2 && loaded){
+        var seen = 0;
+        groupByStudent(attempts.concat(examAttempts)).forEach(function(g){
+          if(seen >= 8) return;
+          if((String(g.name || "") + " " + String(g.email || "")).toLowerCase().indexOf(q) >= 0){ seen++; items.push({ label: g.name || "(no name)", sub: "Student · " + String(g.className || "").replace(/\s+/g, ""), run: function(){ openStudentProfile(g); } }); }
+        });
+      }
+      sel = 0; draw();
+    }
+    function draw(){
+      pl.innerHTML = "";
+      if(!items.length){ var e = document.createElement("li"); e.textContent = "Nothing found."; e.style.cursor = "default"; pl.appendChild(e); return; }
+      items.forEach(function(it, i){
+        var li = document.createElement("li"); li.setAttribute("role", "option"); li.setAttribute("aria-selected", i === sel ? "true" : "false");
+        var a = document.createElement("span"); a.textContent = it.label; var b = document.createElement("small"); b.textContent = it.sub;
+        li.appendChild(a); li.appendChild(b);
+        li.addEventListener("click", function(){ go(i); });
+        pl.appendChild(li);
+      });
+      var cur = pl.querySelector('[aria-selected="true"]'); if(cur && cur.scrollIntoView) cur.scrollIntoView({ block: "nearest" });
+    }
+    function go(i){ var it = items[i]; if(!it) return; pal.close(); it.run(); }
+    function openPal(){ if(screenDashboard.classList.contains("hidden")) return; pq.value = ""; build(""); if(!pal.open) pal.showModal(); pq.focus(); }
+    document.getElementById("btn-palette").addEventListener("click", openPal);
+    document.addEventListener("keydown", function(e){ if((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")){ e.preventDefault(); openPal(); } });
+    pq.addEventListener("input", function(){ build(pq.value); });
+    pq.addEventListener("keydown", function(e){
+      if(e.key === "ArrowDown"){ e.preventDefault(); if(items.length){ sel = (sel + 1) % items.length; draw(); } }
+      else if(e.key === "ArrowUp"){ e.preventDefault(); if(items.length){ sel = (sel - 1 + items.length) % items.length; draw(); } }
+      else if(e.key === "Enter"){ e.preventDefault(); go(sel); }
+    });
+    pal.addEventListener("click", function(e){ if(e.target === pal) pal.close(); });
+
+    function homeExtras(){
+      var h = new Date().getHours(), nm = String(currentAdminName || "").trim().split(/\s+/)[0] || "";
+      var g = document.getElementById("home-greet"); if(g) g.textContent = (h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + (nm ? ", " + nm : "");
+      var d = document.getElementById("home-date"); if(d) d.textContent = new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" }) + ". Here is what needs you today.";
+      var r = document.getElementById("side-role"); if(r) r.textContent = staffRole === "admin" ? "Admin" : staffRole === "collaborator" ? "Collaborator" : staffRole ? "Teacher" : "";
+      var box = document.getElementById("db-chart"); if(!box) return; box.innerHTML = "";
+      if(!loaded){ var p = document.createElement("p"); p.className = "admin-status"; p.textContent = "Loading…"; box.appendChild(p); return; }
+      var key = function(t){ var x = new Date(t); return isNaN(x) ? "" : x.getFullYear() + "-" + x.getMonth() + "-" + x.getDate(); };
+      var days = [], map = {}, i;
+      for(i = 13; i >= 0; i--){ var dt = new Date(); dt.setDate(dt.getDate() - i); var k = key(dt); days.push({ k: k, d: dt.getDate(), n: 0 }); map[k] = {}; }
+      var count = function(a){
+        if(GLV && levelOf(a.className) !== GLV) return;
+        var k2 = key(a.timestamp); if(map[k2]) map[k2][a.uid || a.name] = 1;
+      };
+      attempts.forEach(count); examAttempts.forEach(count);
+      days.forEach(function(x){ x.n = Object.keys(map[x.k]).length; });
+      var mx = Math.max.apply(null, days.map(function(x){ return x.n; }).concat([1]));
+      days.forEach(function(x, idx){
+        var c = document.createElement("div"); c.className = "col" + (idx === 13 ? " today" : "");
+        var v = document.createElement("span"); v.className = "v"; v.textContent = String(x.n);
+        var b = document.createElement("div"); b.className = "bar"; b.style.height = Math.max(2, Math.round(130 * x.n / mx)) + "px";
+        var l = document.createElement("span"); l.className = "d"; l.textContent = String(x.d);
+        c.appendChild(v); c.appendChild(b); c.appendChild(l); box.appendChild(c);
+      });
+    }
+    var baseRender = window.__renderDashboard;
+    window.__renderDashboard = function(){ if(baseRender) baseRender(); homeExtras(); };
+    homeExtras();
+  })();
 
   // Student preview pages open in a new tab through window.open WITHOUT noopener: a sign-in that is not "remembered"
   // lives in the tab's sessionStorage, which a new tab only inherits from its opener.
