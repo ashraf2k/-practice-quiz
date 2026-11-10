@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-6rBmgSAgfPIk/0ATXdrCcoUYb3ecM/RCW4LzlKgqR4A='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-k50YKEIFm9jrYSF6VmLHS6B8J6aOfIQ3rujRfekhHzM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -932,19 +932,19 @@
       <div class="admin-panel" id="panel-unit1">
         <h2 style="margin:0 0 4px">Unit 1: Technology, IP and Security report (10AM)</h2>
         <p class="admin-status">Data privacy and Network and security tutorial: topics completed, quiz scores, wrong answers and written answers for every 10AM student.</p>
-        <p><a class="btn btn-primary" href="unit1.html" target="_blank" rel="noopener">Open the tutorial as a student</a> <span class="admin-status">Your own practice is saved under your teacher account and is not counted in this report.</span></p>
+        <p><a class="btn btn-primary" href="unit1.html" target="_blank" data-keepsession="1">Open the tutorial as a student</a> <span class="admin-status">Your own practice is saved under your teacher account and is not counted in this report.</span></p>
       </div>
 
       <div class="admin-panel" id="panel-gimp">
         <h2 style="margin:0 0 4px">Unit 2: Photo editing with GIMP report (10AM)</h2>
         <p class="admin-status">GIMP tutorial: topics completed, quiz scores, wrong answers and written answers for every 10AM student.</p>
-        <p><a class="btn btn-primary" href="gimp.html" target="_blank" rel="noopener">Open the tutorial as a student</a> <span class="admin-status">Your own practice is saved under your teacher account and is not counted in this report.</span></p>
+        <p><a class="btn btn-primary" href="gimp.html" target="_blank" data-keepsession="1">Open the tutorial as a student</a> <span class="admin-status">Your own practice is saved under your teacher account and is not counted in this report.</span></p>
       </div>
 
       <div class="admin-panel" id="panel-webtut">
         <h2 style="margin:0 0 4px">Unit 3: Web basics report (10AM)</h2>
         <p class="admin-status">HTML, CSS and JavaScript tutorial: topics completed, quiz scores and written answers for every 10AM student.</p>
-        <p><a class="btn btn-primary" href="web-basics.html" target="_blank" rel="noopener">Open the tutorial as a student</a> <span class="admin-status">Full tutorial with quizzes, written answers and the code editor. Your own practice is saved under your teacher account and is not counted in this report.</span></p>
+        <p><a class="btn btn-primary" href="web-basics.html" target="_blank" data-keepsession="1">Open the tutorial as a student</a> <span class="admin-status">Full tutorial with quizzes, written answers and the code editor. Your own practice is saved under your teacher account and is not counted in this report.</span></p>
       </div>
 
       <div class="admin-panel" id="panel-subs">
@@ -3928,6 +3928,13 @@
   }
   window.__renderDashboard = renderDashboard;
 
+  // Student preview pages open in a new tab through window.open WITHOUT noopener: a sign-in that is not "remembered"
+  // lives in the tab's sessionStorage, which a new tab only inherits from its opener.
+  document.addEventListener("click", function(e){
+    var a = e.target.closest && e.target.closest("a[data-keepsession]"); if(!a) return;
+    e.preventDefault(); var w = window.open(a.href, "_blank"); if(!w) window.location.href = a.href;
+  });
+
   // ---- View as student ----
   var VA_LV = "igcse", VA_PAGES = { igcse: "learn.html", as: "as.html", a2: "alevel.html" };
   function drawVaLinks(){
@@ -3936,7 +3943,7 @@
     if(VA_LV === "am") list = [["10AM home: sprint quizzes and unit cards", "quiz.html?preview=10AM"], ["Unit 1: Technology, IP and Security", "unit1.html"], ["Unit 2: Photo editing with GIMP", "gimp.html"], ["Unit 3: Web basics", "web-basics.html"]];
     if(VA_LV === "igcse") list.push(["Mock exam: Paper 1", "paper1.html"], ["Mock exam: Paper 2", "paper2.html"]);
     if(VA_LV === "as") list.push(["AS syllabus guide", "as-guide.html"]);
-    list.forEach(function(x){ var a = mk("a", "btn btn-primary", x[0] + " ›"); a.href = x[1]; a.target = "_blank"; a.rel = "noopener"; a.style.textDecoration = "none"; box.appendChild(a); });
+    list.forEach(function(x){ var a = mk("a", "btn btn-primary", x[0] + " ›"); a.href = x[1]; a.target = "_blank"; a.setAttribute("data-keepsession", "1"); a.style.textDecoration = "none"; box.appendChild(a); });
   }
   document.getElementById("va-level").addEventListener("click", function(e){
     var b = e.target.closest("button[data-v]"); if(!b) return; VA_LV = b.getAttribute("data-v");

@@ -100,7 +100,11 @@
     if(!P || !P.onAuthChange || !P.watchMySubscription){ return setTimeout(init, 150); }
     syncClock(); setInterval(syncClock, 600000);
     P.onAuthChange(function(p){
-      if(p && p.uid && (p.role || "student") === "student") start(p.uid); else start("");
+      if(p && p.uid && (p.role || "student") === "student"){
+        // Teachers and admins are never locked out by a subscription (they preview student pages).
+        if(P.checkIsAdmin){ P.checkIsAdmin(p.uid).then(function(staff){ start(staff ? "" : p.uid); }, function(){ start(p.uid); }); }
+        else start(p.uid);
+      } else start("");
     });
   }
   window.PQ_SUBGUARD = { state: function(){ return state(sub); }, sub: function(){ return sub; }, now: now };
