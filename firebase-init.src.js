@@ -134,9 +134,20 @@ function needsVerification(user){
   return !(created < VERIFY_REQUIRED_FROM);
 }
 
-function signUp(email, password, name, cls, remember, examSession){
-  name = cleanName(name); cls = cleanClass(cls);
-  if(EXAM_SESSIONS.indexOf(examSession) < 0) return Promise.reject(new Error("Please choose your planned exam session."));
+// Stream choice at sign-up. level = IGCSE / AS / A2 (British) or "AM" (American, Digi Champs 10AM).
+// classCode = the class the student picked (10AM1..10AM6, or a British class code); "" = none of these.
+// British codes must belong to the chosen level (10BR.. / AS.. / A2..). Returns { cls, cert }.
+var BR_PREFIX = { IGCSE: /^10BR/, AS: /^AS/, A2: /^A2/ };
+function resolveStream(level, classCode){
+  level = String(level || ""); var code = cleanGroupCode(classCode);
+  if(level === "AM") return /^10AM[1-6]$/.test(code) ? { cls: code, cert: "IGCSE" } : null;
+  if(STUDENT_LEVELS.indexOf(level) < 0) return null;
+  return { cls: code && BR_PREFIX[level].test(code) ? code : level, cert: level };
+}
+function signUp(email, password, name, cls, remember, examSession, classCode){
+  name = cleanName(name); var rs = resolveStream(cls, classCode); cls = rs ? rs.cls : "";
+  var isAM = /^10AM/.test(cls);   // American stream: no exam session is asked
+  if(!isAM && EXAM_SESSIONS.indexOf(examSession) < 0) return Promise.reject(new Error("Please choose your planned exam session."));
   if(!name) return Promise.reject(new Error("Please enter your name (letters and numbers only, no < > or &)."));
   if(!cls) return Promise.reject(new Error("Please choose your class."));
   if(!password || String(password).length < MIN_PASSWORD) return Promise.reject(new Error("Please choose a password with at least " + MIN_PASSWORD + " characters."));
@@ -146,15 +157,16 @@ function signUp(email, password, name, cls, remember, examSession){
     .then(function(){ return createUserWithEmailAndPassword(auth, email, password); })
     .then(function(cred){
       var uid = cred.user.uid;
-      return setDoc(doc(db, "users", uid), {
+      var rec = {
         name: name,
         email: email,
         class: cls,
-        examSession: examSession,
-        certificate: STUDENT_LEVELS.indexOf(cls) >= 0 ? cls : "",
+        certificate: rs.cert,
         createdAt: serverTimestamp(),
         sub: { plan: "trial", start: serverTimestamp() }   // 24-hour free trial; the rules force start == server time
-      }).then(function(){
+      };
+      if(!isAM) rec.examSession = examSession;
+      return setDoc(doc(db, "users", uid), rec).then(function(){
         // The account is unusable until this link is clicked. A failed send
         // does not fail sign-up; the student can press "Resend" on the next screen.
         return sendEmailVerification(cred.user).then(function(){ return true; }, function(){ return false; });
@@ -209,14 +221,17 @@ function googleSignIn(remember){
 }
 // Creates the profile of a first-time Google user. The class is the level
 // (IGCSE / AS / A2) until a teacher approves a class code.
-function completeGoogleProfile(name, level, examSession){
-  name = cleanName(name); level = String(level || "");
-  if(EXAM_SESSIONS.indexOf(examSession) < 0) return Promise.reject(new Error("Please choose your planned exam session."));
+function completeGoogleProfile(name, level, examSession, classCode){
+  name = cleanName(name); level = String(level || ""); var rs = resolveStream(level, classCode);
+  var isAM = !!rs && /^10AM/.test(rs.cls);
+  if(!isAM && EXAM_SESSIONS.indexOf(examSession) < 0) return Promise.reject(new Error("Please choose your planned exam session."));
   if(!name) return Promise.reject(new Error("Please enter your full name."));
-  if(STUDENT_LEVELS.indexOf(level) < 0) return Promise.reject(new Error("Please choose IGCSE, AS or A2."));
+  if(!rs) return Promise.reject(new Error("Please choose your stream and class."));
   var u = auth.currentUser;
   if(!u) return Promise.reject(new Error("Please sign in again."));
-  return setDoc(doc(db, "users", u.uid), { name: name, email: u.email, class: level, examSession: examSession, certificate: level, createdAt: serverTimestamp(), sub: { plan: "trial", start: serverTimestamp() } })
+  var grec = { name: name, email: u.email, class: rs.cls, certificate: rs.cert, createdAt: serverTimestamp(), sub: { plan: "trial", start: serverTimestamp() } };
+  if(!isAM) grec.examSession = examSession;
+  return setDoc(doc(db, "users", u.uid), grec)
     .then(function(){ return getMyProfile(u.uid); });
 }
 // A student created after the exam-session rule came in, but without a session (e.g. an older cached sign-up
@@ -371,7 +386,7 @@ function getMyProfile(uid){
     return { uid: uid, name: d.name, email: d.email, class: d.class, blocked: d.blocked === true, role: role,
              examSession: d.examSession || "", certificate: d.certificate || "", createdMs: cm, sub: subFrom(d),
              // Students who joined after the exam-session rule came in must pick their session once.
-             needsSession: role === "student" && !d.examSession && cm >= SESSION_REQUIRED_FROM };
+             needsSession: role === "student" && !d.examSession && cm >= SESSION_REQUIRED_FROM && !/^10AM/i.test(String(d["class"] || "")) };
   });
 }
 
@@ -836,6 +851,12 @@ function listGroups(){
   return getDocs(collection(db, "groups")).then(function(snap){
     var out = []; snap.forEach(function(d){ var x = d.data() || {}; x.code = x.code || d.id; out.push(x); });
     return out.sort(function(a, b){ return String(a.code).localeCompare(String(b.code)); });
+  });
+}
+// Open classes for the sign-up form (code, level, name only). Needs the public list rule on /groups.
+function listPublicGroups(){
+  return listGroups().then(function(all){
+    return all.filter(function(g){ return g.open !== false; }).map(function(g){ return { code: g.code, level: g.level, name: g.name || "" }; });
   });
 }
 function saveGroup(g){
@@ -1396,6 +1417,7 @@ window.PQFirebase = {
   googleSignIn: googleSignIn,
   completeGoogleProfile: completeGoogleProfile,
   listGroups: listGroups,
+  listPublicGroups: listPublicGroups,
   saveGroup: saveGroup,
   deleteGroup: deleteGroup,
   getGroup: getGroup,
