@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-5Qq3lvdNE51fOMX5ejGhX+cMDHKaFg4dLGCndIGAdGU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-KW9XUXSBz4R9EfG8dMZ40XecBbKcfegLAQFTnXulB6Y='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -404,7 +404,7 @@
 <script src="report-lib.js?v=20261019j"></script>
 <script src="scratchpad.js?v=20261019j"></script>
 <script src="firebase-config.js?v=20261103e"></script>
-<script type="module" src="firebase-init.js?v=20261106a"></script>
+<script type="module" src="firebase-init.js?v=20261111b"></script>
 <script src="sub-guard.js?v=2" defer></script>
 <script type="module">
 (function(){
@@ -460,6 +460,65 @@
 
   var authMode = "login";
 
+  // ---- Stream choice (British / American) shown on sign-up and on the Google "one last step" screen ----
+  var streamUI = {};
+  var publicGroups = null, publicGroupsP = null;
+  function loadPublicGroups(){
+    if(!publicGroupsP) publicGroupsP = (PQFirebase.listPublicGroups ? PQFirebase.listPublicGroups() : Promise.resolve([])).then(function(g){ publicGroups = g || []; }, function(){ publicGroups = []; });
+    return publicGroupsP;
+  }
+  function mkField(id, label, selId, opts, err){
+    var d = document.createElement("div"); d.className = "field hidden"; d.id = id;
+    var l = document.createElement("label"); l.setAttribute("for", selId); l.textContent = label; d.appendChild(l);
+    var sel = document.createElement("select"); sel.id = selId; d.appendChild(sel);
+    var e = document.createElement("div"); e.className = "err"; e.textContent = err; d.appendChild(e);
+    fillSel(sel, opts); return d;
+  }
+  function fillSel(sel, opts){
+    sel.textContent = "";
+    opts.forEach(function(o, i){ var op = document.createElement("option"); op.value = o[0]; op.textContent = o[1]; if(i === 0 && o[0] === ""){ op.disabled = true; op.selected = true; } sel.appendChild(op); });
+  }
+  function initStream(p, certFieldId, certSelId){
+    var certField = document.getElementById(certFieldId), certSel = document.getElementById(certSelId);
+    var fStream = mkField("field-" + p + "-stream", "Your stream", "input-" + p + "-stream", [["", "Choose your stream"], ["british", "British stream (IGCSE, AS, A Level)"], ["american", "American stream (Digi Champs 10AM)"]], "Please choose your stream.");
+    var fB = mkField("field-" + p + "-bclass", "Your class", "input-" + p + "-bclass", [["", "Choose your class"]], "Please choose a class, or None of these.");
+    var am = [["", "Choose your class"]]; for(var i = 1; i <= 6; i++) am.push(["10AM" + i, "10AM" + i]);
+    var fA = mkField("field-" + p + "-amclass", "Your class", "input-" + p + "-amclass", am, "Please choose your class.");
+    certField.parentNode.insertBefore(fStream, certField); certField.parentNode.insertBefore(fB, certField.nextSibling); certField.parentNode.insertBefore(fA, fB.nextSibling);
+    var u = { certField: certField, certSel: certSel, fStream: fStream, fB: fB, fA: fA, sStream: fStream.querySelector("select"), sB: fB.querySelector("select"), sA: fA.querySelector("select"), on: false };
+    function fillBritish(){
+      var lv = certSel.value, map = { IGCSE: "10", AS: "11", A2: "12" }[lv];
+      var opts = [["", "Choose your class"]];
+      (publicGroups || []).filter(function(g){ return g.level === map; }).forEach(function(g){ opts.push([g.code, g.code + (g.name && g.name !== g.code ? " (" + g.name + ")" : "")]); });
+      opts.push(["none", "None of these"]);
+      fillSel(u.sB, opts);
+    }
+    u.sync = function(){
+      var st = u.sStream.value, show = u.on;
+      u.fStream.classList.toggle("hidden", !show);
+      u.certField.classList.toggle("hidden", !(show && st === "british"));
+      u.fB.classList.toggle("hidden", !(show && st === "british" && certSel.value));
+      u.fA.classList.toggle("hidden", !(show && st === "american"));
+      if(u.sessField) u.sessField.classList.toggle("hidden", !show || st === "american");
+    };
+    u.sStream.addEventListener("change", function(){ if(u.sStream.value === "british") loadPublicGroups().then(fillBritish); u.sync(); });
+    certSel.addEventListener("change", function(){ loadPublicGroups().then(function(){ fillBritish(); u.sync(); }); u.sync(); });
+    u.reset = function(){ u.sStream.value = ""; fillSel(u.sB, [["", "Choose your class"]]); u.sA.value = ""; u.sync(); };
+    // Returns { ok, level, classCode } and marks the missing fields.
+    u.read = function(){
+      var st = u.sStream.value, ok = true;
+      [u.fStream, u.fB, u.fA, u.certField].forEach(function(f){ f.classList.remove("invalid"); });
+      if(!st){ u.fStream.classList.add("invalid"); return { ok: false }; }
+      if(st === "american"){ if(!u.sA.value){ u.fA.classList.add("invalid"); return { ok: false }; } return { ok: true, level: "AM", classCode: u.sA.value }; }
+      if(!certSel.value){ u.certField.classList.add("invalid"); ok = false; }
+      if(certSel.value && !u.sB.value){ u.fB.classList.add("invalid"); ok = false; }
+      return { ok: ok, level: certSel.value, classCode: u.sB.value === "none" ? "" : u.sB.value };
+    };
+    streamUI[p] = u; return u;
+  }
+  initStream("su", "field-signup-class", "input-signup-class").sessField = document.getElementById("field-signup-session");
+  initStream("gp", "field-gp-level", "input-gp-level").sessField = document.getElementById("field-gp-session");
+
   function clearAuthErrors(){
     [fieldSignupName, fieldSignupClass, fieldSignupSession, fieldEmail, fieldPassword].forEach(function(f){
       f.classList.remove("invalid");
@@ -490,6 +549,8 @@
       btnAuthSubmit.textContent = "Log in";
       inputPassword.autocomplete = "current-password";
     }
+    streamUI.su.on = (mode === "signup"); streamUI.su.sync();
+    if(mode === "signup") fieldSignupClass.classList.toggle("hidden", !(streamUI.su.sStream.value === "british"));
   }
 
   authTabs.addEventListener("click", function(e){
@@ -507,14 +568,15 @@
     if(!email || email.indexOf("@") === -1){ fieldEmail.classList.add("invalid"); ok = false; }
     if(!password){ fieldPassword.classList.add("invalid"); ok = false; }
 
-    var name, cls, sess;
+    var name, cls, sess, ccode = "";
     if(authMode === "signup"){
       name = inputSignupName.value.trim();
-      cls = inputSignupClass.value;
+      var sv = streamUI.su.read();
+      cls = sv.level; ccode = sv.classCode || "";
       sess = inputSignupSession.value;
-      if(!sess){ fieldSignupSession.classList.add("invalid"); ok = false; }
+      if(!sess && cls !== "AM"){ fieldSignupSession.classList.add("invalid"); ok = false; }
       if(!name){ fieldSignupName.classList.add("invalid"); ok = false; }
-      if(!cls){ fieldSignupClass.classList.add("invalid"); ok = false; }
+      if(!sv.ok) ok = false;
     }
 
     if(!ok) return;
@@ -523,7 +585,7 @@
     authStatus.textContent = authMode === "signup" ? "Creating your account…" : "Logging in…";
 
     var action = authMode === "signup"
-      ? PQFirebase.signUp(email, password, name, cls, inputRemember.checked, sess)
+      ? PQFirebase.signUp(email, password, name, cls, inputRemember.checked, sess, ccode)
       : PQFirebase.logIn(email, password, inputRemember.checked);
 
     action.then(function(res){
@@ -2355,11 +2417,14 @@
   document.getElementById("btn-gp-save").addEventListener("click", function(){
     var f1 = document.getElementById("field-gp-name"), f2 = document.getElementById("field-gp-level"), f3 = document.getElementById("field-gp-session"), st = document.getElementById("gp-status");
     var sessionOnly = !!gpSessionOnly;
-    var name = document.getElementById("input-gp-name").value.trim(), lv = document.getElementById("input-gp-level").value, se = document.getElementById("input-gp-session").value;
-    f1.classList.toggle("invalid", !sessionOnly && !name); f2.classList.toggle("invalid", !lv); f3.classList.toggle("invalid", !se);
-    if((!sessionOnly && !name) || !lv || !se) return;
+    var name = document.getElementById("input-gp-name").value.trim(), lv = document.getElementById("input-gp-level").value, se = document.getElementById("input-gp-session").value, gcode = "";
+    if(!sessionOnly){ var gv = streamUI.gp.read(); lv = gv.ok ? gv.level : ""; gcode = gv.classCode || ""; f2.classList.remove("invalid"); }
+    else f2.classList.toggle("invalid", !lv);
+    var needSe = sessionOnly || lv !== "AM";
+    f1.classList.toggle("invalid", !sessionOnly && !name); f3.classList.toggle("invalid", needSe && !se);
+    if((!sessionOnly && !name) || !lv || (needSe && !se)) return;
     var b = this; b.disabled = true; st.textContent = "Saving\u2026";
-    var p = sessionOnly ? PQFirebase.saveMySession(state.pendingProfile.uid, se, lv) : PQFirebase.completeGoogleProfile(name, lv, se);
+    var p = sessionOnly ? PQFirebase.saveMySession(state.pendingProfile.uid, se, lv) : PQFirebase.completeGoogleProfile(name, lv, se, gcode);
     p.then(function(p){
       st.textContent = ""; state.currentUser = p; gpSessionOnly = false;
       if(isBR(p)) showHub(); else goToStartScreen();
@@ -2400,7 +2465,7 @@
       inputEmail.value = "";
       inputPassword.value = "";
       inputSignupName.value = "";
-      inputSignupClass.value = ""; inputSignupSession.value = "";
+      inputSignupClass.value = ""; inputSignupSession.value = ""; streamUI.su.reset();
       setAuthMode(/signup/.test(window.location.hash) ? "signup" : "login");
       showScreen("auth");
       return;
@@ -2411,6 +2476,7 @@
       document.getElementById("input-gp-name").value = user.name || "";
       document.getElementById("input-gp-level").value = ""; document.getElementById("input-gp-session").value = "";
       document.getElementById("field-gp-name").classList.remove("hidden"); gpSessionOnly = false;
+      streamUI.gp.on = true; streamUI.gp.reset();
       document.getElementById("gp-status").textContent = "";
       setHeader("Enjoy learning journey", "Finish creating your account.");
       showScreen("profile");
@@ -2421,6 +2487,7 @@
       state.currentUser = null; state.pendingProfile = user; gpSessionOnly = true;
       document.getElementById("input-gp-name").value = user.name || "";
       document.getElementById("field-gp-name").classList.add("hidden");
+      streamUI.gp.on = false; streamUI.gp.sync(); document.getElementById("field-gp-level").classList.remove("hidden"); document.getElementById("field-gp-session").classList.remove("hidden");
       document.getElementById("input-gp-level").value = ["IGCSE", "AS", "A2"].indexOf(user.certificate || user["class"]) >= 0 ? (user.certificate || user["class"]) : "";
       document.getElementById("input-gp-session").value = "";
       document.getElementById("gp-status").textContent = "";
