@@ -300,9 +300,7 @@ service cloud.firestore {
     match /groups/{code} {
       // Any signed-in user can look up ONE group by its code (to join); only admins can list.
       allow get: if signedIn();
-      // Anyone (also before sign-up) may list the classes, so the sign-up form can offer the open ones.
-      // A class document holds only its code, level, name, teacher name and open flag: nothing private.
-      allow list: if true;
+      allow list: if canRead();
       allow create, update, delete: if canWrite();
     }
 
