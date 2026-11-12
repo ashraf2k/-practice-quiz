@@ -75,6 +75,30 @@
   .hs-scrim{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:35; }
   .hs-scrim.show{ display:block; }
   .skel{ background:linear-gradient(90deg,var(--line),var(--bg),var(--line)); border-radius:8px; }
+
+  /* Compact the reused exam-countdown / live-session widgets to fit the sidebar */
+  #view-journey .pq-live.bottom{ display:none; } /* only one "Book a live session" banner */
+  .hs-side #view-journey{ margin:4px 0 6px; }
+  .hs-side #view-journey .asp{ margin:0 0 10px; padding:11px; border-radius:12px; color:var(--ink); }
+  .hs-side #view-journey .asp-head{ margin:0 0 8px; gap:6px; }
+  .hs-side #view-journey .asp-head h2{ font-size:.72rem; line-height:1.3; }
+  .hs-side #view-journey .asp-pill{ font-size:.58rem; padding:2px 7px; }
+  .hs-side #view-journey .asp-tiles{ grid-template-columns:1fr; gap:6px; }
+  .hs-side #view-journey .asp-tile{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 9px; text-align:left; }
+  .hs-side #view-journey .asp-tile b{ font-size:1.05rem; }
+  .hs-side #view-journey .asp-tile small{ margin:0; display:none; }
+  .hs-side #view-journey .asp-sq{ min-width:0; padding:4px 10px 2px; margin:2px 0 0; text-align:center; }
+  .hs-side #view-journey .asp-sq span{ font-size:.66rem; color:var(--muted); }
+  .hs-side #view-journey .asp-note,
+  .hs-side #view-journey .asp-focus,
+  .hs-side #view-journey .asp-all{ display:none; }
+  .hs-side #view-journey .pq-live{ flex-direction:column; align-items:flex-start; gap:7px; padding:11px 12px; margin:0; border-radius:12px; }
+  .hs-side #view-journey .pq-live .ic{ width:30px; height:30px; border-radius:9px; }
+  .hs-side #view-journey .pq-live .t{ min-width:0; }
+  .hs-side #view-journey .pq-live b{ font-size:.8rem; }
+  .hs-side #view-journey .pq-live .d{ font-size:.68rem; }
+  .hs-side #view-journey .pq-live .eb{ font-size:.6rem; padding:2px 7px; }
+  .hs-side #view-journey .pq-live .go{ width:100%; min-height:34px; padding:7px 10px; font-size:.72rem; }
 </style>
 </head>
 <body>
@@ -91,6 +115,7 @@
         <div class="hs-pacct" id="hs-pacct"></div>
       </div>
     </div>
+    <div id="view-journey"></div>
     <nav class="hs-nav">
       <a href="home.html" class="cur"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v10H3z"/></svg>Home</a>
       <a href="#" id="hs-nav-learn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8l10-5 10 5-10 5L2 8z"/><path d="M6 10.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-5.5"/></svg>iLearn</a>
@@ -116,8 +141,6 @@
       <h1 id="hs-greeting">Welcome</h1>
       <p id="hs-today"></p>
     </header>
-
-    <div id="view-journey" style="margin-top:20px"></div>
 
     <section class="hs-sect" id="hs-roadmap-sect">
       <div class="hs-card">
