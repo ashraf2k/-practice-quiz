@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-sDjzXObyFgCkkv9TJm11X/3v3ZmduRA8gMsZ6dDV66U='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-qibhiN9E+xJHAmmf5/3zXui8Z4JutuDXv49ha6se0tU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -3173,7 +3173,7 @@
   });
 
   // ---------------- Messages from Chatbot (live, with blinking NEW MESSAGE alerts) ----------------
-  var msgRows = [], msgUnsub = null, msgOpen = {}, MSG_R = { teacher:"Teacher", administrator:"Administrator" }, MSG_REASON = { technical:"Technical problem", payment:"Payment", registration:"Registration", complaint:"Complaint", general:"General", human:"Direct assistance", unanswered:"Unanswered question" }, MSG_ST = ["unread","read","replied","resolved","archived"];
+  var msgRows = [], msgUnsub = null, msgOpen = {}, MSG_R = { teacher:"Teacher", administrator:"Administrator" }, MSG_REASON = { technical:"Technical problem", payment:"Payment", registration:"Registration", complaint:"Complaint", general:"General", human:"Direct assistance", unanswered:"Unanswered question", renewal:"Account renewal" }, MSG_ST = ["unread","read","replied","resolved","archived"];
   function toast(title, text, tab){
     var host = document.getElementById("toast-host"), t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "alert");
     t.innerHTML = '<b>' + esc12(title) + '</b>' + esc12(text) + '<div style="margin-top:4px;text-decoration:underline">Open</div>';

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-TXb75idMexc78wNETLt4xRtvinrXLi5tXd1W8eIi3B4='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-CMgB3z1KPaqxqMFZQhIiWPabUOf6gkDkgoiIzU9Q0QU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -24,6 +24,15 @@
   .se-btn{ padding:10px 18px; border-radius:11px; border:1.5px solid var(--accent); background:var(--accent); color:#fff; font:700 15px system-ui,sans-serif; cursor:pointer; text-decoration:none; }
   .se-btn.alt{ background:transparent; color:var(--accent-dark); }
   .se-ok{ color:var(--correct); font-weight:700; }
+  .se-contact{ margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+  .se-contact h2{ margin:0 0 6px; font-size:16px; }
+  .se-contact p{ margin:0 0 10px; font-size:13.5px; }
+  .se-field{ margin-bottom:10px; }
+  .se-field label{ display:block; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:4px; }
+  .se-field input, .se-field textarea{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; font-size:14px; }
+  .se-field textarea{ min-height:84px; resize:vertical; }
+  .se-err{ color:#C0392B; font-weight:600; font-size:13px; margin:2px 0 0; }
+  .se-sent{ background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:14px; }
 </style>
 </head>
 <body>
@@ -43,6 +52,25 @@
       <a class="se-btn" href="index.html" id="se-home" hidden>Open my courses</a>
       <button class="se-btn alt" type="button" id="se-out">Log out</button>
     </div>
+    <div class="se-contact" id="se-contact">
+      <h2>Contact the administrator</h2>
+      <p>Ask the administrator to review and reactivate your account. They can see your account details already; just add a phone number and your message below.</p>
+      <form id="se-form">
+        <div class="se-field">
+          <label for="se-phone">Phone number (with country code)</label>
+          <input id="se-phone" type="tel" placeholder="+9665XXXXXXXX" autocomplete="tel" />
+        </div>
+        <div class="se-field">
+          <label for="se-note">Message</label>
+          <textarea id="se-note" placeholder="Please reconsider my account - I would like to renew my access."></textarea>
+        </div>
+        <p class="se-err" id="se-cerr" hidden></p>
+        <div class="se-actions">
+          <button class="se-btn" type="submit" id="se-send">Send to administrator</button>
+        </div>
+      </form>
+      <div class="se-sent" id="se-sent" hidden></div>
+    </div>
   </div>
 </main>
 <script src="firebase-config.js?v=20261103e"></script>
@@ -60,14 +88,48 @@
     var t = Date.now() + offset;
     return s.expiryMs > t || (s.graceMs && s.graceMs > t);
   }
+  function newRef(){
+    var d = new Date(), pad = function(n){ return String(n).padStart(2, "0"); }, al = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = "", a = new Uint8Array(5);
+    (window.crypto || window.msCrypto).getRandomValues(a); for(var i = 0; i < 5; i++) r += al[a[i] % al.length];
+    return "SUP-" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "-" + r;
+  }
+  var lastSent = 0;
+  try { lastSent = +localStorage.getItem("se_contact_t") || 0; } catch(e){}
+  function wireContact(P, p){
+    var form = $("se-form"), phoneEl = $("se-phone"), noteEl = $("se-note"), errEl = $("se-cerr"), sendBtn = $("se-send"), sentEl = $("se-sent");
+    form.addEventListener("submit", function(ev){
+      ev.preventDefault();
+      errEl.hidden = true;
+      var phone = phoneEl.value.trim().replace(/[\s-]/g, "");
+      var note = noteEl.value.trim();
+      if(!/^[+][0-9]{6,15}$/.test(phone)){ errEl.textContent = "Please enter a valid phone number with country code, e.g. +9665XXXXXXXX."; errEl.hidden = false; return; }
+      if(note.length < 3){ errEl.textContent = "Please write a short message (at least 3 characters)."; errEl.hidden = false; return; }
+      if(Date.now() - lastSent < 30000){ errEl.textContent = "You have just sent a message. Please wait half a minute before sending another."; errEl.hidden = false; return; }
+      sendBtn.disabled = true; sendBtn.textContent = "Sending…";
+      var rec = { ref: newRef(), kind: "support", reason: "renewal", recipient: "administrator", name: p.name || "", email: p.email || "", phone: phone, message: note.slice(0, 2000), page: "subscription-expired.html", senderType: "student", lang: (document.documentElement.lang === "ar" ? "ar" : "en"), consent: true };
+      if(!rec.name) delete rec.name;
+      P.submitChatMessage(rec).then(function(r){
+        sendBtn.disabled = false; sendBtn.textContent = "Send to administrator";
+        if(!r || !r.ok){ errEl.textContent = "Sorry, your message could not be sent. Please check your connection and try again."; errEl.hidden = false; return; }
+        lastSent = Date.now(); try { localStorage.setItem("se_contact_t", String(lastSent)); } catch(e){}
+        form.hidden = true;
+        sentEl.hidden = false;
+        sentEl.textContent = "Your message has been sent to the administrator. They will contact you using the details above. Reference: " + r.ref;
+      }, function(){
+        sendBtn.disabled = false; sendBtn.textContent = "Send to administrator";
+        errEl.textContent = "Sorry, your message could not be sent. Please check your connection and try again."; errEl.hidden = false;
+      });
+    });
+  }
   function init(){
     var P = window.PQFirebase;
     if(!P || !P.onAuthChange){ return setTimeout(init, 150); }
     $("se-out").addEventListener("click", function(){ P.logOut().then(function(){ location.href = "index.html"; }, function(){ location.href = "index.html"; }); });
-    var unsub = null;
+    var unsub = null, wired = false;
     P.onAuthChange(function(p){
       if(!p || !p.uid){ location.replace("index.html"); return; }
       $("se-name").textContent = p.name || p.email || "";
+      if(!wired){ wired = true; wireContact(P, p); }
       if(unsub) unsub();
       unsub = P.watchMySubscription(p.uid, function(s){
         if(s === undefined) return;
@@ -76,6 +138,7 @@
           $("se-msg").textContent = "Your subscription is active again.";
           $("se-live").hidden = false; $("se-live").textContent = "Taking you back to your courses...";
           $("se-home").hidden = false;
+          $("se-contact").hidden = true;
           setTimeout(function(){ location.replace("index.html"); }, 1500);
           return;
         }

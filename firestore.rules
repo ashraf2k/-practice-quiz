@@ -486,7 +486,7 @@ service cloud.firestore {
         && d.keys().hasAll(['ref','kind','recipient','email','phone','message','senderType','lang','consent','status','isRead','createdAt'])
         && id.matches('^(MSG|SUP)-[0-9]{8}-[A-Z0-9]{5}$') && d.ref == id
         && d.kind in ['message','support'] && d.recipient in ['teacher','administrator']
-        && (!('reason' in d) || d.reason in ['technical','payment','registration','complaint','general','human','unanswered'])
+        && (!('reason' in d) || d.reason in ['technical','payment','registration','complaint','general','human','unanswered','renewal'])
         && d.email is string && d.email.size() <= 120 && d.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
         && d.phone is string && d.phone.matches('^[+][0-9]{6,15}$')
         && (!('name' in d) || (d.name is string && d.name.size() <= 80))
