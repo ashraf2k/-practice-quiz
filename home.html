@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-K+v4ApuHFj4US1bmBIOGUEiVH+DqM6bmuoc3OZh72M8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<script src="framebust.js?v=20261019j"></script>
+<script src="theme.js?v=20261027a"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#146C6A" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<title>My Learning — Home</title>
+<link rel="stylesheet" href="shared.css?v=20261110a" />
+<link rel="stylesheet" href="theme.css?v=20261027a" />
+<link rel="stylesheet" href="chatbot.css?v=2"><style>
+  body{ margin:0; }
+  .hs-shell{ display:flex; min-height:100vh; }
+  .hs-side{ width:252px; flex:0 0 auto; background:#15291F; color:#EAF2EC; display:flex; flex-direction:column; padding:22px 16px; gap:22px; position:sticky; top:0; align-self:flex-start; height:100vh; overflow-y:auto; }
+  .hs-brand{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:17px; padding:0 6px; font-family:Georgia,"Times New Roman",serif; }
+  .hs-brand span{ width:30px; height:30px; border-radius:9px; background:var(--accent); display:grid; place-items:center; color:#fff; font-size:14px; flex:0 0 auto; }
+  .hs-profile{ display:flex; align-items:center; gap:11px; background:rgba(255,255,255,.07); border-radius:14px; padding:13px; }
+  .hs-avatar{ width:38px; height:38px; border-radius:50%; background:var(--accent); display:grid; place-items:center; font-weight:700; font-size:14px; color:#fff; flex:0 0 auto; }
+  .hs-pname{ font-size:13.5px; font-weight:700; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .hs-pclass{ font-size:11.5px; color:#9FC7B4; margin-top:1px; }
+  .hs-pacct{ font-size:10.5px; color:#C8E6D8; margin-top:3px; line-height:1.3; }
+  .hs-nav{ display:flex; flex-direction:column; gap:2px; }
+  .hs-nav a, .hs-nav button{ display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:10px; font-size:13.5px; font-weight:500; color:#C8D6CB; text-decoration:none; background:transparent; border:none; font-family:inherit; text-align:left; cursor:pointer; width:100%; }
+  .hs-nav a:hover, .hs-nav button:hover{ background:rgba(255,255,255,.08); color:#fff; }
+  .hs-nav a.cur{ background:rgba(255,255,255,.12); color:#fff; font-weight:700; }
+  .hs-nav svg{ flex:0 0 auto; }
+  .hs-spacer{ flex:1; }
+  .hs-logout{ display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:10px; background:transparent; border:1px solid rgba(255,255,255,.18); color:#EAF2EC; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .hs-logout:hover{ background:rgba(255,255,255,.08); }
+  .hs-main{ flex:1; min-width:0; padding:30px 40px 60px; max-width:1240px; }
+  .hs-head h1{ margin:0; font-size:25px; font-weight:700; font-family:Georgia,"Times New Roman",serif; letter-spacing:-.01em; }
+  .hs-head p{ margin:6px 0 0; font-size:13.5px; color:var(--muted); }
+  .hs-sect{ margin-top:28px; }
+  .hs-card{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:22px 24px; }
+  .hs-sect h2{ margin:0; font-size:16.5px; font-weight:700; font-family:Georgia,"Times New Roman",serif; }
+  .hs-sect-top{ display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px; flex-wrap:wrap; }
+  .hs-sect-top .hs-link{ font-size:12.5px; font-weight:600; color:var(--accent); text-decoration:none; }
+  .hs-sect-top .hs-link:hover{ text-decoration:underline; }
+  .hs-roadmap-wrap{ overflow-x:auto; padding:6px 2px 10px; }
+  .hs-roadmap{ display:flex; width:max-content; }
+  .hs-step{ flex:0 0 auto; width:108px; display:flex; flex-direction:column; align-items:center; gap:8px; position:relative; padding-top:2px; }
+  .hs-step:not(:first-child)::before{ content:""; position:absolute; top:19px; right:50%; width:108px; height:3px; z-index:0; background:var(--ln, var(--line)); }
+  .hs-dot{ width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font-size:14px; font-weight:700; position:relative; z-index:1; flex:0 0 auto; }
+  .hs-step-label{ font-size:11.5px; text-align:center; line-height:1.3; max-width:104px; }
+  .hs-two-col{ display:grid; grid-template-columns:1.2fr 1fr; gap:20px; }
+  @media (max-width:980px){ .hs-two-col{ grid-template-columns:1fr; } }
+  .hs-paper-row{ display:flex; align-items:center; gap:13px; padding:12px 0; border-top:1px solid var(--line); text-decoration:none; color:inherit; }
+  .hs-paper-row:first-child{ border-top:none; padding-top:0; }
+  .hs-paper-icon{ width:36px; height:36px; border-radius:10px; display:grid; place-items:center; flex:0 0 auto; }
+  .hs-paper-title{ font-size:13.5px; font-weight:600; }
+  .hs-paper-meta{ font-size:11.5px; color:var(--muted); margin-top:2px; }
+  .hs-paper-status{ font-size:12px; font-weight:700; white-space:nowrap; }
+  .hs-empty{ font-size:13px; color:var(--muted); padding:6px 0; }
+  .hs-ring-row{ display:flex; align-items:center; gap:16px; }
+  .hs-score-bars{ display:flex; align-items:flex-end; gap:7px; height:66px; border-bottom:1px solid var(--line); margin-top:14px; }
+  .hs-score-bars > div{ flex:1; border-radius:4px 4px 0 0; min-height:2px; }
+  .hs-activity-row{ display:flex; gap:12px; padding:9px 0; border-top:1px solid var(--line); font-size:13px; }
+  .hs-activity-row:first-child{ border-top:none; padding-top:0; }
+  .hs-activity-dot{ width:8px; height:8px; border-radius:50%; margin-top:6px; flex:0 0 auto; }
+  @media (max-width:860px){
+    .hs-side{ position:fixed; left:0; top:0; z-index:40; transform:translateX(-100%); transition:transform .2s; width:240px; }
+    .hs-side.open{ transform:translateX(0); box-shadow:0 0 30px rgba(0,0,0,.3); }
+    .hs-main{ padding:20px 18px 48px; }
+    .hs-menu-btn{ display:inline-flex !important; }
+  }
+  .hs-menu-btn{ display:none; align-items:center; gap:8px; margin-bottom:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:10px; padding:9px 13px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .hs-scrim{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:35; }
+  .hs-scrim.show{ display:block; }
+  .skel{ background:linear-gradient(90deg,var(--line),var(--bg),var(--line)); border-radius:8px; }
+</style>
+</head>
+<body>
+<div class="hs-shell">
+
+  <div class="hs-scrim" id="hs-scrim"></div>
+  <aside class="hs-side" id="hs-side">
+    <div class="hs-brand"><span>iL</span>iLearn</div>
+    <div class="hs-profile">
+      <div class="hs-avatar" id="hs-avatar">·</div>
+      <div style="min-width:0">
+        <div class="hs-pname" id="hs-pname">Loading…</div>
+        <div class="hs-pclass" id="hs-pclass"></div>
+        <div class="hs-pacct" id="hs-pacct"></div>
+      </div>
+    </div>
+    <nav class="hs-nav">
+      <a href="home.html" class="cur"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v10H3z"/></svg>Home</a>
+      <a href="#" id="hs-nav-learn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8l10-5 10 5-10 5L2 8z"/><path d="M6 10.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-5.5"/></svg>iLearn</a>
+      <a href="quiz.html#solve"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>iSolve</a>
+      <a href="#hs-roadmap-sect"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>My progress</a>
+      <a href="join.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/></svg>Join a class</a>
+      <button type="button" id="hs-help"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 18h.01M9.5 9a2.5 2.5 0 1 1 3.8 2.1c-.7.5-1.3.9-1.3 1.9"/><circle cx="12" cy="12" r="9"/></svg>Help &amp; contact</button>
+    </nav>
+    <div class="hs-spacer"></div>
+    <button type="button" class="hs-logout" id="hs-out">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log out
+    </button>
+  </aside>
+
+  <main class="hs-main">
+    <button type="button" class="hs-menu-btn" id="hs-menu-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      Menu
+    </button>
+
+    <header class="hs-head">
+      <h1 id="hs-greeting">Welcome</h1>
+      <p id="hs-today"></p>
+    </header>
+
+    <section class="hs-sect" id="hs-roadmap-sect">
+      <div class="hs-card">
+        <div class="hs-sect-top">
+          <h2 id="hs-roadmap-title">Your journey</h2>
+          <span class="hs-empty" id="hs-roadmap-pct"></span>
+        </div>
+        <div id="hs-roadmap-body"><p class="hs-empty">Loading your progress…</p></div>
+      </div>
+    </section>
+
+    <section class="hs-sect hs-two-col">
+      <div class="hs-card">
+        <div class="hs-sect-top">
+          <h2>Practice &amp; exam papers</h2>
+          <a class="hs-link" href="quiz.html#solve">iSolve →</a>
+        </div>
+        <div id="hs-papers"><p class="hs-empty">Loading…</p></div>
+      </div>
+
+      <div class="hs-card">
+        <h2 style="margin-bottom:14px">Performance</h2>
+        <div id="hs-perf"><p class="hs-empty">Loading…</p></div>
+      </div>
+    </section>
+
+    <section class="hs-sect">
+      <div class="hs-card">
+        <h2 style="margin-bottom:12px">Recent activity</h2>
+        <div id="hs-activity"><p class="hs-empty">Loading…</p></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="quiz-data.js?v=20261019j"></script>
+<script src="exam-data.js?v=20261019j"></script>
+<script src="as-exam-core.js?v=20261021a"></script>
+<script src="as-exam-t1.js?v=20261021a"></script>
+<script src="as-exam-t2.js?v=20261021a"></script>
+<script src="as-exam-t3.js?v=20261021a"></script>
+<script src="as-exam-t4.js?v=20261021a"></script>
+<script src="as-exam-t5.js?v=20261021a"></script>
+<script src="as-exam-t6.js?v=20261021a"></script>
+<script src="as-exam-t7.js?v=20261021a"></script>
+<script src="as-exam-t8.js?v=20261021a"></script>
+<script src="as-exam-t9.js?v=20261021a"></script>
+<script src="as-exam-t10.js?v=20261021a"></script>
+<script src="as-exam-t11.js?v=20261021a"></script>
+<script src="as-exam-t12.js?v=20261021a"></script>
+<script src="as-exam-register.js?v=20261021a"></script>
+<script src="a2-exam.js?v=20261021a"></script>
+<script src="pp-0478.js?v=20261028a"></script>
+<script src="pp-0478-s24.js?v=20261028a"></script>
+<script src="pp-0478-j12.js?v=20261028a"></script>
+<script src="pp-9618.js?v=20261029a"></script>
+<script src="pp-as-core.js?v=20261031a"></script>
+<script src="pp-as-t1.js?v=20261031a"></script>
+<script src="pp-as-t2.js?v=20261031a"></script>
+<script src="pp-as-t3.js?v=20261031a"></script>
+<script src="pp-as-t4.js?v=20261031a"></script>
+<script src="pp-as-t5.js?v=20261031a"></script>
+<script src="pp-as-t6.js?v=20261031a"></script>
+<script src="pp-as-t8.js?v=20261031a"></script>
+<script src="firebase-config.js?v=20261103e"></script>
+<script src="sub-guard.js?v=2" defer></script>
+<script type="module" src="firebase-init.js?v=20261111d"></script>
+<script>
+(function(){
+  "use strict";
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function fmtDateShort(ms){ try{ return new Date(ms).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Riyadh" }); }catch(e){ return ""; } }
+  function fmtDateLong(ms){ try{ return new Date(ms).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }); }catch(e){ return ""; } }
+  function acctBadge(sub){
+    if(!sub) return "";
+    if(sub.suspended) return "Access paused";
+    var t = sub.label || sub.plan || "Account";
+    return sub.expiryMs ? t + " · Ends " + fmtDateShort(sub.expiryMs) : t;
+  }
+
+  var LV = {
+    igcse: { key: "ilearn", page: "learn.html", name: "IGCSE" },
+    as:    { key: "ilearnAS", page: "as.html", name: "AS Level" },
+    a2:    { key: "ilearn12", page: "alevel.html", name: "A Level (A2)" }
+  };
+  function levelOfUser(u){
+    var c = String((u && u["class"]) || "").replace(/\s+/g, "");
+    if(window.PQ_LEGACY_CLASS) c = window.PQ_LEGACY_CLASS(c);
+    if(/^10BR/i.test(c)) return "igcse"; if(/^11BR/i.test(c)) return "as"; if(/^12BR/i.test(c)) return "a2"; return "";
+  }
+  function loadScript(src){ return new Promise(function(res){ var s = document.createElement("script"); s.src = src; s.onload = function(){ res(true); }; s.onerror = function(){ res(false); }; document.head.appendChild(s); }); }
+  function lessonIndex(lv){
+    if(lv === "as") return loadScript("as-index.js?v=" + Date.now()).then(function(){ return (window.ILEARNAS_INDEX || []); });
+    if(lv === "a2") return loadScript("alevel-index.js?v=" + Date.now()).then(function(){ return (window.ILEARN12_INDEX || []); });
+    return loadScript("learn-index.js?v=" + Date.now()).then(function(){ return (window.ILEARN10_INDEX || []); });
+  }
+
+  // ---------- Sidebar: mobile toggle ----------
+  var sideEl = $("hs-side"), scrimEl = $("hs-scrim");
+  function openSide(){ sideEl.classList.add("open"); scrimEl.classList.add("show"); }
+  function closeSide(){ sideEl.classList.remove("open"); scrimEl.classList.remove("show"); }
+  $("hs-menu-btn").addEventListener("click", openSide);
+  scrimEl.addEventListener("click", closeSide);
+  $("hs-help").addEventListener("click", function(){ var fab = document.querySelector(".cb-fab"); if(fab) fab.click(); });
+  $("hs-out").addEventListener("click", function(){ window.PQFirebase.logOut().then(function(){ location.href = "index.html"; }, function(){ location.href = "index.html"; }); });
+
+  // ---------- Roadmap (real lesson progress) ----------
+  function renderRoadmap(lv, user){
+    var L = LV[lv];
+    $("hs-roadmap-title").textContent = "Your " + L.name + " journey";
+    $("hs-nav-learn").href = L.page;
+    Promise.all([ window.PQFirebase.getMyProgress(user.uid, L.key).catch(function(){ return null; }), lessonIndex(lv) ]).then(function(r){
+      var rec = r[0], idx = r[1] || [];
+      var body = $("hs-roadmap-body");
+      if(!idx.length){
+        body.innerHTML = '<p class="hs-empty">No lessons are set up for your class yet.</p>';
+        $("hs-roadmap-pct").textContent = "";
+        return;
+      }
+      var learn = (rec && rec.learn) || {};
+      var byTopic = {};
+      idx.forEach(function(l){ var b = byTopic[l.topic] = byTopic[l.topic] || { n: 0, d: 0, title: "" }; b.n++; if(learn[l.id] && learn[l.id].d) b.d++; });
+      var tNums = Object.keys(byTopic).map(Number).sort(function(a, b){ return a - b; });
+      var doneLessons = 0, totalLessons = idx.length;
+      tNums.forEach(function(t){ doneLessons += byTopic[t].d; });
+      var pct = totalLessons ? Math.round(doneLessons * 100 / totalLessons) : 0;
+      $("hs-roadmap-pct").textContent = pct + "% of lessons complete";
+
+      var curFound = false;
+      var html = tNums.map(function(t, i){
+        var b = byTopic[t], done = b.n > 0 && b.d === b.n, cur = !done && !curFound;
+        if(cur) curFound = true;
+        var dotStyle, labelColor = "var(--ink)";
+        if(done) dotStyle = "background:var(--correct);color:#fff";
+        else if(cur) dotStyle = "background:var(--accent);color:#fff;box-shadow:0 0 0 5px var(--accent-tint)";
+        else { dotStyle = "background:var(--bg);color:var(--muted);border:2px solid var(--line)"; labelColor = "var(--muted)"; }
+        var lineColor = i === 0 ? "transparent" : (byTopic[tNums[i - 1]].d === byTopic[tNums[i - 1]].n && byTopic[tNums[i - 1]].n > 0 ? "var(--correct)" : "var(--line)");
+        return '<div class="hs-step" style="--ln:' + lineColor + '">' +
+          '<div class="hs-dot" style="' + dotStyle + '">' + (done ? "✓" : (i + 1)) + '</div>' +
+          '<span class="hs-step-label" style="color:' + labelColor + '">Topic ' + esc(t) + '<br>' + b.d + ' / ' + b.n + '</span></div>';
+      }).join("");
+      $("hs-roadmap-body").innerHTML = '<div class="hs-roadmap-wrap"><div class="hs-roadmap">' + html + '</div></div>';
+    });
+  }
+
+  // ---------- Practice papers + performance (real attempt data) ----------
+  function fetchQuizRecords(user){
+    var choices = window.examChoicesForClass ? examChoicesForClass(user.class) : [];
+    return Promise.all(choices.map(function(c){
+      return window.PQFirebase.getMyAttempt(user.uid, c.key).then(function(existing){ return { key: c.key, label: c.label || (window.EXAMS && EXAMS[c.key] && EXAMS[c.key].title) || c.key, existing: existing || null, kind: "quiz" }; }).catch(function(){ return { key: c.key, label: c.label || c.key, existing: null, kind: "quiz" }; });
+    }));
+  }
+  function fetchPaperRecords(user){
+    var choices = window.examPaperChoicesForClass ? examPaperChoicesForClass(user.class) : [];
+    return Promise.all(choices.map(function(c){
+      return window.PQFirebase.getMyExamAttempt(user.uid, c.key).then(function(existing){ return { key: c.key, label: c.label || (window.EXAM_PAPERS && EXAM_PAPERS[c.key] && EXAM_PAPERS[c.key].title) || c.key, existing: existing || null, kind: "paper" }; }).catch(function(){ return { key: c.key, label: c.label || c.key, existing: null, kind: "paper" }; });
+    }));
+  }
+  function recordPct(r){
+    if(!r.existing) return null;
+    if(r.kind === "quiz"){ var e = r.existing; return (typeof e.score === "number" && typeof e.total === "number" && e.total > 0) ? Math.round(e.score * 100 / e.total) : null; }
+    var e2 = r.existing; if(typeof e2.pct === "number") return e2.pct;
+    return (typeof e2.totalEarned === "number" && typeof e2.totalMarks === "number" && e2.totalMarks > 0) ? Math.round(e2.totalEarned * 100 / e2.totalMarks) : null;
+  }
+  function recordDate(r){ return r.existing ? (r.existing.completedAt || null) : null; }
+
+  function renderPapers(paperRecords){
+    var el = $("hs-papers");
+    if(!paperRecords.length){ el.innerHTML = '<p class="hs-empty">No iSolve papers are published for your class yet — check back soon.</p>'; return; }
+    el.innerHTML = paperRecords.map(function(r){
+      var started = !!r.existing, pct = recordPct(r);
+      var statusTxt = !started ? "Not started" : (pct === null ? "Completed" : pct + "%");
+      var statusColor = !started ? "var(--muted)" : (pct !== null && pct >= 70 ? "var(--correct)" : (pct !== null && pct >= 50 ? "#B45309" : "var(--incorrect)"));
+      var meta = started ? ("Scored " + (pct === null ? "—" : pct + "%") + " · " + fmtDateShort(recordDate(r))) : "Not attempted yet";
+      return '<a class="hs-paper-row" href="exam-practice.html?topic=' + encodeURIComponent(r.key) + '">' +
+        '<div class="hs-paper-icon" style="background:var(--accent-tint);color:var(--accent)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>' +
+        '<div style="flex:1;min-width:0"><div class="hs-paper-title">' + esc(r.label) + '</div><div class="hs-paper-meta">' + esc(meta) + '</div></div>' +
+        '<span class="hs-paper-status" style="color:' + statusColor + '">' + esc(statusTxt) + '</span></a>';
+    }).join("");
+  }
+
+  function renderPerf(allRecords){
+    var el = $("hs-perf");
+    var attempted = allRecords.filter(function(r){ return r.existing && recordPct(r) !== null; });
+    if(!allRecords.length){ el.innerHTML = '<p class="hs-empty">Your performance will show here once practice papers are available for your class.</p>'; return; }
+    if(!attempted.length){ el.innerHTML = '<p class="hs-empty">Not started yet — your average score will appear here once you complete a quiz or paper.</p>'; return; }
+    var totalE = 0, totalM = 0;
+    allRecords.forEach(function(r){
+      if(!r.existing) return;
+      if(r.kind === "quiz" && typeof r.existing.score === "number" && typeof r.existing.total === "number"){ totalE += r.existing.score; totalM += r.existing.total; }
+      else if(r.kind === "paper" && typeof r.existing.totalEarned === "number" && typeof r.existing.totalMarks === "number"){ totalE += r.existing.totalEarned; totalM += r.existing.totalMarks; }
+    });
+    var avg = totalM > 0 ? Math.round(totalE * 100 / totalM) : (attempted.reduce(function(s, r){ return s + recordPct(r); }, 0) / attempted.length);
+    avg = Math.round(avg);
+    var R = 34, C = Math.round(2 * Math.PI * R * 10) / 10, off = Math.round(C * (1 - avg / 100));
+    var last5 = attempted.slice().sort(function(a, b){ return new Date(recordDate(b)).getTime() - new Date(recordDate(a)).getTime(); }).slice(0, 5).reverse();
+    var bars = last5.map(function(r){ var p = recordPct(r); return '<div style="height:' + Math.max(4, Math.round(p * 0.6)) + 'px;background:var(--accent)" title="' + esc(r.label) + ' — ' + p + '%"></div>'; }).join("");
+    el.innerHTML = '<div class="hs-ring-row"><div style="width:84px;height:84px;position:relative;flex:0 0 auto">' +
+      '<svg width="84" height="84" viewBox="0 0 84 84" style="position:absolute;transform:rotate(-90deg)"><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="var(--line)" stroke-width="9"/><circle cx="42" cy="42" r="' + R + '" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + off + '"/></svg>' +
+      '<div style="position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:17px">' + avg + '%</div></div>' +
+      '<div style="font-size:12.5px;color:var(--muted)">Average across ' + attempted.length + ' attempted ' + (attempted.length === 1 ? "paper" : "papers") + '</div></div>' +
+      (last5.length > 1 ? '<div class="hs-score-bars">' + bars + '</div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px"><span>Earlier</span><span>Most recent</span></div>' : '');
+  }
+
+  function renderActivity(allRecords, rec, idx){
+    var el = $("hs-activity");
+    var items = [];
+    allRecords.forEach(function(r){
+      if(!r.existing) return;
+      var when = new Date(recordDate(r)).getTime();
+      if(!when || isNaN(when)) return;
+      var pct = recordPct(r);
+      items.push({ when: when, color: "var(--accent)", html: "Completed <b>" + esc(r.label) + "</b>" + (pct !== null ? " (" + pct + "%)" : "") });
+    });
+    if(rec && rec.learn && idx){
+      idx.forEach(function(l){
+        var q = rec.learn[l.id];
+        if(q && q.d){
+          var t = q.rv || q.t || 0;
+          if(t) items.push({ when: t, color: "var(--correct)", html: "Completed lesson <b>" + esc(l.title) + "</b>" });
+        }
+      });
+    }
+    items.sort(function(a, b){ return b.when - a.when; });
+    items = items.slice(0, 6);
+    if(!items.length){ el.innerHTML = '<p class="hs-empty">Nothing yet — your recent lessons and practice attempts will show up here.</p>'; return; }
+    el.innerHTML = items.map(function(it){
+      return '<div class="hs-activity-row"><span class="hs-activity-dot" style="background:' + it.color + '"></span><div>' + it.html + ' <span style="color:var(--muted)">— ' + esc(fmtDateLong(it.when)) + '</span></div></div>';
+    }).join("");
+  }
+
+  function renderPractice(lv, user){
+    Promise.all([ fetchQuizRecords(user), fetchPaperRecords(user) ]).then(function(r){
+      var quizRecords = r[0], paperRecords = r[1], all = quizRecords.concat(paperRecords);
+      renderPapers(paperRecords);
+      renderPerf(all);
+      window.PQFirebase.getMyProgress(user.uid, LV[lv].key).catch(function(){ return null; }).then(function(rec){
+        lessonIndex(lv).then(function(idx){ renderActivity(all, rec, idx); });
+      });
+    });
+  }
+
+  // ---------- Boot ----------
+  var tries = 0;
+  (function wait(){
+    if(window.PQFirebase && window.PQFirebase.onAuthChange){
+      window.PQFirebase.onAuthChange(function(user){
+        if(!user || user.needsProfile){ location.replace("index.html"); return; }
+        var lv = levelOfUser(user);
+        if(!lv){ location.replace("index.html"); return; }
+        var first = String(user.name || "Student").split(" ")[0];
+        var hr = new Date().getHours();
+        var greet = hr < 12 ? "Good morning" : (hr < 17 ? "Good afternoon" : "Good evening");
+        $("hs-greeting").textContent = greet + ", " + first + ".";
+        $("hs-today").textContent = fmtDateLong(Date.now()) + " — here's your learning path.";
+        $("hs-avatar").textContent = first.charAt(0).toUpperCase();
+        $("hs-pname").textContent = user.name || "Student";
+        $("hs-pclass").textContent = user.class || "";
+        $("hs-pacct").textContent = acctBadge(user.sub);
+        renderRoadmap(lv, user);
+        renderPractice(lv, user);
+      });
+      return;
+    }
+    if(++tries < 60) setTimeout(wait, 100);
+  })();
+})();
+</script>
+<script src="exam-timetable-data.js?v=4"></script>
+<script src="chatbot.js?v=4" defer></script>
+<script src="chatbot-ai.js?v=3" defer></script>
+<script src="chatbot-enquiry.js?v=2" defer></script>
+<script src="chatbot-support.js?v=1" defer></script>
+</body>
+</html>
