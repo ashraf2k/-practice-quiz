@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-lK9oSpBkExNlglAqeij0rTg1c/KIUh1Em4nd2IhfvEY=' 'sha256-uMUkCsD/MXZKHJWpCIUc1pYrvGeVsCtD5hQ30dOgQVU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-bLd26Dl8Hw+2YaE29vIVEWRH/FUiMFi46EidkT3VO+4=' 'sha256-uMUkCsD/MXZKHJWpCIUc1pYrvGeVsCtD5hQ30dOgQVU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -445,6 +445,13 @@
     if(/^10BR/i.test(c)) return "igcse"; if(/^11BR/i.test(c)) return "as"; if(/^12BR/i.test(c)) return "a2"; return "";
   }
   function esc(s){ return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function fmtDateShort(ms){ try{ return new Date(ms).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Riyadh" }); }catch(e){ return ""; } }
+  function acctBadge(sub){
+    if(!sub) return "";
+    if(sub.suspended) return "Access paused";
+    var t = sub.label || sub.plan || "Account";
+    return sub.expiryMs ? t + " · Ends " + fmtDateShort(sub.expiryMs) : t;
+  }
   function loadScript(src){ return new Promise(function(res){ var s = document.createElement("script"); s.src = src; s.onload = function(){ res(true); }; s.onerror = function(){ res(false); }; document.head.appendChild(s); }); }
 
   function lessonIndex(lv){
@@ -464,7 +471,8 @@
     $("#nav-acct").innerHTML = '<a class="chip-user" href="quiz.html" title="Open my learning"><i>' + esc(first.charAt(0).toUpperCase()) + '</i><span>' + esc(user.name || "My account") + '</span></a><button class="btn btn-ghost" id="na-out" type="button">Log out</button>';
     $("#na-out").addEventListener("click", function(){ window.PQFirebase.logOut().then(function(){ location.reload(); }); });
     $("#hc-main").textContent = "Continue learning";
-    $("#hero-note").textContent = "Welcome back, " + first + ".";
+    var ab = acctBadge(user.sub);
+    $("#hero-note").textContent = "Welcome back, " + first + "." + (ab ? " " + ab : "");
     if(!lv){
       $("#prog-sub").textContent = "Pick your level at sign-up or join a class to see your progress here.";
       $("#prog-box").innerHTML = '<div class="card guest"><h3>Welcome, ' + esc(first) + '</h3><p>Your progress appears here once you start a course. If your teacher gave you a class code, join your class first.</p><a class="btn btn-primary" href="join.html">Join a class</a></div>';

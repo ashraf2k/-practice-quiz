@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-KSvlEQHZA/dMs9g2uR0Gsk/oEwAbqcWUmYd3kFVMhK0='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-zJqc4GYkYcwo4pcCsoerp2upu169vEQJ3dh4j1ZL/Nw='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -153,6 +153,7 @@
       <div class="ln-hero-body">
         <h2 id="hero-title">Welcome</h2>
         <p class="ln-muted" id="hero-sub"></p>
+        <p class="ln-muted" id="acct-sub" style="margin-top:2px"></p>
         <button class="btn btn-primary" id="btn-continue" type="button">Continue learning</button>
       </div>
     </div>
@@ -259,6 +260,13 @@
 
   function $(id){ return document.getElementById(id); }
   function esc(x){ return E.esc(x); }
+  function fmtDateShort(ms){ try{ return new Date(ms).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Riyadh" }); }catch(e){ return ""; } }
+  function acctBadge(sub){
+    if(!sub) return "";
+    if(sub.suspended) return "Access paused";
+    var t = sub.label || sub.plan || "Account";
+    return sub.expiryMs ? t + " · Ends " + fmtDateShort(sub.expiryMs) : t;
+  }
   var VIEWS = ["view-journey","view-lesson","view-quiz","view-gloss","view-wait"];
   function show(id){ VIEWS.forEach(function(v){ $(v).classList.toggle("hidden", v !== id); }); window.scrollTo(0, 0); }
 
@@ -395,6 +403,7 @@
     var cur = currentLesson(), streak = E.streak(st.days);
     $("hero-title").innerHTML = esc("Hi " + user.name + (doneL ? ", keep going!" : ", let's begin!")) + (streak ? '<span class="ln-streak">🔥 ' + streak + "-day streak</span>" : "") + xpChip();
     $("hero-sub").textContent = doneL + " of " + LESSONS.length + " lessons completed.";
+    $("acct-sub").textContent = acctBadge(user.sub);
     $("btn-continue").textContent = cur ? (doneL ? "Continue: " : "Start: ") + "Topic " + topicNum(cur) + " · " + cur.code + " " + cur.title : "All lessons complete 🎉";
     $("btn-continue").disabled = !cur;
 
