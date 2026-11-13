@@ -10,10 +10,14 @@
       tbl(["Component", "Job", "Examples"], [["Input device", "gets data into the computer", "keyboard, touchscreen, microphone, sensor"], ["Output device", "presents results to the user", "monitor, printer, speaker"], ["Primary memory", "directly accessed by the CPU; holds the program and data being used now", "RAM, ROM"], ["Secondary storage", "keeps data permanently when the power is off (including <b>removable</b> storage)", "SSD, hard disk, optical disc, USB flash drive"]]) +
       "<p>An <b>embedded system</b> is a computer built into a device to do <b>one dedicated job</b> (a washing machine, a car's braking system, a health monitor).</p>" +
       "<h4>Drawbacks of embedded systems</h4>" +
-      "<ul><li>The user finds it <b>difficult to change or update the firmware</b>.</li><li>Faults are hard to fix: <b>repair is a specialist, expensive task</b>.</li><li>Functionality <b>cannot be easily extended</b> or adapted to another task.</li><li>Faulty or outdated devices are thrown away, causing <b>e-waste</b>.</li></ul>",
+      "<ul><li>The user finds it <b>difficult to change or update the firmware</b>.</li><li>Faults are hard to fix: <b>repair is a specialist, expensive task</b>.</li><li>Functionality <b>cannot be easily extended</b> or adapted to another task.</li><li>Faulty or outdated devices are thrown away, causing <b>e-waste</b>.</li></ul>" +
+      ASA.linkDiagram([{icon:"⌨️",label:"Input"},{icon:"🧠",label:"Primary memory"},{icon:"💾",label:"Secondary storage"},{icon:"🖥️",label:"Output"}], null, "Data flows one way through the four kinds of component &mdash; watch where it stops to be kept (storage) on its way to the output."),
     example:
       "<p>A microwave oven contains an embedded system: its keypad (input) and display (output) are connected to a small processor whose program is in ROM. You cannot install a game on it &mdash; that is the point and the limitation.</p>" +
-      "<p><b>A touchscreen is both</b> an input and an output device. There are two main types: a <b>resistive</b> screen has two layers that touch and complete a circuit; a <b>capacitive</b> screen has several layers and the touch causes a change in the electric current. In both, a microprocessor identifies the <b>coordinates</b> of the touch.</p>",
+      "<p><b>A touchscreen is both</b> an input and an output device. There are two main types: a <b>resistive</b> screen has two layers that touch and complete a circuit; a <b>capacitive</b> screen has several layers and the touch causes a change in the electric current. In both, a microprocessor identifies the <b>coordinates</b> of the touch.</p>" +
+      ASA.compareDiagram(
+        {icon:"👆",label:"Resistive",note:"your finger pushes two layers together to COMPLETE a circuit",active:"lo"},
+        {icon:"👆",label:"Capacitive",note:"your finger CHANGES the electric current in several layers",active:"hi"}),
     checks:[
       mc("Which is a feature of an embedded system?", "It does one dedicated task", ["It runs any program the user installs", "It has no processor", "It needs a keyboard and monitor"], "Embedded systems are built for a specific job."),
       mc("Which is secondary (permanent) storage?", "Solid state drive", ["RAM", "CPU register", "Cache"], "Secondary storage keeps data when the power is off."),
@@ -30,7 +34,8 @@
       "<p>The CPU works millions of times faster than a printer. A <b>buffer</b> is a temporary store in memory that sits between the two so the fast device does not have to wait.</p>" +
       "<ol><li>The computer sends the print data to the <b>buffer</b> at <b>computer speed</b>.</li><li>The buffer passes the data to the printer at <b>printer speed</b>.</li><li>The user and the processor can <b>carry on with other work</b> instead of waiting for the slower printer.</li><li>When the buffer is <b>empty</b>, an <b>interrupt</b> is sent to the computer asking for more data.</li></ol>" +
       "<h4>Ports</h4>" +
-      tbl(["Port", "Used for", "Key feature"], [["USB", "keyboards, mice, flash drives, VR headsets", "universal standard; fast data transfer"], ["HDMI", "monitors, TVs, projectors", "carries <b>video and audio on one cable</b>"], ["VGA", "older monitors / projectors", "analogue video only"]]),
+      tbl(["Port", "Used for", "Key feature"], [["USB", "keyboards, mice, flash drives, VR headsets", "universal standard; fast data transfer"], ["HDMI", "monitors, TVs, projectors", "carries <b>video and audio on one cable</b>"], ["VGA", "older monitors / projectors", "analogue video only"]]) +
+      ASA.bufferDiagram({icon:"🖥️",label:"Computer (fast)"}, {icon:"🖨️",label:"Printer (slow)"}, "Watch the tank fill quickly from the computer, then drain slowly out to the printer &mdash; that gap is exactly why the buffer is needed."),
     example:
       "<p>Sending a 100-page document to a laser printer: the data goes to the print buffer in a fraction of a second. You carry on typing while the printer works through the buffer. When the buffer empties, the printer sends an interrupt and the computer sends the next chunk.</p>" +
       "<p>For a justified port question you need <b>two parts</b>: the correct name <i>and</i> a matching reason &mdash; USB: fast transfer speeds; HDMI: video and audio on the same cable.</p>",
@@ -54,7 +59,10 @@
   { id:"3.1.3a", code:"3.1.3", title:"RAM and ROM: SRAM, DRAM, EPROM and EEPROM",
     concept:
       tbl(["", "RAM (random access memory)", "ROM (read only memory)"], [["Volatile?", "<b>volatile</b>: contents lost when power is off", "<b>non-volatile</b>: contents kept"], ["Holds", "programs and data in use now (read and write)", "the boot-up instructions (firmware); read only in normal use"]]) +
-      tbl(["Type", "Key facts"], [["SRAM (static)", "faster access time, does <b>not need to be refreshed</b>, more expensive, lower bit density; used for <b>cache</b> in the CPU"], ["DRAM (dynamic)", "needs to be <b>refreshed</b> constantly, slower, <b>cheaper</b> and <b>higher bit density</b> (more data per chip); used for main memory"], ["PROM", "programmed <b>once</b> after manufacture"], ["EPROM", "erased by <b>ultraviolet light</b>; must be <b>removed from the circuit board</b>; erases <b>all</b> the data"], ["EEPROM", "erased by an <b>electrical signal</b>; stays in the circuit; can erase <b>parts</b> of the data; used for firmware that is updated"]]),
+      tbl(["Type", "Key facts"], [["SRAM (static)", "faster access time, does <b>not need to be refreshed</b>, more expensive, lower bit density; used for <b>cache</b> in the CPU"], ["DRAM (dynamic)", "needs to be <b>refreshed</b> constantly, slower, <b>cheaper</b> and <b>higher bit density</b> (more data per chip); used for main memory"], ["PROM", "programmed <b>once</b> after manufacture"], ["EPROM", "erased by <b>ultraviolet light</b>; must be <b>removed from the circuit board</b>; erases <b>all</b> the data"], ["EEPROM", "erased by an <b>electrical signal</b>; stays in the circuit; can erase <b>parts</b> of the data; used for firmware that is updated"]]) +
+      ASA.compareDiagram(
+        {icon:"🧠",label:"RAM",note:"volatile &mdash; watch its data flicker away when the power is off",active:"flicker"},
+        {icon:"💿",label:"ROM",note:"non-volatile &mdash; its data stays put, power or no power",active:"hi"}),
     example:
       "<p>A laptop uses <b>SRAM</b> for its cache because the CPU needs the fastest possible access (no refresh delay), but uses <b>DRAM</b> for its main memory because it is cheaper and stores more per chip.</p>" +
       "<p>A VR headset keeps its firmware in <b>EEPROM</b>, so the manufacturer can send an update that changes the firmware without removing the chip or erasing it completely first.</p>",
@@ -75,7 +83,9 @@
   { id:"3.1.4a", code:"3.1.4", title:"Sensors, monitoring and control systems",
     concept:
       "<p>A <b>sensor</b> measures a physical quantity (temperature, pressure, light, infra-red, sound, moisture, motion). Its analogue signal is converted to digital for the processor. An <b>actuator</b> is an output device that makes something move or change (a motor, a valve, a heater, a brake).</p>" +
-      tbl(["", "Monitoring system", "Control system"], [["Purpose", "checks and reports values; may warn the user", "uses the readings to <b>change</b> the physical process automatically"], ["Actuators", "none (an alarm or sign is only an indicator)", "<b>yes</b>: they change the environment"], ["Feedback", "<b>no feedback</b>: the output does not affect the input", "<b>feedback</b>: the output changes the next input (a closed loop)"], ["Example", "hospital heart monitor; bridge warning sign", "central heating thermostat; automatic braking"]]),
+      tbl(["", "Monitoring system", "Control system"], [["Purpose", "checks and reports values; may warn the user", "uses the readings to <b>change</b> the physical process automatically"], ["Actuators", "none (an alarm or sign is only an indicator)", "<b>yes</b>: they change the environment"], ["Feedback", "<b>no feedback</b>: the output does not affect the input", "<b>feedback</b>: the output changes the next input (a closed loop)"], ["Example", "hospital heart monitor; bridge warning sign", "central heating thermostat; automatic braking"]]) +
+      ASA.linkDiagram([{icon:"🌡️",label:"Sensor"},{icon:"🧠",label:"Processor"},{icon:"⚠️",label:"Warning sign"}], null, "<b>Monitoring:</b> data flows one way to a display or alarm. Nothing loops back to change the sensor's next reading.") +
+      ASA.feedbackLoopDiagram([{icon:"🌡️",label:"Sensor"},{icon:"🧠",label:"Processor"},{icon:"⚙️",label:"Actuator"}], "<b>Control:</b> the loop never stops &mdash; the actuator's action changes the environment, which changes the sensor's NEXT reading. That closed loop is feedback."),
     example:
       "<p><b>Central heating:</b> the temperature sensor reads 17&deg;C (input). The processor compares it with the target of 20&deg;C and switches the heater actuator on. The room warms, so the next sensor reading is higher (the output changed the input = <b>feedback</b>). At 20&deg;C the heater switches off.</p>" +
       "<p>A bridge warning sign that just lights up has <b>no actuator and no feedback</b>: switching the sign on does not change the height or weight readings, so it is a <b>monitoring</b> system. <b>Careful:</b> the mark scheme gives <i>no mark for naming the system</i>, only for the justification.</p>",
@@ -96,7 +106,8 @@
   { id:"3.2.1a", code:"3.2.1", title:"Logic gates and truth tables",
     concept:
       tbl(["Gate", "Output is 1 when&hellip;", "Memory hook"], [["NOT", "the input is 0 (it flips the input)", "opposite"], ["AND", "<b>both</b> inputs are 1", "all must be 1"], ["OR", "<b>at least one</b> input is 1", "any one"], ["NAND", "NOT AND: 0 only when both inputs are 1", "AND, then flip"], ["NOR", "NOT OR: 1 only when both inputs are 0", "OR, then flip"], ["XOR", "the inputs are <b>different</b>", "one or the other, not both"]]) +
-      "<p><b>Truth table method:</b> a table with n inputs has 2<sup>n</sup> rows (3 inputs = 8 rows, in binary counting order 000 to 111). Work out each <b>bracket in its own working column</b>, then combine them.</p>",
+      "<p><b>Truth table method:</b> a table with n inputs has 2<sup>n</sup> rows (3 inputs = 8 rows, in binary counting order 000 to 111). Work out each <b>bracket in its own working column</b>, then combine them.</p>" +
+      ASA.gateCycle("XOR", 0, 1, 1, 0, "X is only lit when A and B disagree &mdash; that's the 'different inputs' idea in a single glance."),
     example:
       "<p>For <code>X = (A XOR B) NAND (A AND (B XOR C))</code> take row A=1, B=0, C=1:</p>" +
       "<ul><li>A XOR B = 1 XOR 0 = <b>1</b></li><li>B XOR C = 0 XOR 1 = 1, and A AND 1 = <b>1</b></li><li>1 NAND 1 = <b>0</b></li></ul>" +
@@ -118,7 +129,8 @@
       "<ul><li><b>Expression &rarr; circuit:</b> work from the innermost brackets outwards. Each operator in the expression is one gate, so count the gates (<code>NOT ((A AND B) OR (C AND D))</code> needs AND, AND, OR, NOT).</li><li><b>Circuit &rarr; expression:</b> label the output of each gate and write the expression gate by gate from the inputs to the output. <b>Do not simplify</b> unless the question asks.</li><li><b>Table &rarr; expression:</b> look for a pattern in the output column. If X is 1 exactly when B is 0, then X = NOT B.</li><li><b>Problem &rarr; expression:</b> words become gates: 'and' &rarr; AND, 'or' &rarr; OR, 'not' &rarr; NOT, 'but not both' &rarr; XOR.</li></ul>",
     example:
       "<p>Truth table: X = 1 when (A,B,C) = 000, 001, 100, 101. Both rows with B = 0 give 1, and all rows with B = 1 give 0. So X is simply <b>NOT B</b>; A and C make no difference.</p>" +
-      "<p><b>Problem statement:</b> 'An alarm sounds if the door is open AND the system is armed, OR if the panic button is pressed.' &rarr; <code>X = (D AND S) OR P</code>.</p>",
+      "<p><b>Problem statement:</b> 'An alarm sounds if the door is open AND the system is armed, OR if the panic button is pressed.' &rarr; <code>X = (D AND S) OR P</code>.</p>" +
+      ASA.circuitDiagram(["D: door open", "S: armed"], "AND", "P: panic", "OR", "X: alarm", "Watch the highlight travel gate to gate: D and S reach the AND gate first, then its result joins P at the OR gate to produce X."),
     checks:[
       mc("A truth table has output 1 only when A and B are both 0 (for any C). Which expression matches?", "A NOR B", ["A NAND B", "A OR B", "A XOR B"], "NOR is 1 only when both inputs are 0."),
       mc("How many gates are needed to draw NOT ((A AND B) OR (C AND D))?", "4", ["2", "3", "5"], "AND, AND, OR, NOT."),

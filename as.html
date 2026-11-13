@@ -198,8 +198,53 @@
   .an-mesh-dot{ fill:var(--accent); }
   .an-mesh-node{ position:absolute; width:30px; height:30px; margin:-15px 0 0 -15px; border-radius:8px; background:var(--surface); border:1.5px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:14px; }
 
-  @media (prefers-reduced-motion:reduce){ .an-wrap *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; } }
   @media (max-width:420px){ .an-ic{ width:36px; height:36px; font-size:17px; } .an-labels span{ flex-basis:36px; font-size:9.5px; } .an-box{ width:70px; } }
+
+  /* --- animated diagrams for Chapter 3 (hardware & logic) --- */
+  .an-flicker{ animation:an-flicker 1.8s steps(1,end) infinite; }
+  @keyframes an-flicker{ 0%,38%{ opacity:1 } 40%,58%{ opacity:.15 } 60%,100%{ opacity:1 } }
+
+  .an-buffer{ display:flex; align-items:flex-end; justify-content:center; gap:14px; }
+  .an-buf-tank{ position:relative; width:46px; height:72px; border:2px solid var(--accent); border-radius:6px; background:var(--surface); overflow:hidden; flex:0 0 auto; }
+  .an-buf-fill{ position:absolute; left:0; right:0; bottom:0; background:var(--accent-tint); border-top:2px solid var(--accent); animation:an-buf-level 3.2s ease-in-out infinite; }
+  @keyframes an-buf-level{ 0%{ height:6% } 45%{ height:92% } 55%{ height:92% } 100%{ height:6% } }
+  .an-buf-col{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .an-buf-col span{ font-size:11px; font-weight:700; color:var(--ink); text-align:center; }
+  .an-buf-arrow{ font-size:18px; color:var(--muted); align-self:center; margin-bottom:26px; }
+  .an-buf-arrow.in{ animation:an-buf-pulse 3.2s ease-in-out infinite; }
+  .an-buf-arrow.out{ animation:an-buf-pulse 3.2s ease-in-out infinite; animation-delay:.5s; }
+  @keyframes an-buf-pulse{ 0%,100%{ opacity:.25 } 15%{ opacity:1 } 30%{ opacity:.25 } }
+
+  .an-loop{ position:relative; width:180px; height:140px; margin:6px auto 2px; }
+  .an-loop-svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .an-loop-svg path{ fill:none; stroke:var(--line); stroke-width:2; }
+  .an-loop-dot{ fill:var(--accent); }
+  .an-loop-node{ position:absolute; width:46px; height:46px; margin:-23px 0 0 -23px; border-radius:10px; background:var(--surface); border:1.5px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:19px; text-align:center; }
+  .an-loop-node span{ display:block; font-size:9px; font-weight:700; color:var(--ink); margin-top:1px; }
+
+  .an-gate{ display:flex; align-items:center; justify-content:center; gap:14px; }
+  .an-gcol{ display:flex; flex-direction:column; gap:10px; }
+  .an-lamp{ width:36px; height:36px; border-radius:50%; border:2px solid var(--line); background:var(--bg); color:var(--muted); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; }
+  .an-lamp.out{ width:42px; height:42px; }
+  .an-lamp.a{ animation:an-sig-a 8s linear infinite; }
+  .an-lamp.b{ animation:an-sig-b 8s linear infinite; }
+  .an-lamp.out{ animation:an-sig-out 8s linear infinite; }
+  .an-gbox{ padding:14px 16px; border:2px solid var(--accent); border-radius:10px; background:var(--accent-tint); font-weight:800; color:var(--accent-dark); font-size:13px; }
+  .an-garrow{ color:var(--muted); font-size:17px; }
+  @keyframes an-sig-a{ 0%,49.9%{ background:var(--bg); border-color:var(--line); color:var(--muted); } 50%,100%{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); } }
+  @keyframes an-sig-b{ 0%,24.9%{ background:var(--bg); border-color:var(--line); color:var(--muted); } 25%,49.9%{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); } 50%,74.9%{ background:var(--bg); border-color:var(--line); color:var(--muted); } 75%,100%{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); } }
+  @keyframes an-sig-out{ 0%,24.9%{ background:var(--bg); border-color:var(--line); color:var(--muted); } 25%,74.9%{ background:var(--diff-moderate); border-color:var(--diff-moderate); color:var(--on-accent); } 75%,100%{ background:var(--bg); border-color:var(--line); color:var(--muted); } }
+
+  .an-circuit{ display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; }
+  .an-ccol{ display:flex; flex-direction:column; gap:6px; }
+  .an-cpin{ display:flex; align-items:center; gap:5px; padding:5px 9px; border:1.5px solid var(--line); border-radius:8px; background:var(--surface); font-size:11.5px; font-weight:700; white-space:nowrap; color:var(--ink); }
+  .an-cgate{ padding:12px 13px; border:2px solid var(--accent); border-radius:10px; background:var(--accent-tint); font-weight:800; color:var(--accent-dark); font-size:12.5px; text-align:center; }
+  .an-cgate.g1{ animation:an-cpulse1 4s ease-in-out infinite; }
+  .an-cgate.g2{ animation:an-cpulse2 4s ease-in-out infinite; }
+  @keyframes an-cpulse1{ 0%,8%{ box-shadow:none } 15%,33%{ box-shadow:0 0 0 5px var(--accent-tint) } 40%,100%{ box-shadow:none } }
+  @keyframes an-cpulse2{ 0%,45%{ box-shadow:none } 52%,68%{ box-shadow:0 0 0 5px var(--accent-tint) } 75%,100%{ box-shadow:none } }
+
+  @media (prefers-reduced-motion:reduce){ .an-wrap *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; } }
 </style>
 <link rel="stylesheet" href="theme.css?v=20261027a" />
 <link rel="stylesheet" href="chatbot.css?v=2">

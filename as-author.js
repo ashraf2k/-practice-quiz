@@ -77,8 +77,9 @@
         "<p class='an-cap'><b>" + esc(label) + "</b></p>" + (caption ? "<p class='an-cap'>" + caption + "</p>" : "") + "</div>";
     },
     // left/right = {icon,label,note,active:"hi"|"lo"} -- "hi" side gets a gentle pulsing glow to show where the work/activity is
+    // active: "hi" glows gently (more work/control here), "flicker" fades in and out repeatedly (e.g. volatile memory losing its data)
     compareDiagram: function(left, right, caption){
-      function side(s){ return "<div class='an-side'><div class='an-ic big" + (s.active === "hi" ? " an-glow" : "") + "'>" + s.icon + "</div><b>" + esc(s.label) + "</b><small>" + s.note + "</small></div>"; }
+      function side(s){ var cls = s.active === "hi" ? " an-glow" : s.active === "flicker" ? " an-flicker" : ""; return "<div class='an-side'><div class='an-ic big" + cls + "'>" + s.icon + "</div><b>" + esc(s.label) + "</b><small>" + s.note + "</small></div>"; }
       return "<div class='an-wrap'><div class='an-compare'>" + side(left) + "<div class='an-vs'>vs</div>" + side(right) + "</div>" + (caption ? "<p class='an-cap'>" + caption + "</p>" : "") + "</div>";
     },
     // star topology: hub in the middle, 4 devices around it, a packet travels hub <-> one device only
@@ -112,6 +113,51 @@
         "</svg>" +
         "<div class='an-mesh-node' style='left:84px;top:15px'>💻</div><div class='an-mesh-node' style='left:20px;top:80px'>💻</div>" +
         "<div class='an-mesh-node' style='left:148px;top:80px'>💻</div><div class='an-mesh-node' style='left:84px;top:135px'>💻</div>" +
+        "</div>" + (caption ? "<p class='an-cap'>" + caption + "</p>" : "") + "</div>";
+    },
+
+    // ---- more animated diagrams, for Chapter 3 (hardware & logic) ----
+    // a fast device (CPU) fills a buffer "tank" which then drains slowly out to a slow device (e.g. a printer), looping
+    bufferDiagram: function(fast, slow, caption){
+      return "<div class='an-wrap'><div class='an-buffer'>" +
+        "<div class='an-buf-col'><div class='an-ic'>" + fast.icon + "</div><span>" + esc(fast.label) + "</span></div>" +
+        "<div class='an-buf-arrow in'>&rarr;</div>" +
+        "<div class='an-buf-col'><div class='an-buf-tank'><div class='an-buf-fill'></div></div><span>Buffer</span></div>" +
+        "<div class='an-buf-arrow out'>&rarr;</div>" +
+        "<div class='an-buf-col'><div class='an-ic'>" + slow.icon + "</div><span>" + esc(slow.label) + "</span></div>" +
+        "</div>" + (caption ? "<p class='an-cap'>" + caption + "</p>" : "") + "</div>";
+    },
+    // a closed feedback loop: 3 stages arranged in a triangle with a dot continuously travelling round and round (sensor -> processor -> actuator -> back to sensor)
+    feedbackLoopDiagram: function(stages, caption){
+      var n = [{x:90,y:18},{x:18,y:122},{x:162,y:122}];
+      var nodes = "", path = "";
+      stages.slice(0, 3).forEach(function(s, i){
+        nodes += "<div class='an-loop-node' style='left:" + n[i].x + "px;top:" + n[i].y + "px'>" + s.icon + "<span>" + esc(s.label) + "</span></div>";
+        path += (i === 0 ? "M" : "L") + n[i].x + "," + n[i].y + " ";
+      });
+      path += "L" + n[0].x + "," + n[0].y;
+      return "<div class='an-wrap'><div class='an-loop'>" +
+        "<svg viewBox='0 0 180 140' class='an-loop-svg'><path d='" + path + "'/>" +
+        "<circle class='an-loop-dot' r='5'><animateMotion dur='3.6s' repeatCount='indefinite' path='" + path + "'/></circle></svg>" +
+        nodes + "</div>" + (caption ? "<p class='an-cap'>" + caption + "</p>" : "") + "</div>";
+    },
+    // a small logic-gate demo: inputs A and B cycle automatically through all four combinations (00,01,10,11) and the output lamp lights up exactly when the named 2-input gate says it should
+    gateCycle: function(gateName, out00, out01, out10, out11, caption){
+      return "<div class='an-wrap'><div class='an-gate'>" +
+        "<div class='an-gcol'><div class='an-lamp a'>A</div><div class='an-lamp b'>B</div></div>" +
+        "<div class='an-garrow'>&rarr;</div><div class='an-gbox'>" + esc(gateName) + "</div><div class='an-garrow'>&rarr;</div>" +
+        "<div class='an-lamp out'>X</div>" +
+        "</div>" + (caption ? "<p class='an-cap'>Watch A and B cycle through 00, 01, 10, 11 &mdash; X lights up exactly when " + esc(gateName) + "'s truth table says 1. " + caption + "</p>" : "") + "</div>";
+    },
+    // a short logic circuit made of two chained gates (e.g. (D AND S) OR P), with the highlight travelling gate to gate to show the signal propagating through
+    circuitDiagram: function(pins1, gate1, pin2, gate2, outLabel, caption){
+      var p1 = pins1.map(function(p){ return "<div class='an-cpin'>" + esc(p) + "</div>"; }).join("");
+      return "<div class='an-wrap'><div class='an-circuit'>" +
+        "<div class='an-ccol'>" + p1 + "</div><div class='an-garrow'>&rarr;</div>" +
+        "<div class='an-cgate g1'>" + esc(gate1) + "</div><div class='an-garrow'>&rarr;</div>" +
+        "<div class='an-cpin'>" + esc(pin2) + "</div><div class='an-garrow'>&rarr;</div>" +
+        "<div class='an-cgate g2'>" + esc(gate2) + "</div><div class='an-garrow'>&rarr;</div>" +
+        "<div class='an-cpin'>" + esc(outLabel) + "</div>" +
         "</div>" + (caption ? "<p class='an-cap'>" + caption + "</p>" : "") + "</div>";
     }
   };
