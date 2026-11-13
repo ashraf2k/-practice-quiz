@@ -11,7 +11,8 @@
       "<h4>Benefits of networking</h4>" +
       "<ul><li>Share <b>files and data</b>, and communicate (email, messaging).</li><li>Share <b>resources</b>: printers, scanners, software (applications) and internet access.</li><li><b>Central management</b>: back-up, security and updates can be done from one place.</li></ul>" +
       "<h4>A LAN (local area network)</h4>" +
-      "<ul><li>Covers a <b>small geographical area</b> (one building or site).</li><li>The infrastructure (cables, switches) is <b>privately owned</b> by the organisation; it is not controlled by external organisations.</li><li>Can use wired or wireless connections and has a high data transfer rate.</li></ul>",
+      "<ul><li>Covers a <b>small geographical area</b> (one building or site).</li><li>The infrastructure (cables, switches) is <b>privately owned</b> by the organisation; it is not controlled by external organisations.</li><li>Can use wired or wireless connections and has a high data transfer rate.</li></ul>" +
+      ASA.linkDiagram([{icon:"💻",label:"PC 1"},{icon:"💻",label:"PC 2"},{icon:"🔀",label:"Switch"},{icon:"🖨️",label:"Printer"},{icon:"🖥️",label:"Server"}], null, "Watch the dots: every device has its own cable to the switch &mdash; that's the LAN, all inside one building."),
     example:
       "<p>A school computer room: 30 computers, 2 printers and a file server, all joined to a switch in the same building. Students share one printer, save work on the server so the school can back it up every night, and the IT team installs software once for everybody.</p>" +
       "<p><b>Exam habit:</b> 'give two benefits' needs <b>two different ideas</b>. 'Share files' and 'share data' are the same idea, so they earn one mark. Pair 'share files' with 'share a printer' or 'central backup'.</p>",
@@ -36,7 +37,9 @@
       "<h4>Transmission media</h4>" +
       tbl(["Medium", "How it carries data"], [["Copper cable (twisted pair, coaxial)", "electrical signals"], ["Fibre optic cable", "pulses of light (high speed, long distance, no electrical interference)"], ["Radio waves / microwaves (including satellite links)", "electromagnetic waves on different frequencies, no cable needed"]]) +
       "<h4>The cell phone network</h4>" +
-      "<ul><li>The land is split into <b>cells</b>; each cell has a <b>tower with an antenna</b>.</li><li>Data goes between the phone and the tower using <b>low power radio signals (wireless)</b>.</li><li>Many devices can use the same tower at the same time.</li></ul>",
+      "<ul><li>The land is split into <b>cells</b>; each cell has a <b>tower with an antenna</b>.</li><li>Data goes between the phone and the tower using <b>low power radio signals (wireless)</b>.</li><li>Many devices can use the same tower at the same time.</li></ul>" +
+      ASA.linkDiagram([{icon:"🏢",label:"Office LAN"},{icon:"☁️",label:"The internet (WAN)"},{icon:"🏢",label:"Branch LAN"}], ["wifi","wifi"], "Two LANs, far apart, joined across the WAN &mdash; that's the wide area network.") +
+      ASA.pulseDiagram("📡", "Cell tower", "The radio waves spread out from the tower so every phone in range of it can connect."),
     example:
       "<p>A delivery driver's smartphone connects to the cell tower nearest to her. The tower passes the data on towards the company's server over the wider network. As she drives into the next cell, the signal is picked up by the next tower.</p>" +
       "<p><b>Answering 'explain how data is transmitted':</b> write a chain of events in order: cells, tower and antenna, wireless radio signals, many devices at once.</p>",
@@ -58,7 +61,8 @@
     concept:
       "<p>In the <b>client-server model</b> a <b>server</b> is a powerful computer that stores data and provides services. <b>Clients</b> are the computers (or browsers) that <b>send requests</b> to the server; the server <b>performs the action</b>, updates its data and <b>sends the results back</b>.</p>" +
       "<p>In the <b>peer-to-peer (P2P) model</b> there is <b>no central server</b>. Every computer (peer) is both a client and a server: each stores its own files and can share them directly with others.</p>" +
-      tbl(["", "Client-server", "Peer-to-peer"], [["Control", "central server manages users, data, security", "no central control; every peer is equal"], ["Back-up and security", "easier: done on the server", "harder: every computer must be looked after"], ["If it fails", "server down means service stops", "other peers keep working"], ["Cost / set-up", "server and network manager needed", "cheap and simple for a few computers"], ["Examples", "web, email, online games, databases", "file sharing, small home or office networks"]]),
+      tbl(["", "Client-server", "Peer-to-peer"], [["Control", "central server manages users, data, security", "no central control; every peer is equal"], ["Back-up and security", "easier: done on the server", "harder: every computer must be looked after"], ["If it fails", "server down means service stops", "other peers keep working"], ["Cost / set-up", "server and network manager needed", "cheap and simple for a few computers"], ["Examples", "web, email, online games, databases", "file sharing, small home or office networks"]]) +
+      ASA.flowDiagram({icon:"💻",label:"Client"}, {icon:"🖥️",label:"Server"}, "request", "response", "The client asks, the server does the work and answers &mdash; the arrows never cross."),
     example:
       "<p><b>An online game:</b> the web server stores each player's data. The player's web browser is the <b>client</b> and sends requests over the internet. The server performs the action in the game, updates the game data and sends the result back to the player.</p>" +
       "<p><b>'Explain why the statement is correct'</b> needs the <b>reasons applied to the scenario</b>: name the server, name the client, and describe the request and the response.</p>",
@@ -80,7 +84,11 @@
         ["Processing", "The <b>server</b> performs all (or most) of the processing. The client only sends requests and displays the results.", "The client does <b>most of its own processing</b> independently. The server does little (for example storing shared files)."],
         ["Storage", "Data and software are stored on the <b>server</b>, not on the client", "Software and data are installed <b>locally</b>"],
         ["Needs", "A reliable network or internet connection and the server being up; <b>few local resources</b> (small memory and processor)", "A powerful computer; can often work without the network"],
-        ["Typical use", "Web apps, remote desktops, exam-marking software, cheap terminals in a library", "A designer's workstation, a gaming PC, a laptop with installed software"]]),
+        ["Typical use", "Web apps, remote desktops, exam-marking software, cheap terminals in a library", "A designer's workstation, a gaming PC, a laptop with installed software"]]) +
+      ASA.compareDiagram(
+        {icon:"💻",label:"Thin client",note:"little work here &mdash; sends requests, lets the SERVER do the processing",active:"lo"},
+        {icon:"💻",label:"Thick client",note:"most of the processing happens right here, on the client itself",active:"hi"},
+        "The glow marks where the work is actually done."),
     example:
       "<p><b>Exam markers using a thin client:</b> the exam papers are held on the server and not on the examiner's computer (data not stored on the client). A basic laptop will do, because the marking software needs few local resources. But if the server goes down, or there is no network, the examiner cannot mark.</p>" +
       "<p><b>Always link each characteristic to the scenario</b> (examiners, papers, marking). The mark scheme gives one mark for the characteristic and one for the use in this software.</p>",
@@ -101,7 +109,9 @@
       "<h4>Star</h4>" +
       "<ul><li>Every device has <b>its own cable to a central switch (or router)</b>, and no other connections.</li><li><b>Packets:</b> the sending device sends the packets to the switch; the switch <b>checks the destination address</b> of each packet and forwards it <b>only to the intended receiver</b>.</li><li>One cable fails: only that device is cut off. The switch fails: the whole network stops.</li></ul>" +
       "<h4>Bus</h4>" +
-      "<ul><li>All devices connect to <b>one shared backbone cable</b>, with a terminator at each end.</li><li>Only one device can transmit at a time, so <b>collisions</b> can happen. A network on a bus uses <b>Ethernet with CSMA/CD</b> to detect and manage them.</li><li>If the backbone breaks the whole network fails. Cheap and simple for a small number of devices.</li></ul>",
+      "<ul><li>All devices connect to <b>one shared backbone cable</b>, with a terminator at each end.</li><li>Only one device can transmit at a time, so <b>collisions</b> can happen. A network on a bus uses <b>Ethernet with CSMA/CD</b> to detect and manage them.</li><li>If the backbone breaks the whole network fails. Cheap and simple for a small number of devices.</li></ul>" +
+      ASA.starDiagram("<b>Star:</b> the packet goes from a device to the switch, then straight to the ONE device it's addressed to &mdash; the others never see it.") +
+      ASA.busDiagram("<b>Bus:</b> there's only one shared cable, so a packet travels its WHOLE length and every device ‘hears’ it go past."),
     example:
       "<p>Five computers and a server joined to a switch: that is a <b>star</b>. Computer A sends a file to the server. The packets go to the switch, the switch reads the destination address and sends them only to the server, so the other computers see none of the traffic.</p>" +
       "<p><b>Exam habit:</b> in a bus network, say the three CSMA/CD ideas: the device <b>listens</b> and sends only when the line is idle; if a <b>collision</b> is detected it <b>stops and sends a jamming signal</b>; each device then waits a <b>random time</b> before trying again (longer if there are more collisions).</p>",
@@ -125,7 +135,8 @@
       tbl(["", "Full mesh", "Partial mesh"], [["Connections", "every device linked to every other device", "some devices linked to several others, some to only one"], ["Cost", "very expensive: n(n&minus;1)/2 links", "cheaper"], ["Reliability", "highest: many alternative routes", "good"]]) +
       "<h4>Advantages of a mesh over a bus</h4>" +
       "<ul><li>If one line goes down there are <b>more routes available</b>.</li><li>No / fewer <b>collisions</b>, and a dedicated connection between nodes, so it is <b>more secure</b>.</li><li>New nodes can be added <b>without interrupting</b> the other nodes.</li></ul>" +
-      "<p>A <b>hybrid topology</b> combines two or more topologies, for example several star networks whose switches are joined by a bus or a mesh. Large organisations use hybrids because each part can use the topology that suits it.</p>",
+      "<p>A <b>hybrid topology</b> combines two or more topologies, for example several star networks whose switches are joined by a bus or a mesh. Large organisations use hybrids because each part can use the topology that suits it.</p>" +
+      ASA.meshDiagram("Every device is linked to several others, so the packet can hop along more than one possible route to get where it's going."),
     example:
       "<p>Five computers in a full mesh need 5 &times; 4 &divide; 2 = <b>10 cables</b>. Add a sixth and you need 15. This is why a full mesh is only used where reliability matters more than cost.</p>" +
       "<p>The internet itself is a partial mesh of routers: if one link fails, packets are sent along another route.</p>",
@@ -151,7 +162,10 @@
         ["Cost", "cheaper: you share the infrastructure and pay for what you use", "more expensive: the organisation pays for its own dedicated infrastructure"],
         ["Control and security", "provider controls security, back-ups and updates", "<b>greater control</b> over security, privacy and back-ups; not reliant on a third party"],
         ["Capacity", "very easily scaled", "can be tailored / scaled to the company's requirements"],
-        ["Example", "online storage and email services used by the public", "a company's own storage for its employees' work"]]),
+        ["Example", "online storage and email services used by the public", "a company's own storage for its employees' work"]]) +
+      ASA.compareDiagram(
+        {icon:"☁️",label:"Public cloud",note:"shared infrastructure &mdash; anyone can sign up and use it",active:"lo"},
+        {icon:"🔒",label:"Private cloud",note:"dedicated to ONE organisation only &mdash; more control, more cost",active:"hi"}),
     example:
       "<p>An online school sells courses to students in many countries. It uses a <b>public cloud</b> because the courses must be available to anyone, on the internet, and sharing infrastructure with other companies is more economic.</p>" +
       "<p>A design company that stores confidential client work chooses a <b>private cloud</b>: it is not reliant on a third party, it controls security and back-up, and it can tailor the storage to its needs.</p>",
@@ -179,7 +193,8 @@
         ["Easy to <b>share and collaborate</b> with colleagues", "Provider problems (<b>downtime</b>, technical faults) stop access"],
         ["Capacity can be <b>quickly increased</b> when needed; a small amount may be free", "Extra storage costs money, so it can be <b>more expensive in the long term</b>"],
         ["", "Possible <b>security</b> concerns; compatibility issues if you want to move the data"]]) +
-      "<p><b>Remember:</b> a benefit or a drawback must be a <b>real consequence</b> ('easier to share files'), not just the word 'good'.</p>",
+      "<p><b>Remember:</b> a benefit or a drawback must be a <b>real consequence</b> ('easier to share files'), not just the word 'good'.</p>" +
+      ASA.flowDiagram({icon:"💻",label:"Your device"}, {icon:"☁️",label:"Cloud server"}, "upload", "download", "Handy when it works &mdash; but every trip depends on having an internet connection."),
     example:
       "<p>A restaurant stores its menus and orders in the cloud. <b>Benefit:</b> every waiter's tablet can reach the same menu, and the provider backs the data up. <b>Drawback:</b> if the restaurant's internet connection goes down at lunch, the staff cannot see the menu or take orders.</p>",
     checks:[
@@ -201,7 +216,8 @@
       "<p>A LAN can connect devices by <b>cables</b> (wired, usually Ethernet) or by <b>radio waves</b> (wireless, Wi-Fi).</p>" +
       tbl(["", "Wired", "Wireless"], [["Speed and reliability", "usually <b>faster and more reliable</b>; less interference", "can be slower; <b>interference</b> from walls and other devices"], ["Security", "<b>more secure</b>: a hacker needs physical access to a cable (private data stays safer)", "signals can be picked up by others, so need encryption and passwords"], ["Mobility", "devices are tied to a cable and a socket", "devices can be used in <b>different rooms, outside, anywhere</b> in range; easy to add and change devices"], ["Cost", "cables and installation", "no cabling, but needs access points"]]) +
       "<h4>Supporting hardware</h4>" +
-      "<ul><li><b>Network interface card (NIC)</b>: gives a device its connection (wired or wireless).</li><li><b>Switch</b> / <b>router</b>: joins devices and networks.</li><li><b>Wireless access point (WAP)</b>: lets wireless devices join the wired network.</li><li><b>Cables</b>: twisted pair (copper) or fibre optic.</li></ul>",
+      "<ul><li><b>Network interface card (NIC)</b>: gives a device its connection (wired or wireless).</li><li><b>Switch</b> / <b>router</b>: joins devices and networks.</li><li><b>Wireless access point (WAP)</b>: lets wireless devices join the wired network.</li><li><b>Cables</b>: twisted pair (copper) or fibre optic.</li></ul>" +
+      ASA.linkDiagram([{icon:"💻",label:"Laptop"},{icon:"🔀",label:"Switch"},{icon:"📶",label:"Wireless AP"},{icon:"💻",label:"Laptop (Wi-Fi)"}], ["wire","wire","wifi"], "Solid line = a real cable; dashed line = radio waves through the air via the wireless access point."),
     example:
       "<p><b>A university lets students use both.</b> A student with a laptop that has only a Wi-Fi card needs wireless. A student handing in a confidential dissertation or downloading a huge database can plug in by cable for speed and security. Wireless lets them work in the library, a lecture hall or the garden, and bring several devices.</p>" +
       "<p>'Explain the benefits' means: <b>state the benefit and expand it</b> ('wired is faster, so large files download quickly').</p>",
@@ -224,7 +240,10 @@
         ["Address used", "<b>MAC address</b> of each device: it stores them in a table", "<b>IP address</b>: it reads the destination IP address of each packet"],
         ["What it does", "receives packets, checks the destination, forwards them <b>directly to the intended recipient only</b>", "uses a <b>routing table</b> to find the best route and forwards the packet towards its destination; updates the table; may also give out private IP addresses on the LAN"],
         ["Home / office", "inside the office", "the box that connects the office to the internet service provider"]]) +
-      "<p>A router often has <b>two IP addresses</b>: a <b>public</b> one that faces the internet, and a <b>private</b> one that identifies it to the devices inside the LAN.</p>",
+      "<p>A router often has <b>two IP addresses</b>: a <b>public</b> one that faces the internet, and a <b>private</b> one that identifies it to the devices inside the LAN.</p>" +
+      ASA.compareDiagram(
+        {icon:"🔀",label:"Switch",note:"uses MAC addresses to deliver INSIDE one LAN",active:"lo"},
+        {icon:"🌐",label:"Router",note:"uses IP addresses to connect DIFFERENT networks",active:"hi"}),
     example:
       "<p>Laptop A sends a document to the printer in the same office: the <b>switch</b> reads the MAC address, and sends the frames only to the printer port. Laptop A then opens a web page: the request goes to the <b>router</b>, which reads the destination IP address, finds a route in its routing table and forwards the packets to the ISP.</p>",
     checks:[
@@ -244,7 +263,8 @@
       "<p>When devices share a cable, two may transmit at once and cause a <b>collision</b>. <b>CSMA/CD</b> (Carrier Sense Multiple Access with Collision Detection) is the method used to manage this:</p>" +
       "<ol><li><b>Carrier sense:</b> the device listens to the channel.</li><li>If the channel is idle it <b>sends</b>; if not, it waits.</li><li>While sending it checks for a <b>collision</b>.</li><li>On a collision it sends a <b>jamming signal</b> and <b>aborts</b> the transmission.</li><li>It waits a <b>random time</b> (back-off) and tries again. After more collisions, the random time is <b>increased</b>.</li></ol>" +
       "<h4>Drawbacks of CSMA/CD</h4>" +
-      "<ul><li>Waiting times can keep growing, so there is no guarantee of a time to send.</li><li>Constant jamming can mean nothing gets sent on a busy network.</li><li>Certain nodes cannot be given priority.</li><li>Only suits short distances and few nodes; not scalable (more nodes mean much longer waits).</li><li>High power consumption.</li></ul>",
+      "<ul><li>Waiting times can keep growing, so there is no guarantee of a time to send.</li><li>Constant jamming can mean nothing gets sent on a busy network.</li><li>Certain nodes cannot be given priority.</li><li>Only suits short distances and few nodes; not scalable (more nodes mean much longer waits).</li><li>High power consumption.</li></ul>" +
+      ASA.collisionDiagram("Both listen, hear silence, and send at once &mdash; collision! Both stop, jam the line, then each waits a random time before trying again."),
     example:
       "<p>Two computers on a bus both sense an idle line and send at the same moment. Both detect the collision, both send a jam signal and stop. Computer A picks a random wait of 3 ms and computer B picks 7 ms, so A resends first and B follows. If they collide again, the random range doubles.</p>" +
       "<p><b>Why random?</b> If both waited the same fixed time they would collide again every time.</p>",
@@ -268,7 +288,8 @@
       "<ol><li>The data is <b>compressed</b> (so it can be sent quickly).</li><li>It is uploaded to a <b>media server</b>.</li><li>The server sends the bits continuously; the receiver stores them in a <b>buffer</b>.</li><li>The buffer <b>holds the data until the receiving device can process it</b>, so the playback does not stutter.</li></ol>" +
       "<h4>The internet and the World Wide Web are not the same</h4>" +
       tbl(["", "The internet", "The World Wide Web (WWW)"], [["What it is", "the <b>global network of networks</b>: the infrastructure of cables, routers, servers", "a <b>collection of web pages and resources</b> held on web servers, linked by hyperlinks"], ["How you use it", "carries email, streaming, file transfer, the web, games", "viewed in a <b>web browser</b> using HTTP / HTTPS and URLs"]]) +
-      "<p>The web is one <b>service that runs on</b> the internet.</p>",
+      "<p>The web is one <b>service that runs on</b> the internet.</p>" +
+      ASA.streamDiagram({icon:"🖥️",label:"Media server"}, {icon:"📱",label:"Your device"}, "A steady stream of bits, not one big file &mdash; that's why playback can start before the download finishes."),
     example:
       "<p>In a <b>video conference</b>, your camera and microphone data is compressed, sent as a continuous stream of bits, and the other person's device buffers it and plays it back almost straight away.</p>" +
       "<p><b>Why the buffer?</b> The network speed varies. The buffer collects bits ahead of time so that a short slowdown does not stop the picture.</p>",
@@ -290,7 +311,8 @@
       "<ul><li>Receive packets from the internet.</li><li>Analyse the <b>destination IP address</b> of each packet.</li><li>Forward it towards its destination <b>using the routing table</b>; they find the most efficient route and keep the table up to date.</li></ul>" +
       "<h4>The PSTN (Public Switched Telephone Network)</h4>" +
       "<ul><li>The original worldwide telephone network, made up of <b>many different kinds of communication line</b> (copper, fibre, microwave).</li><li>Because the lines differ, the <b>digital data may need to be converted</b> into another form (such as an analogue signal) for part of its journey.</li><li>Data travels in <b>both directions at the same time</b> (duplex).</li><li>The communication passes through different <b>switching centres / ISPs</b>.</li></ul>" +
-      "<p>Other internet hardware: <b>ISP (internet service provider)</b> servers, <b>modems</b>, fibre cables and <b>cell towers</b>.</p>",
+      "<p>Other internet hardware: <b>ISP (internet service provider)</b> servers, <b>modems</b>, fibre cables and <b>cell towers</b>.</p>" +
+      ASA.linkDiagram([{icon:"💻",label:"You"},{icon:"🌐",label:"Router"},{icon:"🌐",label:"Router"},{icon:"🌐",label:"Router"},{icon:"🖥️",label:"Web server"}], null, "Your packet hops router to router, each one reading the destination address and passing it on towards the server."),
     example:
       "<p>You send an email from Riyadh to a friend in London. Your router passes the packets to your ISP. Routers along the way each read the IP address and choose the next best link. Some of the journey may use telephone lines of the PSTN; there the data may be converted to a different form and passes through switching centres until it reaches the destination.</p>",
     checks:[
@@ -311,7 +333,10 @@
     concept:
       "<p>An <b>IP address</b> identifies a device on a network.</p>" +
       tbl(["", "IPv4", "IPv6"], [["Length", "<b>32 bits</b>", "<b>128 bits</b>"], ["Written as", "four groups (bytes) of denary numbers 0&ndash;255 separated by <b>full stops</b> (dots): <code>192.168.3.2</code>", "eight groups of four <b>hexadecimal</b> digits separated by <b>colons</b>: <code>2001:0db8:0000:0000:0000:ff00:0042:8329</code>"], ["Shortening", "&ndash;", "consecutive groups of <b>zeros</b> can be replaced by a double colon <code>::</code>: <code>2001:db8::ff00:42:8329</code>"], ["Why", "about 4.3 billion addresses: not enough for every device", "so many addresses that every device can have its own"]]) +
-      tbl(["Type", "Meaning"], [["Public IP address", "assigned to a device to allow <b>direct access on the internet</b>; unique on the internet"], ["Private IP address", "used for <b>internal LAN communication only</b>; can only be seen/used inside the LAN; assigned by the router"], ["Static IP address", "<b>fixed</b>: does not change each time the device re-joins a network (needed by web servers)"], ["Dynamic IP address", "<b>refreshed / changed</b> each time the device joins the network (assigned automatically)"]]),
+      tbl(["Type", "Meaning"], [["Public IP address", "assigned to a device to allow <b>direct access on the internet</b>; unique on the internet"], ["Private IP address", "used for <b>internal LAN communication only</b>; can only be seen/used inside the LAN; assigned by the router"], ["Static IP address", "<b>fixed</b>: does not change each time the device re-joins a network (needed by web servers)"], ["Dynamic IP address", "<b>refreshed / changed</b> each time the device joins the network (assigned automatically)"]]) +
+      ASA.compareDiagram(
+        {icon:"🏠",label:"Private IP",note:"only ever seen INSIDE your home LAN",active:"lo"},
+        {icon:"🌐",label:"Public IP",note:"unique on the whole internet, so it can be reached from anywhere",active:"hi"}),
     example:
       "<p><b>192.168.3.2 is not an IPv6 address</b> because it has only four groups of digits (IPv6 has eight), uses dots instead of colons, and is a 32-bit address (IPv6 is 128-bit).</p>" +
       "<p>The office printer has a <b>static private</b> address (never changes, only visible inside the LAN). Your phone at a caf&eacute; gets a <b>dynamic</b> address that changes next time.</p>",
@@ -333,7 +358,8 @@
       "<h4>Why subnet?</h4>" +
       "<ul><li><b>Less traffic / congestion:</b> data between devices on the same subnet stays within it, and devices are not flooded with data.</li><li><b>Security:</b> devices do not receive unintended data and a compromised device does not expose the whole network.</li><li><b>Easier management:</b> faults can be isolated, and the network can be expanded in a controlled way; it hides the complexity of the network.</li></ul>" +
       "<h4>A router with two addresses</h4>" +
-      "<p>The router's <b>public IP address</b> makes it visible to the internet / external network (WAN). Its <b>private IP address</b> identifies it to the computers inside the LAN.</p>",
+      "<p>The router's <b>public IP address</b> makes it visible to the internet / external network (WAN). Its <b>private IP address</b> identifies it to the computers inside the LAN.</p>" +
+      ASA.flowDiagram({icon:"💻",label:"Devices (private IPs)"}, {icon:"🌐",label:"Router (public IP)"}, "request", "reply", "Many private addresses inside the LAN, but the router shows just ONE public address to the internet."),
     example:
       "<p>A school splits its network into a <b>Staff</b> subnet and a <b>Students</b> subnet. A student laptop cannot reach the staff file server directly, and the heavy traffic of a student download does not slow the staff network.</p>" +
       "<p>The address <code>192.168.1.25</code> in the subnet <code>192.168.1.x</code>: the network ID is the first part (192.168.1) and the host ID is the device (25).</p>",
@@ -358,7 +384,8 @@
       pre("https://www.example.com/shop/index.html\n\\___/   \\_____________/ \\_____________/\nprotocol  domain name        path and file") +
       "<ul><li><b>Protocol:</b> the rules used (<code>http</code> or secure <code>https</code>).</li><li><b>Domain name:</b> the name of the web server (<code>www.example.com</code>).</li><li><b>Path / file:</b> which page or file on the server.</li></ul>" +
       "<p>Computers find each other with <b>IP addresses</b>, not names. The <b>Domain Name Service (DNS)</b> is the system that <b>converts a domain name into the IP address</b> of the web server, like a phone book.</p>" +
-      "<ol><li>You type <code>www.example.com</code> into the browser.</li><li>The browser asks a <b>DNS server</b> for the IP address.</li><li>If the DNS server does not know it, it asks other DNS servers up the chain until the address is found.</li><li>The IP address is returned to the browser.</li><li>The browser sends a request to that IP address; the <b>web server</b> sends the page back.</li></ol>",
+      "<ol><li>You type <code>www.example.com</code> into the browser.</li><li>The browser asks a <b>DNS server</b> for the IP address.</li><li>If the DNS server does not know it, it asks other DNS servers up the chain until the address is found.</li><li>The IP address is returned to the browser.</li><li>The browser sends a request to that IP address; the <b>web server</b> sends the page back.</li></ol>" +
+      ASA.flowDiagram({icon:"💻",label:"Your browser"}, {icon:"🗂️",label:"DNS server"}, "www.example.com ?", "93.184.216.34", "Like a phone book: you give a name, DNS gives back the address &mdash; THEN the browser talks to the real web server."),
     example:
       "<p>Typing <code>https://www.bbc.co.uk/news</code>: protocol <b>https</b>, domain <b>www.bbc.co.uk</b>, path <b>/news</b>. DNS turns <code>www.bbc.co.uk</code> into an address such as <code>151.101.x.x</code> (illustrative only). Without DNS you would have to remember numbers instead of names.</p>" +
       "<p><b>Exam habit:</b> a URL <i>locates</i> a resource; DNS <i>translates</i> the domain name into an IP address. Do not mix up the two.</p>",
