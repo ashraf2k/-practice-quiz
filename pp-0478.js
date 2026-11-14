@@ -13,11 +13,14 @@
     return { id: id, no: no, topic: topic, difficulty: "intermediate", marks: marks, calc: true, paperLabel: ctx.label, msSource: ctx.msrc, stem: stem, parts: parts,
       prompt: stem, markPoints: points, ms: ms, explanation: expl };
   }
-  // one past-paper set per syllabus sub-topic (e.g. code "1.1"), shown at the end of that sub-topic in iLearn
-  function paper(code, name, qs){
+  // one past-paper set per syllabus sub-topic (e.g. code "1.1"), shown at the end of that sub-topic in iLearn.
+  // paperNo selects which written component the subtitle names (1 = Theory, topics 1-6; 2 = Algorithms,
+  // Programming and Logic, topics 7-10); it does not affect the key or EXAM_PAPERS class filter.
+  function paper(code, name, qs, paperNo){
+    paperNo = paperNo || 1;
     var key = "pp_" + code.replace(".", "_"), total = qs.reduce(function(a, q){ return a + q.marks; }, 0);
     if(EXAM_PAPERS[key]){ var ex = EXAM_PAPERS[key]; qs.forEach(function(q){ ex.questions.push(q); }); ex.totalMarks += total; ex.subtitle = ex.subtitle.replace(/\d+ marks/, ex.totalMarks + " marks"); return; }
-    EXAM_PAPERS[key] = { key: key, code: code, title: code + " " + name + " \u2014 Past-paper question", subtitle: "Cambridge 0478 Paper 1 past paper \u00B7 " + total + " marks \u00B7 mark your own answer with the published mark scheme",
+    EXAM_PAPERS[key] = { key: key, code: code, title: code + " " + name + " \u2014 Past-paper question", subtitle: "Cambridge 0478 Paper " + paperNo + " past paper \u00B7 " + total + " marks \u00B7 mark your own answer with the published mark scheme",
       classes: ["10BR1","10BR2","10BR3"], totalMarks: total, questions: qs };
     var e = EXAM_PAPER_CHOICES_BY_CLASS.filter(function(x){ return x.test.test("10BR1"); })[0];
     if(e && !e.choices.some(function(c){ return c.key === key; })) e.choices.push({ key: key, label: code + " " + name + " \u2014 past-paper question" });
