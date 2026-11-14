@@ -72,13 +72,14 @@
   // ----- rendering -----
   function render(host, q, done, opts){
     opts = opts || {};
-    var inputs = [], results = [], finished = false;
+    var inputs = [], results = [], finished = false, hintUsed = {};
     var h = '<div class="pp-paper"><div class="pp-src">Past paper question · ' + esc(q.src) + "</div>" + (q.intro ? '<div class="pp-intro">' + q.intro + "</div>" : "");
     q.parts.forEach(function(p, pi){
       h += '<div class="pp-part" data-p="' + pi + '"><div class="pp-row"><span class="pp-lab">' + esc(p.label || "") + '</span><div class="pp-body"><div class="pp-q">' + p.q + "</div>";
       if(p.kind === "text"){
         var lines = p.lines || Math.max(2, p.marks * 2);
         h += '<textarea class="pp-ans' + (p.code ? " pp-code" : "") + '" data-p="' + pi + '" rows="' + lines + '" spellcheck="false" aria-label="Your answer to ' + esc(p.label || "the question") + '"></textarea>';
+        h += '<div class="pp-hint" id="pphint' + pi + '"></div>';
       } else if(p.kind === "fields"){
         p.fields.forEach(function(f, fi){ h += '<div class="pp-field"><label>' + esc(f.label) + '</label><input class="pp-in" data-p="' + pi + '" data-f="' + fi + '" autocomplete="off" spellcheck="false" /></div>'; });
       } else if(p.kind === "table"){
@@ -92,7 +93,9 @@
         });
         h += "</tbody></table></div>";
       }
-      h += '</div><span class="pp-marks">[' + p.marks + ']</span></div><div class="pp-res" id="ppres' + pi + '"></div></div>';
+      h += '</div><div class="pp-marks-col"><span class="pp-marks">[' + p.marks + ']</span>' +
+        (p.kind === "text" ? '<button class="pp-hint-btn" data-p="' + pi + '" type="button">💡 Hint</button>' : "") +
+        '</div></div><div class="pp-res" id="ppres' + pi + '"></div></div>';
     });
     h += '<div class="ln-actions"><button class="btn btn-primary" id="pp-go" type="button">Mark my answer</button></div><div id="pp-fb"></div></div>';
     host.innerHTML = h;
@@ -107,8 +110,9 @@
       if(p.kind === "fields") return v.every(function(x){ return !String(x).trim(); });
       return !Object.keys(v).some(function(k){ return v[k] === true || String(v[k] || "").trim(); });
     }
-    function resHtml(p, r, v){
+    function resHtml(p, r, v, usedHint){
       var s = '<div class="pp-score ' + (r.awarded === r.max ? "full" : r.awarded ? "part" : "none") + '"><b>' + esc(p.label || "") + " " + r.awarded + " / " + r.max + (r.awarded === 1 && r.max === 1 ? " mark" : " marks") + "</b></div>";
+      if(usedHint) s += '<p class="pp-cap pp-hint-note">💡 Hint used — 1 mark deducted from this part.</p>';
       if(p.kind === "text"){
         s += '<ul class="pp-pts">' + p.points.map(function(pt, i){ return '<li class="' + (r.hits[i] ? "hit" : "miss") + '"><span class="pp-mk">' + (r.hits[i] ? "✓" : "✗") + "</span> " + pt.t + "</li>"; }).join("") + "</ul>";
         if(r.why) s += '<p class="pp-cap">' + esc(r.why) + "</p>";
@@ -122,7 +126,26 @@
     }
     function lock(){
       Array.prototype.forEach.call(host.querySelectorAll("textarea,input"), function(e){ e.disabled = true; });
+      Array.prototype.forEach.call(host.querySelectorAll(".pp-hint-btn"), function(e){ e.disabled = true; });
     }
+    // Hint buttons: one per written ("text") part. Clicking one first shows a
+    // warning (using it costs 1 mark off that part) before revealing a single
+    // mark point as a nudge -- not the whole model answer.
+    Array.prototype.forEach.call(host.querySelectorAll(".pp-hint-btn"), function(btn){
+      btn.addEventListener("click", function(){
+        if(finished) return;
+        var pi = Number(btn.getAttribute("data-p")), box = host.querySelector("#pphint" + pi);
+        if(hintUsed[pi] || !box) return;
+        box.innerHTML = '<div class="pp-hint-warn">Using a hint will deduct <b>1 mark</b> from this part once you mark your answer.' +
+          '<div class="pp-hint-warn-btns"><button class="btn btn-secondary sm" type="button" data-act="cancel">Cancel</button><button class="btn btn-primary sm" type="button" data-act="use">Use hint (−1 mark)</button></div></div>';
+        box.querySelector('[data-act="cancel"]').addEventListener("click", function(){ box.innerHTML = ""; });
+        box.querySelector('[data-act="use"]').addEventListener("click", function(){
+          hintUsed[pi] = true; btn.disabled = true;
+          var pt = (q.parts[pi].points || [])[0];
+          box.innerHTML = '<div class="pp-hint-box"><b>💡 Hint:</b> one of the things the mark scheme is looking for here is — ' + esc(pt ? pt.t : "think about the key idea behind this part") + "</div>";
+        });
+      });
+    });
     host.querySelector("#pp-go").addEventListener("click", function(){
       if(finished) return;
       var vals = q.parts.map(collect);
@@ -133,8 +156,9 @@
       var total = 0, max = 0;
       q.parts.forEach(function(p, pi){
         var r = p.kind === "text" ? markText(p, vals[pi]) : p.kind === "fields" ? markFields(p, vals[pi]) : markTable(p, vals[pi]);
+        if(hintUsed[pi]) r.awarded = Math.max(0, r.awarded - 1);
         results.push(r); total += r.awarded; max += r.max;
-        host.querySelector("#ppres" + pi).innerHTML = resHtml(p, r, vals[pi]);
+        host.querySelector("#ppres" + pi).innerHTML = resHtml(p, r, vals[pi], hintUsed[pi]);
         if(p.kind === "table"){
           Array.prototype.forEach.call(host.querySelectorAll('tr'), function(){});
           var trs = host.querySelectorAll('.pp-part[data-p="' + pi + '"] tbody tr');

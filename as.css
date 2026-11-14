@@ -9,6 +9,14 @@
 .pp-q{font-size:15px;line-height:1.55;margin:0 0 8px}
 .pp-q p{margin:0 0 6px}
 .pp-marks{font-weight:800;font-size:14px;white-space:nowrap;align-self:end}
+.pp-marks-col{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.pp-hint-btn{border:1px solid var(--accent);border-radius:999px;background:var(--accent-tint);color:var(--accent-dark);font:700 12px system-ui,sans-serif;padding:3px 10px;cursor:pointer;white-space:nowrap}
+.pp-hint-btn:disabled{opacity:.5;cursor:default}
+.pp-hint{margin:8px 0 0}
+.pp-hint-warn{font-size:13.5px;padding:8px 10px;border:1.5px dashed var(--diff-moderate,#b8860b);border-radius:6px;background:var(--diff-moderate-bg,#fff8e6)}
+.pp-hint-warn-btns{display:flex;gap:8px;margin-top:8px}
+.pp-hint-box{font-size:13.5px;padding:8px 10px;border-left:4px solid var(--accent);background:var(--accent-tint);border-radius:0 6px 6px 0}
+.pp-hint-note{color:var(--diff-moderate,#b8860b)}
 .pp-ans{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:4px;padding:6px 8px;font:inherit;font-size:15px;line-height:28px;color:var(--ink);resize:vertical;min-height:84px;
   background-color:var(--surface);background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 26px,var(--line) 26px,var(--line) 27px);background-attachment:local}
 .pp-ans.pp-code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
