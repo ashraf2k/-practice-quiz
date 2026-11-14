@@ -1,4 +1,4 @@
-/* Admin: progress reports for the 10AM tutorials (Unit 1 Technology, IP and Security; Unit 2 GIMP; Unit 3 Web basics).
+/* Admin: progress reports for the 10AM tutorials (Unit 1 Technology, IP and Security; Unit 2 GIMP; Unit 3 Web basics; Unit 5 Data Manipulation).
    One reusable report per tutorial: reads each 10AM student's progress record (practiceProgress, key per tutorial) and shows
    topics done, quiz scores, wrong answers and the written answers next to the model answer. */
 (function(){
@@ -172,4 +172,5 @@ function make(cfg){
 make({ id: "unit1", key: "unit1", data: "UNIT1TUT", hook: "__unit1Opened", csv: "unit1-technology-ip-security-10AM.csv" });
 make({ id: "gimp", key: "gimp", data: "GIMPTUT", hook: "__gimpOpened", csv: "unit2-gimp-10AM.csv" });
 make({ id: "webtut", key: "webtut", data: "WEBTUT", hook: "__webtutOpened", csv: "unit3-web-basics-10AM.csv" });
+make({ id: "unit5", key: "unit5", data: "UNIT5TUT", hook: "__unit5Opened", csv: "unit5-data-manipulation-10AM.csv" });
 })();

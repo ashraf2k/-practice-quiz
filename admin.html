@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-qibhiN9E+xJHAmmf5/3zXui8Z4JutuDXv49ha6se0tU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-dyaM1/5x1TSYH4IItqCyKump5wSfUF3lCDNazWnYsYs='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -16,7 +16,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <title>Admin Report — Practice Quizzes</title>
-<link rel="stylesheet" href="shared.css?v=20261103f" />
+<link rel="stylesheet" href="shared.css?v=20261114a" />
 <style>
   .wrap.wrap-wide{ max-width: 980px; }
 
@@ -1017,6 +1017,12 @@
         <p><a class="btn btn-primary" href="web-basics.html" target="_blank" data-keepsession="1">Open the tutorial as a student</a> <span class="admin-status">Full tutorial with quizzes, written answers and the code editor. Your own practice is saved under your teacher account and is not counted in this report.</span></p>
       </div>
 
+      <div class="admin-panel" id="panel-unit5">
+        <h2 style="margin:0 0 4px">Unit 5: Data Manipulation report (10AM)</h2>
+        <p class="admin-status">Excel data manipulation tutorial (COUNTIF, FILTER, SUMIFS, FILTER function): topics completed, quiz scores, wrong answers and written answers for every 10AM student.</p>
+        <p><a class="btn btn-primary" href="unit5.html" target="_blank" data-keepsession="1">Open the tutorial as a student</a> <span class="admin-status">Your own practice is saved under your teacher account and is not counted in this report.</span></p>
+      </div>
+
       <div class="admin-panel" id="panel-subs">
         <h2 style="margin:0 0 4px">Subscription management</h2>
         <p class="admin-status">Give students access for a period: individually or in bulk. Dates are in Riyadh time.</p>
@@ -1396,9 +1402,9 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["dashboard","live","timetables","subs","unit1","gimp","webtut","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
+  var PANELS = ["dashboard","live","timetables","subs","unit1","gimp","webtut","unit5","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
-    ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes", gimp:"unit1", webtut:"unit1" };
+    ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes", gimp:"unit1", webtut:"unit1", unit5:"unit1" };
   function showTab(name){
     var menu = MENU_OF[name] || name;
     document.querySelectorAll(".admin-tab").forEach(function(btn){
@@ -1411,6 +1417,7 @@
     if(name === "webtut" && window.__webtutOpened) window.__webtutOpened();
     if(name === "unit1" && window.__unit1Opened) window.__unit1Opened();
     if(name === "gimp" && window.__gimpOpened) window.__gimpOpened();
+    if(name === "unit5" && window.__unit5Opened) window.__unit5Opened();
     if(name === "live" && window.__liveOpened) window.__liveOpened();
     if(name === "timetables" && window.__ttOpened) window.__ttOpened();
     if(name === "dashboard" && window.__renderDashboard) window.__renderDashboard();
@@ -3603,7 +3610,7 @@
     var br = GLV === "10" || GLV === "11" || GLV === "12";
     if(br){ LV.ilearn = GLV; LV.syllabus = GLV; LV.isolve = GLV; markSwitchers(); }
     var cur = document.querySelector(".admin-tab.active"); var tab = cur ? cur.dataset.tab : "";
-    var UNITS = ["unit1", "gimp", "webtut"];
+    var UNITS = ["unit1", "gimp", "webtut", "unit5"];
     if(GLV === "AM" && (tab === "ilearn" || tab === "syllabus" || tab === "isolve")){ showTab("unit1"); tab = "unit1"; }
     else if(br && UNITS.indexOf(tab) >= 0){ setLevel("ilearn", GLV); tab = "ilearn"; }
     else if(br && (tab === "ilearn" || tab === "syllabus" || tab === "isolve")) setLevel(tab, GLV);
@@ -4026,7 +4033,7 @@
 
 
     // 10AM unit switcher (same pill style as the level bar)
-    var UNIT_TABS = [["unit1", "Unit 1: Tech, IP and Security"], ["gimp", "Unit 2: GIMP"], ["webtut", "Unit 3: Web basics"]];
+    var UNIT_TABS = [["unit1", "Unit 1: Tech, IP and Security"], ["gimp", "Unit 2: GIMP"], ["webtut", "Unit 3: Web basics"], ["unit5", "Unit 5: Data Manipulation"]];
     function markUnits(name){ document.querySelectorAll(".unit-sw .lvl-btn").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-u") === name); }); }
     UNIT_TABS.forEach(function(u){
       var panel = document.getElementById("panel-" + u[0]); if(!panel) return;
@@ -4035,7 +4042,7 @@
       panel.insertBefore(bar, panel.firstChild);
     });
     var baseShow = showTab;
-    showTab = function(name){ baseShow(name); markUnits(name); if(name === "unit1" || name === "gimp" || name === "webtut"){ if(GLV !== "AM") setGlobalLevel("AM"); } };
+    showTab = function(name){ baseShow(name); markUnits(name); if(name === "unit1" || name === "gimp" || name === "webtut" || name === "unit5"){ if(GLV !== "AM") setGlobalLevel("AM"); } };
     var pal = document.getElementById("pal"), pq = document.getElementById("pal-q"), pl = document.getElementById("pal-list");
     var items = [], sel = 0;
     function labelOf(btn){ var t = ""; btn.childNodes.forEach(function(n){ if(n.nodeType === 3) t += n.textContent; }); return t.trim(); }
@@ -4123,7 +4130,7 @@
   function drawVaLinks(){
     var box = document.getElementById("va-links"); box.innerHTML = "";
     var list = [["iLearn journey", VA_PAGES[VA_LV]], ["iSolve practice", "exam-practice.html?preview=1"], ["Home page", "index.html"]];
-    if(VA_LV === "am") list = [["10AM home: sprint quizzes and unit cards", "quiz.html?preview=10AM"], ["Unit 1: Technology, IP and Security", "unit1.html"], ["Unit 2: Photo editing with GIMP", "gimp.html"], ["Unit 3: Web basics", "web-basics.html"]];
+    if(VA_LV === "am") list = [["10AM home: sprint quizzes and unit cards", "quiz.html?preview=10AM"], ["Unit 1: Technology, IP and Security", "unit1.html"], ["Unit 2: Photo editing with GIMP", "gimp.html"], ["Unit 3: Web basics", "web-basics.html"], ["Unit 5: Data Manipulation", "unit5.html"]];
     if(VA_LV === "igcse") list.push(["Mock exam: Paper 1", "paper1.html"], ["Mock exam: Paper 2", "paper2.html"]);
     if(VA_LV === "as") list.push(["AS syllabus guide", "as-guide.html"]);
     list.forEach(function(x){ var a = mk("a", "btn btn-primary", x[0] + " ›"); a.href = x[1]; a.target = "_blank"; a.setAttribute("data-keepsession", "1"); a.style.textDecoration = "none"; box.appendChild(a); });
@@ -5277,6 +5284,7 @@
 <script src="admin-subs.js?v=1"></script>
 <script src="unit1-data.js?v=1"></script>
 <script src="gimp-data.js?v=1"></script>
-<script src="admin-tutreport.js?v=1"></script>
+<script src="unit5-data.js?v=1"></script>
+<script src="admin-tutreport.js?v=2"></script>
 </body>
 </html>
