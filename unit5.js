@@ -108,6 +108,83 @@
     box.appendChild(el("h2", null, "Watch how: " + t.title));
     var host = el("div"); box.appendChild(host);
     if(window.XLANIM && window.XLANIM.mount && t.anim) window.XLANIM.mount(host, t);
+    if(t.practice) renderPractice(box, t);
+  }
+
+  // ---------- "Try it yourself": a real, tiny spreadsheet students can write a real formula against ----------
+  function colsOf(cells){ var s = {}; Object.keys(cells).forEach(function(a){ var m = a.match(/^([A-Z]+)/); s[m[1]] = true; }); return Object.keys(s).sort(); }
+  function renderPractice(box, t){
+    var p = t.practice, wrap = el("div", "wb-xl"); box.appendChild(wrap);
+    wrap.appendChild(el("h3", null, "Try it yourself"));
+    wrap.appendChild(el("p", "wb-sub", p.instructions));
+
+    var tbl = el("table", "wb-xl-grid"), thead = el("thead"), hr = el("tr");
+    hr.appendChild(el("th", null, ""));
+    p.cols.forEach(function(c){ hr.appendChild(el("th", null, c + (p.colHead && p.colHead[c] ? " - " + p.colHead[c] : ""))); });
+    thead.appendChild(hr); tbl.appendChild(thead);
+    var tbody = el("tbody");
+    for(var r = p.rowStart; r <= p.rowEnd; r++){
+      var tr = el("tr"); tr.appendChild(el("th", null, String(r)));
+      p.cols.forEach(function(c){ var v = p.cells[c + r]; tr.appendChild(el("td", null, v == null ? "" : String(v))); });
+      tbody.appendChild(tr);
+    }
+    tbl.appendChild(tbody); wrap.appendChild(tbl);
+
+    if(p.extra){
+      var ex = el("p", "wb-sub"); ex.textContent = "Also set: " + Object.keys(p.extra).map(function(a){ return a + " = " + p.extra[a]; }).join(", ");
+      wrap.appendChild(ex);
+    }
+
+    var row = el("div", "wb-xl-row");
+    row.appendChild(el("label", null, "Formula for " + p.target + ":"));
+    var input = el("input"); input.type = "text"; input.className = "wb-xl-in"; input.placeholder = "=COUNTIF(...)"; input.autocomplete = "off"; input.spellcheck = false;
+    var run = el("button", "btn", "Run it"); run.type = "button";
+    row.appendChild(input); row.appendChild(run); wrap.appendChild(row);
+
+    var out = el("div", "wb-xl-out"); wrap.appendChild(out);
+    var tries = 0, hintBtn = el("button", "btn btn-secondary", "Show the correct formula"); hintBtn.type = "button"; hintBtn.hidden = true;
+    var hintBox = el("div"); hintBox.hidden = true;
+    wrap.appendChild(hintBtn); wrap.appendChild(hintBox);
+
+    function describe(r){ if(r.s) return { kind: "scalar", v: r.v }; if(r.empty) return { kind: "empty" }; return { kind: "array", rows: r.rows }; }
+    function sameResult(a, b){
+      if(a.kind !== b.kind) return false;
+      if(a.kind === "scalar"){ var an = parseFloat(a.v), bn = parseFloat(b.v); if(!isNaN(an) && !isNaN(bn)) return Math.abs(an - bn) < 1e-6; return String(a.v).trim().toLowerCase() === String(b.v).trim().toLowerCase(); }
+      if(a.kind === "empty") return true;
+      if(a.rows.length !== b.rows.length) return false;
+      var as = a.rows.map(function(row){ return row.join("|"); }).sort(), bs = b.rows.map(function(row){ return row.join("|"); }).sort();
+      return as.every(function(s, i){ return s === bs[i]; });
+    }
+    function renderResultBlock(host, d, cols){
+      host.textContent = "";
+      if(d.kind === "scalar"){ host.appendChild(el("div", "wb-xl-scalar", String(d.v))); return; }
+      if(d.kind === "empty"){ host.appendChild(el("div", "wb-xl-scalar", "(no rows matched)")); return; }
+      var rt = el("table", "wb-xl-grid"); var th = el("tr"); (cols || []).forEach(function(c){ th.appendChild(el("th", null, c)); }); rt.appendChild(th);
+      d.rows.forEach(function(r2){ var tr2 = el("tr"); r2.forEach(function(v){ tr2.appendChild(el("td", null, v == null ? "" : String(v))); }); rt.appendChild(tr2); });
+      host.appendChild(rt);
+    }
+    function go(){
+      out.textContent = "";
+      var grid = window.XLENGINE.makeGrid(p.cells);
+      var expect;
+      try{ expect = describe(window.XLENGINE.run(p.model, grid)); }catch(e){ expect = null; }
+      var text = input.value.trim(); if(!text){ out.appendChild(el("p", "wb-xl-msg bad", "Type a formula first.")); return; }
+      var got;
+      try{ got = window.XLENGINE.run(text, grid); }
+      catch(e){ out.appendChild(el("p", "wb-xl-msg bad", "Could not run that formula: " + e.message)); tries++; if(tries >= 2) hintBtn.hidden = false; return; }
+      var d = describe(got), ok = expect && sameResult(d, expect);
+      out.appendChild(el("p", "wb-xl-msg " + (ok ? "ok" : "bad"), ok ? "Correct - that matches the real formula's result!" : "Not quite the result the lesson's formula gives. Check your ranges and $ signs, then try again."));
+      out.appendChild(el("p", "wb-sub", p.resultLabel + ":"));
+      var resultHost = el("div"); out.appendChild(resultHost);
+      renderResultBlock(resultHost, d, p.resultCols || p.cols);
+      if(!ok){ tries++; if(tries >= 2) hintBtn.hidden = false; } else { hintBtn.hidden = true; hintBox.hidden = true; }
+    }
+    run.addEventListener("click", go);
+    input.addEventListener("keydown", function(e){ if(e.key === "Enter") go(); });
+    hintBtn.addEventListener("click", function(){
+      hintBox.hidden = false; hintBox.textContent = "";
+      hintBox.appendChild(html("p", "wb-tip", "<b>Model formula:</b> <code>" + p.model.replace(/</g, "&lt;") + "</code>"));
+    });
   }
 
   // ---------- quiz + written ----------

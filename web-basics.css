@@ -54,3 +54,20 @@
 .wb-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:8px 0 0; }
 
 .wb-dl{margin:10px 0 4px}.wb-dlbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:12px;background:var(--accent-dark);color:#fff;font-weight:800;text-decoration:none}.wb-dlbtn:hover{filter:brightness(.92)}.wb-dlbtn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+
+/* "Try it yourself" formula practice (Unit 5: a tiny real spreadsheet engine runs the student's formula) */
+.wb-xl{ margin:16px 0 0; padding-top:14px; border-top:1.5px dashed var(--line); }
+.wb-xl h3{ margin:0 0 4px; }
+.wb-xl-grid{ border-collapse:collapse; margin:10px 0; font-size:13px; width:100%; }
+.wb-xl-grid th, .wb-xl-grid td{ border:1px solid var(--line); padding:5px 8px; text-align:left; }
+.wb-xl-grid thead th{ background:var(--accent-tint); font-weight:800; }
+.wb-xl-grid tbody th{ background:var(--bg); font-weight:700; color:var(--muted); width:28px; text-align:center; }
+.wb-xl-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:10px 0; }
+.wb-xl-row label{ font-weight:700; font-size:13.5px; }
+.wb-xl-in{ flex:1; min-width:220px; padding:9px 11px; border:1.5px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); font:14px/1.4 ui-monospace, Menlo, Consolas, monospace; }
+.wb-xl-in:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+.wb-xl-out{ margin:6px 0 0; }
+.wb-xl-scalar{ display:inline-block; padding:8px 14px; border-radius:10px; background:var(--accent-tint); font:800 16px ui-monospace, Menlo, Consolas, monospace; }
+.wb-xl-msg{ margin:0 0 6px; font-weight:700; font-size:13.5px; }
+.wb-xl-msg.ok{ color:var(--correct, #1f8a4c); }
+.wb-xl-msg.bad{ color:var(--wrong, #c0392b); }
