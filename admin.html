@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-dyaM1/5x1TSYH4IItqCyKump5wSfUF3lCDNazWnYsYs='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-pUVe0c8Y2rJbg8ab0BpW0gYYStdKCjC1HVCAsKlJrhE='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -43,6 +43,8 @@
   .enq-badge[hidden]{display:none}
   @keyframes enqpulse{0%,100%{opacity:1}50%{opacity:.35}}
   .enq-new{display:inline-block;background:#dc2626;color:#fff;border-radius:6px;padding:1px 7px;font-size:.7rem;font-weight:800;animation:enqpulse 1.1s infinite}
+  .enq-badge.pp-blink{animation:enqpulse 1.1s infinite}
+  .pp-flag-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#dc2626;margin-inline-end:6px;vertical-align:middle;animation:enqpulse 1.1s infinite}
   tr.enq-unread td{background:#fff7ed}
   @media (prefers-reduced-motion:reduce){.enq-new{animation:none}}
   .admin-tab{
@@ -586,6 +588,7 @@
           <button class="admin-tab" data-tab="enquiries">Enquiries <span id="enq-badge" class="enq-badge" hidden>0</span></button>
           <button class="admin-tab" data-tab="feedback">Feedback</button>
           <button class="admin-tab" data-tab="live">Live sessions <span id="live-badge" class="enq-badge" hidden>0</span></button>
+          <button class="admin-tab" data-tab="answerReview">Answer review <span id="answerreview-badge" class="enq-badge" hidden>0</span></button>
         </div>
         <div class="tab-group"><span class="tab-glabel">Business</span>
           <button class="admin-tab" data-tab="tuition">Tuition</button>
@@ -1138,6 +1141,12 @@
         <p class="admin-status no-print" id="examdetail-reset-status"></p>
         <div id="exampractice-detail"></div>
       </div>
+
+      <div class="admin-panel" id="panel-answerReview">
+        <p class="admin-status">11BR AS past-paper answers a student flagged as "I think this is right" after the automatic mark. Accept to award the mark and add their exact wording to the mark scheme for every future student on that question and part; reject to leave the mark scheme unchanged.</p>
+        <p class="admin-status no-print" id="answerreview-status"></p>
+        <div id="answerreview-body"></div>
+      </div>
     </div>
     </div>
    </div>
@@ -1372,6 +1381,7 @@
     if(window.__startEnquiries) window.__startEnquiries();
     if(window.__startLive) window.__startLive();
     if(window.__startMessages) window.__startMessages();
+    if(window.__startAnswerReview) window.__startAnswerReview();
   }
 
   // Runs once per sign-in. Admin status is decided by the server: the user
@@ -1402,7 +1412,7 @@
   // ============================================================
   // Tabs
   // ============================================================
-  var PANELS = ["dashboard","live","timetables","subs","unit1","gimp","webtut","unit5","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive"];
+  var PANELS = ["dashboard","live","timetables","subs","unit1","gimp","webtut","unit5","viewas","manage","groups","students","byStudent","classes","questions","profile","detail","examPractice","examDetail","syllabus","syllabusStudent","syllabus9618","syllabus9618Student","parentReport","ilearn","ilearnDetail","ilearn12","ilearn12Detail","ilearnAS","ilearnASDetail","isolve","isolveDetail","attention","feedback","enquiries","messages","tuition","ppPerf","archive","answerReview"];
   var MENU_OF = { parentReport:"syllabus", profile:"byStudent", detail:"byStudent", examPractice:"isolve", examDetail:"isolve", isolveDetail:"isolve", syllabusStudent:"syllabus", syllabus9618:"syllabus", syllabus9618Student:"syllabus",
     ilearnDetail:"ilearn", ilearn12:"ilearn", ilearn12Detail:"ilearn", ilearnAS:"ilearn", ilearnASDetail:"ilearn", questions:"classes", gimp:"unit1", webtut:"unit1", unit5:"unit1" };
   function showTab(name){
@@ -1425,6 +1435,7 @@
     if(name === "manage" && window.__renderManage) window.__renderManage();
     if(name === "groups" && window.__renderGroups) window.__renderGroups();
     if(name === "ppPerf"){ var ppl = document.getElementById("pp-level"); if(ppl && window.__curLevel) ppl.value = window.__curLevel(); if(window.__renderPP) window.__renderPP(); }
+    if(name === "answerReview" && window.__renderAnswerReview) window.__renderAnswerReview();
   }
 
   document.getElementById("admin-tabs").addEventListener("click", function(e){
@@ -5273,6 +5284,86 @@
       resetStatusEl.textContent = (err && err.code === "permission-denied")
         ? "Firestore denied this request — this account isn't recognised as admin by firestore.rules (check isAdmin() there)."
         : "Couldn't reset this attempt. Check your internet connection and try again.";
+    });
+  });
+
+  // ============================================================
+  // Answer review: 11BR AS past-paper (pp-as-t*) answers a student flagged
+  // as "I think this is right" after the automatic keyword mark. Accepting
+  // adds the student's exact wording to ppAnswerAlternates so it counts
+  // automatically for every future student on that question + part;
+  // rejecting just dismisses the flag. Scoped entirely to pp11_* papers by
+  // firestore.rules and the writer in exam-practice.html -- this panel
+  // only ever shows what the server already filtered to "pending".
+  // ============================================================
+  var ppFlags = [];
+  function answerReviewBadge(){
+    var n = ppFlags.length, b = document.getElementById("answerreview-badge");
+    if(b){ b.textContent = n; b.hidden = !n; b.classList.toggle("pp-blink", n > 0); }
+    var tab = document.querySelector('[data-tab="answerReview"]'); if(tab) tab.classList.toggle("has-unread", n > 0);
+  }
+  function loadPPFlags(){
+    if(typeof PQFirebase.listPendingPPFlags !== "function") return Promise.resolve(ppFlags);
+    return PQFirebase.listPendingPPFlags().then(function(rows){
+      ppFlags = rows || [];
+      answerReviewBadge();
+      return ppFlags;
+    }).catch(function(){ return ppFlags; });
+  }
+  // Paints the CURRENT in-memory ppFlags without re-fetching -- used right
+  // after Accept/Reject so the row the admin just resolved disappears
+  // immediately instead of waiting on (and depending on) another round
+  // trip. renderAnswerReview() (below) is the one that re-fetches, for
+  // opening the tab fresh or after the initial load.
+  function paintAnswerReview(){
+    var body = document.getElementById("answerreview-body");
+    if(!body) return;
+    if(!ppFlags.length){ body.innerHTML = '<p class="admin-status">No flagged answers waiting for review.</p>'; return; }
+    var rows = ppFlags.map(function(f){
+      return '<tr data-id="' + esc12(f.id) + '">' +
+        '<td><span class="pp-flag-dot" aria-hidden="true"></span>' + esc12(f.name || "") + '</td>' +
+        '<td>' + esc12(f.cls || "") + '</td>' +
+        '<td>' + esc12(f.topicLabel || f.paperKey || "") + '</td>' +
+        '<td>' + esc12(f.mpText || "") + ' (' + esc12(String(f.mpMarks != null ? f.mpMarks : "")) + (f.mpMarks === 1 ? " mark" : " marks") + ')</td>' +
+        '<td class="wrap-cell">' + esc12(f.studentText || "") + '</td>' +
+        '<td><button class="btn btn-primary" type="button" data-pp-accept="1">Accept</button> <button class="btn btn-secondary" type="button" data-pp-reject="1">Reject</button></td>' +
+      '</tr>';
+    }).join("");
+    body.innerHTML = '<div class="table-scroll"><table class="admin-table"><thead><tr><th>Student</th><th>Class</th><th>Topic</th><th>Mark point</th><th>Their answer</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+  }
+  function renderAnswerReview(){
+    return loadPPFlags().then(paintAnswerReview);
+  }
+  window.__renderAnswerReview = renderAnswerReview;
+  window.__startAnswerReview = function(){ loadPPFlags(); };
+
+  document.getElementById("answerreview-body").addEventListener("click", function(e){
+    var btn = e.target.closest("button"); if(!btn) return;
+    var tr = btn.closest("tr"); if(!tr) return;
+    var id = tr.getAttribute("data-id");
+    var flag = ppFlags.filter(function(f){ return f.id === id; })[0];
+    if(!flag) return;
+    var accepting = btn.hasAttribute("data-pp-accept");
+    var rejecting = btn.hasAttribute("data-pp-reject");
+    if(!accepting && !rejecting) return;
+    var statusEl = document.getElementById("answerreview-status");
+    if(accepting && !window.confirm("Accept this answer? It will be added to the mark scheme exactly as the student wrote it, and will count automatically for every future student on this question and part.")) return;
+    if(rejecting && !window.confirm("Reject this answer? The mark scheme will not change.")) return;
+    tr.querySelectorAll("button").forEach(function(b){ b.disabled = true; });
+    PQFirebase.resolvePPFlag(flag.id, accepting ? "accepted" : "rejected", currentAdminEmail || currentAdminName).then(function(res){
+      if(!res || res.ok === false){
+        tr.querySelectorAll("button").forEach(function(b){ b.disabled = false; });
+        alert((res && res.error) || "Could not " + (accepting ? "accept" : "reject") + " this answer.");
+        return;
+      }
+      ppFlags = ppFlags.filter(function(f){ return f.id !== id; });
+      answerReviewBadge();
+      paintAnswerReview();
+      statusEl.classList.remove("warn");
+      statusEl.textContent = accepting ? "Accepted — added to the mark scheme." : "Rejected.";
+    }).catch(function(){
+      tr.querySelectorAll("button").forEach(function(b){ b.disabled = false; });
+      alert("Could not " + (accepting ? "accept" : "reject") + " this answer.");
     });
   });
 

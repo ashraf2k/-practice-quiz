@@ -4,3 +4,4 @@ users.json
 firestore-dump.json
 backup*/
 *.log
+node_modules/

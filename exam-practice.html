@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-QrASarmqXC5/eDKpPNnzIMBzZyQ/SUtugMQxzMKygl8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-Nkf59TlfV/luKQzwxFhpdI2UQ/HFtrf+CV+6D3F/2XM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -102,8 +102,22 @@
 
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-check">AI, check my answer!</button>
+      <button class="btn btn-secondary" id="btn-hint">💡 Hint</button>
     </div>
     <p class="cohort-note" id="check-disclaimer">Automated check — it looks for the key terms and values the mark scheme asks for. Always compare with the official mark scheme below and adjust the ticks yourself if it missed something.</p>
+
+    <div class="restart-confirm hidden" id="hint-confirm">
+      <p class="restart-warn-text">Using a hint will deduct 1 mark from this question. Use the hint anyway?</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-hint-confirm">Yes, use the hint (−1 mark)</button>
+        <button class="btn btn-secondary" id="btn-hint-cancel">Cancel</button>
+      </div>
+    </div>
+
+    <div class="feedback-block hidden" id="hint-block" style="margin-top:14px;">
+      <p class="fb-title">💡 Hint <span style="font-weight:400;">(−1 mark applied)</span></p>
+      <p id="hint-text"></p>
+    </div>
 
     <div id="check-area" class="hidden">
       <div class="check-score-banner" id="check-score-banner"></div>
@@ -299,9 +313,24 @@
   // Returns the SUGGESTED marks for one mark point (0..mp.marks). The
   // student can always override this via the checkbox/selector before it
   // counts toward their score -- see renderMarkPoints().
-  function gradeMarkPoint(studentText, mp){
+  function gradeMarkPoint(studentText, mp, q){
     if(mp.part && window.PP) studentText = PP.part(mp.part);
     if(!studentText || !studentText.trim()) return 0;
+    // 11BR AS past-paper (pp11_*) papers only: a teacher-accepted alternate
+    // phrase for this exact question + part (see loadPPAlternates() /
+    // admin.html's "Answer review" tab) awards full marks outright,
+    // bypassing the normal matcher for this one mark point.
+    if(q && isPP11Paper()){
+      var altKey = (q.id || "") + "::" + (mp.part || "_");
+      var alts = state.alternates[altKey];
+      if(alts && alts.length){
+        var normStudent = normalize(studentText);
+        for(var ai = 0; ai < alts.length; ai++){
+          var altNorm = normalize(alts[ai]).trim();
+          if(altNorm && normStudent.indexOf(altNorm) !== -1) return mp.marks;
+        }
+      }
+    }
     var m = mp.match;
     if(m.type === "numeric") return numericMatch(studentText, m.values) ? mp.marks : 0;
     if(m.type === "value") return valueMatch(studentText, m.values) ? mp.marks : 0;
@@ -348,8 +377,23 @@
     level: 0,
     streak: 0,
     results: [], // { id, topic, difficulty, earned, total, answerText }
-    startedAt: null
+    startedAt: null,
+    // 11BR AS past-paper (pp11_*) papers only: accepted alternate phrases a
+    // teacher has approved via admin.html's "Answer review" tab, keyed
+    // "<questionId>::<partId>". See gradeMarkPoint() and loadPPAlternates().
+    alternates: {}
   };
+
+  function isPP11Paper(){ return !!(state.paperKey && /^pp11_/.test(state.paperKey)); }
+
+  // Fire-and-forget: only 11BR AS past-paper cards use this. A failed/slow
+  // fetch just means no alternates are applied yet this session -- the
+  // normal keyword/value matcher still runs, so nothing breaks.
+  function loadPPAlternates(){
+    state.alternates = {};
+    if(!isPP11Paper() || typeof PQFirebase.getPPAnswerAlternates !== "function") return;
+    PQFirebase.getPPAnswerAlternates(state.paperKey).then(function(map){ state.alternates = map || {}; }).catch(function(){});
+  }
 
   function startAttempt(){
     var qs = state.paper.questions;
@@ -422,9 +466,64 @@
   var qExplanation = document.getElementById("q-explanation");
   var levelBanner = document.getElementById("level-banner");
   var btnNext = document.getElementById("btn-next");
+  var btnHint = document.getElementById("btn-hint");
+  var hintConfirm = document.getElementById("hint-confirm");
+  var btnHintConfirm = document.getElementById("btn-hint-confirm");
+  var btnHintCancel = document.getElementById("btn-hint-cancel");
+  var hintBlock = document.getElementById("hint-block");
+  var hintText = document.getElementById("hint-text");
 
   var currentChecked = false;
   var currentControls = []; // one per markPoint: { get: fn, mp }
+  var hintUsed = false;
+
+  // A hint is built live from the question's own mark scheme, never
+  // authored separately: the first keyword-matched mark point's leading
+  // cue word from each synonym group, e.g. "pixel + more/increase". This
+  // nudges the student toward the right idea without handing them the
+  // mark point's full wording. Falls back to a generic nudge for
+  // questions with no keyword-type mark point (pure numeric/value answers).
+  function buildHint(q){
+    var pts = (q && q.markPoints) || [];
+    for(var i = 0; i < pts.length; i++){
+      var m = pts[i].match;
+      if(m && m.type === "keywords" && m.groups && m.groups.length){
+        var cues = m.groups.map(function(g){
+          var w = (g || []).filter(function(x){ return !/^re:/.test(x); });
+          return w.length ? w[0] : null;
+        }).filter(Boolean);
+        if(cues.length) return "A strong answer here should mention something like: " + cues.join(" + ") + ".";
+      }
+    }
+    return "Re-read the command word in each part, and break your answer into as many separate points as there are marks available.";
+  }
+
+  function hideHintUi(){
+    hintUsed = false;
+    hintConfirm.classList.add("hidden");
+    hintBlock.classList.add("hidden");
+    hintText.textContent = "";
+    btnHint.disabled = false;
+    btnHint.textContent = "💡 Hint";
+  }
+
+  btnHint.addEventListener("click", function(){
+    if(hintUsed) return;
+    hintConfirm.classList.remove("hidden");
+    hintConfirm.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  });
+  btnHintCancel.addEventListener("click", function(){
+    hintConfirm.classList.add("hidden");
+  });
+  btnHintConfirm.addEventListener("click", function(){
+    hintConfirm.classList.add("hidden");
+    hintUsed = true;
+    btnHint.disabled = true;
+    btnHint.textContent = "💡 Hint used (−1 mark)";
+    hintText.textContent = buildHint(currentQuestion());
+    hintBlock.classList.remove("hidden");
+    if(currentChecked) recomputeLiveScore();
+  });
 
   function currentQuestion(){
     return state.paper.questions[state.order[state.index]];
@@ -435,6 +534,7 @@
     var total = state.paper.questions.length;
 
     qTopicLabel.textContent = q.topic; var xv = document.getElementById("exam-viz"); if(xv) xv.innerHTML = "";
+    hideHintUi();
     qCount.textContent = "Question " + (state.index + 1) + " of " + total;
     qProgressFill.style.width = (state.index / total * 100) + "%";
 
@@ -789,16 +889,18 @@
 
   function recomputeLiveScore(){
     var q = currentQuestion();
-    var earned = Math.min(q.marks, currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0));
+    var raw = Math.min(q.marks, currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0));
+    var earned = Math.max(0, raw - (hintUsed ? 1 : 0));
     renderExamVideos(q, q.markPoints.filter(function(mp, i){ return currentControls[i] && currentControls[i].get() < mp.marks; }));
     checkScoreBanner.className = "check-score-banner " + (earned === q.marks ? "full" : (earned > 0 ? "partial" : "none"));
     // "Ticked" describes the normal markpoints-list checkboxes/selects
     // below this banner -- on a single-attempt paper those aren't shown
     // (see renderMarkPoints()), so the wording shouldn't imply the
     // student ticked anything themselves.
+    var hintNote = hintUsed ? " (1 mark deducted for using a hint)" : "";
     checkScoreBanner.textContent = (state.paper.singleAttempt || state.paper.strictMarks)
-      ? "Scored " + earned + " of " + q.marks + (q.marks === 1 ? " mark" : " marks") + " for this question."
-      : "You've ticked " + earned + " of " + q.marks + (q.marks === 1 ? " mark" : " marks") + " for this question.";
+      ? "Scored " + earned + " of " + q.marks + (q.marks === 1 ? " mark" : " marks") + " for this question." + hintNote
+      : "You've ticked " + earned + " of " + q.marks + (q.marks === 1 ? " mark" : " marks") + " for this question." + hintNote;
     return earned;
   }
 
@@ -816,7 +918,7 @@
     if(state.paper.singleAttempt){
       markpointsLabel.classList.add("hidden");
       q.markPoints.forEach(function(mp){
-        var suggested = gradeMarkPoint(studentText, mp);
+        var suggested = gradeMarkPoint(studentText, mp, q);
         currentControls.push({ get: function(){ return suggested; } });
       });
       recomputeLiveScore();
@@ -829,7 +931,7 @@
     if(state.paper.strictMarks){
       markpointsLabel.textContent = "Published mark scheme — marks are awarded by keyword (\u2713 found, \u2717 missing)";
       q.markPoints.forEach(function(mp){
-        var got = gradeMarkPoint(studentText, mp), row = document.createElement("div");
+        var got = gradeMarkPoint(studentText, mp, q), row = document.createElement("div");
         row.className = "markpoint-row";
         var wrap = document.createElement("div"); wrap.className = "markpoint-control";
         var badge = document.createElement("strong");
@@ -845,7 +947,7 @@
     }
 
     q.markPoints.forEach(function(mp, i){
-      var suggested = gradeMarkPoint(studentText, mp);
+      var suggested = gradeMarkPoint(studentText, mp, q);
       var row = document.createElement("div");
       row.className = "markpoint-row";
 
@@ -881,6 +983,41 @@
 
       row.appendChild(controlWrap);
       row.appendChild(label);
+
+      // 11BR AS past-paper (pp11_*) cards only: a student who disagrees
+      // with an automatic mark that fell short of full credit can flag it
+      // for their teacher to review (admin.html's "Answer review" tab).
+      // Accepting there adds their exact wording to the mark scheme for
+      // every future student on this question + part -- see
+      // gradeMarkPoint()'s alternates check above.
+      if(isPP11Paper() && !PREVIEW && suggested < mp.marks){
+        var relevantText = (mp.part && window.PP) ? PP.part(mp.part) : studentText;
+        if(relevantText && relevantText.trim()){
+          (function(mpRef, relevantTextRef){
+            var flagBtn = document.createElement("button");
+            flagBtn.type = "button";
+            flagBtn.className = "btn btn-secondary";
+            flagBtn.style.cssText = "margin-top:6px;margin-left:0;display:block;font-size:12px;padding:4px 10px;";
+            flagBtn.textContent = "🚩 I think this is right";
+            flagBtn.addEventListener("click", function(){
+              if(flagBtn.disabled) return;
+              if(!window.confirm("Send your answer for this part to your teacher for review? They'll decide whether it should count, and your teacher's decision may also apply to other students' answers on this question.")) return;
+              flagBtn.disabled = true;
+              flagBtn.textContent = "Sending…";
+              PQFirebase.flagPPAnswer({
+                uid: state.currentUser.uid, name: state.currentUser.name, cls: state.currentUser.class,
+                paperKey: state.paperKey, questionId: q.id, partId: mpRef.part || "_",
+                mpText: mpRef.text, mpMarks: mpRef.marks, studentText: relevantTextRef, topicLabel: q.topic
+              }).then(function(res){
+                if(res && res.ok){ flagBtn.textContent = "🚩 Flagged — your teacher will review it ✓"; }
+                else { flagBtn.disabled = false; flagBtn.textContent = "🚩 I think this is right"; alert((res && res.error) || "Could not send this — please try again."); }
+              }).catch(function(){ flagBtn.disabled = false; flagBtn.textContent = "🚩 I think this is right"; alert("Could not send this — please try again."); });
+            });
+            row.appendChild(flagBtn);
+          })(mp, relevantText);
+        }
+      }
+
       markpointsList.appendChild(row);
     });
 
@@ -911,6 +1048,8 @@
     })();
     checkArea.classList.remove("hidden");
     currentChecked = true;
+    hintConfirm.classList.add("hidden");
+    btnHint.disabled = true; // the mark scheme is now visible, so a hint has nothing left to add
     if(state.paper.strictMarks){
       // one attempt per question: seeing the scheme must not let the student reword the answer for marks
       answerTextarea.readOnly = true; btnCheck.disabled = true;
@@ -932,10 +1071,10 @@
   btnNext.addEventListener("click", function(){
     if(!currentChecked) return;
     var q = currentQuestion();
-    var earned = Math.min(q.marks, currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0));
+    var earned = Math.max(0, Math.min(q.marks, currentControls.reduce(function(sum, c){ return sum + c.get(); }, 0)) - (hintUsed ? 1 : 0));
 
     state.results.push({
-      id: q.id, topic: q.topic, difficulty: q.difficulty,
+      id: q.id, topic: q.topic, difficulty: q.difficulty, hintUsed: hintUsed,
       earned: earned, total: q.marks,
       answerText: answerTextarea.value.trim() ? answerTextarea.value
         : ((penDraw && penDraw.hasInk()) ? "(handwritten answer, drawn with a pen. The drawing itself is not saved.)" : answerTextarea.value)
@@ -1094,6 +1233,12 @@
       markBadge.className = "badge " + markBadgeClass(r.earned, r.total);
       markBadge.textContent = r.earned + " / " + r.total;
       rq.appendChild(markBadge);
+      if(r.hintUsed){
+        var hintBadge = document.createElement("span");
+        hintBadge.className = "diff-badge";
+        hintBadge.textContent = "💡 hint used (−1)";
+        rq.appendChild(hintBadge);
+      }
       item.appendChild(rq);
       if(q && window.SYLLABUS_OBJECTIVES){
         var sylRev = SYLLABUS_OBJECTIVES.render(q.syl, "syl-review");
@@ -1330,6 +1475,7 @@
 
     state.paperKey = match.key;
     state.paper = EXAM_PAPERS[match.key];
+    loadPPAlternates();
 
     // EXPERIMENT (pen input): on this paper only, make the answer box
     // pen-friendly so iPad Scribble / Samsung S Pen handwriting converts

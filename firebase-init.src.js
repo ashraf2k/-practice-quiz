@@ -609,6 +609,111 @@ function regradeExamAttempt(uid, paperKey, record){
     });
 }
 
+// ---------- Answer-flag review (pp-as-t* past-paper subtopic cards, 11BR AS only) ----------
+// A student who disagrees with the automatic keyword mark on one part of a
+// pp11_* past-paper question (see pp-as-core.js) can flag it from
+// exam-practice.html. This writes one document here for a teacher/admin to
+// review in admin.html's "Answer review" tab -- accepting adds the
+// student's exact wording to ppAnswerAlternates (below) so it counts
+// automatically for every future student on that same question + part;
+// rejecting just dismisses the flag. Never touches as-exam-t* (topic-level)
+// papers or any other class's papers -- exam-practice.html only calls this
+// for paperKey values starting with "pp11_".
+
+function ppAlternatesId(paperKey, questionId, partId){ return String(paperKey) + "__" + String(questionId) + "__" + String(partId || "_"); }
+
+// Student-side: create a pending flag. Firestore rules force status to
+// "pending" and the uid/name to match the signed-in account, so a student
+// can never self-approve or impersonate someone else.
+function flagPPAnswer(flag){
+  var ref = doc(collection(db, "ppAnswerFlags"));
+  var payload = {
+    uid: String((flag && flag.uid) || ""),
+    name: cleanName(flag && flag.name),
+    cls: cleanClass(flag && flag.cls),
+    paperKey: String((flag && flag.paperKey) || ""),
+    questionId: String((flag && flag.questionId) || "").slice(0, 60),
+    partId: String((flag && flag.partId) || "_").slice(0, 20),
+    mpText: String((flag && flag.mpText) || "").slice(0, 500),
+    mpMarks: num(flag && flag.mpMarks, 0),
+    studentText: String((flag && flag.studentText) || "").slice(0, 4000),
+    topicLabel: String((flag && flag.topicLabel) || "").slice(0, 120),
+    status: "pending",
+    createdAt: serverTimestamp()
+  };
+  return setDoc(ref, payload).then(function(){ return { ok: true, id: ref.id }; }).catch(function(err){
+    return { ok: false, error: (err && err.message) || "Could not flag this answer.", code: err && err.code };
+  });
+}
+
+// Admin-only (enforced by security rules, not just this check): every
+// flag still awaiting a decision, newest first.
+function listPendingPPFlags(){
+  return getDocs(query(collection(db, "ppAnswerFlags"), where("status", "==", "pending"))).then(function(snap){
+    var out = [];
+    snap.forEach(function(d){
+      var x = d.data() || {};
+      x.id = d.id;
+      x.createdMs = x.createdAt && x.createdAt.toMillis ? x.createdAt.toMillis() : 0;
+      delete x.createdAt;
+      out.push(x);
+    });
+    out.sort(function(a, b){ return b.createdMs - a.createdMs; });
+    return out;
+  });
+}
+
+// Admin-only (enforced by security rules, not just this check): resolve one
+// flag. "accepted" also merges the student's exact wording into the
+// ppAnswerAlternates document for that question + part (created if it
+// doesn't exist yet, deduplicated, capped at 30 phrases) in the SAME
+// batch, so the mark scheme change and the flag's resolution always land
+// together. "rejected" only updates the flag.
+function resolvePPFlag(flagId, decision, adminName){
+  if(decision !== "accepted" && decision !== "rejected") return Promise.reject(new Error("Unknown decision."));
+  var by = cleanAdminName(adminName);
+  var ref = doc(db, "ppAnswerFlags", flagId);
+  return getDoc(ref).then(function(snap){
+    if(!snap.exists()) return { ok: false, error: "This flag no longer exists -- it may already have been resolved." };
+    var flag = snap.data();
+    var batch = writeBatch(db);
+    batch.update(ref, { status: decision, resolvedAt: serverTimestamp(), resolvedBy: by });
+    if(decision !== "accepted") return batch.commit().then(function(){ return { ok: true }; });
+    var altRef = doc(db, "ppAnswerAlternates", ppAlternatesId(flag.paperKey, flag.questionId, flag.partId));
+    return getDoc(altRef).then(function(altSnap){
+      var values = (altSnap.exists() && Array.isArray(altSnap.data().values)) ? altSnap.data().values : [];
+      var text = String(flag.studentText || "").trim();
+      if(text && values.indexOf(text) < 0) values = values.concat([text]);
+      values = values.slice(-30);
+      batch.set(altRef, {
+        paperKey: String(flag.paperKey || ""),
+        questionId: String(flag.questionId || ""),
+        partId: String(flag.partId || "_"),
+        values: values,
+        updatedAt: serverTimestamp(),
+        updatedBy: by
+      });
+      return batch.commit();
+    }).then(function(){ return { ok: true }; });
+  }).catch(function(err){
+    return { ok: false, error: (err && err.message) || "Could not resolve this flag." };
+  });
+}
+
+// Any signed-in student's own client: every accepted alternate phrase for
+// one paper, keyed "<questionId>::<partId>" so exam-practice.html's
+// grader can look a mark point up by its own id + part.
+function getPPAnswerAlternates(paperKey){
+  return getDocs(query(collection(db, "ppAnswerAlternates"), where("paperKey", "==", String(paperKey || "")))).then(function(snap){
+    var out = {};
+    snap.forEach(function(d){
+      var x = d.data() || {};
+      out[(x.questionId || "") + "::" + (x.partId || "_")] = Array.isArray(x.values) ? x.values : [];
+    });
+    return out;
+  }).catch(function(){ return {}; });
+}
+
 // ---------- MCQ practice progress (resume support, quiz.html) ----------
 // Separate from "attempts" above: this is scratch/working state for an
 // UNFINISHED attempt, saved after every question so a student can close
@@ -1399,6 +1504,10 @@ window.PQFirebase = {
   listAllExamAttempts: listAllExamAttempts,
   deleteExamAttempt: deleteExamAttempt,
   regradeExamAttempt: regradeExamAttempt,
+  flagPPAnswer: flagPPAnswer,
+  listPendingPPFlags: listPendingPPFlags,
+  resolvePPFlag: resolvePPFlag,
+  getPPAnswerAlternates: getPPAnswerAlternates,
   getMyProgress: getMyProgress,
   saveProgress: saveProgress,
   deleteProgress: deleteProgress,

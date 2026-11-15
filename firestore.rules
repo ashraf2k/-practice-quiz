@@ -626,6 +626,70 @@ service cloud.firestore {
       allow create, update, delete: if canWrite();
     }
 
+    // ---------- Answer-flag review (pp-as-t* past-paper subtopic cards, 11BR AS only) ----------
+    // A student flags one mark point they think the automatic keyword
+    // check under-marked; a teacher/admin accepts or rejects it in
+    // admin.html. "accepted" also writes the student's exact wording into
+    // ppAnswerAlternates below so it counts automatically for every future
+    // student on that question + part. See firebase-init.src.js
+    // (flagPPAnswer / listPendingPPFlags / resolvePPFlag / getPPAnswerAlternates).
+    function validPPFlag(uid) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['uid','name','cls','paperKey','questionId','partId','mpText','mpMarks','studentText','topicLabel','status','createdAt'])
+        && d.keys().hasAll(['uid','name','cls','paperKey','questionId','partId','mpText','mpMarks','studentText','topicLabel','status','createdAt'])
+        && d.uid == uid
+        && safeText(d.name, 1, 80) && d.name == get(/databases/$(database)/documents/users/$(uid)).data.name
+        && validClass(d.cls)
+        && d.paperKey is string && d.paperKey.matches('^pp11_[A-Za-z0-9_]{1,56}$')
+        && d.questionId is string && d.questionId.size() >= 1 && d.questionId.size() <= 60
+        && d.partId is string && d.partId.size() >= 1 && d.partId.size() <= 20
+        && d.mpText is string && d.mpText.size() >= 1 && d.mpText.size() <= 500
+        && isNum(d.mpMarks, 0, 50)
+        // The student's own typed answer: no character restriction (exam
+        // answers legitimately contain < > &, e.g. formulas/logic), just a
+        // sane length cap -- rendered escaped everywhere it's shown.
+        && d.studentText is string && d.studentText.size() <= 4000
+        && d.topicLabel is string && d.topicLabel.size() >= 1 && d.topicLabel.size() <= 120
+        && d.status == 'pending'
+        && d.createdAt == request.time;
+    }
+    match /ppAnswerFlags/{flagId} {
+      allow get: if signedIn() && (resource.data.uid == request.auth.uid || canRead());
+      allow list: if canRead();
+      allow create: if signedIn() && entitled() && validPPFlag(request.auth.uid);
+      // A teacher/admin may only move a pending flag to accepted/rejected
+      // and stamp who/when -- never touch the student's original fields.
+      allow update: if canWrite()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','resolvedAt','resolvedBy'])
+        && resource.data.status == 'pending'
+        && request.resource.data.status in ['accepted','rejected']
+        && request.resource.data.resolvedAt == request.time
+        && safeText(request.resource.data.resolvedBy, 1, 80);
+      allow delete: if canWrite();
+    }
+
+    // Accepted alternate phrases per question+part, one doc per
+    // "<paperKey>__<questionId>__<partId>". Read by every signed-in
+    // student's own client at grading time; written only by staff (via
+    // resolvePPFlag, never directly).
+    function validPPAlternates(id) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['paperKey','questionId','partId','values','updatedAt','updatedBy'])
+        && d.keys().hasAll(['paperKey','questionId','partId','values','updatedAt','updatedBy'])
+        && d.paperKey is string && d.paperKey.matches('^pp11_[A-Za-z0-9_]{1,56}$')
+        && d.questionId is string && d.questionId.size() >= 1 && d.questionId.size() <= 60
+        && d.partId is string && d.partId.size() >= 1 && d.partId.size() <= 20
+        && id == d.paperKey + '__' + d.questionId + '__' + d.partId
+        && d.values is list && d.values.size() <= 30
+        && d.updatedAt == request.time
+        && safeText(d.updatedBy, 1, 80);
+    }
+    match /ppAnswerAlternates/{id} {
+      allow get, list: if signedIn();
+      allow create, update: if canWrite() && validPPAlternates(id);
+      allow delete: if canWrite();
+    }
+
     // ---------- default deny ----------
     match /{document=**} {
       allow read, write: if false;

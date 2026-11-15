@@ -132,14 +132,155 @@
       { q: "2(c)", lead: "1 mark each to max 2:", ans: ["Colour/bit depth", "Image resolution"], marks: "2", guide: [] } ],
     "Lossy compression permanently removes data so files are smaller (less storage, faster transfer, less bandwidth). RLE is lossless: runs of identical pixels are stored once with a count.", A.ctx("j2024", 13));
 
+  /* 1.1.2 Number systems: 9618/12 May/June 2025 Q2(a),(b)(i),(b)(ii) */
+  var q112b = Q("AS-J25-12-2ab", "2", "Number conversion and two’s complement range",
+    "",
+    [ { id: "a1", label: "(a)", text: "Convert the denary integer 558 into 12-bit binary.\n\nBinary", marks: 1, lines: 1 },
+      { id: "a2", label: "", text: "Convert the denary integer 558 into hexadecimal.\n\nHexadecimal", marks: 1, lines: 1 },
+      { id: "b1", label: "(b)(i)", text: "Convert the two’s complement binary integer 11100010 into denary.", marks: 1, lines: 1 },
+      { id: "b2", label: "(b)(ii)", text: "Write the smallest two’s complement binary integer that can be represented in 8 bits.\n\nSmallest", marks: 1, lines: 1 },
+      { id: "b3", label: "", text: "Write the largest two’s complement binary integer that can be represented in 8 bits.\n\nLargest", marks: 1, lines: 1 } ],
+    [ val("(a) Binary: 0010 0010 1110", "a1", ["0010 0010 1110", "001000101110"]),
+      val("(a) Hexadecimal: 22E", "a2", ["22E"]),
+      val("(b)(i) -30", "b1", ["-30"]),
+      val("(b)(ii) Smallest: 1000 0000", "b2", ["1000 0000", "10000000"]),
+      val("(b)(ii) Largest: 0111 1111", "b3", ["0111 1111", "01111111"]) ],
+    [ { q: "2(a)", lead: "1 mark for binary; 1 mark for hexadecimal", ans: ["0010 0010 1110", "22E"], marks: "2", guide: [] },
+      { q: "2(b)(i)", ans: ["-30"], marks: "1", guide: [] },
+      { q: "2(b)(ii)", lead: "1 mark for smallest; 1 mark for largest", ans: ["Smallest: 1000 0000", "Largest: 0111 1111"], marks: "2", guide: [] } ],
+    "558 in 12-bit binary is 0010 0010 1110, which is 22E in hexadecimal. To convert two’s complement 11100010 to denary, invert the bits and add 1 to get the magnitude (30), then apply the negative sign: −30. In 8-bit two’s complement the smallest value is 1000 0000 (−128) and the largest is 0111 1111 (+127).", A.ctx("j2025", 12));
+
+  /* 1.1.2 Number systems: 9618/13 May/June 2026 Q6(c),(d) */
+  var q112c = Q("AS-J26-13-6cd", "6", "Two’s complement conversion and range",
+    "",
+    [ { id: "c", label: "(c)", text: "Convert the two’s complement integer 011010110001 into denary.", marks: 1, lines: 1 },
+      { id: "d", label: "(d)", text: "State the 16-bit two’s complement bit pattern of the smallest integer that can be represented using 16 bits.", marks: 1, lines: 1 } ],
+    [ val("(c) 1713", "c", ["1713"]),
+      val("(d) 1000000000000000", "d", ["1000000000000000", "1000 0000 0000 0000"]) ],
+    [ { q: "6(c)", ans: ["1713"], marks: "1", guide: [] },
+      { q: "6(d)", ans: ["1000000000000000"], marks: "1", guide: ["Last answer"] } ],
+    "011010110001 has a leading 0, so it is positive, and converts directly to 1713. The smallest 16-bit two’s complement integer has a 1 in the sign bit and 0s everywhere else: 1000000000000000 (−32768).", A.ctx("j2026", 13));
+
+  /* 1.1.3 Binary arithmetic and overflow: 9618/13 May/June 2024 Q1(c) */
+  var q113b = Q("AS-J24-13-1c", "1", "Overflow in binary addition",
+    "",
+    [ { id: "c", label: "(c)", text: "State what is meant by an overflow in binary addition.", marks: 1, lines: 2 } ],
+    [ kw("(c) The answer is too long to be represented in the same number of bits as the binary numbers being added", 1, "c",
+        [["too long", "too large", "doesn’t fit", "does not fit", "will not fit", "cannot be represented", "can’t be represented", "exceeds the number of bits", "needs more bits", "requires an extra bit", "more bits than available"]]) ],
+    [ { q: "1(c)", ans: ["The answer is too long to be represented in the same number of bits as the binary numbers being added"], marks: "1", guide: [] } ],
+    "Overflow happens when the result of a binary addition needs more bits than are available: the true answer is too long to fit in the same number of bits as the numbers being added.", A.ctx("j2024", 13));
+
+  /* 1.1.3 Binary arithmetic and overflow: 9618/13 May/June 2026 Q6(b) */
+  var q113c = Q("AS-J26-13-6b", "6", "Binary addition with overflow",
+    "",
+    [ { id: "b", label: "(b)", text: "Complete the following binary addition. Show your working. Include any overflow bit(s).\n\n     1 1 0 1 0 1 0 0 1 1 1 1\n   + 1 1 1 1 1 1 0 0 1 1 1 1\n\nAnswer", marks: 2, lines: 1, work: 4 } ],
+    [ kw("(b) Working shown for the binary addition 1101 0100 1111 + 1111 1100 1111", 1, "b+", [[re("1101\\s*0100\\s*1111"), re("1111\\s*1100\\s*1111"), "carry"]]),
+      kw("(b) Answer (1) 1101 0001 1110 including the overflow bit", 1, "b", [[re("1\\)?\\s*1101\\s*0001\\s*1110")]]) ],
+    [ { q: "6(b)", lead: "1 mark for working; 1 mark for answer", ans: ["  1101 0100 1111", "+ 1111 1100 1111", "1 1101 0001 1110"], marks: "2", guide: ["No marks for answer if no evidence of using binary addition."] } ],
+    "1101 0100 1111 + 1111 1100 1111 = 1 1101 0001 1110. The leading 1 is the overflow bit, because the true sum needs 13 bits to be stored exactly.", A.ctx("j2026", 13));
+
+  /* 1.1.4 Applications of BCD and hexadecimal: 9618/12 May/June 2025 Q2(c) */
+  var q114b = Q("AS-J25-12-2c", "2", "Applications of BCD",
+    "",
+    [ { id: "c1", label: "(c)", text: "Give one application where Binary Coded Decimal (BCD) is used and justify its use.\n\nApplication", marks: 1, lines: 2 },
+      { id: "c2", label: "", text: "Justification", marks: 1, lines: 3 } ],
+    [ kw("(c) An application: financial/banking calculations; electronic displays; date/time in a PC’s BIOS; barcode systems", 1, "c1", [["financ", "bank", "money", "currency", "calculator", "digital clock", "display", "bios", "date and time", "barcode", "till", "price"]]),
+      kw("(c) A matching justification: exact decimal values with no accumulating/rounding errors; displays only need individual digits; conversion to/from denary is easier", 1, "c2", [["two decimal", "accurate", "accumulat", "rounding", "individual digit", "each digit", "straightforward", "easier to convert", "easy to convert", "accurately completed", "difficult to represent decimal"]]) ],
+    [ { q: "2(c)", lead: "1 mark for a correct application; 1 mark for a corresponding justification", ans: ["An application that performs financial/banking calculations", "… because financial transactions use only two decimal places and must be accurate, no accumulating/rounding errors, and it is difficult to represent decimal values exactly in normal binary", "Or electronic displays … because visual displays only need to show individual digits and conversion between denary and BCD is straightforward", "Or the storage of the date and time in the BIOS of a PC … because conversion between denary and BCD is more straightforward", "Or barcode systems … because conversion between denary and BCD can be accurately completed"], marks: "2", guide: [] } ],
+    "BCD stores each denary digit separately, so it suits applications where exact decimal digits matter and converting to/from denary must be simple — for example financial calculations, digital displays, a PC’s BIOS clock, or barcodes.", A.ctx("j2025", 12));
+
+  /* 1.1.5 Character sets: 9618/13 May/June 2024 Q1(d)(i),(d)(ii) */
+  var q115b = Q("AS-J24-13-1d", "1", "Character set sizes and encoding a word",
+    "Computers use character sets when representing characters in binary.",
+    [ { id: "d1", label: "(d)(i)", text: "Complete the table by identifying the number of bits each of the character sets allocates to each character.\n\nCharacter set        Number of bits\nASCII\nextended ASCII\nUnicode\n\nWrite the three numbers of bits in order: ASCII, extended ASCII, Unicode.", marks: 1, lines: 1 },
+      { id: "d2", label: "(d)(ii)", text: "Explain how the word ‘Clock’ is represented by a character set.", marks: 2, lines: 4 } ],
+    [ val("(d)(i) 7, 8, 16 or 32", "d1", ["7 8 16", "7,8,16", "7 8 32", "7,8,32", "7 8 16/32", "7,8,16/32", "7 8 16 or 32"]),
+      kw("(d)(ii) Max 2: each character has a unique binary code; the binary code for each character is stored in sequence", 2, "d2",
+        [["unique binary", "unique code", "unique number", "own binary"], ["in sequence", "stored in sequence", "in order", "one after another", "consecutively"]], true) ],
+    [ { q: "1(d)(i)", lead: "1 mark for all 3 answers correct:", ans: ["ASCII 7", "extended ASCII 8", "Unicode 16/32"], marks: "1", guide: [] },
+      { q: "1(d)(ii)", lead: "1 mark each:", ans: ["Each character has a unique binary code", "The binary code for each character is stored in sequence"], marks: "2", guide: [] } ],
+    "ASCII uses 7 bits per character, extended ASCII uses 8 bits, and Unicode uses 16 or 32 bits. ‘Clock’ is represented by giving each letter its own unique binary code and storing those codes one after another in sequence.", A.ctx("j2024", 13));
+
+  /* 1.2.1 Bitmap images: 9618/12 May/June 2026 Q1(a),(b),(c) */
+  var q121b = Q("AS-J26-12-1abc", "1", "Pixels, resolution and the file header",
+    "",
+    [ { id: "a", label: "(a)", text: "Identify the correct definition of a pixel in a bitmap image.", marks: 1, lines: 1 },
+      { id: "b", label: "(b)", text: "Describe the difference between the terms image resolution and screen resolution.", marks: 2, lines: 4 },
+      { id: "c", label: "(c)", text: "Two items in a bitmap image file header are the resolution and colour depth.\nIdentify one other item included in the file header of a bitmap image.", marks: 1, lines: 1 } ],
+    [ kw("(a) The smallest element of an image that can be one colour", 1, "a", [["smallest element", "smallest part", "smallest unit", "smallest piece"], ["one colour", "single colour", "a colour"]]),
+      kw("(b) Max 2: image resolution is pixels wide by pixels high that form the image, screen resolution is pixels wide by pixels high that can be displayed on a screen; if screen resolution is lower than image resolution the image quality is worsened / image resolution can be changed but screen resolution has a physical limit", 2, "b",
+        [["pixels wide", "pixels high", "number of pixels", "forms the image", "make up the image", "can be displayed", "can be shown on a screen"], ["quality is worsened", "quality is reduced", "lower quality", "physical limit", "can be changed", "screen resolution has a limit"]], true),
+      kw("(c) File header item: file size; file type; dimensions/image size; compression type; data offset", 1, "c", [["file size", "file type", "dimensions", "image size", "compression type", "data offset", "bytes from the beginning"]]) ],
+    [ { q: "1(a)", ans: ["The smallest element of an image that can be one colour"], marks: "1", guide: [] },
+      { q: "1(b)", lead: "1 mark each:", ans: ["Image resolution is the number of pixels wide by pixels high that form the image and screen resolution is the number of pixels wide by pixels high that can be displayed on a screen", "If screen resolution is not as high as image resolution the quality of the image is worsened // image resolution can be changed, but screen resolution has a physical limit"], marks: "2", guide: [] },
+      { q: "1(c)", lead: "1 mark for the first correct answer given:", ans: ["File size / File type / Dimensions of the image (image size) / Compression type / Data offset"], marks: "1", guide: ["Do not accept resolution or colour depth (given in the question)", "Do not accept a description of a file header or metadata"] } ],
+    "A pixel is the smallest element of a bitmap image that can be one colour. Image resolution is the pixel dimensions of the image; screen resolution is the pixel dimensions a screen can display — a lower screen resolution worsens the displayed quality. A bitmap file header also typically stores items such as file size, file type, image dimensions, compression type and the data offset to the pixel data.", A.ctx("j2026", 12));
+
+  /* 1.2.1 Bitmap images: 9618/12 Oct/Nov 2023 Q6(c) */
+  var q121c = Q("AS-N23-12-6c", "6", "Bitmap file size calculation",
+    "",
+    [ { id: "c", label: "(c)", text: "A bitmap image has a resolution of 2048 pixels wide and 1024 pixels high. The image has a bit depth of 10 bits per pixel.\nEstimate the file size of the bitmap image in mebibytes. Show your working.\n\nWorking\n\nEstimated file size in mebibytes", marks: 2, lines: 1, work: 5 } ],
+    [ kw("(c) Working: (2048 × 1024 × 10) / (8 × 1024 × 1024)", 1, "c+", [[re("2048\\s*[*x×]\\s*1024\\s*[*x×]\\s*10"), re("2\\s*048\\s*[*x×]\\s*1\\s*024\\s*[*x×]\\s*10")]]),
+      val("(c) Answer 2.5 mebibytes", "c", ["2.5"]) ],
+    [ { q: "6(c)", lead: "1 mark for working; 1 mark for answer", ans: ["Working: (2048 × 1024 × 10) / (8 × 1024 × 1024)", "Answer: 2.5 mebibytes"], marks: "2", guide: [] } ],
+    "File size in bits = 2048 × 1024 × 10 = 20 971 520 bits. Dividing by 8 gives bytes, then by 1024 × 1024 gives mebibytes: 20 971 520 ÷ 8 ÷ 1024 ÷ 1024 = 2.5 MiB.", A.ctx("n2023", 12));
+
+  /* 1.2.2 Changing bitmap elements: 9618/13 Oct/Nov 2024 Q6(b)(i),(b)(ii) */
+  var q122b = Q("AS-N24-13-6b", "6", "Colour depth and pixel bit count",
+    "The colour of each pixel in a bitmapped image is represented by 8 bits.",
+    [ { id: "b1", label: "(b)(i)", text: "State the largest number of different colours that can be represented by 8 bits.", marks: 1, lines: 1 },
+      { id: "b2", label: "(b)(ii)", text: "State one drawback of increasing the number of bits that represents each pixel in the bitmap image.", marks: 1, lines: 2 } ],
+    [ val("(b)(i) 256 or 2⁸", "b1", ["256", "2^8", "2**8", "2⁸"]),
+      kw("(b)(ii) Increased file size", 1, "b2", [["increased file size", "larger file", "bigger file", "file size increases", "more storage", "takes up more space", "file is bigger"]]) ],
+    [ { q: "6(b)(i)", ans: ["256 // 2⁸"], marks: "1", guide: [] },
+      { q: "6(b)(ii)", ans: ["Increased file size"], marks: "1", guide: [] } ],
+    "8 bits per pixel gives 2⁸ = 256 possible colours. Using more bits per pixel allows more colours but increases the file size, since every pixel then needs more storage.", A.ctx("n2024", 13));
+
+  /* 1.2.4 Sound: 9618/13 May/June 2026 Q3(a) */
+  var q124b = Q("AS-J26-13-3a", "3", "Meaning of sampling resolution",
+    "An animation has a sound recording with a sampling resolution of 2 bytes.",
+    [ { id: "a", label: "(a)", text: "State what is meant by a sampling resolution of 2 bytes.", marks: 1, lines: 2 } ],
+    [ kw("(a) Each sample is stored as a 16-bit binary number, giving 2¹⁶/65536 different amplitudes that can be recorded", 1, "a", [["16-bit", "16 bit", "16 bits", "65536", "65 536", re("2\\s*(\\^|²|\\*\\*)\\s*16")]]) ],
+    [ { q: "3(a)", ans: ["Each sample is stored as a 16-bit binary number // there are 2^16/65536 different amplitudes that can be recorded"], marks: "1", guide: ["Accept 2 bytes or any equivalent."] } ],
+    "A sampling resolution of 2 bytes means each sample is stored using 16 bits, giving 2¹⁶ = 65536 possible amplitude values.", A.ctx("j2026", 13));
+
+  /* 1.2.4 Sound: 9618/12 Oct/Nov 2023 Q6(b) */
+  var q124c = Q("AS-N23-12-6b", "6", "Effect of changing sampling resolution",
+    "",
+    [ { id: "b", label: "(b)", text: "Explain the impact of changing the sampling resolution on the accuracy of a sound recording.", marks: 3, lines: 6 } ],
+    [ kw("(b) Max 3: increasing sampling resolution means more bits per sample, more amplitude values available, each digital amplitude closer to the analogue original, smaller quantisation errors (reverse arguments allowed for decreasing)", 3, "b",
+        [["more bits", "fewer bits", "number of bits used for each sample"], ["more values", "more amplitudes", "fewer values", "fewer amplitudes", "values available"], ["closer to the analogue", "closer to the original", "further from the analogue", "further from the original"], ["quantisation error", "quantization error", "quantisation errors are reduced", "quantisation errors are increased"]], true) ],
+    [ { q: "6(b)", lead: "1 mark each to max 3", ans: ["Increasing sampling resolution: the number of bits used for each sample is increased", "… there will be more values available to represent each sample/more amplitudes can be represented", "… each binary amplitude/note in the digital recording is closer to the analogue amplitude/note", "… quantisation errors are reduced // the digital soundwave is closer to the original analogue soundwave", "(Reverse arguments allowed for decreasing sampling resolution)"], marks: "3", guide: [] } ],
+    "A higher sampling resolution uses more bits per sample, so more amplitude values are available and each digital sample is closer to the true analogue amplitude, reducing quantisation error. A lower sampling resolution has the opposite effect.", A.ctx("n2023", 12));
+
+  /* 1.3.1 Compression: 9618/13 May/June 2026 Q3(c)(i) */
+  var q131b = Q("AS-J26-13-3c", "3", "Lossless compression of images and sound",
+    "The sound and images of an animation are compressed independently before being transmitted over the internet.",
+    [ { id: "c1", label: "(c)(i)", text: "Explain the different ways that lossless compression can be used to compress the images and the sound file.\n\nimage file\n\nsound file", marks: 4, lines: 6 } ],
+    [ kw("(c)(i) Image max 2: run-length encoding (RLE); store each colour and the number of times it repeats consecutively", 2, "c1img", [["run-length", "run length", "rle"], ["number of times", "repeats", "consecutively", "count of", "how many times"]], true),
+      kw("(c)(i) Sound max 2: reduce amplitude values to only those used in the recording; reduce sampling resolution without impacting the sound; record changes in amplitude instead of each amplitude; each change needs fewer bits than a new amplitude", 2, "c1snd", [["amplitude values", "range of amplitudes", "dynamic range", "sampling resolution"], ["change in amplitude", "changes in amplitude", "difference between amplitudes", "change instead of"]], true) ],
+    [ { q: "3(c)(i)", lead: "1 mark each, max 2 for image and max 2 for sound", ans: ["Image: run-length encoding/RLE; store each colour and the number of times it appears consecutively", "Sound: reduce amplitude values (dynamic range) to only those used in the actual recording; reduce sampling resolution without impacting the sound; record changes in amplitudes instead of each individual amplitude; each change requires fewer bits than a new amplitude"], marks: "4", guide: ["Accept RLE for sound but do not allow for both parts"] } ],
+    "Lossless image compression can use run-length encoding: each colour is stored once together with how many consecutive pixels repeat it. Lossless sound compression can restrict stored amplitude values to those actually used, or store only the change between consecutive amplitudes, which usually needs fewer bits than a full new amplitude.", A.ctx("j2026", 13));
+
+  /* 1.3.1 Compression: 9618/12 Oct/Nov 2023 Q6(a) */
+  var q131c = Q("AS-N23-12-6a", "6", "Choosing lossy compression for live streaming",
+    "A real-time video of a music concert needs to be streamed to subscribers.",
+    [ { id: "a1", label: "(a)", text: "Identify the most appropriate type of compression (lossy or lossless) and justify your answer.\n\nType of compression", marks: 1, lines: 1 },
+      { id: "a2", label: "", text: "Justification", marks: 2, lines: 4 } ],
+    [ val("(a) Lossy", "a1", ["lossy"]),
+      kw("(a) Max 2: loss of quality will not be noticed; needs to be viewed in real time so less bandwidth needed with a smaller file; smaller files reduce buffering so the video plays more smoothly; viewers may watch on different devices so may not need high quality/resolution", 2, "a2",
+        [["quality will not be noticed", "loss of quality is not noticeable", "not noticed"], ["real time", "less bandwidth", "smaller file", "buffering", "play more smoothly", "different devices", "may not need high quality", "may not need high resolution"]], true) ],
+    [ { q: "6(a)", lead: "1 mark for Lossy; 1 mark each to max 2 for justification", ans: ["Lossy compression", "Loss of quality will not be noticed", "Needs to be viewed in real time so less bandwidth needed if file size smaller", "Smaller file sizes will reduce buffering so the video will play more smoothly", "Viewers may watch on different devices, so may not need high quality resolution"], marks: "3", guide: [] } ],
+    "A live video stream is best served by lossy compression: the smaller file size needs less bandwidth and reduces buffering, which matters more for real-time viewing than a small loss of quality most viewers would not notice.", A.ctx("n2023", 12));
+
   A.paper("1.1.1", "Binary magnitudes", [q111]);
-  A.paper("1.1.2", "Number systems", [q112]);
-  A.paper("1.1.3", "Binary arithmetic and overflow", [q113]);
-  A.paper("1.1.4", "Applications of BCD and hexadecimal", [q114]);
-  A.paper("1.1.5", "Character sets", [q115]);
-  A.paper("1.2.1", "Bitmap images", [q121]);
-  A.paper("1.2.2", "Changing bitmap elements", [q122]);
+  A.paper("1.1.2", "Number systems", [q112, q112b, q112c]);
+  A.paper("1.1.3", "Binary arithmetic and overflow", [q113, q113b, q113c]);
+  A.paper("1.1.4", "Applications of BCD and hexadecimal", [q114, q114b]);
+  A.paper("1.1.5", "Character sets", [q115, q115b]);
+  A.paper("1.2.1", "Bitmap images", [q121, q121b, q121c]);
+  A.paper("1.2.2", "Changing bitmap elements", [q122, q122b]);
   A.paper("1.2.3", "Vector graphics", [q123]);
-  A.paper("1.2.4", "Sound", [q124]);
-  A.paper("1.3.1", "Compression", [q131]);
+  A.paper("1.2.4", "Sound", [q124, q124b, q124c]);
+  A.paper("1.3.1", "Compression", [q131, q131b, q131c]);
 })();
