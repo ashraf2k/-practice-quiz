@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-pUVe0c8Y2rJbg8ab0BpW0gYYStdKCjC1HVCAsKlJrhE='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-LaJQ17UsPsfRej+8qjyeAsO05WYNo20tzWkh756vScQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -454,6 +454,7 @@
   .mg-row-actions{ display:flex; gap:5px; flex-wrap:wrap; }
   .mg-chip{ display:inline-block; padding:2px 9px; border-radius:999px; font-size:11.5px; font-weight:700; color:#fff; }
   .mg-chip.ok{ background:#16a34a; } .mg-chip.bad{ background:#dc2626; }
+  .mg-chip.warn{ background:#d97706; } .mg-chip.muted{ background:#6b7280; }
   .mg-lvl{ font-size:11px; font-weight:700; color:var(--muted); margin-left:6px; }
   tr.mg-blocked td{ opacity:.65; }
   .mg-bulk[hidden], .mg-add[hidden]{ display:none; }
@@ -1029,6 +1030,44 @@
       <div class="admin-panel" id="panel-subs">
         <h2 style="margin:0 0 4px">Subscription management</h2>
         <p class="admin-status">Give students access for a period: individually or in bulk. Dates are in Riyadh time.</p>
+        <div class="mg-kpis" id="sub-kpis"></div>
+        <div class="admin-toolbar no-print">
+          <input type="text" id="sub-search" placeholder="Search name or email" aria-label="Search students">
+          <select id="sub-class" aria-label="Class"><option value="">All classes</option></select>
+          <select id="sub-status" aria-label="Status">
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="trial">Trial</option>
+            <option value="expired">Expired</option>
+            <option value="suspended">Suspended</option>
+            <option value="none">No subscription set</option>
+          </select>
+          <button class="btn btn-secondary" id="sub-csv" type="button">Download CSV</button>
+        </div>
+        <div class="mg-bulk no-print" id="sub-bulk" hidden>
+          <strong id="sub-bulk-n"></strong>
+          <select id="sub-bulk-plan" aria-label="Plan">
+            <option value="trial">Free trial (24 h)</option>
+            <option value="monthly" selected>Monthly (30 days)</option>
+            <option value="quarterly">3-Month (90 days)</option>
+            <option value="biannual">6-Month (180 days)</option>
+            <option value="exams">Until exams (pick a date)</option>
+            <option value="custom">Custom (pick a date)</option>
+          </select>
+          <label style="display:flex;gap:4px;align-items:center;font-size:.85rem">Start<input type="date" id="sub-bulk-start"></label>
+          <label style="display:flex;gap:4px;align-items:center;font-size:.85rem">Expiry<input type="date" id="sub-bulk-expiry"></label>
+          <label style="display:flex;gap:6px;align-items:center;font-size:.85rem"><input type="checkbox" id="sub-bulk-suspended"> Suspend access</label>
+          <input type="text" id="sub-bulk-reason" placeholder="Reason (kept in history, optional)" style="min-width:180px;flex:1">
+          <button class="btn btn-primary" data-bulk="apply" type="button">Apply</button>
+          <button class="btn btn-secondary" data-bulk="clear" type="button">Clear</button>
+        </div>
+        <p class="admin-status" id="sub-status-line" aria-live="polite"></p>
+        <div class="table-scroll">
+          <table class="admin-table" id="sub-table">
+            <thead><tr><th style="width:28px"><input type="checkbox" id="sub-all" aria-label="Select all"></th><th>Student</th><th>Class</th><th>Plan</th><th>Status</th><th>Expiry</th><th>Last changed</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="admin-panel" id="panel-timetables">
@@ -1596,6 +1635,7 @@
     renderArchive();
     renderKpis();
     if(window.__renderManage) window.__renderManage();
+    if(window.__subsOpened) window.__subsOpened();
     if(window.__renderDashboard) window.__renderDashboard();
     if(window.__renderMenus) window.__renderMenus();
   }
@@ -3629,6 +3669,7 @@
     if(tab === "byStudent") renderByStudent();
     if(tab === "attention") renderAttention();
     fillMgClasses(); renderManage(); renderGroups(); renderArchive();
+    if(window.__subsOpened) window.__subsOpened();
   }
   document.getElementById("level-bar").addEventListener("click", function(e){
     var b = e.target.closest(".lvl-btn"); if(b) setGlobalLevel(b.getAttribute("data-gl"));
@@ -3651,6 +3692,7 @@
       if(keep && cur && all.indexOf(cur) >= 0) sel.value = cur;
     }
     fill("mg-class", "All classes", true); fill("mg-a-class", null, true); fill("mg-e-class", null, true); fill("mg-bulk-class", "Move to class…", false);
+    if(document.getElementById("sub-class")) fill("sub-class", "All classes", true);
   }
   var mgSel = {};
   function mgStatus(msg, warn){ var el = document.getElementById("mg-status-line"); el.textContent = msg || ""; el.classList.toggle("warn", !!warn); }
@@ -3837,6 +3879,136 @@
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" })); a.download = "students.csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
   });
 
+
+  // ============================================================
+  // Subscription management (bulk status change)
+  // ============================================================
+  var SUB_PLAN_LABEL = { trial: "Free trial", monthly: "Monthly", quarterly: "3-Month", biannual: "6-Month", exams: "Until exams", custom: "Custom" };
+  var SUB_PLAN_DAYS = { monthly: 30, quarterly: 90, biannual: 180 };
+  var subSel = {};
+  function subUser(uid){ return (usersRoster || []).filter(function(u){ return u.uid === uid; })[0]; }
+  function subInfo(u){
+    // usersRoster entries already carry the parsed subscription (PQFirebase.listAllUsers() runs subFrom() for us).
+    return (u && u.sub) || {};
+  }
+  function subStatusOf(info){
+    if(!info || (!info.plan && !info.expiryMs)) return "none";
+    if(info.suspended) return "suspended";
+    var now = Date.now();
+    if(info.expiryMs && info.expiryMs < now) return "expired";
+    if(info.isTrial || info.plan === "trial") return "trial";
+    return "active";
+  }
+  var SUB_STATUS_LABEL = { active: "Active", trial: "Trial", expired: "Expired", suspended: "Suspended", none: "No subscription" };
+  var SUB_STATUS_CHIP = { active: "ok", trial: "warn", expired: "bad", suspended: "bad", none: "muted" };
+  function subStatusLine(msg, warn){ var el = document.getElementById("sub-status-line"); if(el){ el.textContent = msg || ""; el.classList.toggle("warn", !!warn); } }
+  function subFiltered(){
+    var q = (document.getElementById("sub-search").value || "").trim().toLowerCase();
+    var c = document.getElementById("sub-class").value;
+    var st = document.getElementById("sub-status").value;
+    return (usersRoster || []).filter(function(u){
+      var cls = String(u.className || "").replace(/\s+/g, "");
+      if(GLV && levelOf(cls) !== GLV) return false;
+      if(c && cls !== c.replace(/\s+/g, "")) return false;
+      if(q && (String(u.name || "") + " " + String(u.email || "")).toLowerCase().indexOf(q) < 0) return false;
+      if(st && subStatusOf(subInfo(u)) !== st) return false;
+      return true;
+    }).sort(function(a, b){ return String(a.className || "").localeCompare(String(b.className || "")) || String(a.name || "").localeCompare(String(b.name || "")); });
+  }
+  function renderSubs(){
+    var tb = document.querySelector("#sub-table tbody"); if(!tb) return;
+    var base = (usersRoster || []).filter(function(u){ return !GLV || levelOf(u.className) === GLV; });
+    var counts = { active: 0, trial: 0, expired: 0, suspended: 0, none: 0 };
+    base.forEach(function(u){ counts[subStatusOf(subInfo(u))]++; });
+    var kp = document.getElementById("sub-kpis"); kp.innerHTML = "";
+    [["active", "Active"], ["trial", "Trial"], ["expired", "Expired"], ["suspended", "Suspended"], ["none", "No subscription"]].forEach(function(k){
+      var d = mk("div", "mg-kpi"); d.appendChild(mk("b", null, String(counts[k[0]]))); d.appendChild(mk("span", null, k[1])); kp.appendChild(d);
+    });
+    var list = subFiltered(); tb.innerHTML = "";
+    if(!list.length){
+      var tr0 = mk("tr"), td0 = mk("td", "wrap-cell", loaded ? "No students match these filters." : "Loading…"); td0.colSpan = 7; tr0.appendChild(td0); tb.appendChild(tr0);
+    }
+    list.forEach(function(u){
+      var info = subInfo(u), status = subStatusOf(info);
+      var tr = mk("tr");
+      var c0 = mk("td"), cb = mk("input"); cb.type = "checkbox"; cb.checked = !!subSel[u.uid]; cb.setAttribute("data-uid", u.uid); cb.setAttribute("aria-label", "Select " + (u.name || "student"));
+      cb.addEventListener("change", function(){ if(cb.checked) subSel[u.uid] = 1; else delete subSel[u.uid]; subBulkBar(); }); c0.appendChild(cb); tr.appendChild(c0);
+      var c1 = mk("td"); c1.appendChild(mk("div", null, u.name || "(no name)")); var em = mk("div", null, u.email || ""); em.style.cssText = "font-size:.75rem;color:var(--muted)"; c1.appendChild(em); tr.appendChild(c1);
+      tr.appendChild(mk("td", null, String(u.className || "").replace(/\s+/g, "") || "-"));
+      tr.appendChild(mk("td", null, info.label || SUB_PLAN_LABEL[info.plan] || "-"));
+      var c3 = mk("td"); c3.appendChild(mk("span", "mg-chip " + SUB_STATUS_CHIP[status], SUB_STATUS_LABEL[status])); tr.appendChild(c3);
+      tr.appendChild(mk("td", null, info.expiryMs ? fmtDay(info.expiryMs) : "-"));
+      tr.appendChild(mk("td", null, info.modifiedMs ? fmtDay(info.modifiedMs) + (info.by ? " · " + info.by : "") : "-"));
+      tb.appendChild(tr);
+    });
+    document.getElementById("sub-all").checked = list.length > 0 && list.every(function(u){ return subSel[u.uid]; });
+    subBulkBar();
+  }
+  window.__subsOpened = function(){ fillMgClasses(); renderSubs(); };
+  function subBulkBar(){
+    var n = Object.keys(subSel).length, bar = document.getElementById("sub-bulk");
+    bar.hidden = !n; document.getElementById("sub-bulk-n").textContent = n + " selected";
+  }
+  function subDateInput(id){ var v = document.getElementById(id).value; if(!v) return 0; var d = new Date(v + "T00:00:00"); return d.getTime(); }
+  function subSetDateInput(id, ms){ var el = document.getElementById(id); if(!ms){ el.value = ""; return; } var d = new Date(ms); el.value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function subRecalcExpiry(){
+    var plan = document.getElementById("sub-bulk-plan").value;
+    var startMs = subDateInput("sub-bulk-start") || Date.now();
+    var days = SUB_PLAN_DAYS[plan];
+    if(plan === "trial"){ subSetDateInput("sub-bulk-expiry", startMs + 24 * 60 * 60 * 1000); return; }
+    if(days){ subSetDateInput("sub-bulk-expiry", startMs + days * 24 * 60 * 60 * 1000); return; }
+    // exams / custom: leave the expiry date for the admin to pick manually
+  }
+  document.getElementById("sub-bulk-plan").addEventListener("change", subRecalcExpiry);
+  document.getElementById("sub-bulk-start").addEventListener("change", subRecalcExpiry);
+  document.getElementById("sub-all").addEventListener("change", function(){
+    var on = this.checked; subFiltered().forEach(function(u){ if(on) subSel[u.uid] = 1; else delete subSel[u.uid]; }); renderSubs();
+  });
+  ["sub-search"].forEach(function(id){ document.getElementById(id).addEventListener("input", renderSubs); });
+  ["sub-class", "sub-status"].forEach(function(id){ document.getElementById(id).addEventListener("change", renderSubs); });
+  document.getElementById("sub-csv").addEventListener("click", function(){
+    var rows = [["Name", "Email", "Class", "Plan", "Status", "Expiry"]].concat(subFiltered().map(function(u){
+      var info = subInfo(u), status = subStatusOf(info);
+      return [u.name, u.email, String(u.className || "").replace(/\s+/g, ""), info.label || SUB_PLAN_LABEL[info.plan] || "", SUB_STATUS_LABEL[status], info.expiryMs ? fmtDay(info.expiryMs) : ""];
+    }));
+    var csv = rows.map(function(r){ return r.map(function(v){ v = String(v == null ? "" : v); if(/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }).join(","); }).join("\r\n");
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" })); a.download = "subscriptions.csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+  document.getElementById("sub-bulk").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-bulk]"); if(!b) return;
+    if(b.getAttribute("data-bulk") === "clear"){ subSel = {}; renderSubs(); return; }
+    var uids = Object.keys(subSel); if(!uids.length) return;
+    if(typeof PQFirebase.assignSubscriptions !== "function"){ window.alert("This browser has an older cached script. Hard refresh (Ctrl+Shift+R) and try again."); return; }
+    var plan = document.getElementById("sub-bulk-plan").value;
+    var startMs = subDateInput("sub-bulk-start") || Date.now();
+    var expiryMs = subDateInput("sub-bulk-expiry");
+    var suspended = document.getElementById("sub-bulk-suspended").checked;
+    var reason = document.getElementById("sub-bulk-reason").value.trim();
+    if(!expiryMs && (plan === "exams" || plan === "custom")){ subStatusLine("Pick an expiry date first.", true); return; }
+    if(!window.confirm("Apply " + SUB_PLAN_LABEL[plan] + (suspended ? " (suspended)" : "") + " to " + uids.length + " student(s)?")) return;
+    var items = uids.map(function(uid){
+      var u = subUser(uid), info = subInfo(u);
+      return { uid: uid, action: "set", plan: plan, startMs: startMs, expiryMs: expiryMs, suspended: suspended, reason: reason, prevPlan: info.plan || "", prevExpiryMs: info.expiryMs || 0, expectExpiryMs: info.expiryMs || 0 };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#sub-bulk button"), function(x){ x.disabled = true; });
+    subStatusLine("Applying to " + uids.length + " student(s)…");
+    PQFirebase.assignSubscriptions(items, currentAdminName, currentAdminUid).then(function(res){
+      res = res || {};
+      var ok = res.ok || [], failed = res.failed || [];
+      ok.forEach(function(uid){
+        var u = subUser(uid); if(u) u.sub = { plan: plan, startMs: startMs, expiryMs: expiryMs, suspended: suspended, by: currentAdminName, modifiedMs: Date.now() };
+        delete subSel[uid];
+      });
+      Array.prototype.forEach.call(document.querySelectorAll("#sub-bulk button"), function(x){ x.disabled = false; });
+      renderSubs();
+      var msg = "Done: " + ok.length + " student(s) updated" + (failed.length ? "; " + failed.length + " failed" : "") + ".";
+      subStatusLine(msg, !!failed.length);
+    }).catch(function(err){
+      Array.prototype.forEach.call(document.querySelectorAll("#sub-bulk button"), function(x){ x.disabled = false; });
+      subStatusLine(mgErr(err, "update subscriptions"), true);
+    });
+  });
+  subRecalcExpiry();
 
   // ============================================================
   // Groups (classes with codes), join requests, roles, parent links, migration
