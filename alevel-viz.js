@@ -47,7 +47,17 @@
       wrap.appendChild(body);
       try { fn(body, sp.o || {}); } catch(e){ if(root.console) console.error("viz " + sp.w, e); return; }
       if(sp.note) wrap.appendChild(V.el("div", "viz-note", sp.note));
-      after.parentNode.insertBefore(wrap, after.nextSibling); after = wrap;
+      if(sp.o && sp.o.beside){
+        var besideHost = anchor.parentNode.querySelector(".ln-beside");
+        if(!besideHost || !besideHost.contains(anchor)){
+          besideHost = V.el("div", "ln-beside");
+          anchor.parentNode.insertBefore(besideHost, anchor);
+          besideHost.appendChild(anchor);
+        }
+        besideHost.appendChild(wrap);
+      } else {
+        after.parentNode.insertBefore(wrap, after.nextSibling); after = wrap;
+      }
     });
   };
 })(typeof window !== "undefined" ? window : this);

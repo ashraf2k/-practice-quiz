@@ -174,14 +174,49 @@
   });
 
   /* ---------- 19.1 data structures ---------- */
-  V.reg("stack", function(box){
+  V.reg("stack", function(box, o){
     var N = 6, st = [], inp = el("input", "vin mono"), view = el("div"), log = el("div", "vlog"), n = 10;
     inp.type = "number"; inp.value = n; inp.style.width = "80px";
+    // Highlight, one at a time with a short delay, the pseudocode lines (by data-k) that just ran
+    // in the #stk-pcode block the lesson places beside this widget (see alevel-t19.js / alevel-viz-map.js).
+    var flashSeq = 0;
+    function flashLines(keys){
+      if(!o || !o.codeId) return;
+      var root = document.getElementById(o.codeId); if(!root) return;
+      var mySeq = ++flashSeq;
+      var all = root.querySelectorAll(".pcl"); for(var i = 0; i < all.length; i++) all[i].classList.remove("hi");
+      keys.forEach(function(k, idx){
+        setTimeout(function(){
+          if(mySeq !== flashSeq) return; // a newer action started; don't keep lighting up stale lines
+          var els = root.querySelectorAll('[data-k="' + k + '"]');
+          for(var j = 0; j < els.length; j++) els[j].classList.add("hi");
+        }, idx * 450);
+      });
+    }
+    function clearLines(){
+      flashSeq++;
+      if(!o || !o.codeId) return;
+      var root = document.getElementById(o.codeId); if(!root) return;
+      var all = root.querySelectorAll(".pcl"); for(var i = 0; i < all.length; i++) all[i].classList.remove("hi");
+    }
     function draw(msg){
       var h = '<div class="vtwo"><div><div class="vstack" style="min-height:' + (N * 34) + 'px;width:110px">' + st.map(function(v, k){ return "<i" + (k === st.length - 1 ? ' class="new"' : "") + ">" + v + "</i>"; }).join("") + "</div><div style='font-size:12px;color:var(--muted)'>capacity " + N + "</div></div><div><div class='vres'>TopPointer = <b>" + (st.length - 1) + "</b>" + (st.length === 0 ? " (empty)" : st.length === N ? " (full)" : "") + "</div></div></div>";
       view.innerHTML = h; log.innerHTML = msg || "A stack is LIFO: the last item pushed is the first popped.";
     }
-    box.appendChild(row(el("label", null, "Item: "), inp, btn("Push", function(){ if(st.length === N){ draw("<span class='vbad'>Stack is full</span>: nothing is added."); return; } st.push(inp.value); inp.value = +inp.value + 1; draw("TopPointer + 1, then store <b>" + st[st.length - 1] + "</b> at the top."); }, "p"), btn("Pop", function(){ if(!st.length){ draw("<span class='vbad'>Stack is empty</span>: nothing to pop."); return; } var v = st.pop(); draw("Return <b>" + v + "</b> from the top, then TopPointer − 1."); }), btn("Peek", function(){ draw(st.length ? "Peek returns <b>" + st[st.length - 1] + "</b> without removing it." : "<span class='vbad'>Stack is empty</span>."); })));
+    box.appendChild(row(el("label", null, "Item: "), inp,
+      btn("Push", function(){
+        if(st.length === N){ flashLines(["push-check", "push-full"]); draw("<span class='vbad'>Stack is full</span>: nothing is added."); return; }
+        flashLines(["push-check", "push-inc", "push-store"]);
+        st.push(inp.value); inp.value = +inp.value + 1;
+        draw("TopPointer + 1, then store <b>" + st[st.length - 1] + "</b> at the top.");
+      }, "p"),
+      btn("Pop", function(){
+        if(!st.length){ flashLines(["pop-check", "pop-empty"]); draw("<span class='vbad'>Stack is empty</span>: nothing to pop."); return; }
+        flashLines(["pop-check", "pop-read", "pop-dec", "pop-return"]);
+        var v = st.pop();
+        draw("Return <b>" + v + "</b> from the top, then TopPointer − 1.");
+      }),
+      btn("Peek", function(){ clearLines(); draw(st.length ? "Peek returns <b>" + st[st.length - 1] + "</b> without removing it." : "<span class='vbad'>Stack is empty</span>."); })));
     box.appendChild(view); box.appendChild(log); draw();
   });
   V.reg("queue", function(box){

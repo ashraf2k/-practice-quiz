@@ -4,6 +4,10 @@
 .viz-b{padding:14px;font-size:14px;line-height:1.5;overflow-x:auto}
 .viz-note{padding:0 14px 12px;color:var(--muted);font-size:13px}
 .viz *{box-sizing:border-box}
+.ln-beside{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin:16px 0}
+.ln-beside>.ln-box,.ln-beside>.ln-body,.ln-beside>.viz{flex:1 1 280px;min-width:0;margin:0}
+.pcl{display:block;border-radius:4px;padding:0 3px;margin:0 -3px}
+.pcl.hi{background:var(--accent-tint);font-weight:700;box-shadow:0 0 0 1px var(--accent)}
 .vb{padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
 .vb:hover:not(:disabled){border-color:var(--accent)}
 .vb.p{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}

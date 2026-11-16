@@ -66,7 +66,7 @@
   add("19.1a", "search", "Linear search against binary search", 1); add("19.1b", "search", "Binary search step by step", 1); add("19.p3b", "search", "Linear search against binary search", 1);
   add("19.1c", "sort", "Bubble sort animation", 1, { kind: "bubble" }); add("19.1d", "sort", "Insertion sort animation", 1, { kind: "insertion" });
   add("19.p3a", "sort", "Insertion sort animation", 1, { kind: "insertion" }); add("19.p42q1", "sort", "Insertion sort animation", 1, { kind: "insertion" }); add("19.p43q1", "sort", "Bubble sort animation", 1, { kind: "bubble" });
-  add("19.1e", "stack", "Push and pop", 1);
+  add("19.1e", "stack", "Push and pop", 0, { beside: true, codeId: "stk-pcode" }, "Each line of pseudocode that just ran lights up on the left as you Push or Pop on the right.");
   add("19.1f", "queue", "Enqueue and dequeue", 1); add("19.p41q1", "queue", "Linear queue: enqueue and dequeue", 1);
   add("19.1g", "llist", "A linked list held in arrays", 1); add("19.p42q3", "llist", "A linked list held in arrays (add at the end)", 1);
   add("19.1h", "btree", "Build a binary tree and walk through it", 1); add("19.p43q3", "btree", "Build the binary tree of Paper 43 and walk through it", 1);

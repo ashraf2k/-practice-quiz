@@ -11,6 +11,15 @@
       rows.map(function(r){ return "<tr>" + r.map(function(c){ return "<td>" + c + "</td>"; }).join("") + "</tr>"; }).join("") + "</table>";
   }
   function pre(s){ return "<pre class='ln-pre'>" + s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</pre>"; }
+  function pesc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  // Pseudocode with addressable lines: lines is an array of [text, key-or-null]. A visualizer can then
+  // highlight the exact line(s) that just ran by toggling .hi on [data-k="key"] inside #id.
+  function pcode(id, lines){
+    return "<pre class='vpre' id='" + id + "'>" + lines.map(function(ln){
+      var text = pesc(ln[0]);
+      return ln[1] ? "<span class='pcl' data-k='" + ln[1] + "'>" + text + "</span>" : text;
+    }).join("\n") + "</pre>";
+  }
   function steps(list){ return "<ol>" + list.map(function(s){ return "<li>" + s + "</li>"; }).join("") + "</ol>"; }
   var LEFT = "←";
 
@@ -188,8 +197,33 @@
 
   { id:"19.1e", code:"19.1.3", title:"Stacks",
     concept:
-      "<p>A <b>stack</b> is a <b>last in, first out (LIFO)</b> abstract data type. Items are added (<b>push</b>) and removed (<b>pop</b>) at the same end, the <b>top</b>. A stack stored in an array uses a <b>top pointer</b> (index of the top item; -1 when empty) and checks for full/empty.</p>" +
-      pre("CONSTANT StackSize = 10\nDECLARE Stack : ARRAY[0:9] OF INTEGER\nDECLARE TopPointer : INTEGER\nTopPointer " + LEFT + " -1\n\nPROCEDURE Push(Item : INTEGER)\n    IF TopPointer = StackSize - 1 THEN\n        OUTPUT \"Stack is full\"\n    ELSE\n        TopPointer " + LEFT + " TopPointer + 1\n        Stack[TopPointer] " + LEFT + " Item\n    ENDIF\nENDPROCEDURE\n\nFUNCTION Pop() RETURNS INTEGER\n    IF TopPointer = -1 THEN\n        OUTPUT \"Stack is empty\"\n        RETURN -1\n    ELSE\n        Item " + LEFT + " Stack[TopPointer]\n        TopPointer " + LEFT + " TopPointer - 1\n        RETURN Item\n    ENDIF\nENDFUNCTION"),
+      "<p>A <b>stack</b> is a <b>last in, first out (LIFO)</b> abstract data type. Items are added (<b>push</b>) and removed (<b>pop</b>) at the same end, the <b>top</b>. A stack stored in an array uses a <b>top pointer</b> (index of the top item; -1 when empty) and checks for full/empty. Try the animation beside this pseudocode: each line that runs lights up as you Push or Pop.</p>" +
+      pcode("stk-pcode", [
+        ["CONSTANT StackSize = 10", null],
+        ["DECLARE Stack : ARRAY[0:9] OF INTEGER", null],
+        ["DECLARE TopPointer : INTEGER", null],
+        ["TopPointer " + LEFT + " -1", null],
+        ["", null],
+        ["PROCEDURE Push(Item : INTEGER)", null],
+        ["    IF TopPointer = StackSize - 1 THEN", "push-check"],
+        ["        OUTPUT \"Stack is full\"", "push-full"],
+        ["    ELSE", null],
+        ["        TopPointer " + LEFT + " TopPointer + 1", "push-inc"],
+        ["        Stack[TopPointer] " + LEFT + " Item", "push-store"],
+        ["    ENDIF", null],
+        ["ENDPROCEDURE", null],
+        ["", null],
+        ["FUNCTION Pop() RETURNS INTEGER", null],
+        ["    IF TopPointer = -1 THEN", "pop-check"],
+        ["        OUTPUT \"Stack is empty\"", "pop-empty"],
+        ["        RETURN -1", null],
+        ["    ELSE", null],
+        ["        Item " + LEFT + " Stack[TopPointer]", "pop-read"],
+        ["        TopPointer " + LEFT + " TopPointer - 1", "pop-dec"],
+        ["        RETURN Item", "pop-return"],
+        ["    ENDIF", null],
+        ["ENDFUNCTION", null]
+      ]),
     example:
       "<p>Python version of the same ADT:</p>" +
       pre("stack = [None] * 10\ntop = -1\n\ndef push(item):\n    global top\n    if top == len(stack) - 1:\n        print(\"Stack is full\")\n    else:\n        top += 1\n        stack[top] = item\n\ndef pop():\n    global top\n    if top == -1:\n        print(\"Stack is empty\")\n        return None\n    item = stack[top]\n    top -= 1\n    return item") +
