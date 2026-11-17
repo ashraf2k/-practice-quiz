@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-LaJQ17UsPsfRej+8qjyeAsO05WYNo20tzWkh756vScQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://apis.google.com 'sha256-MXFKEvJnjUtO7yvdFMHH5vKqX7QxfTIhR9lKKM0SnUM='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co https://*.workers.dev; frame-src https://www.youtube-nocookie.com https://www.youtube.com https://*.firebaseapp.com https://*.googleapis.com https://accounts.google.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
 <script src="framebust.js?v=20261019j"></script>
 <script src="theme.js?v=20261027a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -3988,7 +3988,16 @@
     if(!window.confirm("Apply " + SUB_PLAN_LABEL[plan] + (suspended ? " (suspended)" : "") + " to " + uids.length + " student(s)?")) return;
     var items = uids.map(function(uid){
       var u = subUser(uid), info = subInfo(u);
-      return { uid: uid, action: "set", plan: plan, startMs: startMs, expiryMs: expiryMs, suspended: suspended, reason: reason, prevPlan: info.plan || "", prevExpiryMs: info.expiryMs || 0, expectExpiryMs: info.expiryMs || 0 };
+      var prevPlan = info.plan || "", prevExpiryMs = info.expiryMs || 0, prevSuspended = !!info.suspended;
+      // Firestore rules only allow these history actions - pick the one that matches what actually changed.
+      var action;
+      if(suspended && !prevSuspended) action = "suspend";
+      else if(!suspended && prevSuspended) action = "reactivate";
+      else if(!prevPlan) action = "assign";
+      else if(plan === prevPlan && expiryMs > prevExpiryMs) action = "extend";
+      else if(plan === "trial") action = "trial";
+      else action = "change";
+      return { uid: uid, action: action, plan: plan, startMs: startMs, expiryMs: expiryMs, suspended: suspended, reason: reason, prevPlan: prevPlan, prevExpiryMs: prevExpiryMs, expectExpiryMs: prevExpiryMs };
     });
     Array.prototype.forEach.call(document.querySelectorAll("#sub-bulk button"), function(x){ x.disabled = true; });
     subStatusLine("Applying to " + uids.length + " student(s)…");
@@ -4001,7 +4010,7 @@
       });
       Array.prototype.forEach.call(document.querySelectorAll("#sub-bulk button"), function(x){ x.disabled = false; });
       renderSubs();
-      var msg = "Done: " + ok.length + " student(s) updated" + (failed.length ? "; " + failed.length + " failed" : "") + ".";
+      var msg = "Done: " + ok.length + " student(s) updated" + (failed.length ? "; " + failed.length + " failed (" + (failed[0].error || "unknown error") + (failed.length > 1 ? ", +" + (failed.length - 1) + " more" : "") + ")" : "") + ".";
       subStatusLine(msg, !!failed.length);
     }).catch(function(err){
       Array.prototype.forEach.call(document.querySelectorAll("#sub-bulk button"), function(x){ x.disabled = false; });
