@@ -1,1 +1,1 @@
-window.HOMEWORK_MS={"10BR":{"8.1.6b":"ms-8d67138837f535af.pdf","8.1.4b":"ms-53322a98a20dadca.pdf"}};
+window.HOMEWORK_MS={"10BR":{"8.1.6b":"ms-8d67138837f535af.pdf","8.1.4b":"ms-53322a98a20dadca.pdf","8.1.4c":"ms-5818aba7825c70cf.pdf","8.2.3":"ms-c80821c1d1abb76c.pdf","7.4":["ms-fa9a2b38669345a5.pdf","ms-f6a1e0b1eada1992.pdf"]}};
